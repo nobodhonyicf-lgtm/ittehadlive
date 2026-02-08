@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,8 +12,15 @@ const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { user, isAdmin, loading: authLoading, signIn } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect to admin if already logged in as admin
+  useEffect(() => {
+    if (!authLoading && user && isAdmin) {
+      navigate("/admin");
+    }
+  }, [user, isAdmin, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,9 +29,8 @@ const AdminLogin = () => {
     setLoading(false);
     if (error) {
       toast.error("লগইন ব্যর্থ হয়েছে: " + error.message);
-    } else {
-      navigate("/admin");
     }
+    // Navigation will happen via the useEffect above once isAdmin updates
   };
 
   return (
