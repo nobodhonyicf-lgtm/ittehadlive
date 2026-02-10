@@ -12,6 +12,9 @@ import Contact from "./pages/Contact";
 import NoticeView from "./pages/NoticeView";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import StudentDirectory from "./pages/StudentDirectory";
+import ResultCheck from "./pages/ResultCheck";
+import BranchList from "./pages/BranchList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +33,9 @@ const App = () => (
             <Route path="/page/:slug" element={<PageView />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/notice/:id" element={<NoticeView />} />
+            <Route path="/students" element={<StudentDirectory />} />
+            <Route path="/result" element={<ResultCheck />} />
+            <Route path="/branches" element={<BranchList />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/*" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />

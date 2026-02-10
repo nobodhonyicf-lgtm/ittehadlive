@@ -47,6 +47,48 @@ export type Database = {
         }
         Relationships: []
       }
+      branches: {
+        Row: {
+          address: string | null
+          code: string | null
+          created_at: string
+          email: string | null
+          head_name: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          phone: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          address?: string | null
+          code?: string | null
+          created_at?: string
+          email?: string | null
+          head_name?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          phone?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          address?: string | null
+          code?: string | null
+          created_at?: string
+          email?: string | null
+          head_name?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          phone?: string | null
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -98,6 +140,33 @@ export type Database = {
           name?: string
           phone?: string | null
           subject?: string | null
+        }
+        Relationships: []
+      }
+      exams: {
+        Row: {
+          created_at: string
+          exam_type: string | null
+          id: string
+          is_published: boolean | null
+          name: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          exam_type?: string | null
+          id?: string
+          is_published?: boolean | null
+          name: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          exam_type?: string | null
+          id?: string
+          is_published?: boolean | null
+          name?: string
+          year?: number
         }
         Relationships: []
       }
@@ -270,6 +339,61 @@ export type Database = {
           },
         ]
       }
+      results: {
+        Row: {
+          created_at: string
+          exam_id: string
+          gpa: number | null
+          grade: string | null
+          id: string
+          marks_obtained: number | null
+          student_id: string
+          subject_id: string
+        }
+        Insert: {
+          created_at?: string
+          exam_id: string
+          gpa?: number | null
+          grade?: string | null
+          id?: string
+          marks_obtained?: number | null
+          student_id: string
+          subject_id: string
+        }
+        Update: {
+          created_at?: string
+          exam_id?: string
+          gpa?: number | null
+          grade?: string | null
+          id?: string
+          marks_obtained?: number | null
+          student_id?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "results_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "results_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "results_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
           created_at: string
@@ -291,6 +415,101 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: string | null
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          address: string | null
+          admission_year: number | null
+          branch_id: string | null
+          class_name: string
+          created_at: string
+          date_of_birth: string | null
+          father_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          phone: string | null
+          photo_url: string | null
+          registration_number: string | null
+          roll_number: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          admission_year?: number | null
+          branch_id?: string | null
+          class_name: string
+          created_at?: string
+          date_of_birth?: string | null
+          father_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          phone?: string | null
+          photo_url?: string | null
+          registration_number?: string | null
+          roll_number: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          admission_year?: number | null
+          branch_id?: string | null
+          class_name?: string
+          created_at?: string
+          date_of_birth?: string | null
+          father_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          phone?: string | null
+          photo_url?: string | null
+          registration_number?: string | null
+          roll_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subjects: {
+        Row: {
+          class_name: string | null
+          code: string | null
+          created_at: string
+          full_marks: number
+          id: string
+          name: string
+          pass_marks: number
+          sort_order: number | null
+        }
+        Insert: {
+          class_name?: string | null
+          code?: string | null
+          created_at?: string
+          full_marks?: number
+          id?: string
+          name: string
+          pass_marks?: number
+          sort_order?: number | null
+        }
+        Update: {
+          class_name?: string | null
+          code?: string | null
+          created_at?: string
+          full_marks?: number
+          id?: string
+          name?: string
+          pass_marks?: number
+          sort_order?: number | null
         }
         Relationships: []
       }
