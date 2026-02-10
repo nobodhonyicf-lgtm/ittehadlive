@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, FileText, Bell, Image, Settings, Menu as MenuIcon,
-  Video, Users, Mail, Tag, LogOut, ChevronLeft, Newspaper
+  Video, Users, Mail, Tag, LogOut, ChevronLeft, Newspaper, Building2,
+  GraduationCap, BookOpen, ClipboardList
 } from "lucide-react";
 import AdminPosts from "./AdminPosts";
 import AdminPages from "./AdminPages";
@@ -16,12 +17,22 @@ import AdminMenu from "./AdminMenu";
 import AdminSettings from "./AdminSettings";
 import AdminContacts from "./AdminContacts";
 import AdminCategories from "./AdminCategories";
+import AdminBranches from "./AdminBranches";
+import AdminStudents from "./AdminStudents";
+import AdminExams from "./AdminExams";
+import AdminSubjects from "./AdminSubjects";
+import AdminResults from "./AdminResults";
 
 const navItems = [
   { label: "ড্যাশবোর্ড", icon: LayoutDashboard, path: "/admin" },
   { label: "পোস্ট", icon: Newspaper, path: "/admin/posts" },
   { label: "পেজ", icon: FileText, path: "/admin/pages" },
   { label: "নোটিশ", icon: Bell, path: "/admin/notices" },
+  { label: "শাখা", icon: Building2, path: "/admin/branches" },
+  { label: "শিক্ষার্থী", icon: Users, path: "/admin/students" },
+  { label: "পরীক্ষা", icon: ClipboardList, path: "/admin/exams" },
+  { label: "বিষয়", icon: BookOpen, path: "/admin/subjects" },
+  { label: "রেজাল্ট", icon: GraduationCap, path: "/admin/results" },
   { label: "বিজ্ঞাপন", icon: Image, path: "/admin/ads" },
   { label: "ভিডিও", icon: Video, path: "/admin/videos" },
   { label: "নেতৃবৃন্দ", icon: Users, path: "/admin/leaders" },
@@ -55,7 +66,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
       <aside className={`${sidebarOpen ? "w-60" : "w-16"} bg-card border-r border-border transition-all shrink-0 flex flex-col`}>
         <div className="p-4 border-b border-border flex items-center justify-between">
           {sidebarOpen && <span className="font-bold text-primary text-sm">অ্যাডমিন প্যানেল</span>}
@@ -93,7 +103,6 @@ const AdminDashboard = () => {
         </div>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1 p-6 overflow-y-auto">
         <Routes>
           <Route
@@ -109,6 +118,11 @@ const AdminDashboard = () => {
           <Route path="posts" element={<AdminPosts />} />
           <Route path="pages" element={<AdminPages />} />
           <Route path="notices" element={<AdminNotices />} />
+          <Route path="branches" element={<AdminBranches />} />
+          <Route path="students" element={<AdminStudents />} />
+          <Route path="exams" element={<AdminExams />} />
+          <Route path="subjects" element={<AdminSubjects />} />
+          <Route path="results" element={<AdminResults />} />
           <Route path="ads" element={<AdminAds />} />
           <Route path="videos" element={<AdminVideos />} />
           <Route path="leaders" element={<AdminLeaders />} />
