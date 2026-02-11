@@ -143,6 +143,41 @@ export type Database = {
         }
         Relationships: []
       }
+      device_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          student_id: string | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform?: string
+          student_id?: string | null
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          student_id?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "device_tokens_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exams: {
         Row: {
           created_at: string
@@ -262,6 +297,48 @@ export type Database = {
           is_active?: boolean | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          id: string
+          image_url: string | null
+          is_sent: boolean
+          link: string | null
+          sent_at: string | null
+          target: string
+          target_value: string | null
+          title: string
+        }
+        Insert: {
+          body: string
+          category?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_sent?: boolean
+          link?: string | null
+          sent_at?: string | null
+          target?: string
+          target_value?: string | null
+          title: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_sent?: boolean
+          link?: string | null
+          sent_at?: string | null
+          target?: string
+          target_value?: string | null
+          title?: string
         }
         Relationships: []
       }
