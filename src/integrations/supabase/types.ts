@@ -176,6 +176,13 @@ export type Database = {
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "device_tokens_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       exams: {
@@ -519,6 +526,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "results_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "results_subject_id_fkey"
             columns: ["subject_id"]
             isOneToOne: false
@@ -696,7 +710,47 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      students_public: {
+        Row: {
+          branch_id: string | null
+          class_name: string | null
+          id: string | null
+          is_active: boolean | null
+          name: string | null
+          photo_url: string | null
+          registration_number: string | null
+          roll_number: string | null
+        }
+        Insert: {
+          branch_id?: string | null
+          class_name?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          photo_url?: string | null
+          registration_number?: string | null
+          roll_number?: string | null
+        }
+        Update: {
+          branch_id?: string | null
+          class_name?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          photo_url?: string | null
+          registration_number?: string | null
+          roll_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       is_admin: { Args: never; Returns: boolean }
