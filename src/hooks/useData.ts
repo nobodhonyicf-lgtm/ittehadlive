@@ -144,3 +144,33 @@ export const useCategories = () =>
       return data;
     },
   });
+
+export const useActivePoll = () =>
+  useQuery({
+    queryKey: ["active_poll"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("polls")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+export const usePollVotes = (pollId: string | undefined) =>
+  useQuery({
+    queryKey: ["poll_votes", pollId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("poll_votes")
+        .select("option_index")
+        .eq("poll_id", pollId!);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!pollId,
+  });

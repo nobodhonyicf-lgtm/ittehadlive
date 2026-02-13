@@ -1,7 +1,118 @@
-import { useLeaderProfiles, useNotices } from "@/hooks/useData";
+import { useState, useEffect } from "react";
+import { useLeaderProfiles, useNotices, useActivePoll, usePollVotes } from "@/hooks/useData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Bell } from "lucide-react";
+import { User, Bell, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+
+const getVoterId = () => {
+  let id = localStorage.getItem("poll_voter_id");
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("poll_voter_id", id);
+  }
+  return id;
+};
+
+const PollSection = () => {
+  const { data: poll } = useActivePoll();
+  const { data: votes } = usePollVotes(poll?.id);
+  const queryClient = useQueryClient();
+  const [hasVoted, setHasVoted] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const voterId = getVoterId();
+  const options = (poll?.options as string[]) || [];
+
+  useEffect(() => {
+    if (!poll?.id) return;
+    supabase
+      .from("poll_votes")
+      .select("option_index")
+      .eq("poll_id", poll.id)
+      .eq("voter_id", voterId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setHasVoted(true);
+          setSelectedOption(data.option_index);
+        }
+      });
+  }, [poll?.id, voterId]);
+
+  const handleVote = async (index: number) => {
+    if (!poll || hasVoted || submitting) return;
+    setSubmitting(true);
+    const { error } = await supabase.from("poll_votes").insert({
+      poll_id: poll.id,
+      option_index: index,
+      voter_id: voterId,
+    });
+    if (!error) {
+      setHasVoted(true);
+      setSelectedOption(index);
+      queryClient.invalidateQueries({ queryKey: ["poll_votes", poll.id] });
+    }
+    setSubmitting(false);
+  };
+
+  if (!poll) return null;
+
+  const totalVotes = votes?.length || 0;
+  const voteCounts = options.map(
+    (_, i) => votes?.filter((v) => v.option_index === i).length || 0
+  );
+
+  return (
+    <Card className="border-t-4 border-t-primary">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-primary text-base bg-primary/10 rounded py-2 text-center flex items-center justify-center gap-2">
+          <BarChart3 size={16} />
+          মতামত জরিপ
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm font-semibold mb-3">{poll.question}</p>
+        <div className="space-y-2">
+          {options.map((option, i) => {
+            const pct = totalVotes > 0 ? Math.round((voteCounts[i] / totalVotes) * 100) : 0;
+            return (
+              <button
+                key={i}
+                onClick={() => handleVote(i)}
+                disabled={hasVoted || submitting}
+                className={`w-full text-left rounded border text-sm transition-all relative overflow-hidden
+                  ${selectedOption === i ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}
+                  ${hasVoted ? "cursor-default" : "cursor-pointer"}
+                `}
+              >
+                {hasVoted && (
+                  <div
+                    className="absolute inset-y-0 left-0 bg-primary/10 transition-all"
+                    style={{ width: `${pct}%` }}
+                  />
+                )}
+                <div className="relative px-3 py-2 flex justify-between items-center">
+                  <span>{option}</span>
+                  {hasVoted && (
+                    <span className="text-xs text-muted-foreground font-medium">{pct}%</span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        {hasVoted && (
+          <p className="text-xs text-muted-foreground mt-2 text-center">
+            মোট ভোট: {totalVotes}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 const Sidebar = () => {
   const { data: leaders } = useLeaderProfiles();
@@ -61,6 +172,9 @@ const Sidebar = () => {
           </ul>
         </CardContent>
       </Card>
+
+      {/* Poll */}
+      <PollSection />
     </div>
   );
 };
