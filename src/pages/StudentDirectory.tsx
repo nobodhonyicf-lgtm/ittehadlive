@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useBranches, useStudents } from "@/hooks/useBoardData";
-import { Users, Search, User, MapPin, Phone } from "lucide-react";
+import { Users, Search, User } from "lucide-react";
 
 const StudentDirectory = () => {
   const [branchId, setBranchId] = useState<string>("");
@@ -76,12 +76,8 @@ const StudentDirectory = () => {
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-bold text-foreground truncate">{student.name}</h3>
-                    <p className="text-xs text-muted-foreground">পিতা: {student.father_name || "—"}</p>
                     <p className="text-xs text-muted-foreground">রোল: {student.roll_number} | রেজি: {student.registration_number || "—"}</p>
-                    <p className="text-xs text-primary font-semibold">{student.class_name} — {(student as any).branches?.name || "—"}</p>
-                    {student.phone && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1"><Phone size={10} />{student.phone}</p>
-                    )}
+                    <p className="text-xs text-primary font-semibold">{student.class_name}</p>
                   </div>
                 </CardContent>
               </Card>

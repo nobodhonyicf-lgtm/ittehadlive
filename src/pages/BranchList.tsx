@@ -1,7 +1,7 @@
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { useBranches } from "@/hooks/useBoardData";
-import { Building2, MapPin, Phone, Mail, User } from "lucide-react";
+import { Building2, MapPin, User } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const BranchList = () => {
@@ -32,14 +32,8 @@ const BranchList = () => {
                 <div className="p-4">
                   <h3 className="font-bold text-lg text-primary group-hover:text-accent transition-colors">{branch.name}</h3>
                   {branch.code && <p className="text-xs text-muted-foreground">কোড: {branch.code}</p>}
-                  {branch.head_name && (
-                    <p className="text-sm text-foreground flex items-center gap-1 mt-2"><User size={14} /> {branch.head_name}</p>
-                  )}
                   {branch.address && (
-                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1"><MapPin size={14} /> {branch.address}</p>
-                  )}
-                  {branch.phone && (
-                    <p className="text-sm text-muted-foreground flex items-center gap-1"><Phone size={14} /> {branch.phone}</p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-2"><MapPin size={14} /> {branch.address}</p>
                   )}
                   <Link
                     to={`/students?branch=${branch.id}`}

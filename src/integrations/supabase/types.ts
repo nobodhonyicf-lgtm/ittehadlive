@@ -176,13 +176,6 @@ export type Database = {
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "device_tokens_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       exams: {
@@ -526,13 +519,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "results_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students_public"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "results_subject_id_fkey"
             columns: ["subject_id"]
             isOneToOne: false
@@ -625,13 +611,6 @@ export type Database = {
             referencedRelation: "branches"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "students_branch_id_fkey"
-            columns: ["branch_id"]
-            isOneToOne: false
-            referencedRelation: "branches_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       subjects: {
@@ -717,89 +696,47 @@ export type Database = {
       }
     }
     Views: {
-      branches_public: {
-        Row: {
-          address: string | null
-          code: string | null
-          created_at: string | null
-          id: string | null
-          image_url: string | null
-          is_active: boolean | null
-          name: string | null
-          sort_order: number | null
-        }
-        Insert: {
-          address?: string | null
-          code?: string | null
-          created_at?: string | null
-          id?: string | null
-          image_url?: string | null
-          is_active?: boolean | null
-          name?: string | null
-          sort_order?: number | null
-        }
-        Update: {
-          address?: string | null
-          code?: string | null
-          created_at?: string | null
-          id?: string | null
-          image_url?: string | null
-          is_active?: boolean | null
-          name?: string | null
-          sort_order?: number | null
-        }
-        Relationships: []
-      }
-      students_public: {
-        Row: {
-          branch_id: string | null
-          class_name: string | null
-          id: string | null
-          is_active: boolean | null
-          name: string | null
-          photo_url: string | null
-          registration_number: string | null
-          roll_number: string | null
-        }
-        Insert: {
-          branch_id?: string | null
-          class_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          name?: string | null
-          photo_url?: string | null
-          registration_number?: string | null
-          roll_number?: string | null
-        }
-        Update: {
-          branch_id?: string | null
-          class_name?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          name?: string | null
-          photo_url?: string | null
-          registration_number?: string | null
-          roll_number?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "students_branch_id_fkey"
-            columns: ["branch_id"]
-            isOneToOne: false
-            referencedRelation: "branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "students_branch_id_fkey"
-            columns: ["branch_id"]
-            isOneToOne: false
-            referencedRelation: "branches_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
+      find_student_for_result: {
+        Args: { p_class: string; p_roll: string }
+        Returns: {
+          branch_id: string
+          class_name: string
+          id: string
+          name: string
+          photo_url: string
+          registration_number: string
+          roll_number: string
+        }[]
+      }
+      get_branches_public: {
+        Args: never
+        Returns: {
+          address: string
+          code: string
+          created_at: string
+          id: string
+          image_url: string
+          is_active: boolean
+          name: string
+          sort_order: number
+        }[]
+      }
+      get_students_public: {
+        Args: never
+        Returns: {
+          branch_id: string
+          class_name: string
+          id: string
+          is_active: boolean
+          name: string
+          photo_url: string
+          registration_number: string
+          roll_number: string
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {

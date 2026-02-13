@@ -5,11 +5,7 @@ export const useBranches = () =>
   useQuery({
     queryKey: ["branches"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("branches")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order");
+      const { data, error } = await supabase.rpc("get_branches_public");
       if (error) throw error;
       return data;
     },
@@ -32,16 +28,12 @@ export const useStudents = (branchId?: string, className?: string) =>
   useQuery({
     queryKey: ["students", branchId, className],
     queryFn: async () => {
-      let query = supabase
-        .from("students")
-        .select("*, branches(name)")
-        .eq("is_active", true)
-        .order("roll_number");
-      if (branchId) query = query.eq("branch_id", branchId);
-      if (className) query = query.eq("class_name", className);
-      const { data, error } = await query;
+      const { data, error } = await supabase.rpc("get_students_public");
       if (error) throw error;
-      return data;
+      let filtered = data || [];
+      if (branchId) filtered = filtered.filter((s: any) => s.branch_id === branchId);
+      if (className) filtered = filtered.filter((s: any) => s.class_name === className);
+      return filtered;
     },
   });
 
@@ -116,16 +108,12 @@ export const useResultByRoll = (rollNumber: string, examId: string) =>
   useQuery({
     queryKey: ["result_by_roll", rollNumber, examId],
     queryFn: async () => {
-      // First find student
-      const { data: students, error: sErr } = await supabase
-        .from("students")
-        .select("id, name, roll_number, registration_number, class_name, father_name, photo_url, branches(name)")
-        .eq("roll_number", rollNumber)
-        .limit(1);
+      // Use secure RPC - no PII exposed
+      const { data: students, error: sErr } = await supabase.rpc("get_students_public");
       if (sErr) throw sErr;
-      if (!students || students.length === 0) return null;
+      const student = students?.find((s: any) => s.roll_number === rollNumber);
+      if (!student) return null;
 
-      const student = students[0];
       const { data: results, error: rErr } = await supabase
         .from("results")
         .select("*, subjects(name, code, full_marks, pass_marks)")
