@@ -87,11 +87,9 @@ const ResultCheck = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm flex-1">
                       <p><strong>নাম:</strong> {result.student.name}</p>
-                      <p><strong>পিতা:</strong> {result.student.father_name || "—"}</p>
                       <p><strong>রোল:</strong> {result.student.roll_number}</p>
                       <p><strong>রেজিস্ট্রেশন:</strong> {result.student.registration_number || "—"}</p>
                       <p><strong>ক্লাস:</strong> {result.student.class_name}</p>
-                      <p><strong>শাখা:</strong> {(result.student as any).branches?.name || "—"}</p>
                     </div>
                   </div>
 
