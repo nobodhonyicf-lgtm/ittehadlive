@@ -518,10 +518,15 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          image_caption: string | null
           image_url: string | null
           is_featured: boolean | null
           is_published: boolean | null
+          meta_description: string | null
+          meta_title: string | null
+          og_image_url: string | null
           slug: string
+          summary: string | null
           title: string
           updated_at: string
         }
@@ -531,10 +536,15 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          image_caption?: string | null
           image_url?: string | null
           is_featured?: boolean | null
           is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          og_image_url?: string | null
           slug: string
+          summary?: string | null
           title: string
           updated_at?: string
         }
@@ -544,10 +554,15 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          image_caption?: string | null
           image_url?: string | null
           is_featured?: boolean | null
           is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          og_image_url?: string | null
           slug?: string
+          summary?: string | null
           title?: string
           updated_at?: string
         }
