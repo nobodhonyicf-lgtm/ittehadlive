@@ -188,6 +188,20 @@ export const usePrayerTimes = () =>
     },
   });
 
+export const useSliders = () =>
+  useQuery({
+    queryKey: ["sliders"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sliders")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
 export const useCommitteeMembers = (pageSlug?: string) =>
   useQuery({
     queryKey: ["committee_members", pageSlug],
