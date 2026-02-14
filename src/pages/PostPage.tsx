@@ -41,42 +41,158 @@ const PostPage = () => {
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
 
   const generatePhotoCard = useCallback(async () => {
-    if (!post || !cardRef.current) return;
+    if (!post) return;
     try {
+      const SIZE = 1080;
       const canvas = document.createElement("canvas");
-      canvas.width = 1200;
-      canvas.height = 630;
+      canvas.width = SIZE;
+      canvas.height = SIZE;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-      const grad = ctx.createLinearGradient(0, 0, 1200, 630);
-      grad.addColorStop(0, "#1a7a3a");
-      grad.addColorStop(1, "#0d5c2a");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 1200, 630);
-      ctx.fillStyle = "#ffffff";
-      ctx.roundRect(40, 40, 1120, 550, 16);
-      ctx.fill();
+
+      // Dark background
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(0, 0, SIZE, SIZE);
+
+      // Load and draw post image if exists
+      const imageAreaHeight = 580;
+      if (post.image_url) {
+        try {
+          const img = new window.Image();
+          img.crossOrigin = "anonymous";
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = () => reject();
+            img.src = post.image_url!;
+          });
+          // Draw image with padding and rounded corners
+          const pad = 40;
+          const imgW = SIZE - pad * 2;
+          const imgH = imageAreaHeight - pad;
+          ctx.save();
+          ctx.beginPath();
+          ctx.roundRect(pad, pad, imgW, imgH, 16);
+          ctx.clip();
+          // Cover fit
+          const scale = Math.max(imgW / img.width, imgH / img.height);
+          const sw = imgW / scale;
+          const sh = imgH / scale;
+          const sx = (img.width - sw) / 2;
+          const sy = (img.height - sh) / 2;
+          ctx.drawImage(img, sx, sy, sw, sh, pad, pad, imgW, imgH);
+          ctx.restore();
+        } catch {
+          // If image fails, just leave dark bg
+        }
+      }
+
+      // Middle info bar (dark semi-transparent strip)
+      const barY = imageAreaHeight + 10;
+      const barH = 50;
+      ctx.fillStyle = "#2a2a2a";
+      ctx.fillRect(0, barY, SIZE, barH);
+
+      // Logo text (green badge)
       ctx.fillStyle = "#1a7a3a";
-      ctx.font = "bold 36px sans-serif";
+      ctx.roundRect(40, barY + 8, 120, 34, 6);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 16px sans-serif";
+      ctx.fillText("ইত্তেহাদ", 55, barY + 31);
+
+      // Verified badge circle
+      ctx.fillStyle = "#1DA1F2";
+      ctx.beginPath();
+      ctx.arc(175, barY + 25, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillText("✓", 170, barY + 30);
+
+      // Date
+      ctx.fillStyle = "#cccccc";
+      ctx.font = "16px sans-serif";
+      const dateStr = new Date(post.created_at).toLocaleDateString("bn-BD", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      ctx.fillText(dateStr, 210, barY + 32);
+
+      // Website URL (right side)
+      ctx.fillStyle = "#cccccc";
+      ctx.font = "16px sans-serif";
+      const siteText = "ittehad.bd";
+      const siteW = ctx.measureText(siteText).width;
+      ctx.fillText(siteText, SIZE - 40 - siteW, barY + 32);
+
+      // Globe icon placeholder
+      ctx.beginPath();
+      ctx.arc(SIZE - 55 - siteW, barY + 27, 8, 0, Math.PI * 2);
+      ctx.strokeStyle = "#cccccc";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Title area (below bar)
+      const titleY = barY + barH + 30;
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 52px sans-serif";
       const words = post.title.split(" ");
       let line = "";
-      let y = 100;
+      let y = titleY;
       for (const word of words) {
         const testLine = line + word + " ";
-        if (ctx.measureText(testLine).width > 1040) {
-          ctx.fillText(line, 80, y);
+        if (ctx.measureText(testLine).width > SIZE - 80) {
+          ctx.fillText(line.trim(), 40, y);
           line = word + " ";
-          y += 48;
+          y += 64;
         } else {
           line = testLine;
         }
       }
-      ctx.fillText(line, 80, y);
-      ctx.fillStyle = "#1a7a3a";
-      ctx.fillRect(40, 530, 1120, 60);
+      if (line.trim()) ctx.fillText(line.trim(), 40, y);
+
+      // Bottom social bar
+      const bottomBarH = 50;
+      const bottomBarY = SIZE - bottomBarH;
+      ctx.fillStyle = "#111111";
+      ctx.fillRect(0, bottomBarY, SIZE, bottomBarH);
+
+      // Social media items
+      ctx.font = "14px sans-serif";
+      ctx.fillStyle = "#cccccc";
+
+      // YouTube
+      ctx.fillStyle = "#FF0000";
+      ctx.fillRect(30, bottomBarY + 15, 22, 16);
       ctx.fillStyle = "#ffffff";
-      ctx.font = "18px sans-serif";
-      ctx.fillText("ittehad.bd", 80, 568);
+      ctx.font = "10px sans-serif";
+      ctx.fillText("▶", 37, bottomBarY + 27);
+      ctx.fillStyle = "#cccccc";
+      ctx.font = "13px sans-serif";
+      ctx.fillText("| ittehadbd", 58, bottomBarY + 30);
+
+      // Facebook
+      ctx.fillStyle = "#1877F2";
+      ctx.beginPath();
+      ctx.arc(410, bottomBarY + 24, 11, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillText("f", 406, bottomBarY + 29);
+      ctx.fillStyle = "#cccccc";
+      ctx.font = "13px sans-serif";
+      ctx.fillText("| ittehadbd", 425, bottomBarY + 30);
+
+      // "বিস্তারিত কমেন্টে" text (right side)
+      ctx.fillStyle = "#cccccc";
+      ctx.font = "14px sans-serif";
+      const detailText = "✓ বিস্তারিত কমেন্টে";
+      const dtW = ctx.measureText(detailText).width;
+      ctx.fillText(detailText, SIZE - 30 - dtW, bottomBarY + 30);
+
+      // Download
       const link = document.createElement("a");
       link.download = `${post.slug || "post"}-card.png`;
       link.href = canvas.toDataURL("image/png");
