@@ -187,3 +187,19 @@ export const usePrayerTimes = () =>
       return data;
     },
   });
+
+export const useCommitteeMembers = (pageSlug?: string) =>
+  useQuery({
+    queryKey: ["committee_members", pageSlug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("committee_members")
+        .select("*")
+        .eq("page_slug", pageSlug!)
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!pageSlug,
+  });

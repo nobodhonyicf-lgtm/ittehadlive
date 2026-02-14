@@ -54,12 +54,16 @@ export type Database = {
           created_at: string
           email: string | null
           head_name: string | null
+          head_photo_url: string | null
           id: string
           image_url: string | null
           is_active: boolean | null
           name: string
           phone: string | null
           sort_order: number | null
+          total_students: number | null
+          total_teachers: number | null
+          website: string | null
         }
         Insert: {
           address?: string | null
@@ -67,12 +71,16 @@ export type Database = {
           created_at?: string
           email?: string | null
           head_name?: string | null
+          head_photo_url?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
           name: string
           phone?: string | null
           sort_order?: number | null
+          total_students?: number | null
+          total_teachers?: number | null
+          website?: string | null
         }
         Update: {
           address?: string | null
@@ -80,12 +88,16 @@ export type Database = {
           created_at?: string
           email?: string | null
           head_name?: string | null
+          head_photo_url?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
           name?: string
           phone?: string | null
           sort_order?: number | null
+          total_students?: number | null
+          total_teachers?: number | null
+          website?: string | null
         }
         Relationships: []
       }
@@ -120,6 +132,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      committee_members: {
+        Row: {
+          created_at: string
+          id: string
+          institution: string | null
+          is_active: boolean | null
+          name: string
+          page_slug: string
+          photo_url: string | null
+          sort_order: number | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          institution?: string | null
+          is_active?: boolean | null
+          name: string
+          page_slug?: string
+          photo_url?: string | null
+          sort_order?: number | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          institution?: string | null
+          is_active?: boolean | null
+          name?: string
+          page_slug?: string
+          photo_url?: string | null
+          sort_order?: number | null
+          title?: string
+        }
+        Relationships: []
       }
       contact_submissions: {
         Row: {
@@ -794,11 +842,18 @@ export type Database = {
           address: string
           code: string
           created_at: string
+          email: string
+          head_name: string
+          head_photo_url: string
           id: string
           image_url: string
           is_active: boolean
           name: string
+          phone: string
           sort_order: number
+          total_students: number
+          total_teachers: number
+          website: string
         }[]
       }
       get_students_public: {
