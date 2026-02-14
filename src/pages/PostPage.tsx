@@ -118,8 +118,10 @@ const PostPage = () => {
                   <figure className="px-6 pt-4">
                     <img src={post.image_url} alt={post.title} className="w-full rounded-lg" />
                     {(post as any).image_caption && (
-                      <figcaption className="text-xs text-destructive mt-2 italic">
-                        {(post as any).image_caption}
+                      <figcaption className="flex items-center gap-0 mt-0 text-sm bg-muted">
+                        <span className="font-bold text-foreground px-3 py-1.5 shrink-0">ছবি</span>
+                        <span className="w-0.5 h-5 bg-destructive shrink-0" />
+                        <span className="text-foreground px-3 py-1.5">{(post as any).image_caption}</span>
                       </figcaption>
                     )}
                   </figure>
@@ -128,25 +130,35 @@ const PostPage = () => {
                 {/* Content with in-post ad */}
                 <div className="prose max-w-none text-foreground px-6 py-4">
                   {contentParagraphs.map((paragraph, index) => {
-                    // Handle post link lines
-                    if (paragraph.startsWith("🔗 ")) {
-                      const linkPath = paragraph.replace("🔗 ", "").trim();
+                    // Handle inline post link block: 📖 + 🔗 pair
+                    if (paragraph.startsWith("📖 ")) {
+                      const titleText = paragraph.replace("📖 আরও পড়ুন: ", "").replace("📖 ", "").trim();
+                      // Look ahead for 🔗 line
+                      const nextLine = contentParagraphs[index + 1];
+                      const linkPath = nextLine?.startsWith("🔗 ") ? nextLine.replace("🔗 ", "").trim() : null;
+                      // Try to find the post image from supabase
                       return (
-                        <div key={index}>
-                          <Link to={linkPath} className="inline-flex items-center gap-1.5 text-primary hover:underline text-sm font-medium mb-3">
-                            <ExternalLink size={14} /> পোস্টটি পড়ুন →
+                        <div key={index} className="my-4">
+                          <Link
+                            to={linkPath || "#"}
+                            className="flex items-center gap-0 bg-muted rounded-lg overflow-hidden border border-border hover:shadow-md transition-shadow group no-underline"
+                          >
+                            <div className="flex-1 px-4 py-3">
+                              <p className="text-sm md:text-base font-semibold text-foreground group-hover:text-primary transition-colors leading-snug m-0">
+                                {titleText}
+                              </p>
+                            </div>
+                            <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 m-3 rounded shrink-0 whitespace-nowrap">
+                              আরো পড়ুন
+                            </span>
                           </Link>
                           {index === adInsertIndex && <InPostAd />}
                         </div>
                       );
                     }
-                    if (paragraph.startsWith("📖 ")) {
-                      return (
-                        <div key={index}>
-                          <p className="mb-1 leading-relaxed text-[15px] font-semibold text-primary">{paragraph}</p>
-                          {index === adInsertIndex && <InPostAd />}
-                        </div>
-                      );
+                    // Skip 🔗 lines (already consumed by 📖 handler above)
+                    if (paragraph.startsWith("🔗 ")) {
+                      return null;
                     }
                     return (
                       <div key={index}>
