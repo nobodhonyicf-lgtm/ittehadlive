@@ -93,6 +93,31 @@
   animation: ticker 20s linear infinite;
 }
 
+/* Print styles for marksheet */
+@media print {
+  body {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print\:hidden,
+  header, footer, nav {
+    display: none !important;
+  }
+  #printable-marksheet {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 210mm;
+    padding: 10mm;
+    margin: 0;
+  }
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
