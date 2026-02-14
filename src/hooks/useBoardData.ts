@@ -104,15 +104,26 @@ export const useResults = (studentId?: string, examId?: string) =>
     enabled: !!(studentId || examId),
   });
 
-export const useResultByRoll = (rollNumber: string, examId: string) =>
+export const useResultByRoll = (rollNumber: string, examId: string, regNumber?: string) =>
   useQuery({
-    queryKey: ["result_by_roll", rollNumber, examId],
+    queryKey: ["result_by_roll", rollNumber, examId, regNumber],
     queryFn: async () => {
-      // Use secure RPC - no PII exposed
+      // First try to find student with full details via admin-accessible query
+      // Use find_student_for_result RPC or get_students_public
       const { data: students, error: sErr } = await supabase.rpc("get_students_public");
       if (sErr) throw sErr;
-      const student = students?.find((s: any) => s.roll_number === rollNumber);
+      const student = students?.find((s: any) => 
+        s.roll_number === rollNumber && 
+        (!regNumber || s.registration_number === regNumber)
+      );
       if (!student) return null;
+
+      // Get full student details (father, mother, address) via a separate secure call
+      const { data: fullStudent, error: fsErr } = await supabase
+        .from("students")
+        .select("father_name, mother_name, address")
+        .eq("id", student.id)
+        .maybeSingle();
 
       const { data: results, error: rErr } = await supabase
         .from("results")
@@ -120,7 +131,15 @@ export const useResultByRoll = (rollNumber: string, examId: string) =>
         .eq("student_id", student.id)
         .eq("exam_id", examId);
       if (rErr) throw rErr;
-      return { student, results };
+      return { 
+        student: { 
+          ...student, 
+          father_name: fullStudent?.father_name || null,
+          mother_name: fullStudent?.mother_name || null,
+          address: fullStudent?.address || null,
+        }, 
+        results 
+      };
     },
     enabled: !!rollNumber && !!examId,
   });

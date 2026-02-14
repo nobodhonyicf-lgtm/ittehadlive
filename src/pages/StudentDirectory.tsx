@@ -19,9 +19,12 @@ const StudentDirectory = () => {
   const { data: branches } = useBranches();
   const { data: students } = useStudents(branchId || undefined, className || undefined);
 
-  const filtered = students?.filter(s =>
+  // Only show students when className is selected
+  const shouldShowStudents = !!className;
+
+  const filtered = shouldShowStudents ? students?.filter(s =>
     !search || s.name.includes(search) || s.roll_number.includes(search) || s.registration_number?.includes(search)
-  );
+  ) : [];
 
   const totalPages = Math.ceil((filtered?.length || 0) / STUDENTS_PER_PAGE);
   const paginated = filtered?.slice((page - 1) * STUDENTS_PER_PAGE, page * STUDENTS_PER_PAGE);
@@ -116,7 +119,7 @@ const StudentDirectory = () => {
           <Card>
             <CardContent className="p-12 text-center text-muted-foreground">
               <Users className="mx-auto mb-4" size={48} />
-              <p>শাখা ও ক্লাস নির্বাচন করে শিক্ষার্থী খুঁজুন</p>
+              <p>{!className ? "প্রথমে একটি শ্রেণি নির্বাচন করুন" : "কোনো শিক্ষার্থী পাওয়া যায়নি"}</p>
             </CardContent>
           </Card>
         )}

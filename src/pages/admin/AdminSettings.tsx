@@ -45,6 +45,8 @@ const AdminSettings = () => {
     logo_url: "লোগো URL",
     favicon_url: "ফেভিকন URL",
     primary_color: "প্রাইমারি কালার",
+    signature_principal: "প্রধান শিক্ষক/মুহতামিমের স্বাক্ষর (ছবি URL)",
+    signature_controller: "পরীক্ষা নিয়ন্ত্রকের স্বাক্ষর (ছবি URL)",
   };
 
   const keyIcons: Record<string, any> = {
@@ -54,11 +56,13 @@ const AdminSettings = () => {
   };
 
   const brandingKeys = ["logo_url", "favicon_url", "primary_color"];
+  const signatureKeys = ["signature_principal", "signature_controller"];
 
   if (isLoading) return <div className="text-center py-8">লোড হচ্ছে...</div>;
 
   const brandingSettings = settings?.filter(s => brandingKeys.includes(s.key));
-  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key));
+  const signatureSettings = settings?.filter(s => signatureKeys.includes(s.key));
+  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key));
 
   return (
     <div className="space-y-6">
@@ -90,6 +94,37 @@ const AdminSettings = () => {
               </div>
               {s.key === "logo_url" && s.value && (
                 <img src={s.value} alt="Logo preview" className="h-12 mt-2 rounded" />
+              )}
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Signatures */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">✍️ মার্কশিট স্বাক্ষর</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {signatureSettings?.map((s) => (
+            <div key={s.id}>
+              <Label className="mb-1 block font-semibold">{keyLabels[s.key] || s.key}</Label>
+              <div className="flex gap-2">
+                <Input
+                  defaultValue={s.value || ""}
+                  onChange={(e) => setValues({ ...values, [s.id]: e.target.value })}
+                  placeholder="স্বাক্ষরের ছবির URL দিন"
+                />
+                <Button
+                  onClick={() => updateMutation.mutate({ id: s.id, value: values[s.id] ?? s.value ?? "" })}
+                  disabled={updateMutation.isPending}
+                  size="sm"
+                >
+                  সংরক্ষণ
+                </Button>
+              </div>
+              {s.value && (
+                <img src={s.value} alt="Signature preview" className="h-10 mt-2 border rounded p-1" />
               )}
             </div>
           ))}
