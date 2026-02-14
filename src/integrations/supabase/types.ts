@@ -856,6 +856,14 @@ export type Database = {
           website: string
         }[]
       }
+      get_student_details_for_result: {
+        Args: { p_student_id: string }
+        Returns: {
+          address: string
+          father_name: string
+          mother_name: string
+        }[]
+      }
       get_students_public: {
         Args: never
         Returns: {
