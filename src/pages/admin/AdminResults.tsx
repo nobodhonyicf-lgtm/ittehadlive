@@ -9,6 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { GraduationCap, Save } from "lucide-react";
+import { getGradeFromMarks, getOverallGPA, getOverallGrade } from "@/lib/grading";
+import { toBengali } from "@/lib/bengali";
 
 const AdminResults = () => {
   const { data: exams } = useExams();
@@ -19,7 +21,6 @@ const AdminResults = () => {
   const [studentId, setStudentId] = useState("");
   const [marks, setMarks] = useState<Record<string, { marks_obtained: string; grade: string; gpa: string }>>({});
 
-  // Load existing results
   const { data: existingResults } = useQuery({
     queryKey: ["admin_results", studentId, examId],
     queryFn: async () => {
@@ -34,18 +35,8 @@ const AdminResults = () => {
     enabled: !!studentId && !!examId,
   });
 
-  // When existing results load, populate marks
   const selectedStudent = students?.find(s => s.id === studentId);
   const relevantSubjects = subjects?.filter(s => !s.class_name || s.class_name === selectedStudent?.class_name);
-
-  const handleLoadExisting = () => {
-    if (!existingResults) return;
-    const m: typeof marks = {};
-    existingResults.forEach(r => {
-      m[r.subject_id] = { marks_obtained: String(r.marks_obtained || ""), grade: r.grade || "", gpa: String(r.gpa || "") };
-    });
-    setMarks(m);
-  };
 
   // Auto-load when existingResults change
   if (existingResults && Object.keys(marks).length === 0 && existingResults.length > 0) {
@@ -53,9 +44,34 @@ const AdminResults = () => {
     existingResults.forEach(r => {
       m[r.subject_id] = { marks_obtained: String(r.marks_obtained || ""), grade: r.grade || "", gpa: String(r.gpa || "") };
     });
-    // Use timeout to avoid setState in render
     setTimeout(() => setMarks(m), 0);
   }
+
+  // Auto-calculate grade when marks change
+  const updateMarks = (subjectId: string, value: string, sub: { full_marks: number }) => {
+    const num = Number(value);
+    const gradeInfo = value && !isNaN(num) ? getGradeFromMarks(num, sub.full_marks) : { grade: "", gpa: 0 };
+    setMarks({
+      ...marks,
+      [subjectId]: {
+        marks_obtained: value,
+        grade: gradeInfo.grade,
+        gpa: gradeInfo.gpa ? gradeInfo.gpa.toFixed(2) : "",
+      },
+    });
+  };
+
+  // Calculate totals
+  const filledEntries = relevantSubjects?.filter(s => marks[s.id]?.marks_obtained) || [];
+  const totalObtained = filledEntries.reduce((sum, s) => sum + (Number(marks[s.id]?.marks_obtained) || 0), 0);
+  const totalFull = filledEntries.reduce((sum, s) => sum + s.full_marks, 0);
+  const resultsForGpa = filledEntries.map(s => ({
+    marks_obtained: Number(marks[s.id]?.marks_obtained) || 0,
+    gpa: Number(marks[s.id]?.gpa) || 0,
+    subjects: { pass_marks: s.pass_marks, full_marks: s.full_marks },
+  }));
+  const overallGPA = getOverallGPA(resultsForGpa);
+  const overallGrade = getOverallGrade(overallGPA);
 
   const handleSave = async () => {
     if (!examId || !studentId) return toast.error("পরীক্ষা ও শিক্ষার্থী নির্বাচন করুন");
@@ -63,7 +79,6 @@ const AdminResults = () => {
     const entries = Object.entries(marks).filter(([_, v]) => v.marks_obtained);
     if (entries.length === 0) return toast.error("কমপক্ষে একটি বিষয়ের নম্বর দিন");
 
-    // Delete existing and re-insert
     await supabase.from("results").delete().eq("student_id", studentId).eq("exam_id", examId);
     
     const rows = entries.map(([subjectId, v]) => ({
@@ -113,22 +128,47 @@ const AdminResults = () => {
                   <tr className="border-b">
                     <th className="text-right p-2">বিষয়</th>
                     <th className="p-2 text-center">পূর্ণমান</th>
+                    <th className="p-2 text-center">পাশ নম্বর</th>
                     <th className="p-2 text-center">প্রাপ্ত নম্বর</th>
                     <th className="p-2 text-center">গ্রেড</th>
                     <th className="p-2 text-center">জিপিএ</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {relevantSubjects.map(sub => (
-                    <tr key={sub.id} className="border-b">
-                      <td className="p-2 font-medium">{sub.name}</td>
-                      <td className="p-2 text-center text-muted-foreground">{sub.full_marks}</td>
-                      <td className="p-2"><Input type="number" className="w-20 mx-auto text-center" value={marks[sub.id]?.marks_obtained || ""} onChange={e => setMarks({ ...marks, [sub.id]: { ...(marks[sub.id] || {}), marks_obtained: e.target.value, grade: marks[sub.id]?.grade || "", gpa: marks[sub.id]?.gpa || "" } })} /></td>
-                      <td className="p-2"><Input className="w-16 mx-auto text-center" value={marks[sub.id]?.grade || ""} onChange={e => setMarks({ ...marks, [sub.id]: { ...(marks[sub.id] || {}), grade: e.target.value, marks_obtained: marks[sub.id]?.marks_obtained || "", gpa: marks[sub.id]?.gpa || "" } })} /></td>
-                      <td className="p-2"><Input type="number" step="0.01" className="w-16 mx-auto text-center" value={marks[sub.id]?.gpa || ""} onChange={e => setMarks({ ...marks, [sub.id]: { ...(marks[sub.id] || {}), gpa: e.target.value, marks_obtained: marks[sub.id]?.marks_obtained || "", grade: marks[sub.id]?.grade || "" } })} /></td>
-                    </tr>
-                  ))}
+                  {relevantSubjects.map(sub => {
+                    const m = marks[sub.id];
+                    const failed = m?.marks_obtained && Number(m.marks_obtained) < sub.pass_marks;
+                    return (
+                      <tr key={sub.id} className={`border-b ${failed ? "bg-destructive/10" : ""}`}>
+                        <td className="p-2 font-medium">{sub.name}</td>
+                        <td className="p-2 text-center text-muted-foreground">{toBengali(sub.full_marks)}</td>
+                        <td className="p-2 text-center text-muted-foreground">{toBengali(sub.pass_marks)}</td>
+                        <td className="p-2">
+                          <Input
+                            type="number"
+                            className="w-20 mx-auto text-center"
+                            value={m?.marks_obtained || ""}
+                            onChange={e => updateMarks(sub.id, e.target.value, sub)}
+                          />
+                        </td>
+                        <td className="p-2 text-center font-semibold">{m?.grade || "—"}</td>
+                        <td className="p-2 text-center">{m?.gpa ? toBengali(m.gpa) : "—"}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
+                {filledEntries.length > 0 && (
+                  <tfoot>
+                    <tr className="border-t-2 font-bold bg-primary/5">
+                      <td className="p-2">মোট</td>
+                      <td className="p-2 text-center">{toBengali(totalFull)}</td>
+                      <td className="p-2 text-center">—</td>
+                      <td className="p-2 text-center text-primary">{toBengali(totalObtained)}</td>
+                      <td className="p-2 text-center text-primary">{overallGrade}</td>
+                      <td className="p-2 text-center text-primary">{toBengali(overallGPA.toFixed(2))}</td>
+                    </tr>
+                  </tfoot>
+                )}
               </table>
             </div>
             <Button onClick={handleSave} className="mt-4 w-full gap-2"><Save size={16} /> রেজাল্ট সংরক্ষণ করুন</Button>
