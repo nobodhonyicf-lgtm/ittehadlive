@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
-import { Settings, Palette, Image } from "lucide-react";
+import { Settings, Palette, Image, Globe, Search } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 const AdminSettings = () => {
   const qc = useQueryClient();
@@ -47,26 +48,61 @@ const AdminSettings = () => {
     primary_color: "প্রাইমারি কালার",
     signature_principal: "প্রধান শিক্ষক/মুহতামিমের স্বাক্ষর (ছবি URL)",
     signature_controller: "পরীক্ষা নিয়ন্ত্রকের স্বাক্ষর (ছবি URL)",
-  };
-
-  const keyIcons: Record<string, any> = {
-    logo_url: Image,
-    favicon_url: Image,
-    primary_color: Palette,
+    default_og_image: "ডিফল্ট OG ছবি (সোশ্যাল শেয়ার প্রিভিউ)",
+    meta_keywords: "মেটা কীওয়ার্ড (কমা দিয়ে আলাদা)",
+    google_analytics_id: "Google Analytics ID",
+    facebook_page_url: "Facebook পেজ URL",
+    twitter_handle: "Twitter হ্যান্ডেল",
   };
 
   const brandingKeys = ["logo_url", "favicon_url", "primary_color"];
   const signatureKeys = ["signature_principal", "signature_controller"];
+  const seoKeys = ["default_og_image", "meta_keywords", "google_analytics_id", "facebook_page_url", "twitter_handle"];
 
   if (isLoading) return <div className="text-center py-8">লোড হচ্ছে...</div>;
 
   const brandingSettings = settings?.filter(s => brandingKeys.includes(s.key));
   const signatureSettings = settings?.filter(s => signatureKeys.includes(s.key));
-  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key));
+  const seoSettings = settings?.filter(s => seoKeys.includes(s.key));
+  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key));
+
+  const renderSettingField = (s: any) => (
+    <div key={s.id}>
+      <Label className="mb-1 block font-semibold">{keyLabels[s.key] || s.key}</Label>
+      <div className="flex gap-2">
+        <Input
+          type={s.key === "primary_color" ? "color" : "text"}
+          defaultValue={s.value || ""}
+          onChange={(e) => setValues({ ...values, [s.id]: e.target.value })}
+          className={s.key === "primary_color" ? "w-20 h-10 p-1" : ""}
+        />
+        <Button
+          onClick={() => updateMutation.mutate({ id: s.id, value: values[s.id] ?? s.value ?? "" })}
+          disabled={updateMutation.isPending}
+          size="sm"
+        >
+          সংরক্ষণ
+        </Button>
+      </div>
+      {(s.key === "logo_url" || s.key === "default_og_image") && s.value && (
+        <img src={s.value} alt="Preview" className="h-12 mt-2 rounded" />
+      )}
+    </div>
+  );
 
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-bold flex items-center gap-2"><Settings size={22} /> সাইট সেটিংস</h1>
+
+      {/* SEO Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2"><Search size={18} /> এসইও সেটিংস</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {seoSettings?.map(renderSettingField)}
+        </CardContent>
+      </Card>
 
       {/* Branding */}
       <Card>
@@ -74,29 +110,7 @@ const AdminSettings = () => {
           <CardTitle className="text-base flex items-center gap-2"><Palette size={18} /> ব্র্যান্ডিং</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {brandingSettings?.map((s) => (
-            <div key={s.id}>
-              <Label className="mb-1 block font-semibold">{keyLabels[s.key] || s.key}</Label>
-              <div className="flex gap-2">
-                <Input
-                  type={s.key === "primary_color" ? "color" : "text"}
-                  defaultValue={s.value || ""}
-                  onChange={(e) => setValues({ ...values, [s.id]: e.target.value })}
-                  className={s.key === "primary_color" ? "w-20 h-10 p-1" : ""}
-                />
-                <Button
-                  onClick={() => updateMutation.mutate({ id: s.id, value: values[s.id] ?? s.value ?? "" })}
-                  disabled={updateMutation.isPending}
-                  size="sm"
-                >
-                  সংরক্ষণ
-                </Button>
-              </div>
-              {s.key === "logo_url" && s.value && (
-                <img src={s.value} alt="Logo preview" className="h-12 mt-2 rounded" />
-              )}
-            </div>
-          ))}
+          {brandingSettings?.map(renderSettingField)}
         </CardContent>
       </Card>
 
@@ -137,24 +151,7 @@ const AdminSettings = () => {
           <CardTitle className="text-base">সাধারণ সেটিংস</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {generalSettings?.map((s) => (
-            <div key={s.id}>
-              <Label className="mb-1 block font-semibold">{keyLabels[s.key] || s.key}</Label>
-              <div className="flex gap-2">
-                <Input
-                  defaultValue={s.value || ""}
-                  onChange={(e) => setValues({ ...values, [s.id]: e.target.value })}
-                />
-                <Button
-                  onClick={() => updateMutation.mutate({ id: s.id, value: values[s.id] ?? s.value ?? "" })}
-                  disabled={updateMutation.isPending}
-                  size="sm"
-                >
-                  সংরক্ষণ
-                </Button>
-              </div>
-            </div>
-          ))}
+          {generalSettings?.map(renderSettingField)}
         </CardContent>
       </Card>
     </div>

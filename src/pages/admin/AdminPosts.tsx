@@ -19,14 +19,20 @@ type PostForm = {
   content: string;
   slug: string;
   image_url: string;
+  image_caption: string;
+  summary: string;
   category_id: string;
   author_name: string;
   is_featured: boolean;
   is_published: boolean;
+  meta_title: string;
+  meta_description: string;
+  og_image_url: string;
 };
 
 const emptyForm: PostForm = {
-  title: "", content: "", slug: "", image_url: "", category_id: "", author_name: "", is_featured: false, is_published: true,
+  title: "", content: "", slug: "", image_url: "", image_caption: "", summary: "", category_id: "", author_name: "", is_featured: false, is_published: true,
+  meta_title: "", meta_description: "", og_image_url: "",
 };
 
 const DRAFT_KEY = "admin_post_draft";
@@ -99,10 +105,15 @@ const AdminPosts = () => {
       content: post.content || "",
       slug: post.slug,
       image_url: post.image_url || "",
+      image_caption: post.image_caption || "",
+      summary: post.summary || "",
       category_id: post.category_id || "",
       author_name: post.author_name || "",
       is_featured: post.is_featured || false,
       is_published: post.is_published ?? true,
+      meta_title: post.meta_title || "",
+      meta_description: post.meta_description || "",
+      og_image_url: post.og_image_url || "",
     });
     setOpen(true);
   };
@@ -159,6 +170,14 @@ const AdminPosts = () => {
                 <Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
               </div>
               <div>
+                <Label>ছবির ক্যাপশন</Label>
+                <Input value={form.image_caption} onChange={(e) => setForm({ ...form, image_caption: e.target.value })} placeholder="ছবির বর্ণনা" />
+              </div>
+              <div>
+                <Label>সারাংশ</Label>
+                <Textarea rows={2} value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} placeholder="পোস্টের সংক্ষিপ্ত সারাংশ (SEO)" />
+              </div>
+              <div>
                 <Label>ক্যাটাগরি</Label>
                 <select
                   className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
@@ -181,6 +200,24 @@ const AdminPosts = () => {
                   প্রকাশিত
                 </label>
               </div>
+              {/* SEO Fields */}
+              <details className="border border-border rounded-md p-3">
+                <summary className="text-sm font-semibold cursor-pointer">🔍 এসইও সেটিংস</summary>
+                <div className="space-y-3 mt-3">
+                  <div>
+                    <Label>মেটা টাইটেল</Label>
+                    <Input value={form.meta_title} onChange={(e) => setForm({ ...form, meta_title: e.target.value })} placeholder="SEO টাইটেল (ডিফল্ট: পোস্ট শিরোনাম)" />
+                  </div>
+                  <div>
+                    <Label>মেটা ডেসক্রিপশন</Label>
+                    <Textarea rows={2} value={form.meta_description} onChange={(e) => setForm({ ...form, meta_description: e.target.value })} placeholder="SEO ডেসক্রিপশন (ডিফল্ট: সারাংশ)" />
+                  </div>
+                  <div>
+                    <Label>OG ছবি URL</Label>
+                    <Input value={form.og_image_url} onChange={(e) => setForm({ ...form, og_image_url: e.target.value })} placeholder="সোশ্যাল শেয়ার প্রিভিউ ছবি" />
+                  </div>
+                </div>
+              </details>
               <Button type="submit" disabled={saveMutation.isPending} className="w-full">
                 {saveMutation.isPending ? "সংরক্ষণ হচ্ছে..." : "সংরক্ষণ"}
               </Button>

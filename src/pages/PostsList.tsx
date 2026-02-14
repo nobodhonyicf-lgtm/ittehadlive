@@ -1,10 +1,13 @@
 import Layout from "@/components/layout/Layout";
 import { usePosts, useCategories } from "@/hooks/useData";
 import { Link } from "react-router-dom";
-import { Calendar, Newspaper, User, Search } from "lucide-react";
+import { Calendar, Newspaper, User, Search, Clock } from "lucide-react";
 import Sidebar from "@/components/home/Sidebar";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { toBengali } from "@/lib/bengali";
+import { timeAgo } from "@/lib/timeAgo";
+import SEOHead from "@/components/SEOHead";
 
 const POSTS_PER_PAGE = 10;
 
@@ -26,6 +29,7 @@ const PostsList = () => {
 
   return (
     <Layout>
+      <SEOHead title="সকল পোস্ট" description="ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ এর সকল সংবাদ ও পোস্ট" />
       <div className="px-4 py-6">
         <h1 className="text-2xl font-bold text-primary mb-4">সকল পোস্ট</h1>
 
@@ -56,30 +60,37 @@ const PostsList = () => {
                 <Link
                   key={post.id}
                   to={`/post/${post.slug}`}
-                  className="block bg-card border rounded-lg p-4 hover:shadow-md transition-shadow group"
+                  className="block bg-card border rounded-lg overflow-hidden hover:shadow-md transition-shadow group"
                 >
-                  <div className="flex gap-4">
-                    <div className="w-24 h-24 bg-muted rounded shrink-0 flex items-center justify-center overflow-hidden">
+                  <div className="flex gap-4 p-4">
+                    <div className="w-28 h-24 bg-muted rounded shrink-0 flex items-center justify-center overflow-hidden">
                       {post.image_url ? (
                         <img src={post.image_url} alt={post.title} className="w-full h-full object-cover" />
                       ) : (
                         <Newspaper className="text-muted-foreground" size={24} />
                       )}
                     </div>
-                    <div className="min-w-0">
-                      <h2 className="font-bold group-hover:text-primary transition-colors line-clamp-2">
+                    <div className="min-w-0 flex-1">
+                      {/* Category in red */}
+                      {post.categories && (
+                        <span className="text-xs font-bold text-destructive uppercase tracking-wide">
+                          {post.categories.name}
+                        </span>
+                      )}
+                      <h2 className="font-bold group-hover:text-primary transition-colors line-clamp-2 mt-0.5">
                         {post.title}
                       </h2>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                        {post.content}
-                      </p>
+                      {(post as any).summary && (
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                          {(post as any).summary}
+                        </p>
+                      )}
                       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-2">
-                        <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(post.created_at).toLocaleDateString("bn-BD")}</span>
+                        <span className="flex items-center gap-1">
+                          <Clock size={12} /> {timeAgo(post.created_at)}
+                        </span>
                         {(post as any).author_name && (
                           <span className="flex items-center gap-1"><User size={12} /> {(post as any).author_name}</span>
-                        )}
-                        {post.categories && (
-                          <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded">{post.categories.name}</span>
                         )}
                       </div>
                     </div>
@@ -99,7 +110,7 @@ const PostsList = () => {
                     onClick={() => setPage(i + 1)}
                     className={`px-3 py-1.5 rounded text-sm ${page === i + 1 ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"}`}
                   >
-                    {i + 1}
+                    {toBengali(i + 1)}
                   </button>
                 ))}
               </div>

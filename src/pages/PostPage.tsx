@@ -1,10 +1,15 @@
 import { useParams, Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import { usePost } from "@/hooks/useData";
+import { usePost, useAds } from "@/hooks/useData";
 import Sidebar from "@/components/home/Sidebar";
-import { Calendar, Share2, Facebook, Twitter, MessageCircle, Download, User } from "lucide-react";
+import { Calendar, Share2, Facebook, Twitter, MessageCircle, Download, User, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRef, useCallback } from "react";
+import { toBengali } from "@/lib/bengali";
+import { timeAgo } from "@/lib/timeAgo";
+import SEOHead from "@/components/SEOHead";
+import RelatedPosts from "@/components/post/RelatedPosts";
+import InPostAd from "@/components/post/InPostAd";
 
 const SocialShare = ({ url, title }: { url: string; title: string }) => {
   const encodedUrl = encodeURIComponent(url);
@@ -43,20 +48,14 @@ const PostPage = () => {
       canvas.height = 630;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-
-      // Background gradient
       const grad = ctx.createLinearGradient(0, 0, 1200, 630);
       grad.addColorStop(0, "#1a7a3a");
       grad.addColorStop(1, "#0d5c2a");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 1200, 630);
-
-      // White card area
       ctx.fillStyle = "#ffffff";
       ctx.roundRect(40, 40, 1120, 550, 16);
       ctx.fill();
-
-      // Title
       ctx.fillStyle = "#1a7a3a";
       ctx.font = "bold 36px sans-serif";
       const words = post.title.split(" ");
@@ -73,51 +72,35 @@ const PostPage = () => {
         }
       }
       ctx.fillText(line, 80, y);
-
-      // Content preview
-      ctx.fillStyle = "#333333";
-      ctx.font = "20px sans-serif";
-      const content = (post.content || "").substring(0, 200);
-      const cWords = content.split(" ");
-      line = "";
-      y += 60;
-      for (const word of cWords) {
-        const testLine = line + word + " ";
-        if (ctx.measureText(testLine).width > 1040) {
-          ctx.fillText(line, 80, y);
-          line = word + " ";
-          y += 30;
-          if (y > 480) break;
-        } else {
-          line = testLine;
-        }
-      }
-      ctx.fillText(line, 80, y);
-
-      // Footer
       ctx.fillStyle = "#1a7a3a";
       ctx.fillRect(40, 530, 1120, 60);
       ctx.fillStyle = "#ffffff";
       ctx.font = "18px sans-serif";
       ctx.fillText("ittehad.bd", 80, 568);
-      ctx.fillText(new Date(post.created_at).toLocaleDateString("bn-BD"), 1000, 568);
-
-      // Download
       const link = document.createElement("a");
       link.download = `${post.slug || "post"}-card.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     } catch {
-      // Fallback: simple alert
       alert("ফটোকার্ড তৈরি করা সম্ভব হয়নি");
     }
   }, [post]);
 
+  // Split content into paragraphs for in-post ad placement
+  const contentParagraphs = post?.content?.split("\n").filter(Boolean) || [];
+  const adInsertIndex = Math.min(3, Math.floor(contentParagraphs.length / 2));
+
   return (
     <Layout>
-      {/* OG Meta Tags via document head */}
       {post && (
-        <title>{post.title} | ইত্তেহাদুল মাদারিস</title>
+        <SEOHead
+          title={(post as any).meta_title || post.title}
+          description={(post as any).meta_description || (post as any).summary || post.content?.substring(0, 160) || ""}
+          image={(post as any).og_image_url || post.image_url || undefined}
+          type="article"
+          publishedTime={post.created_at}
+          author={(post as any).author_name || undefined}
+        />
       )}
       <div className="px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -125,37 +108,85 @@ const PostPage = () => {
             {isLoading ? (
               <div className="animate-pulse bg-muted h-64 rounded" />
             ) : post ? (
-              <article ref={cardRef} className="bg-card rounded-lg border p-6 shadow-sm">
-                <h1 className="text-2xl font-bold text-primary mb-3">{post.title}</h1>
-                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-4">
-                  <span className="flex items-center gap-1">
-                    <Calendar size={14} />
-                    {new Date(post.created_at).toLocaleDateString("bn-BD")}
-                  </span>
+              <article ref={cardRef} className="bg-card rounded-lg border shadow-sm">
+                {/* Category badge - red */}
+                <div className="px-6 pt-5">
+                  {post.categories && (
+                    <Link
+                      to={`/posts?category=${post.categories.slug}`}
+                      className="text-xs font-bold uppercase tracking-wide text-destructive hover:underline"
+                    >
+                      {post.categories.name}
+                    </Link>
+                  )}
+                </div>
+
+                {/* Title */}
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground px-6 pt-2 pb-1 leading-snug">
+                  {post.title}
+                </h1>
+
+                {/* Summary */}
+                {(post as any).summary && (
+                  <p className="text-base text-muted-foreground px-6 pb-3 border-b border-border leading-relaxed">
+                    {(post as any).summary}
+                  </p>
+                )}
+
+                {/* Meta info bar */}
+                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground px-6 py-3 border-b border-border">
                   {(post as any).author_name && (
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 font-medium text-foreground">
                       <User size={14} /> {(post as any).author_name}
                     </span>
                   )}
-                  {post.categories && (
-                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs">
-                      {post.categories.name}
-                    </span>
-                  )}
+                  <span className="flex items-center gap-1">
+                    <Calendar size={14} />
+                    {new Date(post.created_at).toLocaleDateString("bn-BD", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock size={14} />
+                    {timeAgo(post.created_at)}
+                  </span>
                 </div>
+
+                {/* Featured image with caption */}
                 {post.image_url && (
-                  <img src={post.image_url} alt={post.title} className="w-full rounded-lg mb-4" />
+                  <figure className="px-6 pt-4">
+                    <img src={post.image_url} alt={post.title} className="w-full rounded-lg" />
+                    {(post as any).image_caption && (
+                      <figcaption className="text-xs text-destructive mt-2 italic">
+                        {(post as any).image_caption}
+                      </figcaption>
+                    )}
+                  </figure>
                 )}
-                <div className="prose max-w-none text-foreground whitespace-pre-wrap mb-6">
-                  {post.content}
+
+                {/* Content with in-post ad */}
+                <div className="prose max-w-none text-foreground px-6 py-4">
+                  {contentParagraphs.map((paragraph, index) => (
+                    <div key={index}>
+                      <p className="mb-3 leading-relaxed text-[15px]">{paragraph}</p>
+                      {index === adInsertIndex && <InPostAd />}
+                    </div>
+                  ))}
                 </div>
 
                 {/* Social Share */}
-                <div className="border-t border-border pt-4 space-y-3">
+                <div className="border-t border-border px-6 py-4 space-y-3">
                   <SocialShare url={currentUrl} title={post.title} />
                   <Button variant="outline" size="sm" className="gap-2" onClick={generatePhotoCard}>
                     <Download size={14} /> ফটোকার্ড ডাউনলোড
                   </Button>
+                </div>
+
+                {/* Related Posts */}
+                <div className="px-6 pb-6">
+                  <RelatedPosts currentPostId={post.id} categoryId={post.category_id} />
                 </div>
               </article>
             ) : (

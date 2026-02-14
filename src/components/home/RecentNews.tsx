@@ -2,6 +2,7 @@ import { usePosts } from "@/hooks/useData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Newspaper } from "lucide-react";
+import { timeAgo } from "@/lib/timeAgo";
 
 const RecentNews = () => {
   const { data: posts } = usePosts(6);
@@ -34,9 +35,15 @@ const RecentNews = () => {
                   <Newspaper className="text-muted-foreground" size={40} />
                 )}
               </div>
-              <h3 className="mt-2 text-sm font-bold group-hover:text-primary transition-colors line-clamp-2">
+              {post.categories && (
+                <span className="text-[11px] font-bold text-destructive uppercase mt-2 block">
+                  {post.categories.name}
+                </span>
+              )}
+              <h3 className="text-sm font-bold group-hover:text-primary transition-colors line-clamp-2">
                 {post.title}
               </h3>
+              <span className="text-xs text-muted-foreground">{timeAgo(post.created_at)}</span>
             </Link>
           ))}
         </div>
