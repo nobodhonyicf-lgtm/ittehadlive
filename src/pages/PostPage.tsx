@@ -1,7 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { usePost, useAds } from "@/hooks/useData";
-import Sidebar from "@/components/home/Sidebar";
 import { Calendar, Share2, Facebook, Twitter, MessageCircle, Download, User, Clock, Image, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -68,8 +67,8 @@ const PostPage = () => {
           ...(post?.categories ? [{ label: post.categories.name, href: `/posts?category=${post.categories.slug}` }] : []),
           ...(post ? [{ label: post.title }] : []),
         ]} />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        <div>
+          <div>
             {isLoading ? (
               <div className="animate-pulse bg-muted h-64 rounded" />
             ) : post ? (
@@ -193,9 +192,6 @@ const PostPage = () => {
                 পোস্ট পাওয়া যায়নি
               </div>
             )}
-          </div>
-          <div className="lg:col-span-1">
-            <Sidebar />
           </div>
         </div>
       </div>

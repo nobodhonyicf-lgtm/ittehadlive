@@ -53,18 +53,22 @@ const AdminSettings = () => {
     google_analytics_id: "Google Analytics ID",
     facebook_page_url: "Facebook পেজ URL",
     twitter_handle: "Twitter হ্যান্ডেল",
+    photocard_ad_enabled: "ফটোকার্ডে বিজ্ঞাপন সক্রিয়",
+    photocard_ad_image: "ফটোকার্ড বিজ্ঞাপন ছবি URL",
   };
 
   const brandingKeys = ["logo_url", "favicon_url", "primary_color"];
   const signatureKeys = ["signature_principal", "signature_controller"];
   const seoKeys = ["default_og_image", "meta_keywords", "google_analytics_id", "facebook_page_url", "twitter_handle"];
+  const adKeys = ["photocard_ad_enabled", "photocard_ad_image"];
 
   if (isLoading) return <div className="text-center py-8">লোড হচ্ছে...</div>;
 
   const brandingSettings = settings?.filter(s => brandingKeys.includes(s.key));
   const signatureSettings = settings?.filter(s => signatureKeys.includes(s.key));
   const seoSettings = settings?.filter(s => seoKeys.includes(s.key));
-  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key));
+  const adSettings = settings?.filter(s => adKeys.includes(s.key));
+  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key) && !adKeys.includes(s.key));
 
   const renderSettingField = (s: any) => (
     <div key={s.id}>
@@ -101,6 +105,19 @@ const AdminSettings = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {seoSettings?.map(renderSettingField)}
+        </CardContent>
+      </Card>
+
+      {/* Photo Card Ad Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2"><Image size={18} /> ফটোকার্ড বিজ্ঞাপন</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {adSettings?.map(renderSettingField)}
+          <p className="text-xs text-muted-foreground">
+            "ফটোকার্ডে বিজ্ঞাপন সক্রিয়" এর মান <b>true</b> দিলে ফ্রন্টেন্ডে ফটোকার্ডে বিজ্ঞাপন দেখাবে। <b>false</b> দিলে দেখাবে না।
+          </p>
         </CardContent>
       </Card>
 

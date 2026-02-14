@@ -27,6 +27,7 @@ import AdminAnalytics from "./AdminAnalytics";
 import AdminPrayerTimes from "./AdminPrayerTimes";
 import AdminCommittee from "./AdminCommittee";
 import AdminPhotoCard from "./AdminPhotoCard";
+import AdminGallery from "./AdminGallery";
 
 const navItems = [
   { label: "ড্যাশবোর্ড", icon: LayoutDashboard, path: "/admin" },
@@ -46,6 +47,7 @@ const navItems = [
   { label: "ভিডিও", icon: Video, path: "/admin/videos" },
   { label: "নেতৃবৃন্দ", icon: Users, path: "/admin/leaders" },
   { label: "কমিটি/উপদেষ্টা", icon: Users, path: "/admin/committee" },
+  { label: "গ্যালারী", icon: Image, path: "/admin/gallery" },
   { label: "মেনু", icon: MenuIcon, path: "/admin/menu" },
   { label: "ক্যাটাগরি", icon: Tag, path: "/admin/categories" },
   { label: "যোগাযোগ", icon: Mail, path: "/admin/contacts" },
@@ -141,6 +143,7 @@ const AdminDashboard = () => {
           <Route path="videos" element={<AdminVideos />} />
           <Route path="leaders" element={<AdminLeaders />} />
           <Route path="committee" element={<AdminCommittee />} />
+          <Route path="gallery" element={<AdminGallery />} />
           <Route path="menu" element={<AdminMenu />} />
           <Route path="categories" element={<AdminCategories />} />
           <Route path="contacts" element={<AdminContacts />} />

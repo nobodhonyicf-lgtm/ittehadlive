@@ -236,11 +236,15 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
   const [resIdx, setResIdx] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  // Auto-load logo from site settings
+  // Auto-load logo and ad settings from site settings
   useEffect(() => {
     if (siteSettings?.logo_url && !logoLoaded) {
       setLogoUrl(siteSettings.logo_url);
       setLogoLoaded(true);
+    }
+    // Auto-load ad image if enabled in settings
+    if (siteSettings?.photocard_ad_enabled === "true" && siteSettings?.photocard_ad_image && !adImageUrl) {
+      setAdImageUrl(siteSettings.photocard_ad_image);
     }
   }, [siteSettings, logoLoaded]);
 
