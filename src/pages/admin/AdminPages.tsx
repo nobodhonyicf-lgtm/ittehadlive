@@ -15,7 +15,7 @@ const AdminPages = () => {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", content: "", slug: "" });
+  const [form, setForm] = useState({ title: "", content: "", slug: "", cover_image_url: "" });
 
   const { data: pages, isLoading } = useQuery({
     queryKey: ["admin_pages"],
@@ -29,18 +29,19 @@ const AdminPages = () => {
   const saveMutation = useMutation({
     mutationFn: async (data: typeof form) => {
       const slug = data.slug || data.title.toLowerCase().replace(/[^a-z0-9\u0980-\u09FF]+/g, "-") || `page-${Date.now()}`;
+      const payload = { title: data.title, content: data.content, slug, cover_image_url: data.cover_image_url || null } as any;
       if (editId) {
-        const { error } = await supabase.from("pages").update({ ...data, slug }).eq("id", editId);
+        const { error } = await supabase.from("pages").update(payload).eq("id", editId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("pages").insert([{ ...data, slug }]);
+        const { error } = await supabase.from("pages").insert([payload]);
         if (error) throw error;
       }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin_pages"] });
       toast.success(editId ? "পেজ আপডেট হয়েছে" : "পেজ তৈরি হয়েছে");
-      setOpen(false); setEditId(null); setForm({ title: "", content: "", slug: "" });
+      setOpen(false); setEditId(null); setForm({ title: "", content: "", slug: "", cover_image_url: "" });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -59,13 +60,14 @@ const AdminPages = () => {
         <h1 className="text-xl font-bold">পেজ ব্যবস্থাপনা</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => { setEditId(null); setForm({ title: "", content: "", slug: "" }); }}><Plus size={16} /> নতুন পেজ</Button>
+            <Button onClick={() => { setEditId(null); setForm({ title: "", content: "", slug: "", cover_image_url: "" }); }}><Plus size={16} /> নতুন পেজ</Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editId ? "পেজ সম্পাদনা" : "নতুন পেজ"}</DialogTitle></DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
               <div><Label>শিরোনাম *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></div>
               <div><Label>স্লাগ</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} /></div>
+              <div><Label>কভার ছবি URL (ফেসবুক শেয়ার প্রিভিউ)</Label><Input value={form.cover_image_url} onChange={(e) => setForm({ ...form, cover_image_url: e.target.value })} placeholder="ফেসবুকে শেয়ারের সময় এই ছবি দেখাবে" /></div>
               <div><Label>বিষয়বস্তু</Label><Textarea rows={10} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} /></div>
               <Button type="submit" disabled={saveMutation.isPending} className="w-full">{saveMutation.isPending ? "সংরক্ষণ হচ্ছে..." : "সংরক্ষণ"}</Button>
             </form>
@@ -83,7 +85,7 @@ const AdminPages = () => {
                     <TableCell className="font-medium">{page.title}</TableCell>
                     <TableCell className="text-muted-foreground">{page.slug}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => { setEditId(page.id); setForm({ title: page.title, content: page.content || "", slug: page.slug }); setOpen(true); }}><Edit size={16} /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => { setEditId(page.id); setForm({ title: page.title, content: page.content || "", slug: page.slug, cover_image_url: (page as any).cover_image_url || "" }); setOpen(true); }}><Edit size={16} /></Button>
                       <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(page.id)}><Trash2 size={16} /></Button>
                     </TableCell>
                   </TableRow>

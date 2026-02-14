@@ -431,6 +431,7 @@ export type Database = {
       pages: {
         Row: {
           content: string | null
+          cover_image_url: string | null
           created_at: string
           id: string
           slug: string
@@ -439,6 +440,7 @@ export type Database = {
         }
         Insert: {
           content?: string | null
+          cover_image_url?: string | null
           created_at?: string
           id?: string
           slug: string
@@ -447,6 +449,7 @@ export type Database = {
         }
         Update: {
           content?: string | null
+          cover_image_url?: string | null
           created_at?: string
           id?: string
           slug?: string

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { toBengali } from "@/lib/bengali";
 import { timeAgo } from "@/lib/timeAgo";
 import SEOHead from "@/components/SEOHead";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const POSTS_PER_PAGE = 10;
 
@@ -31,6 +32,7 @@ const PostsList = () => {
     <Layout>
       <SEOHead title="সকল পোস্ট" description="ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ এর সকল সংবাদ ও পোস্ট" />
       <div className="px-4 py-6">
+        <Breadcrumbs items={[{ label: "সকল পোস্ট" }]} />
         <h1 className="text-2xl font-bold text-primary mb-4">সকল পোস্ট</h1>
 
         {/* Filters */}
