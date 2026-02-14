@@ -12,14 +12,18 @@ import RelatedPosts from "@/components/post/RelatedPosts";
 import InPostAd from "@/components/post/InPostAd";
 import PhotoCardEditor from "@/components/post/PhotoCardEditor";
 
-const SocialShare = ({ url, title }: { url: string; title: string }) => {
-  const encodedUrl = encodeURIComponent(url);
+const SocialShare = ({ url, title, slug }: { url: string; title: string; slug?: string }) => {
   const encodedTitle = encodeURIComponent(title);
+  // Use OG meta endpoint for Facebook so crawlers get proper meta tags
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const ogUrl = slug ? `${supabaseUrl}/functions/v1/og-meta?slug=${encodeURIComponent(slug)}` : url;
+  const encodedOgUrl = encodeURIComponent(ogUrl);
+  const encodedUrl = encodeURIComponent(url);
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <span className="text-sm text-muted-foreground flex items-center gap-1"><Share2 size={14} /> শেয়ার:</span>
-      <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer"
+      <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedOgUrl}`} target="_blank" rel="noopener noreferrer"
         className="inline-flex items-center gap-1 bg-[#1877F2] text-white px-3 py-1.5 rounded text-xs hover:opacity-90">
         <Facebook size={14} /> Facebook
       </a>
@@ -133,7 +137,7 @@ const PostPage = () => {
 
                 {/* Social Share */}
                 <div className="border-t border-border px-6 py-4 space-y-3">
-                  <SocialShare url={currentUrl} title={post.title} />
+                  <SocialShare url={currentUrl} title={post.title} slug={post.slug} />
                   <Button variant="outline" size="sm" className="gap-2" onClick={() => setPhotoCardOpen(true)}>
                     <Image size={14} /> ফটোকার্ড তৈরি করুন
                   </Button>
