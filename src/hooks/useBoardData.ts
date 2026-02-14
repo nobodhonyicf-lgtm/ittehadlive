@@ -118,12 +118,9 @@ export const useResultByRoll = (rollNumber: string, examId: string, regNumber?: 
       );
       if (!student) return null;
 
-      // Get full student details (father, mother, address) via a separate secure call
-      const { data: fullStudent, error: fsErr } = await supabase
-        .from("students")
-        .select("father_name, mother_name, address")
-        .eq("id", student.id)
-        .maybeSingle();
+      // Get additional details via secure RPC
+      const { data: details } = await supabase.rpc("get_student_details_for_result", { p_student_id: student.id });
+      const detail = details?.[0];
 
       const { data: results, error: rErr } = await supabase
         .from("results")
@@ -134,9 +131,9 @@ export const useResultByRoll = (rollNumber: string, examId: string, regNumber?: 
       return { 
         student: { 
           ...student, 
-          father_name: fullStudent?.father_name || null,
-          mother_name: fullStudent?.mother_name || null,
-          address: fullStudent?.address || null,
+          father_name: detail?.father_name || null,
+          mother_name: detail?.mother_name || null,
+          address: detail?.address || null,
         }, 
         results 
       };
