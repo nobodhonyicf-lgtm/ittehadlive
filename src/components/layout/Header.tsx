@@ -46,10 +46,15 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Logo section */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-[1200px] mx-auto px-4 py-5 text-center">
-          <Link to="/" className="inline-block">
+      {/* Logo section - boxy design */}
+      <div className="bg-card border-b-2 border-primary/20">
+        <div className="max-w-[1200px] mx-auto px-4 py-5 flex items-center justify-center gap-4">
+          {settings?.logo_url && (
+            <Link to="/">
+              <img src={settings.logo_url} alt="Logo" className="h-14 md:h-16 object-contain" />
+            </Link>
+          )}
+          <Link to="/" className="text-center">
             <h1 className="text-2xl md:text-3xl font-bold text-primary tracking-tight">
               {settings?.site_name || "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ"}
             </h1>
@@ -60,8 +65,8 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="bg-primary text-primary-foreground">
+      {/* Navigation - boxy */}
+      <nav className="bg-primary text-primary-foreground border-b-4 border-primary/80">
         <div className="max-w-[1200px] mx-auto px-4">
           <div className="md:hidden flex items-center justify-between py-2">
             <span className="font-semibold text-sm">মেনু</span>
@@ -74,7 +79,7 @@ const Header = () => {
               <li key={item.id}>
                 <Link
                   to={item.url}
-                  className="block px-4 py-2.5 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded"
+                  className="block px-4 py-2.5 hover:bg-primary-foreground/10 transition-colors text-sm font-medium border-r border-primary-foreground/10 last:border-r-0"
                   onClick={() => setMobileOpen(false)}
                 >
                   {item.label}

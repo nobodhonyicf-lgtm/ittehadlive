@@ -5,12 +5,15 @@ const Footer = () => {
   const { data: settings } = useSiteSettings();
 
   return (
-    <footer className="bg-primary text-primary-foreground mt-8">
+    <footer className="bg-primary text-primary-foreground mt-8 border-t-4 border-primary/80">
       <div className="max-w-[1200px] mx-auto px-4 py-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* About */}
-          <div>
-            <h3 className="text-lg font-bold mb-3">
+          <div className="border border-primary-foreground/15 rounded-lg p-4">
+            {settings?.logo_url && (
+              <img src={settings.logo_url} alt="Logo" className="h-10 mb-3 object-contain brightness-0 invert opacity-80" />
+            )}
+            <h3 className="text-lg font-bold mb-2">
               {settings?.site_name || "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ"}
             </h3>
             <p className="text-sm opacity-80 leading-relaxed">
@@ -19,7 +22,7 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div className="border border-primary-foreground/15 rounded-lg p-4">
             <h3 className="text-lg font-bold mb-3">গুরুত্বপূর্ণ লিংক</h3>
             <ul className="text-sm opacity-80 space-y-2">
               <li><a href="/page/about" className="hover:underline hover:opacity-100 transition-opacity">আমাদের সম্পর্কে</a></li>
@@ -30,7 +33,7 @@ const Footer = () => {
           </div>
 
           {/* Services */}
-          <div>
+          <div className="border border-primary-foreground/15 rounded-lg p-4">
             <h3 className="text-lg font-bold mb-3">সেবা সমূহ</h3>
             <ul className="text-sm opacity-80 space-y-2">
               <li><a href="/students" className="hover:underline hover:opacity-100 transition-opacity">শিক্ষার্থী ডিরেক্টরি</a></li>
@@ -40,7 +43,7 @@ const Footer = () => {
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="border border-primary-foreground/15 rounded-lg p-4">
             <h3 className="text-lg font-bold mb-3">যোগাযোগ</h3>
             <ul className="text-sm opacity-80 space-y-2">
               <li className="flex items-center gap-2">
