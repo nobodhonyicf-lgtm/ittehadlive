@@ -30,7 +30,10 @@ const ResultCheck = () => {
     },
   });
 
-  const getSetting = (key: string) => settings?.find((s: any) => s.key === key)?.value || "";
+  const getSetting = (key: string) => {
+    if (!settings || !Array.isArray(settings)) return "";
+    return settings.find((s: any) => s.key === key)?.value || "";
+  };
 
   const publishedExams = exams?.filter(e => e.is_published);
 
