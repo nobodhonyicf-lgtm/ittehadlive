@@ -535,9 +535,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
       if (adImg && adTotalH > 0) {
         const adAreaTop = mainCardH + Math.round(4 * scale);
         const adAreaH = adTotalH - Math.round(8 * scale);
-        const adW = Math.min(WIDTH, (adImg.width / adImg.height) * adAreaH);
-        const adX = (WIDTH - adW) / 2;
-        ctx.drawImage(adImg, adX, adAreaTop, adW, adAreaH);
+        ctx.drawImage(adImg, 0, adAreaTop, WIDTH, adAreaH);
       }
 
       setPreviewUrl(canvas.toDataURL("image/png"));
