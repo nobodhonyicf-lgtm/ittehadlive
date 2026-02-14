@@ -268,7 +268,8 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
       if (adImageUrl) {
         try {
           adImg = await loadImage(adImageUrl);
-          adTotalH = Math.round(120 * scale);
+          // Maintain original aspect ratio at full canvas width
+          adTotalH = Math.round((adImg.height / adImg.width) * WIDTH);
         } catch { adImg = null; }
       }
 
@@ -533,9 +534,8 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
 
       // ── Ad image at the very bottom ──
       if (adImg && adTotalH > 0) {
-        const adAreaTop = mainCardH + Math.round(4 * scale);
-        const adAreaH = adTotalH - Math.round(8 * scale);
-        ctx.drawImage(adImg, 0, adAreaTop, WIDTH, adAreaH);
+        const adAreaTop = mainCardH;
+        ctx.drawImage(adImg, 0, adAreaTop, WIDTH, adTotalH);
       }
 
       setPreviewUrl(canvas.toDataURL("image/png"));
