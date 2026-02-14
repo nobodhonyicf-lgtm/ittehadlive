@@ -47,6 +47,206 @@ export type Database = {
         }
         Relationships: []
       }
+      book_order_items: {
+        Row: {
+          book_id: string
+          created_at: string
+          id: string
+          order_id: string
+          price: number
+          quantity: number
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          id?: string
+          order_id: string
+          price: number
+          quantity?: number
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          id?: string
+          order_id?: string
+          price?: number
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_order_items_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "book_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "book_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      book_orders: {
+        Row: {
+          address: string
+          created_at: string
+          customer_name: string
+          delivery_charge: number
+          district: string | null
+          email: string | null
+          id: string
+          notes: string | null
+          order_number: string
+          payment_method: string
+          phone: string
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          customer_name: string
+          delivery_charge?: number
+          district?: string | null
+          email?: string | null
+          id?: string
+          notes?: string | null
+          order_number: string
+          payment_method?: string
+          phone: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          customer_name?: string
+          delivery_charge?: number
+          district?: string | null
+          email?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: string
+          payment_method?: string
+          phone?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      book_reviews: {
+        Row: {
+          book_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          is_approved: boolean | null
+          rating: number
+          reviewer_name: string
+        }
+        Insert: {
+          book_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          rating: number
+          reviewer_name: string
+        }
+        Update: {
+          book_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          rating?: number
+          reviewer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_reviews_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      books: {
+        Row: {
+          author_name: string
+          category: string | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          discount_price: number | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          isbn: string | null
+          language: string | null
+          pages: number | null
+          preview_pdf_url: string | null
+          price: number
+          publisher: string | null
+          slug: string
+          sort_order: number | null
+          stock: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name: string
+          category?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          discount_price?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          isbn?: string | null
+          language?: string | null
+          pages?: number | null
+          preview_pdf_url?: string | null
+          price?: number
+          publisher?: string | null
+          slug: string
+          sort_order?: number | null
+          stock?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          category?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          discount_price?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          isbn?: string | null
+          language?: string | null
+          pages?: number | null
+          preview_pdf_url?: string | null
+          price?: number
+          publisher?: string | null
+          slug?: string
+          sort_order?: number | null
+          stock?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       branches: {
         Row: {
           address: string | null
