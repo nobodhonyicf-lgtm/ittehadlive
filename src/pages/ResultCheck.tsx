@@ -30,7 +30,7 @@ const ResultCheck = () => {
     },
   });
 
-  const getSetting = (key: string) => settings?.find(s => s.key === key)?.value || "";
+  const getSetting = (key: string) => settings?.find((s: any) => s.key === key)?.value || "";
 
   const publishedExams = exams?.filter(e => e.is_published);
 
@@ -51,7 +51,7 @@ const ResultCheck = () => {
     return {
       ...r,
       computed_grade: r.grade || computed.grade,
-      computed_gpa: r.gpa || computed.gpa,
+      computed_gpa: Number(r.gpa) || computed.gpa,
     };
   });
 
@@ -77,7 +77,7 @@ const ResultCheck = () => {
             <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input placeholder="রোল নম্বর লিখুন *" value={roll} onChange={e => setRoll(e.target.value)} required />
               <Input placeholder="রেজিস্ট্রেশন নম্বর লিখুন *" value={reg} onChange={e => setReg(e.target.value)} required />
-              <Select value={examId} onValueChange={setExamId} required>
+              <Select value={examId} onValueChange={setExamId}>
                 <SelectTrigger><SelectValue placeholder="পরীক্ষা নির্বাচন" /></SelectTrigger>
                 <SelectContent>
                   {publishedExams?.map(e => (
@@ -94,9 +94,9 @@ const ResultCheck = () => {
         </Card>
 
         {searchRoll && searchExam && !isLoading && (
-          <>
+          <div>
             {result ? (
-              <>
+              <div>
                 <div id="printable-marksheet">
                   <Card className="border-2 border-primary/30 print:border-black print:shadow-none" id="result-card">
                     <CardHeader className="bg-primary/5 print:bg-white text-center border-b-2 border-primary/20 print:border-black">
@@ -138,8 +138,6 @@ const ResultCheck = () => {
                               <th className="border border-primary/30 print:border-black px-3 py-2 text-center">পূর্ণমান</th>
                               <th className="border border-primary/30 print:border-black px-3 py-2 text-center">পাশ নম্বর</th>
                               <th className="border border-primary/30 print:border-black px-3 py-2 text-center">প্রাপ্ত নম্বর</th>
-                              <th className="border border-primary/30 print:border-black px-3 py-2 text-center">গ্রেড</th>
-                              <th className="border border-primary/30 print:border-black px-3 py-2 text-center">জিপিএ</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -151,8 +149,6 @@ const ResultCheck = () => {
                                   <td className="border border-border print:border-black px-3 py-2 text-center">{toBengali(r.subjects?.full_marks || 100)}</td>
                                   <td className="border border-border print:border-black px-3 py-2 text-center">{toBengali(r.subjects?.pass_marks || 33)}</td>
                                   <td className="border border-border print:border-black px-3 py-2 text-center font-bold">{toBengali(r.marks_obtained || 0)}</td>
-                                  <td className="border border-border print:border-black px-3 py-2 text-center font-semibold">{r.computed_grade}</td>
-                                  <td className="border border-border print:border-black px-3 py-2 text-center">{toBengali(r.computed_gpa.toFixed(2))}</td>
                                 </tr>
                               );
                             })}
@@ -163,8 +159,6 @@ const ResultCheck = () => {
                               <td className="border border-border print:border-black px-3 py-2 text-center">{toBengali(totalFull)}</td>
                               <td className="border border-border print:border-black px-3 py-2 text-center">—</td>
                               <td className="border border-border print:border-black px-3 py-2 text-center">{toBengali(totalMarks)}</td>
-                              <td className="border border-border print:border-black px-3 py-2 text-center">{overallGrade}</td>
-                              <td className="border border-border print:border-black px-3 py-2 text-center">{toBengali(overallGPA.toFixed(2))}</td>
                             </tr>
                           </tfoot>
                         </table>
@@ -235,7 +229,7 @@ const ResultCheck = () => {
                     <Printer size={16} /> প্রিন্ট করুন
                   </Button>
                 </div>
-              </>
+              </div>
             ) : (
               <Card className="print:hidden">
                 <CardContent className="p-12 text-center text-muted-foreground">
@@ -244,7 +238,7 @@ const ResultCheck = () => {
                 </CardContent>
               </Card>
             )}
-          </>
+          </div>
         )}
       </div>
     </Layout>

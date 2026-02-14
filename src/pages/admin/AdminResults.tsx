@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useExams, useAllStudents, useAllSubjects } from "@/hooks/useBoardData";
+import { useExams, useAllStudents, useAllSubjects, useBranches } from "@/hooks/useBoardData";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +16,11 @@ const AdminResults = () => {
   const { data: exams } = useExams();
   const { data: students } = useAllStudents();
   const { data: subjects } = useAllSubjects();
+  const { data: branches } = useBranches();
   const qc = useQueryClient();
   const [examId, setExamId] = useState("");
+  const [branchId, setBranchId] = useState("");
+  const [className, setClassName] = useState("");
   const [studentId, setStudentId] = useState("");
   const [marks, setMarks] = useState<Record<string, { marks_obtained: string; grade: string; gpa: string }>>({});
 
@@ -33,6 +36,16 @@ const AdminResults = () => {
       return data;
     },
     enabled: !!studentId && !!examId,
+  });
+
+  // Get unique class names from students
+  const classNames = [...new Set(students?.map(s => s.class_name) || [])].sort();
+
+  // Filter students by branch and class
+  const filteredStudents = students?.filter(s => {
+    if (branchId && branchId !== "all" && s.branch_id !== branchId) return false;
+    if (className && className !== "all" && s.class_name !== className) return false;
+    return true;
   });
 
   const selectedStudent = students?.find(s => s.id === studentId);
@@ -100,12 +113,32 @@ const AdminResults = () => {
     <div>
       <h2 className="text-xl font-bold text-primary flex items-center gap-2 mb-6"><GraduationCap size={22} /> রেজাল্ট এন্ট্রি</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div>
           <Label>পরীক্ষা নির্বাচন *</Label>
-          <Select value={examId} onValueChange={v => { setExamId(v); setMarks({}); }}>
+          <Select value={examId} onValueChange={v => { setExamId(v); setMarks({}); setStudentId(""); }}>
             <SelectTrigger><SelectValue placeholder="পরীক্ষা" /></SelectTrigger>
             <SelectContent>{exams?.map(e => <SelectItem key={e.id} value={e.id}>{e.name} ({e.year})</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>প্রতিষ্ঠান</Label>
+          <Select value={branchId} onValueChange={v => { setBranchId(v); setStudentId(""); setMarks({}); }}>
+            <SelectTrigger><SelectValue placeholder="সব প্রতিষ্ঠান" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">সব প্রতিষ্ঠান</SelectItem>
+              {branches?.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>শ্রেণি</Label>
+          <Select value={className} onValueChange={v => { setClassName(v); setStudentId(""); setMarks({}); }}>
+            <SelectTrigger><SelectValue placeholder="সব শ্রেণি" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">সব শ্রেণি</SelectItem>
+              {classNames.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
           </Select>
         </div>
         <div>
@@ -113,7 +146,7 @@ const AdminResults = () => {
           <Select value={studentId} onValueChange={v => { setStudentId(v); setMarks({}); }}>
             <SelectTrigger><SelectValue placeholder="শিক্ষার্থী" /></SelectTrigger>
             <SelectContent>
-              {students?.map(s => <SelectItem key={s.id} value={s.id}>{s.name} ({s.roll_number}) — {s.class_name}</SelectItem>)}
+              {filteredStudents?.map(s => <SelectItem key={s.id} value={s.id}>{s.name} ({s.roll_number}) — {s.class_name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
