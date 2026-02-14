@@ -66,7 +66,7 @@ const AdminAds = () => {
               <div><Label>লিংক</Label><Input value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} /></div>
               <div><Label>পজিশন</Label>
                 <select className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })}>
-                  <option value="header">হেডার</option><option value="sidebar">সাইডবার</option><option value="footer">ফুটার</option><option value="slider">স্লাইডার</option>
+                  <option value="header">হেডার</option><option value="sidebar">সাইডবার</option><option value="footer">ফুটার</option><option value="slider">স্লাইডার</option><option value="in_post">পোস্টের মধ্যে</option>
                 </select>
               </div>
               <div><Label>ক্রম</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })} /></div>

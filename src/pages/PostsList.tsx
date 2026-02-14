@@ -2,7 +2,6 @@ import Layout from "@/components/layout/Layout";
 import { usePosts, useCategories } from "@/hooks/useData";
 import { Link } from "react-router-dom";
 import { Calendar, Newspaper, User, Search, Clock } from "lucide-react";
-import Sidebar from "@/components/home/Sidebar";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { toBengali } from "@/lib/bengali";
@@ -51,8 +50,8 @@ const PostsList = () => {
           </select>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
+        <div>
+          <div className="space-y-4">
             {isLoading ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="animate-pulse bg-muted h-32 rounded" />
@@ -117,9 +116,6 @@ const PostsList = () => {
                 ))}
               </div>
             )}
-          </div>
-          <div className="lg:col-span-1">
-            <Sidebar />
           </div>
         </div>
       </div>

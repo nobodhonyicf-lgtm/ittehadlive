@@ -12,7 +12,7 @@ const RecentNews = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-primary">
           <Newspaper size={20} />
-          সাম্প্রতিক খবর
+          নিবন্ধসমূহ
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -43,7 +43,15 @@ const RecentNews = () => {
               <h3 className="text-sm font-bold group-hover:text-primary transition-colors line-clamp-2">
                 {post.title}
               </h3>
-              <span className="text-xs text-muted-foreground">{timeAgo(post.created_at)}</span>
+              {(post as any).summary && (
+                <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                  {(post as any).summary}
+                </p>
+              )}
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-xs text-muted-foreground">{timeAgo(post.created_at)}</span>
+                <span className="text-xs font-semibold text-primary">আরও পড়ুন...</span>
+              </div>
             </Link>
           ))}
         </div>

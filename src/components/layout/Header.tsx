@@ -16,10 +16,10 @@ const Header = () => {
   }, []);
 
   return (
-    <header className={`w-full sticky top-0 z-50 transition-shadow ${scrolled ? "shadow-lg" : "shadow-sm"}`}>
+    <header className={`w-full sticky top-0 z-50 transition-shadow ${scrolled ? "shadow-lg" : "shadow-sm"} max-w-[1200px] mx-auto`}>
       {/* Top utility bar */}
       <div className="bg-primary text-primary-foreground">
-        <div className="max-w-[1200px] mx-auto px-4 py-1.5 text-sm flex items-center justify-between">
+        <div className="px-4 py-1.5 text-sm flex items-center justify-between">
           <div className="flex items-center gap-4">
             {settings?.contact_phone && (
               <span className="flex items-center gap-1 text-xs opacity-90">
@@ -48,7 +48,7 @@ const Header = () => {
 
       {/* Logo section - boxy design */}
       <div className="bg-card border-b-2 border-primary/20">
-        <div className="max-w-[1200px] mx-auto px-4 py-5 flex items-center justify-center gap-4">
+        <div className="px-4 py-5 flex items-center justify-center gap-4">
           {settings?.logo_url && (
             <Link to="/">
               <img src={settings.logo_url} alt="Logo" className="h-14 md:h-16 object-contain" />
@@ -67,7 +67,7 @@ const Header = () => {
 
       {/* Navigation - boxy */}
       <nav className="bg-primary text-primary-foreground border-b-4 border-primary/80">
-        <div className="max-w-[1200px] mx-auto px-4">
+        <div className="px-4">
           <div className="md:hidden flex items-center justify-between py-2">
             <span className="font-semibold text-sm">মেনু</span>
             <button onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
