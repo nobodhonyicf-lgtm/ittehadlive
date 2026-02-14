@@ -26,11 +26,13 @@ import AdminPolls from "./AdminPolls";
 import AdminAnalytics from "./AdminAnalytics";
 import AdminPrayerTimes from "./AdminPrayerTimes";
 import AdminCommittee from "./AdminCommittee";
+import AdminPhotoCard from "./AdminPhotoCard";
 
 const navItems = [
   { label: "ড্যাশবোর্ড", icon: LayoutDashboard, path: "/admin" },
   { label: "অ্যানালিটিক্স", icon: BarChart3, path: "/admin/analytics" },
   { label: "পোস্ট", icon: Newspaper, path: "/admin/posts" },
+  { label: "ফটো কার্ড", icon: Image, path: "/admin/photo-card" },
   { label: "পেজ", icon: FileText, path: "/admin/pages" },
   { label: "নোটিশ", icon: Bell, path: "/admin/notices" },
   { label: "শাখা", icon: Building2, path: "/admin/branches" },
@@ -124,6 +126,7 @@ const AdminDashboard = () => {
             }
           />
           <Route path="posts" element={<AdminPosts />} />
+          <Route path="photo-card" element={<AdminPhotoCard />} />
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="pages" element={<AdminPages />} />
           <Route path="notices" element={<AdminNotices />} />
