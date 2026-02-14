@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useLeaderProfiles, useNotices, useActivePoll, usePollVotes } from "@/hooks/useData";
+import { useLeaderProfiles, useNotices, useActivePoll, usePollVotes, usePrayerTimes } from "@/hooks/useData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Bell, BarChart3 } from "lucide-react";
+import { User, Bell, BarChart3, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { toBengali } from "@/lib/bengali";
 
 const getVoterId = () => {
   let id = localStorage.getItem("poll_voter_id");
@@ -97,7 +98,7 @@ const PollSection = () => {
                 <div className="relative px-3 py-2 flex justify-between items-center">
                   <span>{option}</span>
                   {hasVoted && (
-                    <span className="text-xs text-muted-foreground font-medium">{pct}%</span>
+                    <span className="text-xs text-muted-foreground font-medium">{toBengali(pct)}%</span>
                   )}
                 </div>
               </button>
@@ -106,7 +107,7 @@ const PollSection = () => {
         </div>
         {hasVoted && (
           <p className="text-xs text-muted-foreground mt-2 text-center">
-            মোট ভোট: {totalVotes}
+            মোট ভোট: {toBengali(totalVotes)}
           </p>
         )}
       </CardContent>
@@ -173,9 +174,39 @@ const Sidebar = () => {
         </CardContent>
       </Card>
 
+      {/* Prayer Times */}
+      <PrayerTimesSection />
+
       {/* Poll */}
       <PollSection />
     </div>
+  );
+};
+
+const PrayerTimesSection = () => {
+  const { data: prayerTimes } = usePrayerTimes();
+
+  if (!prayerTimes?.length) return null;
+
+  return (
+    <Card className="border-t-4 border-t-primary">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-primary text-base bg-primary/10 rounded py-2 text-center flex items-center justify-center gap-2">
+          <Clock size={16} />
+          নামাজের সময়সূচি
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {prayerTimes.map((pt) => (
+            <div key={pt.id} className="flex justify-between items-center border-b border-border pb-1.5 last:border-0 text-sm">
+              <span className="font-medium">{pt.name}</span>
+              <span className="text-primary font-semibold">{pt.time_text}</span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

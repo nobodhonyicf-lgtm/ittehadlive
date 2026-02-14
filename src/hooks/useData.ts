@@ -174,3 +174,16 @@ export const usePollVotes = (pollId: string | undefined) =>
     },
     enabled: !!pollId,
   });
+
+export const usePrayerTimes = () =>
+  useQuery({
+    queryKey: ["prayer_times"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("prayer_times")
+        .select("*")
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });

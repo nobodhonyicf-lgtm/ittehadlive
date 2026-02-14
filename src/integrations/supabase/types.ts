@@ -513,6 +513,33 @@ export type Database = {
           },
         ]
       }
+      prayer_times: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number | null
+          time_text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number | null
+          time_text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number | null
+          time_text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       results: {
         Row: {
           created_at: string
