@@ -133,7 +133,7 @@ const BranchDetail = () => {
                     </div>
                     <div className="min-w-0">
                       <h3 className="font-bold text-sm truncate">{student.name}</h3>
-                      <p className="text-xs text-muted-foreground">{student.class_name} | রোল: {student.roll_number}</p>
+                      <p className="text-xs text-muted-foreground">{student.class_name} | রোল: {toBengali(student.roll_number)}</p>
                     </div>
                   </CardContent>
                 </Card>

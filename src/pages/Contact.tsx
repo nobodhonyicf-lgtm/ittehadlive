@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/sonner";
 import { z } from "zod";
 import { useSiteSettings } from "@/hooks/useData";
 import { Phone, Mail, Send } from "lucide-react";
+import { toBengali } from "@/lib/bengali";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "নাম আবশ্যক").max(100),
@@ -93,7 +94,7 @@ const Contact = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
                 <Phone className="text-primary" size={20} />
-                <span>{settings?.contact_phone || "০১৯২৬-৪২৮৯৮৮"}</span>
+                <span>{toBengali(settings?.contact_phone || "০১৯২৬-৪২৮৯৮৮")}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="text-primary" size={20} />

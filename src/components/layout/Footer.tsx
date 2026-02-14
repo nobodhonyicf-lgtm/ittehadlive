@@ -1,6 +1,7 @@
 import { useSiteSettings } from "@/hooks/useData";
 import { Phone, Mail, MapPin } from "lucide-react";
 import logoImg from "@/assets/logo.png";
+import { toBengali } from "@/lib/bengali";
 
 const Footer = () => {
   const { data: settings } = useSiteSettings();
@@ -47,7 +48,7 @@ const Footer = () => {
             <ul className="text-sm opacity-80 space-y-2">
               <li className="flex items-center gap-2">
                 <Phone size={14} />
-                {settings?.contact_phone || "০১৯২৬-৪২৮৯৮৮"}
+                {toBengali(settings?.contact_phone || "০১৯২৬-৪২৮৯৮৮")}
               </li>
               <li className="flex items-center gap-2">
                 <Mail size={14} />
@@ -58,7 +59,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-primary-foreground/20 mt-8 pt-4 text-center text-sm opacity-60">
-          {settings?.copyright_text || "© ২০২৪ ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ। সর্বস্বত্ব সংরক্ষিত।"}
+          {toBengali(settings?.copyright_text || "© ২০২৪ ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ। সর্বস্বত্ব সংরক্ষিত।")}
         </div>
       </div>
     </footer>
