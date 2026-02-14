@@ -16,6 +16,7 @@ import StudentDirectory from "./pages/StudentDirectory";
 import ResultCheck from "./pages/ResultCheck";
 import BranchList from "./pages/BranchList";
 import NotFound from "./pages/NotFound";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/result" element={<ResultCheck />} />
             <Route path="/branches" element={<BranchList />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/reset-password" element={<ResetPassword />} />
             <Route path="/admin/*" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
