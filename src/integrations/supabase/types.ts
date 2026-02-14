@@ -94,21 +94,32 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          parent_id: string | null
           slug: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
+          parent_id?: string | null
           slug: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          parent_id?: string | null
           slug?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contact_submissions: {
         Row: {
@@ -342,6 +353,33 @@ export type Database = {
         }
         Relationships: []
       }
+      page_views: {
+        Row: {
+          created_at: string
+          id: string
+          page_path: string
+          referrer: string | null
+          user_agent: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_path: string
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_path?: string
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
       pages: {
         Row: {
           content: string | null
@@ -427,6 +465,7 @@ export type Database = {
       }
       posts: {
         Row: {
+          author_name: string | null
           category_id: string | null
           content: string | null
           created_at: string
@@ -439,6 +478,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          author_name?: string | null
           category_id?: string | null
           content?: string | null
           created_at?: string
@@ -451,6 +491,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          author_name?: string | null
           category_id?: string | null
           content?: string | null
           created_at?: string
@@ -555,6 +596,7 @@ export type Database = {
         Row: {
           address: string | null
           admission_year: number | null
+          blood_group: string | null
           branch_id: string | null
           class_name: string
           created_at: string
@@ -562,7 +604,9 @@ export type Database = {
           father_name: string | null
           id: string
           is_active: boolean | null
+          mother_name: string | null
           name: string
+          nid: string | null
           phone: string | null
           photo_url: string | null
           registration_number: string | null
@@ -572,6 +616,7 @@ export type Database = {
         Insert: {
           address?: string | null
           admission_year?: number | null
+          blood_group?: string | null
           branch_id?: string | null
           class_name: string
           created_at?: string
@@ -579,7 +624,9 @@ export type Database = {
           father_name?: string | null
           id?: string
           is_active?: boolean | null
+          mother_name?: string | null
           name: string
+          nid?: string | null
           phone?: string | null
           photo_url?: string | null
           registration_number?: string | null
@@ -589,6 +636,7 @@ export type Database = {
         Update: {
           address?: string | null
           admission_year?: number | null
+          blood_group?: string | null
           branch_id?: string | null
           class_name?: string
           created_at?: string
@@ -596,7 +644,9 @@ export type Database = {
           father_name?: string | null
           id?: string
           is_active?: boolean | null
+          mother_name?: string | null
           name?: string
+          nid?: string | null
           phone?: string | null
           photo_url?: string | null
           registration_number?: string | null

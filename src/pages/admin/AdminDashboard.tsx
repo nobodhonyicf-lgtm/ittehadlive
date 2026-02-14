@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, FileText, Bell, Image, Settings, Menu as MenuIcon,
   Video, Users, Mail, Tag, LogOut, ChevronLeft, Newspaper, Building2,
-  GraduationCap, BookOpen, ClipboardList
+  GraduationCap, BookOpen, ClipboardList, BarChart3
 } from "lucide-react";
 import AdminPosts from "./AdminPosts";
 import AdminPages from "./AdminPages";
@@ -23,9 +23,11 @@ import AdminExams from "./AdminExams";
 import AdminSubjects from "./AdminSubjects";
 import AdminResults from "./AdminResults";
 import AdminPolls from "./AdminPolls";
+import AdminAnalytics from "./AdminAnalytics";
 
 const navItems = [
   { label: "ড্যাশবোর্ড", icon: LayoutDashboard, path: "/admin" },
+  { label: "অ্যানালিটিক্স", icon: BarChart3, path: "/admin/analytics" },
   { label: "পোস্ট", icon: Newspaper, path: "/admin/posts" },
   { label: "পেজ", icon: FileText, path: "/admin/pages" },
   { label: "নোটিশ", icon: Bell, path: "/admin/notices" },
@@ -118,6 +120,7 @@ const AdminDashboard = () => {
             }
           />
           <Route path="posts" element={<AdminPosts />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="pages" element={<AdminPages />} />
           <Route path="notices" element={<AdminNotices />} />
           <Route path="branches" element={<AdminBranches />} />
