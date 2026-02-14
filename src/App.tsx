@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import PageViewTracker from "@/components/PageViewTracker";
 import Index from "./pages/Index";
 import PostPage from "./pages/PostPage";
 import PostsList from "./pages/PostsList";
@@ -15,6 +16,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import StudentDirectory from "./pages/StudentDirectory";
 import ResultCheck from "./pages/ResultCheck";
 import BranchList from "./pages/BranchList";
+import BranchDetail from "./pages/BranchDetail";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 
@@ -27,6 +29,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <PageViewTracker />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/post/:slug" element={<PostPage />} />
@@ -37,6 +40,7 @@ const App = () => (
             <Route path="/students" element={<StudentDirectory />} />
             <Route path="/result" element={<ResultCheck />} />
             <Route path="/branches" element={<BranchList />} />
+            <Route path="/branch/:id" element={<BranchDetail />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/reset-password" element={<ResetPassword />} />
             <Route path="/admin/*" element={<AdminDashboard />} />
