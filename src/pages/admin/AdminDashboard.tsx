@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, FileText, Bell, Image, Settings, Menu as MenuIcon,
   Video, Users, Mail, Tag, LogOut, ChevronLeft, Newspaper, Building2,
-  GraduationCap, BookOpen, ClipboardList, BarChart3
+  GraduationCap, BookOpen, ClipboardList, BarChart3, Clock
 } from "lucide-react";
 import AdminPosts from "./AdminPosts";
 import AdminPages from "./AdminPages";
@@ -24,6 +24,7 @@ import AdminSubjects from "./AdminSubjects";
 import AdminResults from "./AdminResults";
 import AdminPolls from "./AdminPolls";
 import AdminAnalytics from "./AdminAnalytics";
+import AdminPrayerTimes from "./AdminPrayerTimes";
 
 const navItems = [
   { label: "ড্যাশবোর্ড", icon: LayoutDashboard, path: "/admin" },
@@ -37,6 +38,7 @@ const navItems = [
   { label: "বিষয়", icon: BookOpen, path: "/admin/subjects" },
   { label: "রেজাল্ট", icon: GraduationCap, path: "/admin/results" },
   { label: "পোল", icon: ClipboardList, path: "/admin/polls" },
+  { label: "নামাজের সময়", icon: Clock, path: "/admin/prayer-times" },
   { label: "বিজ্ঞাপন", icon: Image, path: "/admin/ads" },
   { label: "ভিডিও", icon: Video, path: "/admin/videos" },
   { label: "নেতৃবৃন্দ", icon: Users, path: "/admin/leaders" },
@@ -129,6 +131,7 @@ const AdminDashboard = () => {
           <Route path="subjects" element={<AdminSubjects />} />
           <Route path="results" element={<AdminResults />} />
           <Route path="polls" element={<AdminPolls />} />
+          <Route path="prayer-times" element={<AdminPrayerTimes />} />
           <Route path="ads" element={<AdminAds />} />
           <Route path="videos" element={<AdminVideos />} />
           <Route path="leaders" element={<AdminLeaders />} />
