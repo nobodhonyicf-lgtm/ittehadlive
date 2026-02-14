@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useMenuItems, useSiteSettings } from "@/hooks/useData";
-import { Menu, X, GraduationCap, Users, Building2, Phone, Mail } from "lucide-react";
+import { Menu, X, GraduationCap, Users, Building2, Phone, Mail, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toBengali } from "@/lib/bengali";
 
@@ -42,6 +42,9 @@ const Header = () => {
             </Link>
             <Link to="/branches" className="hover:text-accent transition-colors flex items-center gap-1">
               <Building2 size={13} /> শাখা
+            </Link>
+            <Link to="/books" className="hover:text-accent transition-colors flex items-center gap-1">
+              <BookOpen size={13} /> প্রকাশনা
             </Link>
           </div>
         </div>

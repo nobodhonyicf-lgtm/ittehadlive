@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, FileText, Bell, Image, Settings, Menu as MenuIcon,
   Video, Users, Mail, Tag, LogOut, ChevronLeft, Newspaper, Building2,
-  GraduationCap, BookOpen, ClipboardList, BarChart3, Clock
+  GraduationCap, BookOpen, ClipboardList, BarChart3, Clock, Package, MessageCircle
 } from "lucide-react";
 import AdminPosts from "./AdminPosts";
 import AdminPages from "./AdminPages";
@@ -29,6 +29,9 @@ import AdminCommittee from "./AdminCommittee";
 import AdminPhotoCard from "./AdminPhotoCard";
 import AdminGallery from "./AdminGallery";
 import AdminSliders from "./AdminSliders";
+import AdminBooks from "./AdminBooks";
+import AdminBookOrders from "./AdminBookOrders";
+import AdminBookReviews from "./AdminBookReviews";
 
 const navItems = [
   { label: "ড্যাশবোর্ড", icon: LayoutDashboard, path: "/admin" },
@@ -44,6 +47,9 @@ const navItems = [
   { label: "রেজাল্ট", icon: GraduationCap, path: "/admin/results" },
   { label: "পোল", icon: ClipboardList, path: "/admin/polls" },
   { label: "নামাজের সময়", icon: Clock, path: "/admin/prayer-times" },
+  { label: "বই", icon: BookOpen, path: "/admin/books" },
+  { label: "অর্ডার", icon: Package, path: "/admin/book-orders" },
+  { label: "বই রিভিউ", icon: MessageCircle, path: "/admin/book-reviews" },
   { label: "বিজ্ঞাপন", icon: Image, path: "/admin/ads" },
   { label: "ভিডিও", icon: Video, path: "/admin/videos" },
   { label: "নেতৃবৃন্দ", icon: Users, path: "/admin/leaders" },
@@ -141,6 +147,9 @@ const AdminDashboard = () => {
           <Route path="results" element={<AdminResults />} />
           <Route path="polls" element={<AdminPolls />} />
           <Route path="prayer-times" element={<AdminPrayerTimes />} />
+          <Route path="books" element={<AdminBooks />} />
+          <Route path="book-orders" element={<AdminBookOrders />} />
+          <Route path="book-reviews" element={<AdminBookReviews />} />
           <Route path="ads" element={<AdminAds />} />
           <Route path="videos" element={<AdminVideos />} />
           <Route path="leaders" element={<AdminLeaders />} />
