@@ -40,8 +40,8 @@ serve(async (req) => {
     const description = post.meta_description || post.summary || post.content?.substring(0, 160) || "";
     const image = post.og_image_url || post.image_url || "https://storage.googleapis.com/gpt-engineer-file-uploads/Jlhgp5SVlNRsWE1kL5rCoZMrbN23/uploads/1770800561345-ittehad_logo-01.png";
     
-    // Proxy the image through our proxy-image function to ensure accessibility
-    const proxyImage = `${supabaseUrl}/functions/v1/proxy-image?url=${encodeURIComponent(image)}`;
+    // Use image directly - Facebook crawlers can access most image URLs
+    const proxyImage = image;
 
     const html = `<!DOCTYPE html>
 <html lang="bn">

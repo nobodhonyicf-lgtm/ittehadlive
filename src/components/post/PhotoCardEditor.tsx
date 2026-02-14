@@ -272,10 +272,9 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
         } catch { adImg = null; }
       }
 
-      // Caption area
+      // No caption in photo card
       const imageSource = customImageUrl || post.image_url;
-      const captionText = post.image_caption;
-      const captionH = captionText ? Math.round(40 * scale) : 0;
+      const captionH = 0;
 
       const HEIGHT = BASE_HEIGHT + adTotalH;
       canvas.width = WIDTH;
@@ -324,33 +323,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
         ctx.fill();
       }
 
-      // ── Caption bar (gray bg, "ছবি" prefix, red divider, black text) ──
-      if (captionText) {
-        const capY = imgAreaTop + imgAreaH;
-        // Gray background
-        ctx.fillStyle = "#d4d4d4";
-        ctx.fillRect(PAD, capY, imgAreaW, captionH);
-        
-        const capTextY = capY + captionH / 2 + Math.round(6 * scale);
-        const capFontSize = Math.round(16 * scale);
-        
-        // "ছবি" label
-        ctx.fillStyle = "#333333";
-        ctx.font = `bold ${capFontSize}px 'SolaimanLipi', sans-serif`;
-        const labelText = "ছবি";
-        const labelW = ctx.measureText(labelText).width;
-        ctx.fillText(labelText, PAD + Math.round(12 * scale), capTextY);
-        
-        // Red divider
-        const divX = PAD + Math.round(12 * scale) + labelW + Math.round(8 * scale);
-        ctx.fillStyle = "#e11d48";
-        ctx.fillRect(divX, capY + Math.round(8 * scale), Math.round(2 * scale), captionH - Math.round(16 * scale));
-        
-        // Caption text in black
-        ctx.fillStyle = "#111111";
-        ctx.font = `${capFontSize}px 'SolaimanLipi', sans-serif`;
-        ctx.fillText(captionText, divX + Math.round(10 * scale), capTextY);
-      }
+      // No caption in photo card
 
       // ── Info bar ──
       const barY = imgAreaTop + imgAreaH + captionH + Math.round(16 * scale);
@@ -433,7 +406,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
       const catFontSize = Math.round(24 * scale);
       const catFont = `bold ${catFontSize}px 'SolaimanLipi', sans-serif`;
       const catH = categoryText ? Math.round(38 * scale) : 0;
-      const catGapForMeasure = categoryText ? Math.round(20 * scale) : 0;
+      const catGapForMeasure = categoryText ? Math.round(30 * scale) : 0;
 
       const titleTextH = measureWrappedText(ctx, title, titleMaxW, scaledLineSpacing, titleFont);
       const totalContentH = catH + catGapForMeasure + titleTextH;
@@ -460,7 +433,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
 
       // Title text
       ctx.fillStyle = c.text;
-      const catGap = Math.round(20 * scale);
+      const catGap = Math.round(30 * scale);
       const titleStartY = startContentY + catH + catGap + Math.round(scaledLineSpacing * 0.3);
       wrapTextCentered(ctx, title, PAD + Math.round(20 * scale), titleMaxW, titleStartY, scaledLineSpacing, titleFont);
 
@@ -530,12 +503,6 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
       ctx.fillStyle = "#ffffff";
       ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
       ctx.fillText(socialHandles[2], fbDivX + Math.round(8 * scale), textYPos);
-
-      // Divider 3 (before right text)
-      const div3X = fbX + itemSpacing - Math.round(6 * scale);
-      ctx.fillStyle = "#ffffff"; ctx.globalAlpha = 0.3;
-      ctx.fillRect(div3X, bottomBarY + Math.round(14 * scale), Math.round(1.5 * scale), bottomBarH - Math.round(28 * scale));
-      ctx.globalAlpha = 1;
 
       // Right text: arrow on left, text
       ctx.fillStyle = "#ffffff";
@@ -705,7 +672,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
             </div>
           )}
 
-          {/* Front-end: font size + color only */}
+          {/* Front-end: font size, line spacing + color */}
           {!editMode && (
             <div className="space-y-4">
               <div>
@@ -714,6 +681,15 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
                   <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setFontSize(Math.max(24, fontSize - 2))}><Minus size={14} /></Button>
                   <Slider value={[fontSize]} onValueChange={([v]) => setFontSize(v)} min={24} max={80} step={2} className="flex-1" />
                   <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setFontSize(Math.min(80, fontSize + 2))}><Plus size={14} /></Button>
+                </div>
+              </div>
+
+              <div>
+                <Label className="flex items-center gap-1">লাইন স্পেসিং: {lineSpacing}px</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setLineSpacing(Math.max(30, lineSpacing - 2))}><Minus size={14} /></Button>
+                  <Slider value={[lineSpacing]} onValueChange={([v]) => setLineSpacing(v)} min={30} max={100} step={2} className="flex-1" />
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setLineSpacing(Math.min(100, lineSpacing + 2))}><Plus size={14} /></Button>
                 </div>
               </div>
 

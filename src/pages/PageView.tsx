@@ -5,6 +5,7 @@ import { useCommitteeMembers } from "@/hooks/useData";
 import Sidebar from "@/components/home/Sidebar";
 import { User } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const committeePages = ["committee", "advisors"];
 
@@ -16,8 +17,9 @@ const PageView = () => {
 
   return (
     <Layout>
-      {page && <SEOHead title={page.title} description={page.content?.substring(0, 160) || ""} />}
+      {page && <SEOHead title={page.title} description={page.content?.substring(0, 160) || ""} image={(page as any).cover_image_url || undefined} />}
       <div className="max-w-7xl mx-auto px-4 py-6">
+        <Breadcrumbs items={page ? [{ label: page.title }] : []} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             {isLoading ? (

@@ -11,6 +11,7 @@ import SEOHead from "@/components/SEOHead";
 import RelatedPosts from "@/components/post/RelatedPosts";
 import InPostAd from "@/components/post/InPostAd";
 import PhotoCardEditor from "@/components/post/PhotoCardEditor";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const SocialShare = ({ url, title, slug }: { url: string; title: string; slug?: string }) => {
   const encodedTitle = encodeURIComponent(title);
@@ -62,6 +63,11 @@ const PostPage = () => {
         />
       )}
       <div className="px-4 py-6">
+        <Breadcrumbs items={[
+          { label: "সকল পোস্ট", href: "/posts" },
+          ...(post?.categories ? [{ label: post.categories.name, href: `/posts?category=${post.categories.slug}` }] : []),
+          ...(post ? [{ label: post.title }] : []),
+        ]} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             {isLoading ? (
