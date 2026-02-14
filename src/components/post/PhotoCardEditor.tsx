@@ -433,9 +433,10 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
       const catFontSize = Math.round(24 * scale);
       const catFont = `bold ${catFontSize}px 'SolaimanLipi', sans-serif`;
       const catH = categoryText ? Math.round(38 * scale) : 0;
+      const catGapForMeasure = categoryText ? Math.round(20 * scale) : 0;
 
       const titleTextH = measureWrappedText(ctx, title, titleMaxW, scaledLineSpacing, titleFont);
-      const totalContentH = catH + titleTextH;
+      const totalContentH = catH + catGapForMeasure + titleTextH;
       const startContentY = titleAreaTop + (titleAreaHeight - totalContentH) / 2;
 
       // Category label above title
@@ -459,7 +460,8 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
 
       // Title text
       ctx.fillStyle = c.text;
-      const titleStartY = startContentY + catH + Math.round(scaledLineSpacing * 0.3);
+      const catGap = Math.round(20 * scale);
+      const titleStartY = startContentY + catH + catGap + Math.round(scaledLineSpacing * 0.3);
       wrapTextCentered(ctx, title, PAD + Math.round(20 * scale), titleMaxW, titleStartY, scaledLineSpacing, titleFont);
 
       // ── Bottom bar ──
@@ -470,45 +472,64 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
       const iconYPos = bottomBarY + bottomBarH / 2;
       const textYPos = bottomBarY + bottomBarH / 2 + Math.round(8 * scale);
       const socialIconSize = Math.round(30 * scale);
-      const socialFontSize = Math.round(21 * scale);
+      const socialFontSize = Math.round(19 * scale);
 
       // Layout: social items evenly in left ~70%
       const socialZoneW = WIDTH * 0.65;
       const itemSpacing = socialZoneW / 3;
 
-      // YouTube
+      // Helper: draw divider between social groups
+      const drawSocialDivider = (x: number) => {
+        ctx.fillStyle = "#ffffff"; ctx.globalAlpha = 0.3;
+        ctx.fillRect(x, bottomBarY + Math.round(14 * scale), Math.round(1.5 * scale), bottomBarH - Math.round(28 * scale));
+        ctx.globalAlpha = 1;
+      };
+
+      // YouTube (square shape)
       const ytX = Math.round(24 * scale);
       const ytIconW = drawYouTubeIcon(ctx, ytX, iconYPos, socialIconSize);
+      // Divider between icon and handle
+      const ytDivX = ytX + ytIconW + Math.round(6 * scale);
+      drawSocialDivider(ytDivX);
       ctx.fillStyle = "#ffffff";
       ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
-      ctx.fillText(socialHandles[0], ytX + ytIconW + Math.round(8 * scale), textYPos);
+      ctx.fillText(socialHandles[0], ytDivX + Math.round(8 * scale), textYPos);
 
-      // Divider 1
+      // Divider between groups
       const div1X = ytX + itemSpacing - Math.round(6 * scale);
-      ctx.fillStyle = "#ffffff"; ctx.globalAlpha = 0.3;
-      ctx.fillRect(div1X, bottomBarY + Math.round(14 * scale), Math.round(1.5 * scale), bottomBarH - Math.round(28 * scale));
-      ctx.globalAlpha = 1;
+      drawSocialDivider(div1X);
 
-      // Instagram
+      // Instagram (already square)
       const igX = ytX + itemSpacing;
       const igIconW = drawInstagramIcon(ctx, igX, iconYPos, socialIconSize);
+      const igDivX = igX + igIconW + Math.round(6 * scale);
+      drawSocialDivider(igDivX);
       ctx.fillStyle = "#ffffff";
       ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
-      ctx.fillText(socialHandles[1], igX + igIconW + Math.round(8 * scale), textYPos);
+      ctx.fillText(socialHandles[1], igDivX + Math.round(8 * scale), textYPos);
 
-      // Divider 2
+      // Divider between groups
       const div2X = igX + itemSpacing - Math.round(6 * scale);
-      ctx.fillStyle = "#ffffff"; ctx.globalAlpha = 0.3;
-      ctx.fillRect(div2X, bottomBarY + Math.round(14 * scale), Math.round(1.5 * scale), bottomBarH - Math.round(28 * scale));
-      ctx.globalAlpha = 1;
+      drawSocialDivider(div2X);
 
-      // Facebook
+      // Facebook (square instead of circle)
       const fbX = igX + itemSpacing;
-      const fbR = Math.round(15 * scale);
-      const fbIconW = drawFacebookIcon(ctx, fbX, iconYPos, fbR);
+      const fbSize = socialIconSize;
+      // Draw square Facebook icon
+      ctx.save();
+      ctx.fillStyle = "#1877F2";
+      ctx.beginPath(); ctx.roundRect(fbX, iconYPos - fbSize / 2, fbSize, fbSize, fbSize * 0.15); ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = `bold ${fbSize * 0.7}px Arial`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText("f", fbX + fbSize / 2, iconYPos + fbSize * 0.04);
+      ctx.textAlign = "start"; ctx.textBaseline = "alphabetic";
+      ctx.restore();
+      const fbDivX = fbX + fbSize + Math.round(6 * scale);
+      drawSocialDivider(fbDivX);
       ctx.fillStyle = "#ffffff";
       ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
-      ctx.fillText(socialHandles[2], fbX + fbIconW + Math.round(8 * scale), textYPos);
+      ctx.fillText(socialHandles[2], fbDivX + Math.round(8 * scale), textYPos);
 
       // Divider 3 (before right text)
       const div3X = fbX + itemSpacing - Math.round(6 * scale);
