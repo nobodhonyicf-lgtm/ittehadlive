@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Link2 } from "lucide-react";
 import { useCategories } from "@/hooks/useData";
 import { useEffect } from "react";
 
@@ -41,11 +41,31 @@ const AdminPosts = () => {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [linkSearch, setLinkSearch] = useState("");
+  const contentRef = useRef<HTMLTextAreaElement>(null);
   const [form, setForm] = useState<PostForm>(() => {
     const saved = localStorage.getItem(DRAFT_KEY);
     return saved ? JSON.parse(saved) : emptyForm;
   });
   const { data: categories } = useCategories();
+
+  // Search posts for linking
+  const { data: linkPosts } = useQuery({
+    queryKey: ["link_posts_search", linkSearch],
+    queryFn: async () => {
+      if (!linkSearch.trim()) return [];
+      const { data, error } = await supabase
+        .from("posts")
+        .select("id, title, slug")
+        .eq("is_published", true)
+        .ilike("title", `%${linkSearch}%`)
+        .limit(10);
+      if (error) throw error;
+      return data;
+    },
+    enabled: linkDialogOpen && linkSearch.trim().length > 1,
+  });
 
   // Auto-save draft
   useEffect(() => {
@@ -162,8 +182,58 @@ const AdminPosts = () => {
                 <Input value={form.author_name} onChange={(e) => setForm({ ...form, author_name: e.target.value })} placeholder="লেখকের নাম" />
               </div>
               <div>
-                <Label>বিষয়বস্তু</Label>
-                <Textarea rows={8} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} />
+                <div className="flex items-center justify-between">
+                  <Label>বিষয়বস্তু</Label>
+                  <Button type="button" variant="outline" size="sm" className="gap-1 h-7 text-xs" onClick={() => setLinkDialogOpen(true)}>
+                    <Link2 size={12} /> পোস্ট লিংক যুক্ত করুন
+                  </Button>
+                </div>
+                <Textarea ref={contentRef} rows={8} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} />
+                
+                {/* Post link insertion dialog */}
+                <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2"><Link2 size={16} /> পোস্ট লিংক সংযুক্ত করুন</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                      <Input
+                        placeholder="পোস্ট খুঁজুন (শিরোনাম লিখুন)..."
+                        value={linkSearch}
+                        onChange={(e) => setLinkSearch(e.target.value)}
+                        autoFocus
+                      />
+                      <div className="max-h-60 overflow-y-auto space-y-1">
+                        {linkPosts?.map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            className="w-full text-left px-3 py-2 rounded text-sm hover:bg-muted border border-transparent hover:border-border transition-colors"
+                            onClick={() => {
+                              const linkText = `\n\n📖 আরও পড়ুন: ${p.title}\n🔗 /post/${p.slug}\n`;
+                              const textarea = contentRef.current;
+                              if (textarea) {
+                                const start = textarea.selectionStart;
+                                const newContent = form.content.slice(0, start) + linkText + form.content.slice(start);
+                                setForm({ ...form, content: newContent });
+                              } else {
+                                setForm({ ...form, content: form.content + linkText });
+                              }
+                              setLinkDialogOpen(false);
+                              setLinkSearch("");
+                              toast.success("লিংক যুক্ত হয়েছে");
+                            }}
+                          >
+                            {p.title}
+                          </button>
+                        ))}
+                        {linkSearch.trim().length > 1 && !linkPosts?.length && (
+                          <p className="text-sm text-muted-foreground text-center py-4">কোনো পোস্ট পাওয়া যায়নি</p>
+                        )}
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
               <div>
                 <Label>ছবির URL</Label>

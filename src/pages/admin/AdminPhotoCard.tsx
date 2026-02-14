@@ -16,7 +16,7 @@ const AdminPhotoCard = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("posts")
-        .select("id, title, slug, image_url, created_at, categories(name)")
+        .select("id, title, slug, image_url, image_caption, created_at, categories(name)")
         .eq("is_published", true)
         .order("created_at", { ascending: false })
         .limit(50);
@@ -80,7 +80,9 @@ const AdminPhotoCard = () => {
             title: selectedPost.title,
             slug: selectedPost.slug,
             image_url: selectedPost.image_url,
+            image_caption: selectedPost.image_caption || null,
             created_at: selectedPost.created_at,
+            category_name: selectedPost.categories?.name || null,
           }}
         />
       )}

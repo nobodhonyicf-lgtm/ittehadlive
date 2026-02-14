@@ -15,7 +15,9 @@ interface PhotoCardEditorProps {
     title: string;
     slug: string;
     image_url?: string | null;
+    image_caption?: string | null;
     created_at: string;
+    category_name?: string | null;
   };
   editMode?: boolean;
 }
@@ -60,13 +62,10 @@ const drawStripeTexture = (ctx: CanvasRenderingContext2D, x: number, y: number, 
 
 const loadImage = async (src: string): Promise<HTMLImageElement> => {
   if (!src) throw new Error("No src");
-  
-  // Use proxy for external URLs to avoid CORS
   const isExternal = src.startsWith("http") && !src.includes(window.location.hostname);
-  const url = isExternal 
+  const url = isExternal
     ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/proxy-image?url=${encodeURIComponent(src)}`
     : src;
-  
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const el = new window.Image();
     el.crossOrigin = "anonymous";
@@ -97,7 +96,7 @@ const drawGlobeIcon = (ctx: CanvasRenderingContext2D, cx: number, cy: number, r:
 const wrapTextCentered = (
   ctx: CanvasRenderingContext2D, text: string, x: number, maxWidth: number,
   startY: number, lineHeight: number, font: string
-): number => {
+): { endY: number; totalHeight: number; lineCount: number } => {
   ctx.font = font;
   const paragraphs = text.split("\n");
   const allLines: string[] = [];
@@ -123,7 +122,36 @@ const wrapTextCentered = (
     ctx.fillText(l, x + (maxWidth - w) / 2, y);
     y += lineHeight;
   }
-  return y;
+  const totalHeight = y - startY;
+  return { endY: y, totalHeight, lineCount: allLines.length };
+};
+
+// Measure text without drawing
+const measureWrappedText = (
+  ctx: CanvasRenderingContext2D, text: string, maxWidth: number,
+  lineHeight: number, font: string
+): number => {
+  ctx.font = font;
+  const paragraphs = text.split("\n");
+  let totalH = 0;
+  for (const para of paragraphs) {
+    if (para.trim() === "") { totalH += lineHeight * 0.5; continue; }
+    const words = para.split(" ");
+    let line = "";
+    let lines = 0;
+    for (const word of words) {
+      const testLine = line + word + " ";
+      if (ctx.measureText(testLine).width > maxWidth && line) {
+        lines++;
+        line = word + " ";
+      } else {
+        line = testLine;
+      }
+    }
+    if (line.trim()) lines++;
+    totalH += lines * lineHeight;
+  }
+  return totalH;
 };
 
 const drawYouTubeIcon = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
@@ -169,6 +197,25 @@ const drawInstagramIcon = (ctx: CanvasRenderingContext2D, x: number, y: number, 
   ctx.beginPath(); ctx.arc(x + size * 0.75, y - size * 0.25, size * 0.06, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
   return size;
+};
+
+// Facebook-style verified badge with proper checkmark
+const drawFBVerifiedBadge = (ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) => {
+  ctx.save();
+  // Blue circle
+  ctx.fillStyle = "#1877F2";
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+  // White checkmark
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = r * 0.35;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(cx - r * 0.38, cy + r * 0.02);
+  ctx.lineTo(cx - r * 0.08, cy + r * 0.35);
+  ctx.lineTo(cx + r * 0.42, cy - r * 0.3);
+  ctx.stroke();
+  ctx.restore();
 };
 
 const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCardEditorProps) => {
@@ -225,6 +272,11 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
         } catch { adImg = null; }
       }
 
+      // Caption area
+      const imageSource = customImageUrl || post.image_url;
+      const captionText = post.image_caption;
+      const captionH = captionText ? Math.round(40 * scale) : 0;
+
       const HEIGHT = BASE_HEIGHT + adTotalH;
       canvas.width = WIDTH;
       canvas.height = HEIGHT;
@@ -237,10 +289,8 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
       // ── Image area ──
       const imgAreaTop = PAD;
       const mainCardH = BASE_HEIGHT;
-      const imgAreaH = Math.round(mainCardH * 0.5);
+      const imgAreaH = Math.round(mainCardH * 0.5) - captionH;
       const imgAreaW = WIDTH - PAD * 2;
-
-      const imageSource = customImageUrl || post.image_url;
 
       if (imageSource) {
         try {
@@ -274,8 +324,36 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
         ctx.fill();
       }
 
+      // ── Caption bar (gray bg, "ছবি" prefix, red divider, black text) ──
+      if (captionText) {
+        const capY = imgAreaTop + imgAreaH;
+        // Gray background
+        ctx.fillStyle = "#d4d4d4";
+        ctx.fillRect(PAD, capY, imgAreaW, captionH);
+        
+        const capTextY = capY + captionH / 2 + Math.round(6 * scale);
+        const capFontSize = Math.round(16 * scale);
+        
+        // "ছবি" label
+        ctx.fillStyle = "#333333";
+        ctx.font = `bold ${capFontSize}px 'SolaimanLipi', sans-serif`;
+        const labelText = "ছবি";
+        const labelW = ctx.measureText(labelText).width;
+        ctx.fillText(labelText, PAD + Math.round(12 * scale), capTextY);
+        
+        // Red divider
+        const divX = PAD + Math.round(12 * scale) + labelW + Math.round(8 * scale);
+        ctx.fillStyle = "#e11d48";
+        ctx.fillRect(divX, capY + Math.round(8 * scale), Math.round(2 * scale), captionH - Math.round(16 * scale));
+        
+        // Caption text in black
+        ctx.fillStyle = "#111111";
+        ctx.font = `${capFontSize}px 'SolaimanLipi', sans-serif`;
+        ctx.fillText(captionText, divX + Math.round(10 * scale), capTextY);
+      }
+
       // ── Info bar ──
-      const barY = imgAreaTop + imgAreaH + Math.round(16 * scale);
+      const barY = imgAreaTop + imgAreaH + captionH + Math.round(16 * scale);
       const barH = Math.round(52 * scale);
       ctx.fillStyle = c.bar;
       ctx.fillRect(PAD, barY, imgAreaW, barH);
@@ -308,20 +386,16 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
       ctx.fillStyle = "#ffffff";
       ctx.fillText(badgeText, barContentX + Math.round(16 * scale), badgeY + Math.round(25 * scale));
 
-      // Verified blue circle
-      const verGap = Math.round(26 * scale);
+      // Facebook-style verified badge
+      const verGap = Math.round(12 * scale);
       const verX = barContentX + badgeW + verGap;
       const verY = barY + barH / 2;
       const verR = Math.round(13 * scale);
-      ctx.fillStyle = "#1DA1F2";
-      ctx.beginPath(); ctx.arc(verX, verY, verR, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#ffffff";
-      ctx.font = `bold ${Math.round(16 * scale)}px sans-serif`;
-      ctx.fillText("✓", verX - Math.round(5 * scale), verY + Math.round(5 * scale));
+      drawFBVerifiedBadge(ctx, verX + verR, verY, verR);
 
       // Separator
       ctx.fillStyle = c.sub; ctx.globalAlpha = 0.4;
-      ctx.fillRect(verX + Math.round(22 * scale), barY + Math.round(10 * scale), 2, barH - Math.round(20 * scale));
+      ctx.fillRect(verX + verR * 2 + Math.round(12 * scale), barY + Math.round(10 * scale), 2, barH - Math.round(20 * scale));
       ctx.globalAlpha = 1;
 
       // Date
@@ -330,7 +404,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
       const dateStr = new Date(post.created_at).toLocaleDateString("bn-BD", {
         weekday: "long", year: "numeric", month: "long", day: "numeric",
       });
-      ctx.fillText(dateStr, verX + Math.round(34 * scale), barY + barH / 2 + Math.round(8 * scale));
+      ctx.fillText(dateStr, verX + verR * 2 + Math.round(24 * scale), barY + barH / 2 + Math.round(8 * scale));
 
       // Website with globe
       ctx.fillStyle = "#ffffff";
@@ -342,17 +416,53 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
       ctx.fillStyle = "#ffffff";
       ctx.fillText(websiteText, globeX + globeR + Math.round(10 * scale), barY + barH / 2 + Math.round(8 * scale));
 
-      // ── Title ──
-      const titleY = barY + barH + Math.round(90 * scale);
-      ctx.fillStyle = c.text;
-      const scaledFontSize = Math.round(fontSize * scale);
-      const scaledLineSpacing = Math.round(lineSpacing * scale);
-      wrapTextCentered(ctx, title, PAD + Math.round(10 * scale), imgAreaW - Math.round(20 * scale), titleY, scaledLineSpacing,
-        `bold ${scaledFontSize}px 'SolaimanLipi', sans-serif`);
-
-      // ── Bottom bar ──
+      // ── Title centered between info bar and bottom bar ──
       const bottomBarH = Math.round(70 * scale);
       const bottomBarY = mainCardH - bottomBarH;
+      const titleAreaTop = barY + barH;
+      const titleAreaBottom = bottomBarY;
+      const titleAreaHeight = titleAreaBottom - titleAreaTop;
+
+      // Measure title + category height to center them
+      const scaledFontSize = Math.round(fontSize * scale);
+      const scaledLineSpacing = Math.round(lineSpacing * scale);
+      const titleMaxW = imgAreaW - Math.round(40 * scale);
+      const titleFont = `bold ${scaledFontSize}px 'SolaimanLipi', sans-serif`;
+
+      const categoryText = post.category_name || "";
+      const catFontSize = Math.round(24 * scale);
+      const catFont = `bold ${catFontSize}px 'SolaimanLipi', sans-serif`;
+      const catH = categoryText ? Math.round(38 * scale) : 0;
+
+      const titleTextH = measureWrappedText(ctx, title, titleMaxW, scaledLineSpacing, titleFont);
+      const totalContentH = catH + titleTextH;
+      const startContentY = titleAreaTop + (titleAreaHeight - totalContentH) / 2;
+
+      // Category label above title
+      if (categoryText) {
+        ctx.font = catFont;
+        const catW = ctx.measureText(categoryText).width;
+        const catPadX = Math.round(16 * scale);
+        const catPadY = Math.round(6 * scale);
+        const catBoxW = catW + catPadX * 2;
+        const catBoxH = Math.round(30 * scale);
+        const catBoxX = PAD + Math.round(20 * scale) + (titleMaxW - catBoxW) / 2;
+        const catBoxY = startContentY;
+
+        ctx.fillStyle = "#e11d48";
+        ctx.beginPath();
+        ctx.roundRect(catBoxX, catBoxY, catBoxW, catBoxH, 4 * scale);
+        ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(categoryText, catBoxX + catPadX, catBoxY + catBoxH - catPadY);
+      }
+
+      // Title text
+      ctx.fillStyle = c.text;
+      const titleStartY = startContentY + catH + Math.round(scaledLineSpacing * 0.3);
+      wrapTextCentered(ctx, title, PAD + Math.round(20 * scale), titleMaxW, titleStartY, scaledLineSpacing, titleFont);
+
+      // ── Bottom bar ──
       ctx.fillStyle = c.bottom;
       ctx.fillRect(0, bottomBarY, WIDTH, bottomBarH);
       drawStripeTexture(ctx, 0, bottomBarY, WIDTH, bottomBarH, "#ffffff");
@@ -361,7 +471,10 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
       const textYPos = bottomBarY + bottomBarH / 2 + Math.round(8 * scale);
       const socialIconSize = Math.round(30 * scale);
       const socialFontSize = Math.round(21 * scale);
-      const socialSpacing = Math.round(WIDTH / 4);
+
+      // Layout: social items evenly in left ~70%
+      const socialZoneW = WIDTH * 0.65;
+      const itemSpacing = socialZoneW / 3;
 
       // YouTube
       const ytX = Math.round(24 * scale);
@@ -370,51 +483,65 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
       ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
       ctx.fillText(socialHandles[0], ytX + ytIconW + Math.round(8 * scale), textYPos);
 
+      // Divider 1
+      const div1X = ytX + itemSpacing - Math.round(6 * scale);
+      ctx.fillStyle = "#ffffff"; ctx.globalAlpha = 0.3;
+      ctx.fillRect(div1X, bottomBarY + Math.round(14 * scale), Math.round(1.5 * scale), bottomBarH - Math.round(28 * scale));
+      ctx.globalAlpha = 1;
+
       // Instagram
-      const igX = ytX + socialSpacing;
+      const igX = ytX + itemSpacing;
       const igIconW = drawInstagramIcon(ctx, igX, iconYPos, socialIconSize);
       ctx.fillStyle = "#ffffff";
       ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
       ctx.fillText(socialHandles[1], igX + igIconW + Math.round(8 * scale), textYPos);
 
+      // Divider 2
+      const div2X = igX + itemSpacing - Math.round(6 * scale);
+      ctx.fillStyle = "#ffffff"; ctx.globalAlpha = 0.3;
+      ctx.fillRect(div2X, bottomBarY + Math.round(14 * scale), Math.round(1.5 * scale), bottomBarH - Math.round(28 * scale));
+      ctx.globalAlpha = 1;
+
       // Facebook
-      const fbX = igX + socialSpacing;
+      const fbX = igX + itemSpacing;
       const fbR = Math.round(15 * scale);
       const fbIconW = drawFacebookIcon(ctx, fbX, iconYPos, fbR);
       ctx.fillStyle = "#ffffff";
       ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
       ctx.fillText(socialHandles[2], fbX + fbIconW + Math.round(8 * scale), textYPos);
 
-      // Right text with arrow
+      // Divider 3 (before right text)
+      const div3X = fbX + itemSpacing - Math.round(6 * scale);
+      ctx.fillStyle = "#ffffff"; ctx.globalAlpha = 0.3;
+      ctx.fillRect(div3X, bottomBarY + Math.round(14 * scale), Math.round(1.5 * scale), bottomBarH - Math.round(28 * scale));
+      ctx.globalAlpha = 1;
+
+      // Right text: arrow on left, text
       ctx.fillStyle = "#ffffff";
       ctx.font = `bold ${Math.round(22 * scale)}px 'SolaimanLipi', sans-serif`;
       const brText = bottomRight;
       const brW = ctx.measureText(brText).width;
       const arrowSize = Math.round(12 * scale);
-      const brTotalW = brW + arrowSize + Math.round(16 * scale);
+      const brTotalW = arrowSize * 2 + Math.round(12 * scale) + brW;
       const brStartX = WIDTH - Math.round(24 * scale) - brTotalW;
-      
-      const checkR = Math.round(11 * scale);
-      ctx.fillStyle = "#22c55e";
-      ctx.beginPath(); ctx.arc(brStartX + checkR, iconYPos, checkR, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#ffffff";
-      ctx.font = `bold ${Math.round(14 * scale)}px sans-serif`;
-      ctx.fillText("✓", brStartX + checkR - Math.round(5 * scale), iconYPos + Math.round(5 * scale));
-      
-      ctx.fillStyle = "#ffffff";
-      ctx.font = `bold ${Math.round(22 * scale)}px 'SolaimanLipi', sans-serif`;
-      ctx.fillText(brText, brStartX + checkR * 2 + Math.round(8 * scale), textYPos);
-      
-      const arrowX = brStartX + checkR * 2 + Math.round(8 * scale) + brW + Math.round(8 * scale);
+
+      // Down arrow on the LEFT side
+      const arrowX = brStartX + arrowSize;
       const arrowY = iconYPos;
       ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = Math.round(2.5 * scale);
+      ctx.lineCap = "round";
       ctx.beginPath(); ctx.moveTo(arrowX, arrowY - arrowSize); ctx.lineTo(arrowX, arrowY + arrowSize); ctx.stroke();
       ctx.beginPath();
       ctx.moveTo(arrowX - arrowSize * 0.6, arrowY + arrowSize * 0.3);
       ctx.lineTo(arrowX, arrowY + arrowSize);
       ctx.lineTo(arrowX + arrowSize * 0.6, arrowY + arrowSize * 0.3);
       ctx.stroke();
+
+      // Text after arrow
+      ctx.fillStyle = "#ffffff";
+      ctx.font = `bold ${Math.round(22 * scale)}px 'SolaimanLipi', sans-serif`;
+      ctx.fillText(brText, arrowX + arrowSize + Math.round(8 * scale), textYPos);
 
       // ── Ad image at the very bottom ──
       if (adImg && adTotalH > 0) {
@@ -470,7 +597,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
             )}
           </div>
 
-          {/* Edit Controls */}
+          {/* Edit Controls - Admin gets full controls, Front-end gets font size + color */}
           {editMode && (
             <div className="space-y-3 text-sm">
               <div>
@@ -557,9 +684,30 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
             </div>
           )}
 
+          {/* Front-end: font size + color only */}
           {!editMode && (
-            <div className="flex justify-center">
-              <Button onClick={handleDownload} className="gap-2" size="lg">
+            <div className="space-y-4">
+              <div>
+                <Label className="flex items-center gap-1"><Type size={14} /> শিরোনামের সাইজ: {fontSize}px</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setFontSize(Math.max(24, fontSize - 2))}><Minus size={14} /></Button>
+                  <Slider value={[fontSize]} onValueChange={([v]) => setFontSize(v)} min={24} max={80} step={2} className="flex-1" />
+                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setFontSize(Math.min(80, fontSize + 2))}><Plus size={14} /></Button>
+                </div>
+              </div>
+
+              <div>
+                <Label className="flex items-center gap-1"><Palette size={14} /> কালার নির্বাচন</Label>
+                <div className="flex gap-2 mt-1 flex-wrap">
+                  {COLORS.map((c, i) => (
+                    <button key={i} onClick={() => setColorIdx(i)}
+                      className={`w-9 h-9 rounded-lg border-2 transition-all ${colorIdx === i ? "border-primary ring-2 ring-primary/30 scale-110" : "border-border"}`}
+                      style={{ backgroundColor: c.bg }} title={c.label} />
+                  ))}
+                </div>
+              </div>
+
+              <Button onClick={handleDownload} className="w-full gap-2" size="lg">
                 <Download size={18} /> ডাউনলোড করুন
               </Button>
             </div>
