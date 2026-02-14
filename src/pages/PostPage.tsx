@@ -11,6 +11,7 @@ import RelatedPosts from "@/components/post/RelatedPosts";
 import InPostAd from "@/components/post/InPostAd";
 import PhotoCardEditor from "@/components/post/PhotoCardEditor";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Sidebar from "@/components/home/Sidebar";
 
 const SocialShare = ({ url, title, slug }: { url: string; title: string; slug?: string }) => {
   const encodedTitle = encodeURIComponent(title);
@@ -67,8 +68,8 @@ const PostPage = () => {
           ...(post?.categories ? [{ label: post.categories.name, href: `/posts?category=${post.categories.slug}` }] : []),
           ...(post ? [{ label: post.title }] : []),
         ]} />
-        <div>
-          <div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
             {isLoading ? (
               <div className="animate-pulse bg-muted h-64 rounded" />
             ) : post ? (
@@ -192,6 +193,9 @@ const PostPage = () => {
                 পোস্ট পাওয়া যায়নি
               </div>
             )}
+          </div>
+          <div className="lg:col-span-1">
+            <Sidebar />
           </div>
         </div>
       </div>

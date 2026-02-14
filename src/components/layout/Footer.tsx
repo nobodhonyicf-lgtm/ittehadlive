@@ -5,7 +5,7 @@ const Footer = () => {
   const { data: settings } = useSiteSettings();
 
   return (
-    <footer className="bg-primary text-primary-foreground mt-8 max-w-[1200px] mx-auto">
+    <footer className="bg-primary text-primary-foreground mt-8">
       <div className="px-4 py-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* About */}
