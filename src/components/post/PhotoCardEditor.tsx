@@ -57,19 +57,16 @@ const drawStripeTexture = (ctx: CanvasRenderingContext2D, x: number, y: number, 
   ctx.restore();
 };
 
-const loadImage = (src: string): Promise<HTMLImageElement> => {
-  return new Promise((resolve, reject) => {
-    const img = new window.Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = () => {
-      // Retry without crossOrigin for same-origin images
-      const img2 = new window.Image();
-      img2.onload = () => resolve(img2);
-      img2.onerror = () => reject();
-      img2.src = src;
-    };
-    img.src = src;
+const loadImage = async (src: string): Promise<HTMLImageElement> => {
+  // Use proxy to avoid CORS issues with external images
+  const proxyUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/proxy-image?url=${encodeURIComponent(src)}`;
+  
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const el = new window.Image();
+    el.crossOrigin = "anonymous";
+    el.onload = () => resolve(el);
+    el.onerror = () => reject(new Error("Failed to load image"));
+    el.src = proxyUrl;
   });
 };
 
