@@ -39,12 +39,12 @@ const BranchDetail = () => {
             </div>
             <CardContent className="md:col-span-2 p-6">
               <h1 className="text-2xl font-bold text-primary mb-2">{branch.name}</h1>
-              {branch.code && <p className="text-sm text-muted-foreground mb-3">কোড: {branch.code}</p>}
+              {branch.code && <p className="text-sm text-muted-foreground mb-3">কোড: {toBengali(branch.code)}</p>}
               {branch.address && (
                 <p className="text-sm flex items-center gap-2 mb-2"><MapPin size={16} className="text-primary" /> {branch.address}</p>
               )}
               {branch.phone && (
-                <p className="text-sm flex items-center gap-2 mb-2"><Phone size={16} className="text-primary" /> {branch.phone}</p>
+                <p className="text-sm flex items-center gap-2 mb-2"><Phone size={16} className="text-primary" /> {toBengali(branch.phone)}</p>
               )}
               {branch.email && (
                 <p className="text-sm flex items-center gap-2 mb-2"><Mail size={16} className="text-primary" /> {branch.email}</p>
@@ -83,7 +83,7 @@ const BranchDetail = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold">{branch.head_name}</h3>
-                  {branch.phone && <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1"><Phone size={14} /> {branch.phone}</p>}
+                  {branch.phone && <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1"><Phone size={14} /> {toBengali(branch.phone)}</p>}
                   {branch.email && <p className="text-sm text-muted-foreground flex items-center gap-1"><Mail size={14} /> {branch.email}</p>}
                   {branch.website && <p className="text-sm text-muted-foreground flex items-center gap-1"><Globe size={14} /> <a href={branch.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{branch.website}</a></p>}
                 </div>
