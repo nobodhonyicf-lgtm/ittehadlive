@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { usePost, useAds } from "@/hooks/useData";
 import Sidebar from "@/components/home/Sidebar";
-import { Calendar, Share2, Facebook, Twitter, MessageCircle, Download, User, Clock, Image } from "lucide-react";
+import { Calendar, Share2, Facebook, Twitter, MessageCircle, Download, User, Clock, Image, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toBengali } from "@/lib/bengali";
@@ -127,12 +127,34 @@ const PostPage = () => {
 
                 {/* Content with in-post ad */}
                 <div className="prose max-w-none text-foreground px-6 py-4">
-                  {contentParagraphs.map((paragraph, index) => (
-                    <div key={index}>
-                      <p className="mb-3 leading-relaxed text-[15px]">{paragraph}</p>
-                      {index === adInsertIndex && <InPostAd />}
-                    </div>
-                  ))}
+                  {contentParagraphs.map((paragraph, index) => {
+                    // Handle post link lines
+                    if (paragraph.startsWith("🔗 ")) {
+                      const linkPath = paragraph.replace("🔗 ", "").trim();
+                      return (
+                        <div key={index}>
+                          <Link to={linkPath} className="inline-flex items-center gap-1.5 text-primary hover:underline text-sm font-medium mb-3">
+                            <ExternalLink size={14} /> পোস্টটি পড়ুন →
+                          </Link>
+                          {index === adInsertIndex && <InPostAd />}
+                        </div>
+                      );
+                    }
+                    if (paragraph.startsWith("📖 ")) {
+                      return (
+                        <div key={index}>
+                          <p className="mb-1 leading-relaxed text-[15px] font-semibold text-primary">{paragraph}</p>
+                          {index === adInsertIndex && <InPostAd />}
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={index}>
+                        <p className="mb-3 leading-relaxed text-[15px]">{paragraph}</p>
+                        {index === adInsertIndex && <InPostAd />}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Social Share */}
@@ -168,7 +190,9 @@ const PostPage = () => {
             title: post.title,
             slug: post.slug,
             image_url: post.image_url,
+            image_caption: (post as any).image_caption || null,
             created_at: post.created_at,
+            category_name: post.categories?.name || null,
           }}
         />
       )}
