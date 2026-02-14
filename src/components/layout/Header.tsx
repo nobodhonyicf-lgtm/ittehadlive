@@ -16,7 +16,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header className={`w-full sticky top-0 z-50 transition-shadow ${scrolled ? "shadow-lg" : "shadow-sm"} max-w-[1200px] mx-auto`}>
+    <header className={`w-full sticky top-0 z-50 transition-shadow ${scrolled ? "shadow-lg" : "shadow-sm"}`}>
       {/* Top utility bar */}
       <div className="bg-primary text-primary-foreground">
         <div className="px-4 py-1.5 text-sm flex items-center justify-between">
