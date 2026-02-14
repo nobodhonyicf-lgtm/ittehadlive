@@ -16,7 +16,7 @@ interface PhotoCardEditorProps {
     image_url?: string | null;
     created_at: string;
   };
-  editMode?: boolean; // true = admin full editor, false = frontend preview only
+  editMode?: boolean;
 }
 
 const COLORS = [
@@ -52,6 +52,38 @@ const drawStripeTexture = (ctx: CanvasRenderingContext2D, x: number, y: number, 
     ctx.stroke();
   }
   ctx.globalAlpha = 1;
+  ctx.restore();
+};
+
+const loadImage = (src: string): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject();
+    img.src = src;
+  });
+};
+
+const drawGlobeIcon = (ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, color: string) => {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.8;
+  // Outer circle
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+  // Horizontal line
+  ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke();
+  // Vertical ellipse
+  ctx.beginPath(); ctx.ellipse(cx, cy, r * 0.45, r, 0, 0, Math.PI * 2); ctx.stroke();
+  // Top & bottom latitude lines
+  ctx.beginPath();
+  ctx.moveTo(cx - r * 0.75, cy - r * 0.45);
+  ctx.quadraticCurveTo(cx, cy - r * 0.35, cx + r * 0.75, cy - r * 0.45);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx - r * 0.75, cy + r * 0.45);
+  ctx.quadraticCurveTo(cx, cy + r * 0.35, cx + r * 0.75, cy + r * 0.45);
+  ctx.stroke();
   ctx.restore();
 };
 
@@ -93,12 +125,15 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
   const [socialHandles, setSocialHandles] = useState(["ittehadbd", "ittehadbd", "ittehadbd"]);
   const [bottomRight, setBottomRight] = useState("বিস্তারিত কমেন্টে");
   const [logoUrl, setLogoUrl] = useState("");
+  const [customImageUrl, setCustomImageUrl] = useState("");
+  const [adImageUrl, setAdImageUrl] = useState("");
   const [resIdx, setResIdx] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
       setTitle(post.title);
+      setCustomImageUrl("");
       renderCard();
     }
   }, [open]);
@@ -113,7 +148,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
 
     const c = COLORS[colorIdx];
     const PAD = Math.round(WIDTH * 0.028);
-    const scale = WIDTH / 1080; // scale factor relative to base 1080
+    const scale = WIDTH / 1080;
 
     // ── Background ──
     ctx.fillStyle = c.bg;
@@ -125,15 +160,12 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
     const imgAreaH = Math.round(HEIGHT * 0.5);
     const imgAreaW = WIDTH - PAD * 2;
 
-    if (post.image_url) {
+    // Use custom image if provided, otherwise post image
+    const imageSource = customImageUrl || post.image_url;
+
+    if (imageSource) {
       try {
-        const img = new window.Image();
-        img.crossOrigin = "anonymous";
-        await new Promise<void>((resolve, reject) => {
-          img.onload = () => resolve();
-          img.onerror = () => reject();
-          img.src = post.image_url!;
-        });
+        const img = await loadImage(imageSource);
         ctx.save();
         ctx.beginPath();
         ctx.roundRect(PAD, imgAreaTop, imgAreaW, imgAreaH, 12 * scale);
@@ -167,22 +199,16 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
 
     let barContentX = PAD + Math.round(14 * scale);
 
-    // Logo (if provided)
+    // Logo
     if (logoUrl) {
       try {
-        const logoImg = new window.Image();
-        logoImg.crossOrigin = "anonymous";
-        await new Promise<void>((resolve, reject) => {
-          logoImg.onload = () => resolve();
-          logoImg.onerror = () => reject();
-          logoImg.src = logoUrl;
-        });
+        const logoImg = await loadImage(logoUrl);
         const logoH = barH - Math.round(12 * scale);
         const logoW = (logoImg.width / logoImg.height) * logoH;
         const logoY = barY + (barH - logoH) / 2;
         ctx.drawImage(logoImg, barContentX, logoY, logoW, logoH);
         barContentX += logoW + Math.round(14 * scale);
-      } catch { /* skip logo on error */ }
+      } catch { /* skip */ }
     }
 
     // Green badge
@@ -198,8 +224,8 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
     ctx.fillStyle = "#ffffff";
     ctx.fillText(badgeText, barContentX + Math.round(16 * scale), badgeY + Math.round(25 * scale));
 
-    // Verified blue circle — kept distant from badge
-    const verGap = Math.round(18 * scale);
+    // Verified blue circle — more distant from badge
+    const verGap = Math.round(26 * scale);
     const verX = barContentX + badgeW + verGap;
     const verY = barY + barH / 2;
     const verR = Math.round(13 * scale);
@@ -217,102 +243,115 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
     ctx.fillRect(verX + Math.round(22 * scale), barY + Math.round(10 * scale), 2, barH - Math.round(20 * scale));
     ctx.globalAlpha = 1;
 
-    // Date
-    ctx.fillStyle = c.sub;
-    ctx.font = `${Math.round(18 * scale)}px 'SolaimanLipi', sans-serif`;
+    // Date — bigger & bolder
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `bold ${Math.round(22 * scale)}px 'SolaimanLipi', sans-serif`;
     const dateStr = new Date(post.created_at).toLocaleDateString("bn-BD", {
       weekday: "long", year: "numeric", month: "long", day: "numeric",
     });
-    ctx.fillText(dateStr, verX + Math.round(34 * scale), barY + barH / 2 + Math.round(6 * scale));
+    ctx.fillText(dateStr, verX + Math.round(34 * scale), barY + barH / 2 + Math.round(7 * scale));
 
-    // Website with globe
-    ctx.fillStyle = c.sub;
-    ctx.font = `${Math.round(18 * scale)}px 'SolaimanLipi', sans-serif`;
+    // Website with better globe — bigger & white text
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `bold ${Math.round(22 * scale)}px 'SolaimanLipi', sans-serif`;
     const siteW = ctx.measureText(websiteText).width;
-    const globeX = PAD + imgAreaW - Math.round(14 * scale) - siteW - Math.round(24 * scale);
-    ctx.strokeStyle = c.sub;
-    ctx.lineWidth = 1.5;
-    const gr = Math.round(9 * scale);
-    ctx.beginPath(); ctx.arc(globeX, barY + barH / 2, gr, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(globeX - gr, barY + barH / 2); ctx.lineTo(globeX + gr, barY + barH / 2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(globeX, barY + barH / 2 - gr); ctx.lineTo(globeX, barY + barH / 2 + gr); ctx.stroke();
-    ctx.fillStyle = c.sub;
-    ctx.fillText(websiteText, globeX + Math.round(14 * scale), barY + barH / 2 + Math.round(6 * scale));
+    const globeR = Math.round(11 * scale);
+    const globeX = PAD + imgAreaW - Math.round(14 * scale) - siteW - Math.round(28 * scale);
+    drawGlobeIcon(ctx, globeX, barY + barH / 2, globeR, "#ffffff");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(websiteText, globeX + globeR + Math.round(8 * scale), barY + barH / 2 + Math.round(7 * scale));
 
-    // ── Title ──
-    const titleY = barY + barH + Math.round(50 * scale);
+    // ── Title — more gap from bar ──
+    const titleY = barY + barH + Math.round(70 * scale);
     ctx.fillStyle = c.text;
     const scaledFontSize = Math.round(fontSize * scale);
     const scaledLineSpacing = Math.round(lineSpacing * scale);
-    wrapTextCentered(ctx, title, PAD, imgAreaW, titleY, scaledLineSpacing,
+    const titleEndY = wrapTextCentered(ctx, title, PAD, imgAreaW, titleY, scaledLineSpacing,
       `bold ${scaledFontSize}px 'SolaimanLipi', sans-serif`);
 
-    // ── Bottom bar ──
-    const bottomBarH = Math.round(56 * scale);
+    // ── Ad image (optional, between title and bottom bar) ──
+    if (adImageUrl) {
+      try {
+        const adImg = await loadImage(adImageUrl);
+        const adAreaTop = titleEndY + Math.round(20 * scale);
+        const bottomBarH = Math.round(66 * scale);
+        const bottomBarY = HEIGHT - bottomBarH;
+        const adAreaH = Math.min(Math.round(100 * scale), bottomBarY - adAreaTop - Math.round(10 * scale));
+        if (adAreaH > 30) {
+          const adW = (adImg.width / adImg.height) * adAreaH;
+          const adX = (WIDTH - adW) / 2;
+          ctx.drawImage(adImg, adX, adAreaTop, adW, adAreaH);
+        }
+      } catch { /* skip ad */ }
+    }
+
+    // ── Bottom bar — taller ──
+    const bottomBarH = Math.round(66 * scale);
     const bottomBarY = HEIGHT - bottomBarH;
     ctx.fillStyle = c.bottom;
     ctx.fillRect(0, bottomBarY, WIDTH, bottomBarH);
     drawStripeTexture(ctx, 0, bottomBarY, WIDTH, bottomBarH, "#ffffff");
 
     const iconYPos = bottomBarY + bottomBarH / 2;
-    const textYPos = bottomBarY + bottomBarH / 2 + Math.round(5 * scale);
+    const textYPos = bottomBarY + bottomBarH / 2 + Math.round(7 * scale);
 
-    // Social icons — reduced spacing
-    const socialSpacing = Math.round(WIDTH / 3.6);
+    // Social icons — bigger sizes, tighter spacing
+    const socialSpacing = Math.round(WIDTH / 3.8);
+    const iconBtnH = Math.round(26 * scale);
+    const iconBtnW = Math.round(34 * scale);
+    const socialFontSize = Math.round(19 * scale);
 
     // YouTube
-    const ytX = Math.round(24 * scale);
+    const ytX = Math.round(28 * scale);
     ctx.fillStyle = "#FF0000";
-    const iconBtnH = Math.round(20 * scale);
-    const iconBtnW = Math.round(28 * scale);
-    ctx.beginPath(); ctx.roundRect(ytX, iconYPos - iconBtnH / 2, iconBtnW, iconBtnH, 4 * scale); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(ytX, iconYPos - iconBtnH / 2, iconBtnW, iconBtnH, 5 * scale); ctx.fill();
     ctx.fillStyle = "#fff";
-    ctx.font = `${Math.round(12 * scale)}px sans-serif`;
-    ctx.fillText("▶", ytX + Math.round(9 * scale), iconYPos + Math.round(4 * scale));
-    ctx.fillStyle = c.sub;
-    ctx.font = `${Math.round(15 * scale)}px 'SolaimanLipi', sans-serif`;
-    ctx.fillText(`| ${socialHandles[0]}`, ytX + iconBtnW + Math.round(6 * scale), textYPos);
+    ctx.font = `${Math.round(15 * scale)}px sans-serif`;
+    ctx.fillText("▶", ytX + Math.round(11 * scale), iconYPos + Math.round(5 * scale));
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
+    ctx.fillText(`| ${socialHandles[0]}`, ytX + iconBtnW + Math.round(8 * scale), textYPos);
 
     // LinkedIn
     const liX = ytX + socialSpacing;
     ctx.fillStyle = "#0A66C2";
-    const liW = Math.round(22 * scale);
-    ctx.beginPath(); ctx.roundRect(liX, iconYPos - iconBtnH / 2, liW, iconBtnH, 3 * scale); ctx.fill();
+    const liW = Math.round(26 * scale);
+    ctx.beginPath(); ctx.roundRect(liX, iconYPos - iconBtnH / 2, liW, iconBtnH, 4 * scale); ctx.fill();
     ctx.fillStyle = "#fff";
-    ctx.font = `bold ${Math.round(14 * scale)}px sans-serif`;
-    ctx.fillText("in", liX + Math.round(3 * scale), iconYPos + Math.round(5 * scale));
-    ctx.fillStyle = c.sub;
-    ctx.font = `${Math.round(15 * scale)}px 'SolaimanLipi', sans-serif`;
-    ctx.fillText(`| ${socialHandles[1]}`, liX + liW + Math.round(6 * scale), textYPos);
+    ctx.font = `bold ${Math.round(17 * scale)}px sans-serif`;
+    ctx.fillText("in", liX + Math.round(4 * scale), iconYPos + Math.round(6 * scale));
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
+    ctx.fillText(`| ${socialHandles[1]}`, liX + liW + Math.round(8 * scale), textYPos);
 
     // Facebook
     const fbX = liX + socialSpacing;
     ctx.fillStyle = "#1877F2";
-    const fbR = Math.round(12 * scale);
+    const fbR = Math.round(14 * scale);
     ctx.beginPath(); ctx.arc(fbX + fbR, iconYPos, fbR, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "#fff";
-    ctx.font = `bold ${Math.round(16 * scale)}px sans-serif`;
-    ctx.fillText("f", fbX + fbR - Math.round(5 * scale), iconYPos + Math.round(6 * scale));
-    ctx.fillStyle = c.sub;
-    ctx.font = `${Math.round(15 * scale)}px 'SolaimanLipi', sans-serif`;
-    ctx.fillText(`| ${socialHandles[2]}`, fbX + fbR * 2 + Math.round(6 * scale), textYPos);
+    ctx.font = `bold ${Math.round(19 * scale)}px sans-serif`;
+    ctx.fillText("f", fbX + fbR - Math.round(6 * scale), iconYPos + Math.round(7 * scale));
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
+    ctx.fillText(`| ${socialHandles[2]}`, fbX + fbR * 2 + Math.round(8 * scale), textYPos);
 
-    // Right text
-    ctx.fillStyle = c.sub;
-    ctx.font = `${Math.round(15 * scale)}px 'SolaimanLipi', sans-serif`;
+    // Right text — bigger
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
     const brText = `✓ ${bottomRight}`;
     const brW = ctx.measureText(brText).width;
-    ctx.fillText(brText, WIDTH - Math.round(24 * scale) - brW, textYPos);
+    ctx.fillText(brText, WIDTH - Math.round(28 * scale) - brW, textYPos);
 
     setPreviewUrl(canvas.toDataURL("image/png"));
-  }, [post, title, colorIdx, websiteText, badgeText, socialHandles, bottomRight, fontSize, lineSpacing, logoUrl, resIdx]);
+  }, [post, title, colorIdx, websiteText, badgeText, socialHandles, bottomRight, fontSize, lineSpacing, logoUrl, customImageUrl, adImageUrl, resIdx]);
 
   useEffect(() => {
     if (open) {
       const timeout = setTimeout(renderCard, 100);
       return () => clearTimeout(timeout);
     }
-  }, [open, title, colorIdx, websiteText, badgeText, socialHandles, bottomRight, fontSize, lineSpacing, logoUrl, resIdx, renderCard]);
+  }, [open, title, colorIdx, websiteText, badgeText, socialHandles, bottomRight, fontSize, lineSpacing, logoUrl, customImageUrl, adImageUrl, resIdx, renderCard]);
 
   const handleDownload = () => {
     if (!previewUrl) return;
@@ -345,7 +384,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
             )}
           </div>
 
-          {/* Edit Controls — only in editMode */}
+          {/* Edit Controls */}
           {editMode && (
             <div className="space-y-3 text-sm">
               {/* Resolution */}
@@ -403,6 +442,18 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
               <div>
                 <Label className="flex items-center gap-1"><ImageIcon size={12} /> লোগো URL</Label>
                 <Input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="লোগো ছবির URL দিন (ঐচ্ছিক)" className="text-sm" />
+              </div>
+
+              {/* Custom Image URL */}
+              <div>
+                <Label className="flex items-center gap-1"><ImageIcon size={12} /> কাস্টম ছবি URL</Label>
+                <Input value={customImageUrl} onChange={(e) => setCustomImageUrl(e.target.value)} placeholder="পোস্টের ছবি পরিবর্তন করতে URL দিন (ঐচ্ছিক)" className="text-sm" />
+              </div>
+
+              {/* Ad Image URL */}
+              <div>
+                <Label className="flex items-center gap-1"><ImageIcon size={12} /> বিজ্ঞাপন ছবি URL (ঐচ্ছিক)</Label>
+                <Input value={adImageUrl} onChange={(e) => setAdImageUrl(e.target.value)} placeholder="শিরোনামের নিচে বিজ্ঞাপন ছবি দিন" className="text-sm" />
               </div>
 
               {/* Badge & Website */}
