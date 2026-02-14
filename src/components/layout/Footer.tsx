@@ -1,5 +1,6 @@
 import { useSiteSettings } from "@/hooks/useData";
 import { Phone, Mail, MapPin } from "lucide-react";
+import logoImg from "@/assets/logo.png";
 
 const Footer = () => {
   const { data: settings } = useSiteSettings();
@@ -10,9 +11,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* About */}
           <div>
-            {settings?.logo_url && (
-              <img src={settings.logo_url} alt="Logo" className="h-10 mb-3 object-contain brightness-0 invert opacity-80" />
-            )}
+            <img src={logoImg} alt="Logo" className="h-16 mb-3 object-contain" />
             <h3 className="text-lg font-bold mb-2">
               {settings?.site_name || "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ"}
             </h3>
