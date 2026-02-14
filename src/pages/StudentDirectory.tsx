@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
+import { toBengali } from "@/lib/bengali";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -75,7 +76,7 @@ const StudentDirectory = () => {
 
         {/* Count */}
         {filtered && filtered.length > 0 && (
-          <p className="text-sm text-muted-foreground mb-4">মোট {filtered.length} জন শিক্ষার্থী পাওয়া গেছে</p>
+          <p className="text-sm text-muted-foreground mb-4">মোট {toBengali(filtered.length)} জন শিক্ষার্থী পাওয়া গেছে</p>
         )}
 
         {/* Student Grid */}
@@ -94,7 +95,7 @@ const StudentDirectory = () => {
                     </div>
                     <div className="min-w-0">
                       <h3 className="font-bold text-foreground truncate">{student.name}</h3>
-                      <p className="text-xs text-muted-foreground">রোল: {student.roll_number} | রেজি: {student.registration_number || "—"}</p>
+                      <p className="text-xs text-muted-foreground">রোল: {toBengali(student.roll_number)} | রেজি: {student.registration_number ? toBengali(student.registration_number) : "—"}</p>
                       <p className="text-xs text-primary font-semibold mt-1">{student.class_name}</p>
                     </div>
                   </CardContent>
@@ -108,7 +109,7 @@ const StudentDirectory = () => {
                 <Button variant="outline" size="icon" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
                   <ChevronLeft size={16} />
                 </Button>
-                <span className="text-sm text-muted-foreground">পৃষ্ঠা {page} / {totalPages}</span>
+                <span className="text-sm text-muted-foreground">পৃষ্ঠা {toBengali(page)} / {toBengali(totalPages)}</span>
                 <Button variant="outline" size="icon" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
                   <ChevronRight size={16} />
                 </Button>

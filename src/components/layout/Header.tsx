@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useMenuItems, useSiteSettings } from "@/hooks/useData";
 import { Menu, X, GraduationCap, Users, Building2, Phone, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
+import { toBengali } from "@/lib/bengali";
 
 const Header = () => {
   const { data: menuItems } = useMenuItems();
@@ -23,7 +24,7 @@ const Header = () => {
           <div className="flex items-center gap-4">
             {settings?.contact_phone && (
               <span className="flex items-center gap-1 text-xs opacity-90">
-                <Phone size={12} /> {settings.contact_phone}
+                <Phone size={12} /> {toBengali(settings.contact_phone)}
               </span>
             )}
             {settings?.contact_email && (

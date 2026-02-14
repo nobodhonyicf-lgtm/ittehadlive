@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, Eye, Users, FileText, Building2, TrendingUp } from "lucide-react";
+import { toBengali } from "@/lib/bengali";
 
 const AdminAnalytics = () => {
   const { data: pageViews } = useQuery({
@@ -68,28 +69,28 @@ const AdminAnalytics = () => {
         <Card>
           <CardContent className="p-4 text-center">
             <Eye className="mx-auto text-primary mb-2" size={24} />
-            <p className="text-2xl font-bold">{totalViews}</p>
+            <p className="text-2xl font-bold">{toBengali(totalViews)}</p>
             <p className="text-xs text-muted-foreground">মোট পেজ ভিউ</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <Users className="mx-auto text-primary mb-2" size={24} />
-            <p className="text-2xl font-bold">{uniqueVisitors}</p>
+            <p className="text-2xl font-bold">{toBengali(uniqueVisitors)}</p>
             <p className="text-xs text-muted-foreground">ইউনিক ভিজিটর</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <TrendingUp className="mx-auto text-accent mb-2" size={24} />
-            <p className="text-2xl font-bold">{todayViews}</p>
+            <p className="text-2xl font-bold">{toBengali(todayViews)}</p>
             <p className="text-xs text-muted-foreground">আজকের ভিউ</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
             <FileText className="mx-auto text-primary mb-2" size={24} />
-            <p className="text-2xl font-bold">{postCount}</p>
+            <p className="text-2xl font-bold">{toBengali(postCount || 0)}</p>
             <p className="text-xs text-muted-foreground">মোট পোস্ট</p>
           </CardContent>
         </Card>
@@ -102,15 +103,15 @@ const AdminAnalytics = () => {
           <CardContent className="space-y-3">
             <div className="flex justify-between items-center py-2 border-b">
               <span className="text-sm flex items-center gap-2"><Users size={16} /> শিক্ষার্থী</span>
-              <span className="font-bold">{studentCount}</span>
+              <span className="font-bold">{toBengali(studentCount || 0)}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b">
               <span className="text-sm flex items-center gap-2"><Building2 size={16} /> শাখা</span>
-              <span className="font-bold">{branchCount}</span>
+              <span className="font-bold">{toBengali(branchCount || 0)}</span>
             </div>
             <div className="flex justify-between items-center py-2">
               <span className="text-sm flex items-center gap-2"><FileText size={16} /> পোস্ট</span>
-              <span className="font-bold">{postCount}</span>
+              <span className="font-bold">{toBengali(postCount || 0)}</span>
             </div>
           </CardContent>
         </Card>
@@ -123,7 +124,7 @@ const AdminAnalytics = () => {
               {topPages.map(([path, count]) => (
                 <div key={path} className="flex justify-between items-center text-sm py-1.5 border-b last:border-0">
                   <span className="truncate text-muted-foreground">{path}</span>
-                  <span className="font-semibold text-primary shrink-0 ml-2">{count}</span>
+                  <span className="font-semibold text-primary shrink-0 ml-2">{toBengali(count)}</span>
                 </div>
               ))}
               {topPages.length === 0 && (
