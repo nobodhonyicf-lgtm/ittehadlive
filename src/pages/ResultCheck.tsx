@@ -30,6 +30,20 @@ const ResultCheck = () => {
     },
   });
 
+  // Fetch all results for this exam to calculate positions
+  const { data: allExamResults } = useQuery({
+    queryKey: ["all_exam_results", searchExam],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("results")
+        .select("student_id, marks_obtained, subjects(full_marks, pass_marks), students(class_name, branch_id)")
+        .eq("exam_id", searchExam);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!searchExam && !!result,
+  });
+
   const getSetting = (key: string) => {
     if (!settings || !Array.isArray(settings)) return "";
     return settings.find((s: any) => s.key === key)?.value || "";
@@ -64,6 +78,49 @@ const ResultCheck = () => {
   const overallGrade = getOverallGrade(overallGPA);
   const passed = resultsWithGrade?.every(r => (Number(r.marks_obtained) || 0) >= (r.subjects?.pass_marks || 33));
 
+  // Calculate board position and class position
+  const positions = (() => {
+    if (!allExamResults || !result?.student) return { boardPosition: 0, classPosition: 0, totalBoard: 0, totalClass: 0 };
+    
+    // Group by student and sum total marks
+    const studentTotals: Record<string, { total: number; className: string; branchId: string; allPassed: boolean }> = {};
+    allExamResults.forEach((r: any) => {
+      const sid = r.student_id;
+      if (!studentTotals[sid]) {
+        studentTotals[sid] = { total: 0, className: r.students?.class_name || "", branchId: r.students?.branch_id || "", allPassed: true };
+      }
+      const marks = Number(r.marks_obtained) || 0;
+      studentTotals[sid].total += marks;
+      if (marks < (r.subjects?.pass_marks || 33)) {
+        studentTotals[sid].allPassed = false;
+      }
+    });
+
+    const currentStudentId = result.student.id;
+    const currentClass = result.student.class_name;
+
+    // Board position (all students in this exam who passed)
+    const allStudents = Object.entries(studentTotals)
+      .filter(([, v]) => v.allPassed)
+      .sort((a, b) => b[1].total - a[1].total);
+    const boardPosition = allStudents.findIndex(([id]) => id === currentStudentId) + 1;
+
+    // Class position (students in same class who passed)
+    const classStudents = Object.entries(studentTotals)
+      .filter(([, v]) => v.className === currentClass && v.allPassed)
+      .sort((a, b) => b[1].total - a[1].total);
+    const classPosition = classStudents.findIndex(([id]) => id === currentStudentId) + 1;
+
+    return { 
+      boardPosition: passed ? boardPosition : 0, 
+      classPosition: passed ? classPosition : 0, 
+      totalBoard: allStudents.length, 
+      totalClass: classStudents.length 
+    };
+  })();
+
+  const logoUrl = getSetting("logo_url");
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -84,7 +141,7 @@ const ResultCheck = () => {
                 <SelectTrigger><SelectValue placeholder="পরীক্ষা নির্বাচন" /></SelectTrigger>
                 <SelectContent>
                   {publishedExams?.map(e => (
-                    <SelectItem key={e.id} value={e.id}>{e.name} ({e.year})</SelectItem>
+                    <SelectItem key={e.id} value={e.id}>{e.name} ({toBengali(e.year)})</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -101,18 +158,27 @@ const ResultCheck = () => {
             {result ? (
               <div>
                 <div id="printable-marksheet">
-                  <Card className="border-2 border-primary/30 print:border-black print:shadow-none" id="result-card">
-                    <CardHeader className="bg-primary/5 print:bg-white text-center border-b-2 border-primary/20 print:border-black">
+                  <Card className="border-2 border-primary/30 print:border-black print:shadow-none relative overflow-hidden" id="result-card">
+                    {/* Watermark */}
+                    {logoUrl && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                        <img src={logoUrl} alt="" className="w-72 h-72 object-contain opacity-[0.06] print:opacity-[0.04]" />
+                      </div>
+                    )}
+                    
+                    <CardHeader className="bg-primary/5 print:bg-white text-center border-b-2 border-primary/20 print:border-black relative z-10">
                       <div className="flex flex-col items-center gap-1">
-                        {getSetting("logo_url") && (
-                          <img src={getSetting("logo_url")} alt="Logo" className="h-16 mb-1" />
+                        {logoUrl && (
+                          <img src={logoUrl} alt="Logo" className="h-20 mb-1" />
                         )}
-                        <CardTitle className="text-primary print:text-black text-xl">{getSetting("site_name") || "ইত্তেহাদুল মাদারিস"}</CardTitle>
-                        <p className="text-sm text-muted-foreground print:text-black">{selectedExam?.name} — {selectedExam?.year}</p>
-                        <h2 className="text-lg font-bold mt-1">মার্কশিট</h2>
+                        <CardTitle className="text-primary print:text-black text-2xl font-bold">
+                          ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground print:text-black">{selectedExam?.name} — {toBengali(selectedExam?.year || "")}</p>
+                        <h2 className="text-lg font-bold mt-1 border-b-2 border-primary/30 pb-1 px-8">মার্কশিট</h2>
                       </div>
                     </CardHeader>
-                    <CardContent className="p-6 print:p-4">
+                    <CardContent className="p-6 print:p-4 relative z-10">
                       <div className="flex items-start gap-4 mb-6 p-4 bg-secondary/50 print:bg-white rounded-lg border border-border print:border-black">
                         <div className="w-24 h-28 rounded border-2 border-primary/20 print:border-black flex items-center justify-center overflow-hidden shrink-0">
                           {result.student.photo_url ? (
@@ -123,8 +189,8 @@ const ResultCheck = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-x-8 gap-y-1.5 text-sm flex-1">
                           <p><strong>নাম:</strong> {result.student.name}</p>
-                          <p><strong>রোল:</strong> {result.student.roll_number}</p>
-                          <p><strong>রেজিস্ট্রেশন:</strong> {result.student.registration_number || "—"}</p>
+                          <p><strong>রোল:</strong> {toBengali(result.student.roll_number)}</p>
+                          <p><strong>রেজিস্ট্রেশন:</strong> {result.student.registration_number ? toBengali(result.student.registration_number) : "—"}</p>
                           <p><strong>শ্রেণি:</strong> {result.student.class_name}</p>
                           <p><strong>পিতার নাম:</strong> {result.student.father_name || "—"}</p>
                           <p><strong>মাতার নাম:</strong> {result.student.mother_name || "—"}</p>
@@ -183,6 +249,24 @@ const ResultCheck = () => {
                           </p>
                         </div>
                       </div>
+
+                      {/* Board & Class Position */}
+                      {passed && positions.boardPosition > 0 && (
+                        <div className="mt-4 grid grid-cols-2 gap-4 text-center text-sm">
+                          <div className="p-3 bg-primary/5 print:bg-card rounded border-2 border-primary/20">
+                            <p className="text-muted-foreground">বোর্ড অবস্থান</p>
+                            <p className="text-2xl font-bold text-primary">
+                              {toBengali(positions.boardPosition)} / {toBengali(positions.totalBoard)}
+                            </p>
+                          </div>
+                          <div className="p-3 bg-primary/5 print:bg-card rounded border-2 border-primary/20">
+                            <p className="text-muted-foreground">শ্রেণি অবস্থান</p>
+                            <p className="text-2xl font-bold text-primary">
+                              {toBengali(positions.classPosition)} / {toBengali(positions.totalClass)}
+                            </p>
+                          </div>
+                        </div>
+                      )}
 
                       <div className="mt-6 text-xs">
                         <p className="font-bold mb-1">গ্রেডিং স্কেল:</p>
