@@ -20,14 +20,16 @@ interface PhotoCardEditorProps {
 }
 
 const COLORS = [
-  { label: "ডার্ক", bg: "#1a1a1a", bar: "#2a2a2a", bottom: "#111111", text: "#ffffff", sub: "#cccccc" },
-  { label: "সবুজ", bg: "#0d3b1e", bar: "#145a2e", bottom: "#0a2e17", text: "#ffffff", sub: "#b8e6c8" },
-  { label: "নীল", bg: "#0f1f3d", bar: "#172d54", bottom: "#0a1628", text: "#ffffff", sub: "#a8c4e0" },
-  { label: "মেরুন", bg: "#3b0f0f", bar: "#551a1a", bottom: "#280a0a", text: "#ffffff", sub: "#e0b8b8" },
-  { label: "সোনালি", bg: "#2e2207", bar: "#3d2e0a", bottom: "#1f1805", text: "#ffffff", sub: "#e8d5a0" },
-  { label: "বেগুনি", bg: "#1e0a3b", bar: "#2d1455", bottom: "#140728", text: "#ffffff", sub: "#c8a8e0" },
-  { label: "টিল", bg: "#0a2e2e", bar: "#0f4040", bottom: "#071f1f", text: "#ffffff", sub: "#a8dede" },
-  { label: "ধূসর", bg: "#2c2c2c", bar: "#3a3a3a", bottom: "#1e1e1e", text: "#ffffff", sub: "#d0d0d0" },
+  { label: "ডার্ক", bg: "#1e1e1e", bar: "#333333", bottom: "#151515", text: "#ffffff", sub: "#d0d0d0" },
+  { label: "সবুজ", bg: "#0f4d28", bar: "#1a7a3a", bottom: "#0b3a1d", text: "#ffffff", sub: "#c8f0d8" },
+  { label: "নীল", bg: "#132e5e", bar: "#1e4a8a", bottom: "#0e2040", text: "#ffffff", sub: "#b8d4f0" },
+  { label: "মেরুন", bg: "#5a1515", bar: "#7a2222", bottom: "#3a0e0e", text: "#ffffff", sub: "#f0c8c8" },
+  { label: "সোনালি", bg: "#4a3810", bar: "#6a5018", bottom: "#2e2208", text: "#ffffff", sub: "#f0e0b0" },
+  { label: "বেগুনি", bg: "#2e1260", bar: "#441e88", bottom: "#1e0c40", text: "#ffffff", sub: "#d8b8f0" },
+  { label: "টিল", bg: "#104848", bar: "#186868", bottom: "#0a3030", text: "#ffffff", sub: "#b8f0f0" },
+  { label: "ধূসর", bg: "#383838", bar: "#505050", bottom: "#252525", text: "#ffffff", sub: "#e0e0e0" },
+  { label: "কমলা", bg: "#4a2200", bar: "#6a3500", bottom: "#301500", text: "#ffffff", sub: "#f0d8b0" },
+  { label: "গোলাপি", bg: "#4a1038", bar: "#6a1850", bottom: "#300a24", text: "#ffffff", sub: "#f0b8d8" },
 ];
 
 const RESOLUTIONS = [
@@ -44,7 +46,7 @@ const drawStripeTexture = (ctx: CanvasRenderingContext2D, x: number, y: number, 
   ctx.clip();
   ctx.strokeStyle = color;
   ctx.lineWidth = 1;
-  ctx.globalAlpha = 0.12;
+  ctx.globalAlpha = 0.08;
   for (let i = -h; i < w + h; i += 8) {
     ctx.beginPath();
     ctx.moveTo(x + i, y);
@@ -60,7 +62,13 @@ const loadImage = (src: string): Promise<HTMLImageElement> => {
     const img = new window.Image();
     img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
-    img.onerror = () => reject();
+    img.onerror = () => {
+      // Retry without crossOrigin for same-origin images
+      const img2 = new window.Image();
+      img2.onload = () => resolve(img2);
+      img2.onerror = () => reject();
+      img2.src = src;
+    };
     img.src = src;
   });
 };
@@ -68,50 +76,120 @@ const loadImage = (src: string): Promise<HTMLImageElement> => {
 const drawGlobeIcon = (ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number, color: string) => {
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.lineWidth = 1.8;
-  // Outer circle
+  ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
-  // Horizontal line
   ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke();
-  // Vertical ellipse
   ctx.beginPath(); ctx.ellipse(cx, cy, r * 0.45, r, 0, 0, Math.PI * 2); ctx.stroke();
-  // Top & bottom latitude lines
   ctx.beginPath();
-  ctx.moveTo(cx - r * 0.75, cy - r * 0.45);
-  ctx.quadraticCurveTo(cx, cy - r * 0.35, cx + r * 0.75, cy - r * 0.45);
+  ctx.moveTo(cx - r * 0.8, cy - r * 0.45);
+  ctx.quadraticCurveTo(cx, cy - r * 0.3, cx + r * 0.8, cy - r * 0.45);
   ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(cx - r * 0.75, cy + r * 0.45);
-  ctx.quadraticCurveTo(cx, cy + r * 0.35, cx + r * 0.75, cy + r * 0.45);
+  ctx.moveTo(cx - r * 0.8, cy + r * 0.45);
+  ctx.quadraticCurveTo(cx, cy + r * 0.3, cx + r * 0.8, cy + r * 0.45);
   ctx.stroke();
   ctx.restore();
 };
 
+// Supports newlines (\n) in text
 const wrapTextCentered = (
   ctx: CanvasRenderingContext2D, text: string, x: number, maxWidth: number,
   startY: number, lineHeight: number, font: string
 ): number => {
   ctx.font = font;
-  const words = text.split(" ");
-  let line = "";
-  const lines: string[] = [];
-  for (const word of words) {
-    const testLine = line + word + " ";
-    if (ctx.measureText(testLine).width > maxWidth && line) {
-      lines.push(line.trim());
-      line = word + " ";
-    } else {
-      line = testLine;
+  const paragraphs = text.split("\n");
+  const allLines: string[] = [];
+  for (const para of paragraphs) {
+    if (para.trim() === "") {
+      allLines.push("");
+      continue;
     }
+    const words = para.split(" ");
+    let line = "";
+    for (const word of words) {
+      const testLine = line + word + " ";
+      if (ctx.measureText(testLine).width > maxWidth && line) {
+        allLines.push(line.trim());
+        line = word + " ";
+      } else {
+        line = testLine;
+      }
+    }
+    if (line.trim()) allLines.push(line.trim());
   }
-  if (line.trim()) lines.push(line.trim());
   let y = startY;
-  for (const l of lines) {
+  for (const l of allLines) {
+    if (l === "") { y += lineHeight * 0.5; continue; }
     const w = ctx.measureText(l).width;
     ctx.fillText(l, x + (maxWidth - w) / 2, y);
     y += lineHeight;
   }
   return y;
+};
+
+// Draw YouTube play button icon
+const drawYouTubeIcon = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
+  ctx.save();
+  ctx.fillStyle = "#FF0000";
+  const w = size * 1.4, h = size;
+  const rx = x, ry = y - h / 2;
+  ctx.beginPath();
+  ctx.roundRect(rx, ry, w, h, size * 0.22);
+  ctx.fill();
+  // Play triangle
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.moveTo(rx + w * 0.38, ry + h * 0.25);
+  ctx.lineTo(rx + w * 0.38, ry + h * 0.75);
+  ctx.lineTo(rx + w * 0.72, ry + h * 0.5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+  return w;
+};
+
+// Draw Facebook "f" icon
+const drawFacebookIcon = (ctx: CanvasRenderingContext2D, x: number, y: number, r: number) => {
+  ctx.save();
+  ctx.fillStyle = "#1877F2";
+  ctx.beginPath(); ctx.arc(x + r, y, r, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `bold ${r * 1.3}px Arial`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("f", x + r, y + r * 0.08);
+  ctx.textAlign = "start";
+  ctx.textBaseline = "alphabetic";
+  ctx.restore();
+  return r * 2;
+};
+
+// Draw Instagram gradient icon
+const drawInstagramIcon = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
+  ctx.save();
+  const grad = ctx.createLinearGradient(x, y - size / 2, x + size, y + size / 2);
+  grad.addColorStop(0, "#f09433");
+  grad.addColorStop(0.25, "#e6683c");
+  grad.addColorStop(0.5, "#dc2743");
+  grad.addColorStop(0.75, "#cc2366");
+  grad.addColorStop(1, "#bc1888");
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(x, y - size / 2, size, size, size * 0.25);
+  ctx.fill();
+  // Camera outline
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = size * 0.08;
+  ctx.beginPath();
+  ctx.arc(x + size / 2, y, size * 0.28, 0, Math.PI * 2);
+  ctx.stroke();
+  // Dot
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(x + size * 0.75, y - size * 0.25, size * 0.06, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  return size;
 };
 
 const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCardEditorProps) => {
@@ -139,16 +217,28 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
   }, [open]);
 
   const renderCard = useCallback(async () => {
-    const { w: WIDTH, h: HEIGHT } = RESOLUTIONS[resIdx];
+    const { w: WIDTH, h: BASE_HEIGHT } = RESOLUTIONS[resIdx];
     const canvas = canvasRef.current || document.createElement("canvas");
-    canvas.width = WIDTH;
-    canvas.height = HEIGHT;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const c = COLORS[colorIdx];
     const PAD = Math.round(WIDTH * 0.028);
     const scale = WIDTH / 1080;
+
+    // Calculate ad height first to determine total canvas height
+    let adTotalH = 0;
+    let adImg: HTMLImageElement | null = null;
+    if (adImageUrl) {
+      try {
+        adImg = await loadImage(adImageUrl);
+        adTotalH = Math.round(120 * scale);
+      } catch { adImg = null; }
+    }
+
+    const HEIGHT = BASE_HEIGHT + adTotalH;
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
 
     // ── Background ──
     ctx.fillStyle = c.bg;
@@ -157,10 +247,11 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
 
     // ── Image area ──
     const imgAreaTop = PAD;
-    const imgAreaH = Math.round(HEIGHT * 0.5);
+    const mainCardH = BASE_HEIGHT;
+    const imgAreaH = Math.round(mainCardH * 0.5);
     const imgAreaW = WIDTH - PAD * 2;
 
-    // Use custom image if provided, otherwise post image
+    // Use custom image, or post image (try to resolve the original URL)
     const imageSource = customImageUrl || post.image_url;
 
     if (imageSource) {
@@ -178,13 +269,19 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
         ctx.drawImage(img, sx, sy, sw, sh, PAD, imgAreaTop, imgAreaW, imgAreaH);
         ctx.restore();
       } catch {
-        ctx.fillStyle = "#333";
+        ctx.fillStyle = "#444";
         ctx.beginPath();
         ctx.roundRect(PAD, imgAreaTop, imgAreaW, imgAreaH, 12 * scale);
         ctx.fill();
+        // Show placeholder text
+        ctx.fillStyle = "#888";
+        ctx.font = `${Math.round(20 * scale)}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillText("ছবি লোড হয়নি", WIDTH / 2, imgAreaTop + imgAreaH / 2);
+        ctx.textAlign = "start";
       }
     } else {
-      ctx.fillStyle = "#333";
+      ctx.fillStyle = "#444";
       ctx.beginPath();
       ctx.roundRect(PAD, imgAreaTop, imgAreaW, imgAreaH, 12 * scale);
       ctx.fill();
@@ -224,7 +321,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
     ctx.fillStyle = "#ffffff";
     ctx.fillText(badgeText, barContentX + Math.round(16 * scale), badgeY + Math.round(25 * scale));
 
-    // Verified blue circle — more distant from badge
+    // Verified blue circle
     const verGap = Math.round(26 * scale);
     const verX = barContentX + badgeW + verGap;
     const verY = barY + barH / 2;
@@ -243,105 +340,115 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
     ctx.fillRect(verX + Math.round(22 * scale), barY + Math.round(10 * scale), 2, barH - Math.round(20 * scale));
     ctx.globalAlpha = 1;
 
-    // Date — bigger & bolder
+    // Date
     ctx.fillStyle = "#ffffff";
-    ctx.font = `bold ${Math.round(22 * scale)}px 'SolaimanLipi', sans-serif`;
+    ctx.font = `bold ${Math.round(24 * scale)}px 'SolaimanLipi', sans-serif`;
     const dateStr = new Date(post.created_at).toLocaleDateString("bn-BD", {
       weekday: "long", year: "numeric", month: "long", day: "numeric",
     });
-    ctx.fillText(dateStr, verX + Math.round(34 * scale), barY + barH / 2 + Math.round(7 * scale));
+    ctx.fillText(dateStr, verX + Math.round(34 * scale), barY + barH / 2 + Math.round(8 * scale));
 
-    // Website with better globe — bigger & white text
+    // Website with globe
     ctx.fillStyle = "#ffffff";
-    ctx.font = `bold ${Math.round(22 * scale)}px 'SolaimanLipi', sans-serif`;
+    ctx.font = `bold ${Math.round(24 * scale)}px 'SolaimanLipi', sans-serif`;
     const siteW = ctx.measureText(websiteText).width;
-    const globeR = Math.round(11 * scale);
-    const globeX = PAD + imgAreaW - Math.round(14 * scale) - siteW - Math.round(28 * scale);
+    const globeR = Math.round(12 * scale);
+    const globeX = PAD + imgAreaW - Math.round(14 * scale) - siteW - Math.round(32 * scale);
     drawGlobeIcon(ctx, globeX, barY + barH / 2, globeR, "#ffffff");
     ctx.fillStyle = "#ffffff";
-    ctx.fillText(websiteText, globeX + globeR + Math.round(8 * scale), barY + barH / 2 + Math.round(7 * scale));
+    ctx.fillText(websiteText, globeX + globeR + Math.round(10 * scale), barY + barH / 2 + Math.round(8 * scale));
 
     // ── Title — more gap from bar ──
-    const titleY = barY + barH + Math.round(70 * scale);
+    const titleY = barY + barH + Math.round(90 * scale);
     ctx.fillStyle = c.text;
     const scaledFontSize = Math.round(fontSize * scale);
     const scaledLineSpacing = Math.round(lineSpacing * scale);
-    const titleEndY = wrapTextCentered(ctx, title, PAD, imgAreaW, titleY, scaledLineSpacing,
+    wrapTextCentered(ctx, title, PAD + Math.round(10 * scale), imgAreaW - Math.round(20 * scale), titleY, scaledLineSpacing,
       `bold ${scaledFontSize}px 'SolaimanLipi', sans-serif`);
 
-    // ── Ad image (optional, between title and bottom bar) ──
-    if (adImageUrl) {
-      try {
-        const adImg = await loadImage(adImageUrl);
-        const adAreaTop = titleEndY + Math.round(20 * scale);
-        const bottomBarH = Math.round(66 * scale);
-        const bottomBarY = HEIGHT - bottomBarH;
-        const adAreaH = Math.min(Math.round(100 * scale), bottomBarY - adAreaTop - Math.round(10 * scale));
-        if (adAreaH > 30) {
-          const adW = (adImg.width / adImg.height) * adAreaH;
-          const adX = (WIDTH - adW) / 2;
-          ctx.drawImage(adImg, adX, adAreaTop, adW, adAreaH);
-        }
-      } catch { /* skip ad */ }
-    }
-
-    // ── Bottom bar — taller ──
-    const bottomBarH = Math.round(66 * scale);
-    const bottomBarY = HEIGHT - bottomBarH;
+    // ── Bottom bar ──
+    const bottomBarH = Math.round(70 * scale);
+    const bottomBarY = mainCardH - bottomBarH;
     ctx.fillStyle = c.bottom;
     ctx.fillRect(0, bottomBarY, WIDTH, bottomBarH);
     drawStripeTexture(ctx, 0, bottomBarY, WIDTH, bottomBarH, "#ffffff");
 
     const iconYPos = bottomBarY + bottomBarH / 2;
-    const textYPos = bottomBarY + bottomBarH / 2 + Math.round(7 * scale);
+    const textYPos = bottomBarY + bottomBarH / 2 + Math.round(8 * scale);
 
-    // Social icons — bigger sizes, tighter spacing
-    const socialSpacing = Math.round(WIDTH / 3.8);
-    const iconBtnH = Math.round(26 * scale);
-    const iconBtnW = Math.round(34 * scale);
-    const socialFontSize = Math.round(19 * scale);
+    const socialIconSize = Math.round(30 * scale);
+    const socialFontSize = Math.round(21 * scale);
+    const socialSpacing = Math.round(WIDTH / 4);
 
     // YouTube
-    const ytX = Math.round(28 * scale);
-    ctx.fillStyle = "#FF0000";
-    ctx.beginPath(); ctx.roundRect(ytX, iconYPos - iconBtnH / 2, iconBtnW, iconBtnH, 5 * scale); ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.font = `${Math.round(15 * scale)}px sans-serif`;
-    ctx.fillText("▶", ytX + Math.round(11 * scale), iconYPos + Math.round(5 * scale));
+    const ytX = Math.round(24 * scale);
+    const ytIconW = drawYouTubeIcon(ctx, ytX, iconYPos, socialIconSize);
     ctx.fillStyle = "#ffffff";
     ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
-    ctx.fillText(`| ${socialHandles[0]}`, ytX + iconBtnW + Math.round(8 * scale), textYPos);
+    ctx.fillText(socialHandles[0], ytX + ytIconW + Math.round(8 * scale), textYPos);
 
-    // LinkedIn
-    const liX = ytX + socialSpacing;
-    ctx.fillStyle = "#0A66C2";
-    const liW = Math.round(26 * scale);
-    ctx.beginPath(); ctx.roundRect(liX, iconYPos - iconBtnH / 2, liW, iconBtnH, 4 * scale); ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.font = `bold ${Math.round(17 * scale)}px sans-serif`;
-    ctx.fillText("in", liX + Math.round(4 * scale), iconYPos + Math.round(6 * scale));
+    // Instagram (replacing LinkedIn)
+    const igX = ytX + socialSpacing;
+    const igIconW = drawInstagramIcon(ctx, igX, iconYPos, socialIconSize);
     ctx.fillStyle = "#ffffff";
     ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
-    ctx.fillText(`| ${socialHandles[1]}`, liX + liW + Math.round(8 * scale), textYPos);
+    ctx.fillText(socialHandles[1], igX + igIconW + Math.round(8 * scale), textYPos);
 
     // Facebook
-    const fbX = liX + socialSpacing;
-    ctx.fillStyle = "#1877F2";
-    const fbR = Math.round(14 * scale);
-    ctx.beginPath(); ctx.arc(fbX + fbR, iconYPos, fbR, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.font = `bold ${Math.round(19 * scale)}px sans-serif`;
-    ctx.fillText("f", fbX + fbR - Math.round(6 * scale), iconYPos + Math.round(7 * scale));
+    const fbX = igX + socialSpacing;
+    const fbR = Math.round(15 * scale);
+    const fbIconW = drawFacebookIcon(ctx, fbX, iconYPos, fbR);
     ctx.fillStyle = "#ffffff";
     ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
-    ctx.fillText(`| ${socialHandles[2]}`, fbX + fbR * 2 + Math.round(8 * scale), textYPos);
+    ctx.fillText(socialHandles[2], fbX + fbIconW + Math.round(8 * scale), textYPos);
 
-    // Right text — bigger
+    // Right text with clear arrow
     ctx.fillStyle = "#ffffff";
-    ctx.font = `bold ${socialFontSize}px 'SolaimanLipi', sans-serif`;
-    const brText = `✓ ${bottomRight}`;
+    ctx.font = `bold ${Math.round(22 * scale)}px 'SolaimanLipi', sans-serif`;
+    const brText = bottomRight;
     const brW = ctx.measureText(brText).width;
-    ctx.fillText(brText, WIDTH - Math.round(28 * scale) - brW, textYPos);
+    const arrowSize = Math.round(12 * scale);
+    const brTotalW = brW + arrowSize + Math.round(16 * scale);
+    const brStartX = WIDTH - Math.round(24 * scale) - brTotalW;
+    
+    // Draw checkmark circle
+    const checkR = Math.round(11 * scale);
+    ctx.fillStyle = "#22c55e";
+    ctx.beginPath();
+    ctx.arc(brStartX + checkR, iconYPos, checkR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `bold ${Math.round(14 * scale)}px sans-serif`;
+    ctx.fillText("✓", brStartX + checkR - Math.round(5 * scale), iconYPos + Math.round(5 * scale));
+    
+    // Text
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `bold ${Math.round(22 * scale)}px 'SolaimanLipi', sans-serif`;
+    ctx.fillText(brText, brStartX + checkR * 2 + Math.round(8 * scale), textYPos);
+    
+    // Arrow pointing down ↓
+    const arrowX = brStartX + checkR * 2 + Math.round(8 * scale) + brW + Math.round(8 * scale);
+    const arrowY = iconYPos;
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = Math.round(2.5 * scale);
+    ctx.beginPath();
+    ctx.moveTo(arrowX, arrowY - arrowSize);
+    ctx.lineTo(arrowX, arrowY + arrowSize);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(arrowX - arrowSize * 0.6, arrowY + arrowSize * 0.3);
+    ctx.lineTo(arrowX, arrowY + arrowSize);
+    ctx.lineTo(arrowX + arrowSize * 0.6, arrowY + arrowSize * 0.3);
+    ctx.stroke();
+
+    // ── Ad image at the very bottom, separate from main card ──
+    if (adImg && adTotalH > 0) {
+      const adAreaTop = mainCardH + Math.round(4 * scale);
+      const adAreaH = adTotalH - Math.round(8 * scale);
+      const adW = Math.min(WIDTH, (adImg.width / adImg.height) * adAreaH);
+      const adX = (WIDTH - adW) / 2;
+      ctx.drawImage(adImg, adX, adAreaTop, adW, adAreaH);
+    }
 
     setPreviewUrl(canvas.toDataURL("image/png"));
   }, [post, title, colorIdx, websiteText, badgeText, socialHandles, bottomRight, fontSize, lineSpacing, logoUrl, customImageUrl, adImageUrl, resIdx]);
@@ -403,7 +510,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
               {/* Title */}
               <div>
                 <Label>শিরোনাম</Label>
-                <Textarea rows={2} value={title} onChange={(e) => setTitle(e.target.value)} className="text-sm" />
+                <Textarea rows={3} value={title} onChange={(e) => setTitle(e.target.value)} className="text-sm" />
               </div>
 
               {/* Font size & line spacing */}
@@ -453,7 +560,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
               {/* Ad Image URL */}
               <div>
                 <Label className="flex items-center gap-1"><ImageIcon size={12} /> বিজ্ঞাপন ছবি URL (ঐচ্ছিক)</Label>
-                <Input value={adImageUrl} onChange={(e) => setAdImageUrl(e.target.value)} placeholder="শিরোনামের নিচে বিজ্ঞাপন ছবি দিন" className="text-sm" />
+                <Input value={adImageUrl} onChange={(e) => setAdImageUrl(e.target.value)} placeholder="কার্ডের একেবারে নিচে বিজ্ঞাপন ছবি দিন" className="text-sm" />
               </div>
 
               {/* Badge & Website */}
@@ -465,7 +572,7 @@ const PhotoCardEditor = ({ open, onOpenChange, post, editMode = true }: PhotoCar
               {/* Social handles */}
               <div className="grid grid-cols-3 gap-2">
                 <div><Label>ইউটিউব</Label><Input value={socialHandles[0]} onChange={(e) => updateHandle(0, e.target.value)} className="text-sm" /></div>
-                <div><Label>লিংকডইন</Label><Input value={socialHandles[1]} onChange={(e) => updateHandle(1, e.target.value)} className="text-sm" /></div>
+                <div><Label>ইনস্টাগ্রাম</Label><Input value={socialHandles[1]} onChange={(e) => updateHandle(1, e.target.value)} className="text-sm" /></div>
                 <div><Label>ফেসবুক</Label><Input value={socialHandles[2]} onChange={(e) => updateHandle(2, e.target.value)} className="text-sm" /></div>
               </div>
 
