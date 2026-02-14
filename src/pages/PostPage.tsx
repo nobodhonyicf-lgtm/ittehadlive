@@ -159,6 +159,7 @@ const PostPage = () => {
         <PhotoCardEditor
           open={photoCardOpen}
           onOpenChange={setPhotoCardOpen}
+          editMode={false}
           post={{
             title: post.title,
             slug: post.slug,
