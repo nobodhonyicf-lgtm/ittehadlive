@@ -38,7 +38,7 @@ const Footer = () => {
             <ul className="text-sm opacity-80 space-y-2">
               <li><a href="/students" className="hover:underline hover:opacity-100 transition-opacity">শিক্ষার্থী ডিরেক্টরি</a></li>
               <li><a href="/contact" className="hover:underline hover:opacity-100 transition-opacity">যোগাযোগ</a></li>
-              <li><a href="/admin/login" className="hover:underline hover:opacity-100 transition-opacity">অ্যাডমিন লগইন</a></li>
+              
             </ul>
           </div>
 
