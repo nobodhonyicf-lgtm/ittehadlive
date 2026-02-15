@@ -1308,6 +1308,7 @@ export type Database = {
           roll_number: string
         }[]
       }
+      has_any_role: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
