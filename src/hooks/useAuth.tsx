@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -20,14 +20,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [hasAnyRole, setHasAnyRole] = useState(false);
   const [loading, setLoading] = useState(true);
+  const initializedRef = useRef(false);
 
-  const checkAdminAndFinish = useCallback(async (currentUser: User | null) => {
+  const checkRoles = useCallback(async (currentUser: User | null) => {
     if (currentUser) {
       try {
-        const { data: adminData } = await supabase.rpc("is_admin");
-        setIsAdmin(!!adminData);
-        const { data: roleData } = await supabase.rpc("has_any_role");
-        setHasAnyRole(!!roleData);
+        const [adminRes, roleRes] = await Promise.all([
+          supabase.rpc("is_admin"),
+          supabase.rpc("has_any_role"),
+        ]);
+        setIsAdmin(!!adminRes.data);
+        setHasAnyRole(!!roleRes.data);
       } catch {
         setIsAdmin(false);
         setHasAnyRole(false);
@@ -36,7 +39,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAdmin(false);
       setHasAnyRole(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -48,8 +50,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
 
-      // Sync social profile data on sign in
       if (event === 'SIGNED_IN' && newSession?.user) {
+        // Sync social profile data
         const meta = newSession.user.user_metadata;
         const fullName = meta?.full_name || meta?.name;
         const avatarUrl = meta?.avatar_url || meta?.picture;
@@ -61,39 +63,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             .from("profiles")
             .update(updates)
             .eq("user_id", newSession.user.id)
-            .then(() => {}); // fire and forget
+            .then(() => {});
         }
-        setLoading(true);
-        setTimeout(() => {
-          if (mounted) checkAdminAndFinish(newSession.user ?? null);
-        }, 0);
+
+        // Only re-check roles if initial load is already done
+        // (to avoid double-checking on first load)
+        if (initializedRef.current) {
+          setLoading(true);
+          await checkRoles(newSession.user);
+          if (mounted) setLoading(false);
+        }
       } else if (event === 'SIGNED_OUT') {
         setIsAdmin(false);
         setHasAnyRole(false);
         setLoading(false);
       }
-      // TOKEN_REFRESHED: don't change loading/isAdmin
     });
 
     // THEN check existing session
-    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
-      if (!mounted) return;
-      setSession(existingSession);
-      setUser(existingSession?.user ?? null);
-      checkAdminAndFinish(existingSession?.user ?? null);
-    });
+    const initAuth = async () => {
+      try {
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        if (!mounted) return;
+        setSession(existingSession);
+        setUser(existingSession?.user ?? null);
+        await checkRoles(existingSession?.user ?? null);
+      } finally {
+        if (mounted) {
+          initializedRef.current = true;
+          setLoading(false);
+        }
+      }
+    };
+
+    initAuth();
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [checkAdminAndFinish]);
+  }, [checkRoles]);
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) setLoading(false);
-    // On success, onAuthStateChange SIGNED_IN will trigger checkAdminAndFinish
+    // On success, onAuthStateChange SIGNED_IN will trigger role check
     return { error };
   };
 
