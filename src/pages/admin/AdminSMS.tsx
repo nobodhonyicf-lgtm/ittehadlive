@@ -363,9 +363,12 @@ const AdminSMS = () => {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  বাংলা ইউনিকোড SMS এ ৭০ অক্ষর = ১ SMS, ইংরেজিতে ১৬০ অক্ষর = ১ SMS
-                </p>
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>বাংলা ইউনিকোড: ৭০ অক্ষর = ১ SMS | ইংরেজি: ১৬০ অক্ষর = ১ SMS</span>
+                  <span className="font-medium">
+                    {message.length} অক্ষর | আনুমানিক {message.length === 0 ? 0 : Math.ceil(message.length / 70)} SMS (বাংলা)
+                  </span>
+                </div>
               </div>
 
               <Button onClick={sendSMS} disabled={sending} className="gap-2">
@@ -398,6 +401,7 @@ const AdminSMS = () => {
                   value={templateContent}
                   onChange={(e) => setTemplateContent(e.target.value)}
                 />
+                <p className="text-xs text-muted-foreground mt-1 text-right">{templateContent.length} অক্ষর</p>
               </div>
               <Button
                 onClick={() => addTemplateMutation.mutate({ name: templateName, content: templateContent })}

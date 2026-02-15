@@ -28,7 +28,7 @@ const AdminEmail = () => {
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [sending, setSending] = useState(false);
-  const [recipientSource, setRecipientSource] = useState<"manual" | "contacts" | "customers">("manual");
+  const [recipientSource, setRecipientSource] = useState<"manual" | "contacts" | "customers" | "branches">("manual");
 
   // Load SMTP settings
   const { data: settings, isLoading } = useQuery({
@@ -49,6 +49,15 @@ const AdminEmail = () => {
     queryFn: async () => {
       const { data } = await supabase.from("contact_submissions").select("email, name").not("email", "is", null);
       return data?.filter((c) => c.email) || [];
+    },
+  });
+
+  // Load branches
+  const { data: branches } = useQuery({
+    queryKey: ["admin_branches_email"],
+    queryFn: async () => {
+      const { data } = await supabase.from("branches").select("id, name, email").eq("is_active", true).order("sort_order");
+      return data || [];
     },
   });
 
@@ -104,8 +113,9 @@ const AdminEmail = () => {
         .filter(Boolean);
     } else if (recipientSource === "contacts") {
       recipients = contacts?.map((c) => c.email!).filter(Boolean) || [];
+    } else if (recipientSource === "branches") {
+      recipients = branches?.map((b) => b.email).filter(Boolean) as string[] || [];
     } else if (recipientSource === "customers") {
-      // We need to get emails from auth - but we can't directly. We'll use a workaround.
       toast.error("কাস্টমার ইমেইল পেতে প্রোফাইলে ইমেইল ফিল্ড প্রয়োজন।");
       return;
     }
@@ -271,6 +281,13 @@ const AdminEmail = () => {
                     <Users size={14} className="mr-1" />
                     সব কন্টাক্ট ({contacts?.length || 0})
                   </Button>
+                  <Button
+                    variant={recipientSource === "branches" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setRecipientSource("branches")}
+                  >
+                    সব শাখা ({branches?.filter(b => b.email).length || 0})
+                  </Button>
                 </div>
               </div>
 
@@ -295,6 +312,20 @@ const AdminEmail = () => {
                 </div>
               )}
 
+              {recipientSource === "branches" && (
+                <div className="p-3 bg-muted rounded text-sm">
+                  <strong>{branches?.filter(b => b.email).length || 0}</strong>টি শাখার ইমেইলে পাঠানো হবে।
+                  <div className="mt-1 max-h-24 overflow-y-auto text-xs text-muted-foreground">
+                    {branches?.filter(b => b.email).map((b) => `${b.name} (${b.email})`).join(", ")}
+                  </div>
+                  {branches?.some(b => !b.email) && (
+                    <p className="text-xs text-destructive mt-1">
+                      ⚠️ {branches.filter(b => !b.email).length}টি শাখায় ইমেইল নেই
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div>
                 <Label className="mb-1 block">সাবজেক্ট</Label>
                 <Input
@@ -312,9 +343,10 @@ const AdminEmail = () => {
                   value={emailBody}
                   onChange={(e) => setEmailBody(e.target.value)}
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  HTML ট্যাগ ব্যবহার করতে পারেন: &lt;h2&gt;, &lt;p&gt;, &lt;b&gt;, &lt;a href=""&gt; ইত্যাদি
-                </p>
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>HTML ট্যাগ ব্যবহার করতে পারেন: &lt;h2&gt;, &lt;p&gt;, &lt;b&gt;, &lt;a href=""&gt; ইত্যাদি</span>
+                  <span className="font-medium">{emailBody.length} অক্ষর</span>
+                </div>
               </div>
 
               <Button onClick={sendEmail} disabled={sending} className="gap-2">

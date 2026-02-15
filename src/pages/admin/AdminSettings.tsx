@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Settings, Palette, Image, Globe, Search } from "lucide-react";
+import { Settings, Palette, Image, Globe, Search, ShieldCheck } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
 const AdminSettings = () => {
@@ -55,12 +56,15 @@ const AdminSettings = () => {
     twitter_handle: "Twitter হ্যান্ডেল",
     photocard_ad_enabled: "ফটোকার্ডে বিজ্ঞাপন সক্রিয়",
     photocard_ad_image: "ফটোকার্ড বিজ্ঞাপন ছবি URL",
+    otp_enabled: "ইমেইল ওটিপি যাচাই সক্রিয়",
+    two_fa_enabled: "টু-ফ্যাক্টর অথেন্টিকেশন (2FA) সক্রিয়",
   };
 
   const brandingKeys = ["logo_url", "favicon_url", "primary_color"];
   const signatureKeys = ["signature_principal", "signature_controller"];
   const seoKeys = ["default_og_image", "meta_keywords", "google_analytics_id", "facebook_page_url", "twitter_handle"];
   const adKeys = ["photocard_ad_enabled", "photocard_ad_image"];
+  const authKeys = ["otp_enabled", "two_fa_enabled"];
 
   if (isLoading) return <div className="text-center py-8">লোড হচ্ছে...</div>;
 
@@ -68,7 +72,8 @@ const AdminSettings = () => {
   const signatureSettings = settings?.filter(s => signatureKeys.includes(s.key));
   const seoSettings = settings?.filter(s => seoKeys.includes(s.key));
   const adSettings = settings?.filter(s => adKeys.includes(s.key));
-  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key) && !adKeys.includes(s.key));
+  const authSettings = settings?.filter(s => authKeys.includes(s.key));
+  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key) && !adKeys.includes(s.key) && !authKeys.includes(s.key));
 
   const renderSettingField = (s: any) => (
     <div key={s.id}>
@@ -159,6 +164,50 @@ const AdminSettings = () => {
               )}
             </div>
           ))}
+        </CardContent>
+      </Card>
+
+      {/* Auth Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2"><ShieldCheck size={18} /> অথেন্টিকেশন সেটিংস</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {authKeys.map((key) => {
+            const setting = settings?.find(s => s.key === key);
+            const currentVal = setting ? (values[setting.id] ?? setting.value ?? "false") : "false";
+            const isEnabled = currentVal === "true";
+
+            const handleToggle = async (checked: boolean) => {
+              const newVal = checked ? "true" : "false";
+              if (setting) {
+                updateMutation.mutate({ id: setting.id, value: newVal });
+              } else {
+                // Create the setting
+                const { error } = await supabase.from("site_settings").insert({ key, value: newVal });
+                if (error) {
+                  toast.error("সংরক্ষণ ব্যর্থ");
+                } else {
+                  qc.invalidateQueries({ queryKey: ["admin_settings"] });
+                  toast.success("সংরক্ষিত");
+                }
+              }
+            };
+
+            return (
+              <div key={key} className="flex items-center justify-between p-3 bg-muted rounded">
+                <div>
+                  <Label className="font-semibold">{keyLabels[key] || key}</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {key === "otp_enabled"
+                      ? "চালু করলে ইউজাররা রেজিস্ট্রেশনের পর ইমেইল যাচাই করতে হবে"
+                      : "চালু করলে ইউজাররা লগইনের সময় অতিরিক্ত নিরাপত্তা স্তর ব্যবহার করতে পারবে"}
+                  </p>
+                </div>
+                <Switch checked={isEnabled} onCheckedChange={handleToggle} />
+              </div>
+            );
+          })}
         </CardContent>
       </Card>
 
