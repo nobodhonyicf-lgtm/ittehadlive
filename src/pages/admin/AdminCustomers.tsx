@@ -7,8 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
-import { Users, MessageCircle, Send, Mail } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Users, MessageCircle, Send, Mail, ShieldCheck } from "lucide-react";
 import { format } from "date-fns";
+
+const MAX_REPLY_CHARS = 1000;
 
 const AdminUsers = () => {
   const qc = useQueryClient();
@@ -61,6 +64,36 @@ const AdminUsers = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin_customer_messages"] }),
   });
 
+  // Role change mutation
+  const roleMutation = useMutation({
+    mutationFn: async ({ userId, newRole }: { userId: string; newRole: "admin" | "user" }) => {
+      // Check if role entry exists
+      const { data: existing } = await supabase
+        .from("user_roles")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from("user_roles")
+          .update({ role: newRole })
+          .eq("user_id", userId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("user_roles")
+          .insert({ user_id: userId, role: newRole });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin_users_list"] });
+      toast.success("রোল পরিবর্তন সফল");
+    },
+    onError: () => toast.error("রোল পরিবর্তন ব্যর্থ"),
+  });
+
   // Find user email for a message
   const getUserEmail = (userId: string) => {
     const user = usersData?.find((u: any) => u.id === userId);
@@ -110,6 +143,7 @@ const AdminUsers = () => {
                         <th className="text-left p-2">রোল</th>
                         <th className="text-left p-2">যোগদান</th>
                         <th className="text-left p-2">সর্বশেষ লগইন</th>
+                        <th className="text-left p-2">অ্যাকশন</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -129,6 +163,22 @@ const AdminUsers = () => {
                           </td>
                           <td className="p-2 text-xs text-muted-foreground">
                             {user.last_sign_in_at ? format(new Date(user.last_sign_in_at), "dd/MM/yyyy HH:mm") : "—"}
+                          </td>
+                          <td className="p-2">
+                            <Select
+                              value={user.role}
+                              onValueChange={(val) =>
+                                roleMutation.mutate({ userId: user.id, newRole: val as "admin" | "user" })
+                              }
+                            >
+                              <SelectTrigger className="w-28 h-8 text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="user">User</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </td>
                         </tr>
                       ))}
@@ -174,12 +224,18 @@ const AdminUsers = () => {
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <Textarea
-                        rows={3}
-                        placeholder="উত্তর লিখুন..."
-                        value={replyText[msg.id] || ""}
-                        onChange={(e) => setReplyText({ ...replyText, [msg.id]: e.target.value })}
-                      />
+                      <div>
+                        <Textarea
+                          rows={3}
+                          placeholder="উত্তর লিখুন..."
+                          maxLength={MAX_REPLY_CHARS}
+                          value={replyText[msg.id] || ""}
+                          onChange={(e) => setReplyText({ ...replyText, [msg.id]: e.target.value })}
+                        />
+                        <p className="text-xs text-muted-foreground mt-1 text-right">
+                          {(replyText[msg.id] || "").length}/{MAX_REPLY_CHARS} অক্ষর
+                        </p>
+                      </div>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
