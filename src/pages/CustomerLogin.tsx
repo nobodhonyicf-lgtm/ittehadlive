@@ -69,12 +69,34 @@ const CustomerLogin = () => {
 
   const handleSocialLogin = async (provider: "google" | "apple") => {
     setSocialLoading(provider);
-    const { error } = await lovable.auth.signInWithOAuth(provider, {
-      redirect_uri: window.location.origin,
-    });
-    setSocialLoading(null);
-    if (error) {
-      toast.error(`${provider} লগইন ব্যর্থ: ${error.message}`);
+    try {
+      const isCustomDomain =
+        !window.location.hostname.includes("lovable.app") &&
+        !window.location.hostname.includes("lovableproject.com");
+
+      if (isCustomDomain) {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo: window.location.origin,
+            skipBrowserRedirect: true,
+          },
+        });
+        if (error) throw error;
+        if (data?.url) {
+          window.location.href = data.url;
+          return;
+        }
+      } else {
+        const { error } = await lovable.auth.signInWithOAuth(provider, {
+          redirect_uri: window.location.origin,
+        });
+        if (error) throw error;
+      }
+    } catch (err: any) {
+      toast.error(`${provider} লগইন ব্যর্থ: ${err.message}`);
+    } finally {
+      setSocialLoading(null);
     }
   };
 
