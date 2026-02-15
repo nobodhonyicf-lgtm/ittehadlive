@@ -75,11 +75,18 @@ const CustomerLogin = () => {
         !window.location.hostname.includes("lovableproject.com");
 
       if (isCustomDomain) {
-        // On custom domain, redirect through lovable.app's OAuth bridge
-        const lovableOrigin = "https://ittehadlive.lovable.app";
-        const returnTo = encodeURIComponent(window.location.origin + "/oauth-callback");
-        window.location.href = `${lovableOrigin}/oauth-bridge?provider=${provider}&return_to=${returnTo}`;
-        return;
+        // On custom domain, use Supabase OAuth directly (bypasses auth-bridge)
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo: `${window.location.origin}/profile`,
+            skipBrowserRedirect: true,
+          },
+        });
+        if (error) throw error;
+        if (data?.url) {
+          window.location.href = data.url;
+        }
       } else {
         const { error } = await lovable.auth.signInWithOAuth(provider, {
           redirect_uri: window.location.origin,
