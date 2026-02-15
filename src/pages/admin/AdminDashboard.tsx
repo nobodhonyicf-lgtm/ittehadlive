@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, FileText, Bell, Image, Settings, Menu as MenuIcon,
   Video, Users, Mail, Tag, LogOut, ChevronLeft, Newspaper, Building2,
-  GraduationCap, BookOpen, ClipboardList, BarChart3, Clock, Package, MessageCircle
+  GraduationCap, BookOpen, ClipboardList, BarChart3, Clock, Package, MessageCircle, MessageSquare
 } from "lucide-react";
 import AdminPosts from "./AdminPosts";
 import AdminPages from "./AdminPages";
@@ -33,6 +33,7 @@ import AdminBooks from "./AdminBooks";
 import AdminBookOrders from "./AdminBookOrders";
 import AdminBookReviews from "./AdminBookReviews";
 import AdminEmail from "./AdminEmail";
+import AdminSMS from "./AdminSMS";
 
 const navItems = [
   { label: "ড্যাশবোর্ড", icon: LayoutDashboard, path: "/admin" },
@@ -61,6 +62,7 @@ const navItems = [
   { label: "ক্যাটাগরি", icon: Tag, path: "/admin/categories" },
   { label: "যোগাযোগ", icon: Mail, path: "/admin/contacts" },
   { label: "ইমেইল", icon: Mail, path: "/admin/email" },
+  { label: "SMS", icon: MessageSquare, path: "/admin/sms" },
   { label: "সেটিংস", icon: Settings, path: "/admin/settings" },
 ];
 
@@ -162,6 +164,7 @@ const AdminDashboard = () => {
           <Route path="categories" element={<AdminCategories />} />
           <Route path="contacts" element={<AdminContacts />} />
           <Route path="email" element={<AdminEmail />} />
+          <Route path="sms" element={<AdminSMS />} />
           <Route path="settings" element={<AdminSettings />} />
         </Routes>
       </main>
