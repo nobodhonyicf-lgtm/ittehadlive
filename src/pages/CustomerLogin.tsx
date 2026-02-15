@@ -75,11 +75,10 @@ const CustomerLogin = () => {
         !window.location.hostname.includes("lovableproject.com");
 
       if (isCustomDomain) {
-        // On custom domain, initiate OAuth through the lovable.app domain
-        // where the auth bridge (/~oauth) is available
+        // On custom domain, redirect through lovable.app's OAuth bridge
         const lovableOrigin = "https://ittehadlive.lovable.app";
-        const redirectUri = encodeURIComponent(window.location.origin);
-        window.location.href = `${lovableOrigin}/~oauth/initiate?provider=${provider}&redirect_uri=${redirectUri}`;
+        const returnTo = encodeURIComponent(window.location.origin + "/oauth-callback");
+        window.location.href = `${lovableOrigin}/oauth-bridge?provider=${provider}&return_to=${returnTo}`;
         return;
       } else {
         const { error } = await lovable.auth.signInWithOAuth(provider, {
