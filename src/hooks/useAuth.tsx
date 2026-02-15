@@ -37,16 +37,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let mounted = true;
 
     // Set up listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       if (!mounted) return;
       setSession(newSession);
       setUser(newSession?.user ?? null);
 
-      // Only run admin check on meaningful events
-      if (event === 'SIGNED_IN') {
+      // Sync social profile data on sign in
+      if (event === 'SIGNED_IN' && newSession?.user) {
+        const meta = newSession.user.user_metadata;
+        const fullName = meta?.full_name || meta?.name;
+        const avatarUrl = meta?.avatar_url || meta?.picture;
+        if (fullName || avatarUrl) {
+          const updates: Record<string, string> = {};
+          if (fullName) updates.full_name = fullName;
+          if (avatarUrl) updates.avatar_url = avatarUrl;
+          supabase
+            .from("profiles")
+            .update(updates)
+            .eq("user_id", newSession.user.id)
+            .then(() => {}); // fire and forget
+        }
         setLoading(true);
         setTimeout(() => {
-          if (mounted) checkAdminAndFinish(newSession?.user ?? null);
+          if (mounted) checkAdminAndFinish(newSession.user ?? null);
         }, 0);
       } else if (event === 'SIGNED_OUT') {
         setIsAdmin(false);
