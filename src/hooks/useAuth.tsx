@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const initializedRef = useRef(false);
 
-  const checkRoles = useCallback(async (currentUser: User | null) => {
+  const checkRoles = useCallback(async (currentUser: User | null, keepOnError = false) => {
     if (currentUser) {
       try {
         const [adminRes, roleRes] = await Promise.all([
@@ -32,8 +32,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsAdmin(!!adminRes.data);
         setHasAnyRole(!!roleRes.data);
       } catch {
-        setIsAdmin(false);
-        setHasAnyRole(false);
+        // On re-check errors, keep existing values to prevent false redirects
+        if (!keepOnError) {
+          setIsAdmin(false);
+          setHasAnyRole(false);
+        }
       }
     } else {
       setIsAdmin(false);
@@ -67,10 +70,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Only re-check roles if initial load is already done
-        // (to avoid double-checking on first load)
+        // keepOnError=true prevents false redirects on network hiccups
         if (initializedRef.current) {
           setLoading(true);
-          await checkRoles(newSession.user);
+          await checkRoles(newSession.user, true);
           if (mounted) setLoading(false);
         }
       } else if (event === 'SIGNED_OUT') {
