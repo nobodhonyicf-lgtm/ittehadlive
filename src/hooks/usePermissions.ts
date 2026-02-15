@@ -11,19 +11,22 @@ export interface SectionPermission {
 export const usePermissions = () => {
   const { user } = useAuth();
 
-  const { data: userRole } = useQuery({
+  const { data: userRoleData } = useQuery({
     queryKey: ["user_role", user?.id],
     queryFn: async () => {
-      if (!user?.id) return "user";
+      if (!user?.id) return { role: "user", custom_role_name: null };
       const { data } = await supabase
         .from("user_roles")
-        .select("role")
+        .select("role, custom_role_name")
         .eq("user_id", user.id)
         .maybeSingle();
-      return data?.role || "user";
+      return { role: data?.role || "user", custom_role_name: data?.custom_role_name || null };
     },
     enabled: !!user?.id,
   });
+
+  // Use custom_role_name for permissions if set, otherwise use standard role
+  const userRole = userRoleData?.custom_role_name || userRoleData?.role || "user";
 
   const { data: permissions } = useQuery({
     queryKey: ["admin_permissions", userRole],

@@ -167,25 +167,27 @@ const AdminUsers = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin_customer_messages"] }),
   });
 
-  // Role change mutation
+  // Role change mutation (standard role)
   const roleMutation = useMutation({
-    mutationFn: async ({ userId, newRole }: { userId: string; newRole: "admin" | "user" }) => {
+    mutationFn: async ({ userId, newRole, customRoleName }: { userId: string; newRole: "admin" | "user"; customRoleName?: string | null }) => {
       const { data: existing } = await supabase
         .from("user_roles")
         .select("id")
         .eq("user_id", userId)
         .maybeSingle();
 
+      const payload: any = { role: newRole, custom_role_name: customRoleName || null };
+
       if (existing) {
         const { error } = await supabase
           .from("user_roles")
-          .update({ role: newRole })
+          .update(payload)
           .eq("user_id", userId);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("user_roles")
-          .insert({ user_id: userId, role: newRole });
+          .insert({ user_id: userId, ...payload });
         if (error) throw error;
       }
     },
@@ -293,7 +295,8 @@ const AdminUsers = () => {
                         <th className="text-left p-2">রোল</th>
                         <th className="text-left p-2">যোগদান</th>
                         <th className="text-left p-2">সর্বশেষ লগইন</th>
-                        <th className="text-left p-2">রোল পরিবর্তন</th>
+                        <th className="text-left p-2">স্ট্যান্ডার্ড রোল</th>
+                        <th className="text-left p-2">কাস্টম রোল</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -304,9 +307,16 @@ const AdminUsers = () => {
                           <td className="p-2">{user.profile?.phone || "—"}</td>
                           <td className="p-2">{user.profile?.district || "—"}</td>
                           <td className="p-2">
-                            <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                              {user.role === "admin" ? "এডমিন" : "ইউজার"}
-                            </Badge>
+                            <div className="flex flex-wrap gap-1">
+                              <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                                {user.role === "admin" ? "এডমিন" : "ইউজার"}
+                              </Badge>
+                              {user.custom_role_display && (
+                                <Badge variant="outline" className="text-xs">
+                                  {user.custom_role_display}
+                                </Badge>
+                              )}
+                            </div>
                           </td>
                           <td className="p-2 text-xs text-muted-foreground">
                             {user.created_at ? format(new Date(user.created_at), "dd/MM/yyyy") : "—"}
@@ -315,18 +325,40 @@ const AdminUsers = () => {
                             {user.last_sign_in_at ? format(new Date(user.last_sign_in_at), "dd/MM/yyyy HH:mm") : "—"}
                           </td>
                           <td className="p-2">
+                            <div className="flex gap-1">
+                              <Select
+                                value={user.role}
+                                onValueChange={(val) =>
+                                  roleMutation.mutate({ userId: user.id, newRole: val as "admin" | "user", customRoleName: user.custom_role_name })
+                                }
+                              >
+                                <SelectTrigger className="w-24 h-8 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="user">ইউজার</SelectItem>
+                                  <SelectItem value="admin">এডমিন</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </td>
+                          <td className="p-2">
                             <Select
-                              value={user.role}
+                              value={user.custom_role_name || "none"}
                               onValueChange={(val) =>
-                                roleMutation.mutate({ userId: user.id, newRole: val as "admin" | "user" })
+                                roleMutation.mutate({ userId: user.id, newRole: user.role as "admin" | "user", customRoleName: val === "none" ? null : val })
                               }
                             >
                               <SelectTrigger className="w-28 h-8 text-xs">
-                                <SelectValue />
+                                <SelectValue placeholder="কোনটি নয়" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="user">ইউজার</SelectItem>
-                                <SelectItem value="admin">এডমিন</SelectItem>
+                                <SelectItem value="none">কোনটি নয়</SelectItem>
+                                {customRoles?.filter((r: any) => !r.is_system).map((role: any) => (
+                                  <SelectItem key={role.role_name} value={role.role_name}>
+                                    {role.display_name}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                           </td>
