@@ -32,6 +32,7 @@ import AdminSliders from "./AdminSliders";
 import AdminBooks from "./AdminBooks";
 import AdminBookOrders from "./AdminBookOrders";
 import AdminBookReviews from "./AdminBookReviews";
+import AdminEmail from "./AdminEmail";
 
 const navItems = [
   { label: "ড্যাশবোর্ড", icon: LayoutDashboard, path: "/admin" },
@@ -59,6 +60,7 @@ const navItems = [
   { label: "মেনু", icon: MenuIcon, path: "/admin/menu" },
   { label: "ক্যাটাগরি", icon: Tag, path: "/admin/categories" },
   { label: "যোগাযোগ", icon: Mail, path: "/admin/contacts" },
+  { label: "ইমেইল", icon: Mail, path: "/admin/email" },
   { label: "সেটিংস", icon: Settings, path: "/admin/settings" },
 ];
 
@@ -159,6 +161,7 @@ const AdminDashboard = () => {
           <Route path="menu" element={<AdminMenu />} />
           <Route path="categories" element={<AdminCategories />} />
           <Route path="contacts" element={<AdminContacts />} />
+          <Route path="email" element={<AdminEmail />} />
           <Route path="settings" element={<AdminSettings />} />
         </Routes>
       </main>
