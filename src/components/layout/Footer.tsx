@@ -8,7 +8,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-primary text-primary-foreground mt-8">
-      <div className="px-4 py-10">
+      <div className="max-w-[1200px] mx-auto px-4 py-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* About */}
           <div>
@@ -47,12 +47,16 @@ const Footer = () => {
             <h3 className="text-lg font-bold mb-3">যোগাযোগ</h3>
             <ul className="text-sm opacity-80 space-y-2">
               <li className="flex items-center gap-2">
-                <Phone size={14} />
+                <Phone size={14} className="shrink-0" />
                 {toBengali(settings?.contact_phone || "০১৯২৬-৪২৮৯৮৮")}
               </li>
               <li className="flex items-center gap-2">
-                <Mail size={14} />
+                <Mail size={14} className="shrink-0" />
                 {settings?.contact_email || "info@ittehad.bd"}
+              </li>
+              <li className="flex items-start gap-2">
+                <MapPin size={14} className="shrink-0 mt-0.5" />
+                <span>{settings?.contact_address || "মারকাযুস সুন্নাহ ক্যাডেট মাদরাসা, ওয়াবদারপুল তালতলা বাজার, ফতুল্লা, নারায়ণগঞ্জ"}</span>
               </li>
             </ul>
           </div>
