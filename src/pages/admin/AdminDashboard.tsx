@@ -71,7 +71,7 @@ const navItems = [
 ];
 
 const AdminDashboard = () => {
-  const { user, isAdmin, loading, signOut } = useAuth();
+  const { user, isAdmin, hasAnyRole, loading, signOut } = useAuth();
   const { hasPermission } = usePermissions();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -89,10 +89,10 @@ const AdminDashboard = () => {
   );
 
   useEffect(() => {
-    if (!loading && (!user || !isAdmin)) {
+    if (!loading && (!user || (!isAdmin && !hasAnyRole))) {
       navigate("/admin/login");
     }
-  }, [user, isAdmin, loading, navigate]);
+  }, [user, isAdmin, hasAnyRole, loading, navigate]);
 
   if (loading) {
     return (
@@ -102,7 +102,7 @@ const AdminDashboard = () => {
     );
   }
 
-  if (!user || !isAdmin) return null;
+  if (!user || (!isAdmin && !hasAnyRole)) return null;
 
   const handleNavClick = () => {
     if (isMobile) setSidebarOpen(false);

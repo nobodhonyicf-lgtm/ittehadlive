@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
+  hasAnyRole: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -17,18 +18,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hasAnyRole, setHasAnyRole] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const checkAdminAndFinish = useCallback(async (currentUser: User | null) => {
     if (currentUser) {
       try {
-        const { data } = await supabase.rpc("is_admin");
-        setIsAdmin(!!data);
+        const { data: adminData } = await supabase.rpc("is_admin");
+        setIsAdmin(!!adminData);
+        const { data: roleData } = await supabase.rpc("has_any_role");
+        setHasAnyRole(!!roleData);
       } catch {
         setIsAdmin(false);
+        setHasAnyRole(false);
       }
     } else {
       setIsAdmin(false);
+      setHasAnyRole(false);
     }
     setLoading(false);
   }, []);
@@ -63,6 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }, 0);
       } else if (event === 'SIGNED_OUT') {
         setIsAdmin(false);
+        setHasAnyRole(false);
         setLoading(false);
       }
       // TOKEN_REFRESHED: don't change loading/isAdmin
@@ -95,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, hasAnyRole, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

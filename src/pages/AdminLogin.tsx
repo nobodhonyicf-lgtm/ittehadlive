@@ -15,15 +15,15 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const [showReset, setShowReset] = useState(false);
-  const { user, isAdmin, loading: authLoading, signIn } = useAuth();
+  const { user, isAdmin, hasAnyRole, loading: authLoading, signIn } = useAuth();
   const navigate = useNavigate();
 
   // Redirect to admin if already logged in as admin
   useEffect(() => {
-    if (!authLoading && user && isAdmin) {
+    if (!authLoading && user && (isAdmin || hasAnyRole)) {
       navigate("/admin");
     }
-  }, [user, isAdmin, authLoading, navigate]);
+  }, [user, isAdmin, hasAnyRole, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
