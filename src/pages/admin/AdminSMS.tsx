@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
-import { MessageSquare, Settings, Send, Users, Eye, EyeOff, Wallet } from "lucide-react";
+import { MessageSquare, Settings, Send, Users, Eye, EyeOff, Wallet, FileText, Plus, Trash2 } from "lucide-react";
 
 const SMS_KEYS = [
   { key: "sms_api_key", label: "API Key", placeholder: "আপনার BulkSMSBD API Key", type: "password" },
@@ -28,6 +28,8 @@ const AdminSMS = () => {
   const [recipientSource, setRecipientSource] = useState<"manual" | "branch" | "class" | "all">("manual");
   const [selectedBranch, setSelectedBranch] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
+  const [templateName, setTemplateName] = useState("");
+  const [templateContent, setTemplateContent] = useState("");
 
   // Load SMS settings
   const { data: settings, isLoading } = useQuery({
@@ -66,6 +68,41 @@ const AdminSMS = () => {
 
   // Get unique class names
   const classNames = [...new Set(students?.map((s) => s.class_name) || [])].sort();
+
+  // Load SMS templates
+  const { data: templates } = useQuery({
+    queryKey: ["sms_templates"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("sms_templates").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const addTemplateMutation = useMutation({
+    mutationFn: async ({ name, content }: { name: string; content: string }) => {
+      const { error } = await supabase.from("sms_templates").insert({ name, content });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["sms_templates"] });
+      setTemplateName("");
+      setTemplateContent("");
+      toast.success("টেমপ্লেট সংরক্ষিত");
+    },
+    onError: () => toast.error("টেমপ্লেট সংরক্ষণ ব্যর্থ"),
+  });
+
+  const deleteTemplateMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("sms_templates").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["sms_templates"] });
+      toast.success("টেমপ্লেট মুছে ফেলা হয়েছে");
+    },
+  });
 
   // Save SMS setting
   const saveMutation = useMutation({
@@ -175,6 +212,9 @@ const AdminSMS = () => {
           </TabsTrigger>
           <TabsTrigger value="send" className="gap-1">
             <Send size={14} /> SMS পাঠান
+          </TabsTrigger>
+          <TabsTrigger value="templates" className="gap-1">
+            <FileText size={14} /> টেমপ্লেট
           </TabsTrigger>
         </TabsList>
 
@@ -300,6 +340,21 @@ const AdminSMS = () => {
                 </div>
               )}
 
+              {/* Template selection */}
+              {templates && templates.length > 0 && (
+                <div>
+                  <Label className="mb-1 block">টেমপ্লেট থেকে বাছুন</Label>
+                  <Select onValueChange={(val) => setMessage(val)}>
+                    <SelectTrigger><SelectValue placeholder="টেমপ্লেট নির্বাচন করুন" /></SelectTrigger>
+                    <SelectContent>
+                      {templates.map((t) => (
+                        <SelectItem key={t.id} value={t.content}>{t.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div>
                 <Label className="mb-1 block">মেসেজ</Label>
                 <Textarea
@@ -319,6 +374,75 @@ const AdminSMS = () => {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="templates" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">নতুন টেমপ্লেট তৈরি করুন</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <Label className="mb-1 block">টেমপ্লেটের নাম</Label>
+                <Input
+                  placeholder="যেমন: রেজাল্ট প্রকাশ নোটিশ"
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label className="mb-1 block">মেসেজ কন্টেন্ট</Label>
+                <Textarea
+                  rows={4}
+                  placeholder="আপনার টেমপ্লেট মেসেজ লিখুন..."
+                  value={templateContent}
+                  onChange={(e) => setTemplateContent(e.target.value)}
+                />
+              </div>
+              <Button
+                onClick={() => addTemplateMutation.mutate({ name: templateName, content: templateContent })}
+                disabled={!templateName.trim() || !templateContent.trim() || addTemplateMutation.isPending}
+                className="gap-1"
+              >
+                <Plus size={14} /> টেমপ্লেট সংরক্ষণ
+              </Button>
+            </CardContent>
+          </Card>
+
+          {templates && templates.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">সংরক্ষিত টেমপ্লেট ({templates.length})</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {templates.map((t) => (
+                  <div key={t.id} className="flex items-start justify-between gap-3 p-3 bg-muted rounded">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-sm">{t.name}</h4>
+                      <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{t.content}</p>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => { setMessage(t.content); toast.success("টেমপ্লেট লোড হয়েছে — SMS পাঠান ট্যাবে যান"); }}
+                      >
+                        ব্যবহার
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive"
+                        onClick={() => deleteTemplateMutation.mutate(t.id)}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>
