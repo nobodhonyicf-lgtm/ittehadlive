@@ -67,18 +67,10 @@ const CustomerRegister = () => {
         !window.location.hostname.includes("lovableproject.com");
 
       if (isCustomDomain) {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider,
-          options: {
-            redirectTo: window.location.origin,
-            skipBrowserRedirect: true,
-          },
-        });
-        if (error) throw error;
-        if (data?.url) {
-          window.location.href = data.url;
-          return;
-        }
+        const lovableOrigin = "https://ittehadlive.lovable.app";
+        const redirectUri = encodeURIComponent(window.location.origin);
+        window.location.href = `${lovableOrigin}/~oauth/initiate?provider=${provider}&redirect_uri=${redirectUri}`;
+        return;
       } else {
         const { error } = await lovable.auth.signInWithOAuth(provider, {
           redirect_uri: window.location.origin,
