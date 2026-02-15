@@ -25,6 +25,10 @@ import CartPage from "./pages/CartPage";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
+import CustomerLogin from "./pages/CustomerLogin";
+import CustomerRegister from "./pages/CustomerRegister";
+import UserProfile from "./pages/UserProfile";
+import CustomerResetPassword from "./pages/CustomerResetPassword";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,6 +64,10 @@ const App = () => (
               <Route path="/book/:slug" element={<BookDetail />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/login" element={<CustomerLogin />} />
+              <Route path="/register" element={<CustomerRegister />} />
+              <Route path="/profile" element={<UserProfile />} />
+              <Route path="/reset-password" element={<CustomerResetPassword />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/reset-password" element={<ResetPassword />} />
               <Route path="/admin/*" element={<AdminDashboard />} />

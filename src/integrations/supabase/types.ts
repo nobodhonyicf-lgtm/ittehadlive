@@ -105,6 +105,7 @@ export type Database = {
           status: string
           total_amount: number
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           address: string
@@ -121,6 +122,7 @@ export type Database = {
           status?: string
           total_amount?: number
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           address?: string
@@ -137,6 +139,7 @@ export type Database = {
           status?: string
           total_amount?: number
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -399,6 +402,39 @@ export type Database = {
           name?: string
           phone?: string | null
           subject?: string | null
+        }
+        Relationships: []
+      }
+      customer_messages: {
+        Row: {
+          admin_reply: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          replied_at: string | null
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          admin_reply?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          replied_at?: string | null
+          subject: string
+          user_id: string
+        }
+        Update: {
+          admin_reply?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          replied_at?: string | null
+          subject?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -833,6 +869,42 @@ export type Database = {
           sort_order?: number | null
           time_text?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          avatar_url: string | null
+          created_at: string
+          district: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          district?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          district?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
