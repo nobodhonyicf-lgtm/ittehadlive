@@ -58,13 +58,15 @@ const AdminSettings = () => {
     photocard_ad_image: "ফটোকার্ড বিজ্ঞাপন ছবি URL",
     otp_enabled: "ইমেইল ওটিপি যাচাই সক্রিয়",
     two_fa_enabled: "টু-ফ্যাক্টর অথেন্টিকেশন (2FA) সক্রিয়",
+    google_login_enabled: "Google লগইন সক্রিয়",
+    apple_login_enabled: "Apple লগইন সক্রিয়",
   };
 
   const brandingKeys = ["logo_url", "favicon_url", "primary_color"];
   const signatureKeys = ["signature_principal", "signature_controller"];
   const seoKeys = ["default_og_image", "meta_keywords", "google_analytics_id", "facebook_page_url", "twitter_handle"];
   const adKeys = ["photocard_ad_enabled", "photocard_ad_image"];
-  const authKeys = ["otp_enabled", "two_fa_enabled"];
+  const authKeys = ["otp_enabled", "two_fa_enabled", "google_login_enabled", "apple_login_enabled"];
 
   if (isLoading) return <div className="text-center py-8">লোড হচ্ছে...</div>;
 
@@ -201,7 +203,11 @@ const AdminSettings = () => {
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {key === "otp_enabled"
                       ? "চালু করলে ইউজাররা রেজিস্ট্রেশনের পর ইমেইল যাচাই করতে হবে"
-                      : "চালু করলে ইউজাররা লগইনের সময় অতিরিক্ত নিরাপত্তা স্তর ব্যবহার করতে পারবে"}
+                      : key === "two_fa_enabled"
+                      ? "চালু করলে ইউজাররা লগইনের সময় অতিরিক্ত নিরাপত্তা স্তর ব্যবহার করতে পারবে"
+                      : key === "google_login_enabled"
+                      ? "চালু করলে লগইন/রেজিস্ট্রেশন পেজে Google দিয়ে লগইন বাটন দেখাবে"
+                      : "চালু করলে লগইন/রেজিস্ট্রেশন পেজে Apple দিয়ে লগইন বাটন দেখাবে"}
                   </p>
                 </div>
                 <Switch checked={isEnabled} onCheckedChange={handleToggle} />
