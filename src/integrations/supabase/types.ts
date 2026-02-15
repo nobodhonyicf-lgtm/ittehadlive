@@ -438,6 +438,33 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_name: string
+          id: string
+          is_system: boolean
+          role_name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_name: string
+          id?: string
+          is_system?: boolean
+          role_name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          id?: string
+          is_system?: boolean
+          role_name?: string
+        }
+        Relationships: []
+      }
       customer_messages: {
         Row: {
           admin_reply: string | null
