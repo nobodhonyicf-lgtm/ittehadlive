@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import Layout from "@/components/layout/Layout";
 import { useCart } from "@/hooks/useCart";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ const DELIVERY_CHARGE_OUTSIDE = 120;
 const Checkout = () => {
   const { items, totalPrice, totalItems, clearCart } = useCart();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [form, setForm] = useState({
     customer_name: "",
     phone: "",
@@ -67,6 +69,7 @@ const Checkout = () => {
         delivery_charge: deliveryCharge,
         payment_method: "cod",
         notes: form.notes || null,
+        user_id: user?.id || null,
       })
       .select("id")
       .single();
