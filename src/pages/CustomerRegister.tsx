@@ -68,8 +68,8 @@ const CustomerRegister = () => {
 
       if (isCustomDomain) {
         const lovableOrigin = "https://ittehadlive.lovable.app";
-        const redirectUri = encodeURIComponent(window.location.origin);
-        window.location.href = `${lovableOrigin}/~oauth/initiate?provider=${provider}&redirect_uri=${redirectUri}`;
+        const returnTo = encodeURIComponent(window.location.origin + "/oauth-callback");
+        window.location.href = `${lovableOrigin}/oauth-bridge?provider=${provider}&return_to=${returnTo}`;
         return;
       } else {
         const { error } = await lovable.auth.signInWithOAuth(provider, {
