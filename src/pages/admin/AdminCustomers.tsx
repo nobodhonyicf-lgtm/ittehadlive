@@ -8,14 +8,49 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Users, MessageCircle, Send, Mail, ShieldCheck } from "lucide-react";
 import { format } from "date-fns";
 
 const MAX_REPLY_CHARS = 1000;
 
+const SECTION_LABELS: Record<string, string> = {
+  analytics: "অ্যানালিটিক্স",
+  posts: "পোস্ট",
+  "photo-card": "ফটো কার্ড",
+  pages: "পেজ",
+  notices: "নোটিশ",
+  branches: "শাখা",
+  students: "শিক্ষার্থী",
+  exams: "পরীক্ষা",
+  subjects: "বিষয়",
+  results: "রেজাল্ট",
+  polls: "পোল",
+  "prayer-times": "নামাজের সময়",
+  books: "বই",
+  "book-orders": "অর্ডার",
+  "book-reviews": "বই রিভিউ",
+  ads: "বিজ্ঞাপন",
+  videos: "ভিডিও",
+  leaders: "নেতৃবৃন্দ",
+  committee: "কমিটি/উপদেষ্টা",
+  gallery: "গ্যালারী",
+  sliders: "স্লাইডার",
+  menu: "মেনু",
+  categories: "ক্যাটাগরি",
+  contacts: "যোগাযোগ",
+  users: "ইউজার",
+  email: "ইমেইল",
+  sms: "SMS",
+  settings: "সেটিংস",
+};
+
+const ALL_SECTIONS = Object.keys(SECTION_LABELS);
+
 const AdminUsers = () => {
   const qc = useQueryClient();
   const [replyText, setReplyText] = useState<Record<string, string>>({});
+  const [selectedRole, setSelectedRole] = useState("admin");
 
   // Load users via edge function
   const { data: usersData, isLoading: usersLoading } = useQuery({
@@ -35,6 +70,19 @@ const AdminUsers = () => {
         .from("customer_messages")
         .select("*")
         .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Load permissions
+  const { data: permissions, isLoading: permsLoading } = useQuery({
+    queryKey: ["admin_permissions", selectedRole],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admin_permissions")
+        .select("*")
+        .eq("role_name", selectedRole);
       if (error) throw error;
       return data;
     },
@@ -67,7 +115,6 @@ const AdminUsers = () => {
   // Role change mutation
   const roleMutation = useMutation({
     mutationFn: async ({ userId, newRole }: { userId: string; newRole: "admin" | "user" }) => {
-      // Check if role entry exists
       const { data: existing } = await supabase
         .from("user_roles")
         .select("id")
@@ -94,7 +141,48 @@ const AdminUsers = () => {
     onError: () => toast.error("রোল পরিবর্তন ব্যর্থ"),
   });
 
-  // Find user email for a message
+  // Permission update mutation
+  const permMutation = useMutation({
+    mutationFn: async ({
+      sectionKey,
+      field,
+      value,
+    }: {
+      sectionKey: string;
+      field: "can_view" | "can_edit" | "can_delete";
+      value: boolean;
+    }) => {
+      const existing = permissions?.find((p: any) => p.section_key === sectionKey);
+      if (existing) {
+        const { error } = await supabase
+          .from("admin_permissions")
+          .update({ [field]: value })
+          .eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("admin_permissions").insert({
+          role_name: selectedRole,
+          section_key: sectionKey,
+          can_view: field === "can_view" ? value : true,
+          can_edit: field === "can_edit" ? value : false,
+          can_delete: field === "can_delete" ? value : false,
+        });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin_permissions", selectedRole] });
+      toast.success("পারমিশন আপডেট হয়েছে");
+    },
+    onError: () => toast.error("পারমিশন আপডেট ব্যর্থ"),
+  });
+
+  const getPermValue = (sectionKey: string, field: "can_view" | "can_edit" | "can_delete") => {
+    const perm = permissions?.find((p: any) => p.section_key === sectionKey);
+    if (!perm) return field === "can_view"; // default: view=true, edit/delete=false
+    return perm[field];
+  };
+
   const getUserEmail = (userId: string) => {
     const user = usersData?.find((u: any) => u.id === userId);
     return user?.email || user?.profile?.full_name || userId.slice(0, 8);
@@ -105,13 +193,16 @@ const AdminUsers = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-bold flex items-center gap-2">
-        <Users size={22} /> ইউজার ও মেসেজ ম্যানেজমেন্ট
+        <Users size={22} /> ইউজার ও পারমিশন ম্যানেজমেন্ট
       </h1>
 
       <Tabs defaultValue="users">
         <TabsList>
           <TabsTrigger value="users" className="gap-1">
             <Users size={14} /> ইউজার তালিকা
+          </TabsTrigger>
+          <TabsTrigger value="permissions" className="gap-1">
+            <ShieldCheck size={14} /> পারমিশন
           </TabsTrigger>
           <TabsTrigger value="messages" className="gap-1">
             <MessageCircle size={14} /> মেসেজ
@@ -121,6 +212,7 @@ const AdminUsers = () => {
           </TabsTrigger>
         </TabsList>
 
+        {/* Users Tab */}
         <TabsContent value="users" className="mt-4">
           <Card>
             <CardHeader>
@@ -143,7 +235,7 @@ const AdminUsers = () => {
                         <th className="text-left p-2">রোল</th>
                         <th className="text-left p-2">যোগদান</th>
                         <th className="text-left p-2">সর্বশেষ লগইন</th>
-                        <th className="text-left p-2">অ্যাকশন</th>
+                        <th className="text-left p-2">রোল পরিবর্তন</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -155,7 +247,7 @@ const AdminUsers = () => {
                           <td className="p-2">{user.profile?.district || "—"}</td>
                           <td className="p-2">
                             <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                              {user.role}
+                              {user.role === "admin" ? "এডমিন" : "ইউজার"}
                             </Badge>
                           </td>
                           <td className="p-2 text-xs text-muted-foreground">
@@ -175,8 +267,8 @@ const AdminUsers = () => {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="user">User</SelectItem>
-                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="user">ইউজার</SelectItem>
+                                <SelectItem value="admin">এডমিন</SelectItem>
                               </SelectContent>
                             </Select>
                           </td>
@@ -190,6 +282,81 @@ const AdminUsers = () => {
           </Card>
         </TabsContent>
 
+        {/* Permissions Tab */}
+        <TabsContent value="permissions" className="mt-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <ShieldCheck size={18} /> রোল ভিত্তিক পারমিশন
+                </CardTitle>
+                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                  <SelectTrigger className="w-36 h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">এডমিন</SelectItem>
+                    <SelectItem value="user">ইউজার</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                প্রতিটি সেকশনের জন্য দেখা, এডিট ও ডিলিট করার অনুমতি নির্ধারণ করুন।
+              </p>
+            </CardHeader>
+            <CardContent>
+              {permsLoading ? (
+                <p className="text-center py-4 text-muted-foreground">লোড হচ্ছে...</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="text-left p-2 font-semibold">সেকশন</th>
+                        <th className="text-center p-2 font-semibold">দেখতে পারবে</th>
+                        <th className="text-center p-2 font-semibold">এডিট করতে পারবে</th>
+                        <th className="text-center p-2 font-semibold">ডিলিট করতে পারবে</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ALL_SECTIONS.map((section) => (
+                        <tr key={section} className="border-b hover:bg-muted/30">
+                          <td className="p-2 font-medium">{SECTION_LABELS[section]}</td>
+                          <td className="p-2 text-center">
+                            <Checkbox
+                              checked={getPermValue(section, "can_view")}
+                              onCheckedChange={(checked) =>
+                                permMutation.mutate({ sectionKey: section, field: "can_view", value: !!checked })
+                              }
+                            />
+                          </td>
+                          <td className="p-2 text-center">
+                            <Checkbox
+                              checked={getPermValue(section, "can_edit")}
+                              onCheckedChange={(checked) =>
+                                permMutation.mutate({ sectionKey: section, field: "can_edit", value: !!checked })
+                              }
+                            />
+                          </td>
+                          <td className="p-2 text-center">
+                            <Checkbox
+                              checked={getPermValue(section, "can_delete")}
+                              onCheckedChange={(checked) =>
+                                permMutation.mutate({ sectionKey: section, field: "can_delete", value: !!checked })
+                              }
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Messages Tab */}
         <TabsContent value="messages" className="mt-4 space-y-4">
           {messagesLoading ? (
             <p className="text-center py-4 text-muted-foreground">লোড হচ্ছে...</p>

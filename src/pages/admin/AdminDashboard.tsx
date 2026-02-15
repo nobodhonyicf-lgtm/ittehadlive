@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, FileText, Bell, Image, Settings, Menu as MenuIcon,
@@ -37,42 +38,47 @@ import AdminSMS from "./AdminSMS";
 import AdminCustomers from "./AdminCustomers";
 
 const navItems = [
-  { label: "ড্যাশবোর্ড", icon: LayoutDashboard, path: "/admin" },
-  { label: "অ্যানালিটিক্স", icon: BarChart3, path: "/admin/analytics" },
-  { label: "পোস্ট", icon: Newspaper, path: "/admin/posts" },
-  { label: "ফটো কার্ড", icon: Image, path: "/admin/photo-card" },
-  { label: "পেজ", icon: FileText, path: "/admin/pages" },
-  { label: "নোটিশ", icon: Bell, path: "/admin/notices" },
-  { label: "শাখা", icon: Building2, path: "/admin/branches" },
-  { label: "শিক্ষার্থী", icon: Users, path: "/admin/students" },
-  { label: "পরীক্ষা", icon: ClipboardList, path: "/admin/exams" },
-  { label: "বিষয়", icon: BookOpen, path: "/admin/subjects" },
-  { label: "রেজাল্ট", icon: GraduationCap, path: "/admin/results" },
-  { label: "পোল", icon: ClipboardList, path: "/admin/polls" },
-  { label: "নামাজের সময়", icon: Clock, path: "/admin/prayer-times" },
-  { label: "বই", icon: BookOpen, path: "/admin/books" },
-  { label: "অর্ডার", icon: Package, path: "/admin/book-orders" },
-  { label: "বই রিভিউ", icon: MessageCircle, path: "/admin/book-reviews" },
-  { label: "বিজ্ঞাপন", icon: Image, path: "/admin/ads" },
-  { label: "ভিডিও", icon: Video, path: "/admin/videos" },
-  { label: "নেতৃবৃন্দ", icon: Users, path: "/admin/leaders" },
-  { label: "কমিটি/উপদেষ্টা", icon: Users, path: "/admin/committee" },
-  { label: "গ্যালারী", icon: Image, path: "/admin/gallery" },
-  { label: "স্লাইডার", icon: Image, path: "/admin/sliders" },
-  { label: "মেনু", icon: MenuIcon, path: "/admin/menu" },
-  { label: "ক্যাটাগরি", icon: Tag, path: "/admin/categories" },
-  { label: "যোগাযোগ", icon: Mail, path: "/admin/contacts" },
-  { label: "কাস্টমার", icon: Users, path: "/admin/customers" },
-  { label: "ইমেইল", icon: Mail, path: "/admin/email" },
-  { label: "SMS", icon: MessageSquare, path: "/admin/sms" },
-  { label: "সেটিংস", icon: Settings, path: "/admin/settings" },
+  { label: "ড্যাশবোর্ড", icon: LayoutDashboard, path: "/admin", section: "" },
+  { label: "অ্যানালিটিক্স", icon: BarChart3, path: "/admin/analytics", section: "analytics" },
+  { label: "পোস্ট", icon: Newspaper, path: "/admin/posts", section: "posts" },
+  { label: "ফটো কার্ড", icon: Image, path: "/admin/photo-card", section: "photo-card" },
+  { label: "পেজ", icon: FileText, path: "/admin/pages", section: "pages" },
+  { label: "নোটিশ", icon: Bell, path: "/admin/notices", section: "notices" },
+  { label: "শাখা", icon: Building2, path: "/admin/branches", section: "branches" },
+  { label: "শিক্ষার্থী", icon: Users, path: "/admin/students", section: "students" },
+  { label: "পরীক্ষা", icon: ClipboardList, path: "/admin/exams", section: "exams" },
+  { label: "বিষয়", icon: BookOpen, path: "/admin/subjects", section: "subjects" },
+  { label: "রেজাল্ট", icon: GraduationCap, path: "/admin/results", section: "results" },
+  { label: "পোল", icon: ClipboardList, path: "/admin/polls", section: "polls" },
+  { label: "নামাজের সময়", icon: Clock, path: "/admin/prayer-times", section: "prayer-times" },
+  { label: "বই", icon: BookOpen, path: "/admin/books", section: "books" },
+  { label: "অর্ডার", icon: Package, path: "/admin/book-orders", section: "book-orders" },
+  { label: "বই রিভিউ", icon: MessageCircle, path: "/admin/book-reviews", section: "book-reviews" },
+  { label: "বিজ্ঞাপন", icon: Image, path: "/admin/ads", section: "ads" },
+  { label: "ভিডিও", icon: Video, path: "/admin/videos", section: "videos" },
+  { label: "নেতৃবৃন্দ", icon: Users, path: "/admin/leaders", section: "leaders" },
+  { label: "কমিটি/উপদেষ্টা", icon: Users, path: "/admin/committee", section: "committee" },
+  { label: "গ্যালারী", icon: Image, path: "/admin/gallery", section: "gallery" },
+  { label: "স্লাইডার", icon: Image, path: "/admin/sliders", section: "sliders" },
+  { label: "মেনু", icon: MenuIcon, path: "/admin/menu", section: "menu" },
+  { label: "ক্যাটাগরি", icon: Tag, path: "/admin/categories", section: "categories" },
+  { label: "যোগাযোগ", icon: Mail, path: "/admin/contacts", section: "contacts" },
+  { label: "ইউজার", icon: Users, path: "/admin/customers", section: "users" },
+  { label: "ইমেইল", icon: Mail, path: "/admin/email", section: "email" },
+  { label: "SMS", icon: MessageSquare, path: "/admin/sms", section: "sms" },
+  { label: "সেটিংস", icon: Settings, path: "/admin/settings", section: "settings" },
 ];
 
 const AdminDashboard = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
+  const { hasPermission } = usePermissions();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const filteredNavItems = navItems.filter(
+    (item) => !item.section || hasPermission(item.section, "view")
+  );
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -100,7 +106,7 @@ const AdminDashboard = () => {
           </Button>
         </div>
         <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
