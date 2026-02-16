@@ -352,9 +352,9 @@ const AdminUsers = () => {
                               <SelectTrigger className="w-28 h-8 text-xs">
                                 <SelectValue placeholder="কোনটি নয়" />
                               </SelectTrigger>
-                              <SelectContent>
+                                <SelectContent>
                                 <SelectItem value="none">কোনটি নয়</SelectItem>
-                                {customRoles?.filter((r: any) => !r.is_system).map((role: any) => (
+                                {(customRoles || []).filter((r: any) => !r.is_system).map((role: any) => (
                                   <SelectItem key={role.role_name} value={role.role_name}>
                                     {role.display_name}
                                   </SelectItem>
@@ -436,7 +436,7 @@ const AdminUsers = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {customRoles?.map((role: any) => (
+                    {(customRoles || []).map((role: any) => (
                       <tr key={role.id} className="border-b hover:bg-muted/30">
                         <td className="p-2 font-mono text-xs">{role.role_name}</td>
                         <td className="p-2 font-medium">{role.display_name}</td>
@@ -481,7 +481,7 @@ const AdminUsers = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {customRoles?.map((role: any) => (
+                    {(customRoles || []).map((role: any) => (
                       <SelectItem key={role.role_name} value={role.role_name}>
                         {role.display_name}
                       </SelectItem>
