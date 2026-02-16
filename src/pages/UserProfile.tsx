@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ const statusMap: Record<string, { label: string; color: string }> = {
 
 const UserProfile = () => {
   const { user, signOut, loading: authLoading } = useAuth();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [orders, setOrders] = useState<any[]>([]);
@@ -66,6 +68,7 @@ const UserProfile = () => {
       toast.success("প্রোফাইল ছবি আপডেট হয়েছে");
       setShowAvatarInput(false);
       setProfile({ ...profile, avatar_url: avatarUrl });
+      queryClient.invalidateQueries({ queryKey: ["user_profile", user.id] });
     }
   };
 
@@ -90,7 +93,10 @@ const UserProfile = () => {
     }).eq("user_id", user!.id);
     setSaving(false);
     if (error) toast.error("সেভ ব্যর্থ");
-    else toast.success("প্রোফাইল আপডেট হয়েছে");
+    else {
+      toast.success("প্রোফাইল আপডেট হয়েছে");
+      queryClient.invalidateQueries({ queryKey: ["user_profile", user!.id] });
+    }
   };
 
   const sendMessage = async () => {

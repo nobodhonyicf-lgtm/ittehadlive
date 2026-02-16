@@ -147,9 +147,9 @@ const AdminDashboard = () => {
   const profileRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch profile
+  // Fetch profile - shared query key with user profile page
   const { data: profile } = useQuery({
-    queryKey: ["admin_profile", user?.id],
+    queryKey: ["user_profile", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
       const { data } = await supabase
@@ -183,7 +183,7 @@ const AdminDashboard = () => {
     const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(path);
     const avatarUrl = urlData.publicUrl + "?t=" + Date.now();
     await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("user_id", user.id);
-    queryClient.invalidateQueries({ queryKey: ["admin_profile", user.id] });
+    queryClient.invalidateQueries({ queryKey: ["user_profile", user.id] });
   };
 
   useEffect(() => {
