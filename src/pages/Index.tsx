@@ -6,8 +6,16 @@ import SectionCards from "@/components/home/SectionCards";
 import RecentNews from "@/components/home/RecentNews";
 import VideoSection from "@/components/home/VideoSection";
 import Sidebar from "@/components/home/Sidebar";
+import { useIsApp } from "@/hooks/useIsApp";
+import AppHome from "@/components/app/AppHome";
 
 const Index = () => {
+  const isApp = useIsApp();
+
+  if (isApp) {
+    return <AppHome />;
+  }
+
   return (
     <Layout fullWidth>
       <HeroSection />
