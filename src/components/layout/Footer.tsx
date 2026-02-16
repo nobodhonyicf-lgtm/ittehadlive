@@ -1,5 +1,6 @@
 import { useSiteSettings } from "@/hooks/useData";
-import { Phone, Mail, MapPin } from "lucide-react";
+import { Phone, Mail, MapPin, Download, Smartphone } from "lucide-react";
+import { Link } from "react-router-dom";
 import logoImg from "@/assets/logo.png";
 import { toBengali } from "@/lib/bengali";
 
@@ -32,14 +33,28 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Services */}
+          {/* Services + App Download */}
           <div>
             <h3 className="text-lg font-bold mb-3">সেবা সমূহ</h3>
             <ul className="text-sm opacity-80 space-y-2">
               <li><a href="/students" className="hover:underline hover:opacity-100 transition-opacity">শিক্ষার্থী ডিরেক্টরি</a></li>
               <li><a href="/contact" className="hover:underline hover:opacity-100 transition-opacity">যোগাযোগ</a></li>
-              
+              <li><a href="/books" className="hover:underline hover:opacity-100 transition-opacity">প্রকাশনা</a></li>
             </ul>
+
+            {/* App download */}
+            <div className="mt-4 pt-4 border-t border-primary-foreground/20">
+              <h4 className="text-sm font-bold mb-2 flex items-center gap-1.5">
+                <Smartphone size={14} /> অ্যাপ ডাউনলোড
+              </h4>
+              <Link
+                to="/install"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-primary-foreground/10 hover:bg-primary-foreground/20 rounded-lg transition-colors text-sm"
+              >
+                <Download size={16} />
+                <span>অ্যাপ ইনস্টল করুন</span>
+              </Link>
+            </div>
           </div>
 
           {/* Contact */}
