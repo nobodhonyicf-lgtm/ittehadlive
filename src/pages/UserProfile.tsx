@@ -170,13 +170,24 @@ const UserProfile = () => {
                   <User size={28} />
                 </AvatarFallback>
               </Avatar>
-              <button
-                onClick={() => setShowAvatarInput(!showAvatarInput)}
-                className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                title="ছবি পরিবর্তন করুন"
-              >
-                <LinkIcon size={16} className="text-white" />
-              </button>
+              <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => setShowAvatarInput(!showAvatarInput)}
+                  title="ছবি পরিবর্তন করুন"
+                  className="text-white hover:scale-110 transition-transform"
+                >
+                  <LinkIcon size={14} />
+                </button>
+                {profile?.avatar_url && (
+                  <button
+                    onClick={removeAvatar}
+                    title="ছবি মুছুন"
+                    className="text-red-300 hover:text-red-100 hover:scale-110 transition-all"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              </div>
             </div>
             <div>
               <h1 className="text-xl font-bold">{profile?.full_name || "ইউজার"}</h1>
