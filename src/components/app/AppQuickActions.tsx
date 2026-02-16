@@ -8,20 +8,27 @@ import {
   Mail,
   FileText,
   Image,
+  LayoutDashboard,
 } from "lucide-react";
-
-const actions = [
-  { icon: GraduationCap, label: "রেজাল্ট", path: "/result", color: "bg-blue-500 dark:bg-blue-600" },
-  { icon: Users, label: "শিক্ষার্থী", path: "/students", color: "bg-emerald-500 dark:bg-emerald-600" },
-  { icon: Building2, label: "শাখা", path: "/branches", color: "bg-orange-500 dark:bg-orange-600" },
-  { icon: BookOpen, label: "প্রকাশনা", path: "/books", color: "bg-purple-500 dark:bg-purple-600" },
-  { icon: Bell, label: "নোটিশ", path: "/posts", color: "bg-red-500 dark:bg-red-600" },
-  { icon: FileText, label: "পরিচিতি", path: "/page/about", color: "bg-teal-500 dark:bg-teal-600" },
-  { icon: Mail, label: "যোগাযোগ", path: "/contact", color: "bg-indigo-500 dark:bg-indigo-600" },
-  { icon: Image, label: "গ্যালারি", path: "/page/cultural", color: "bg-pink-500 dark:bg-pink-600" },
-];
+import { useAuth } from "@/hooks/useAuth";
 
 const AppQuickActions = () => {
+  const { user, hasAnyRole } = useAuth();
+
+  const actions = [
+    { icon: GraduationCap, label: "রেজাল্ট", path: "/result", color: "bg-blue-500 dark:bg-blue-600" },
+    { icon: Users, label: "শিক্ষার্থী", path: "/students", color: "bg-emerald-500 dark:bg-emerald-600" },
+    { icon: Building2, label: "শাখা", path: "/branches", color: "bg-orange-500 dark:bg-orange-600" },
+    { icon: BookOpen, label: "প্রকাশনা", path: "/books", color: "bg-purple-500 dark:bg-purple-600" },
+    { icon: Bell, label: "নোটিশ", path: "/posts", color: "bg-red-500 dark:bg-red-600" },
+    { icon: FileText, label: "পরিচিতি", path: "/page/about", color: "bg-teal-500 dark:bg-teal-600" },
+    { icon: Mail, label: "যোগাযোগ", path: "/contact", color: "bg-indigo-500 dark:bg-indigo-600" },
+    { icon: Image, label: "গ্যালারি", path: "/page/cultural", color: "bg-pink-500 dark:bg-pink-600" },
+    ...(user && hasAnyRole
+      ? [{ icon: LayoutDashboard, label: "ড্যাশবোর্ড", path: "/admin", color: "bg-slate-700 dark:bg-slate-600" }]
+      : []),
+  ];
+
   return (
     <div>
       <h2 className="text-sm font-bold text-foreground mb-3">দ্রুত অ্যাক্সেস</h2>

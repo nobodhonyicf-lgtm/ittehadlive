@@ -62,6 +62,7 @@ const AdminSettings = () => {
     apple_login_enabled: "Apple লগইন সক্রিয়",
     app_name: "অ্যাপের নাম",
     app_logo_url: "অ্যাপ লোগো URL",
+    app_icon_url: "অ্যাপ আইকন URL (PWA হোমস্ক্রিন আইকন)",
     app_banner_enabled: "অ্যাপ ব্যানার স্লাইডার সক্রিয়",
     vapid_public_key: "VAPID Public Key (পুশ নোটিফিকেশন)",
   };
@@ -71,7 +72,7 @@ const AdminSettings = () => {
   const seoKeys = ["default_og_image", "meta_keywords", "google_analytics_id", "facebook_page_url", "twitter_handle"];
   const adKeys = ["photocard_ad_enabled", "photocard_ad_image"];
   const authKeys = ["otp_enabled", "two_fa_enabled", "google_login_enabled", "apple_login_enabled"];
-  const appKeys = ["app_name", "app_logo_url", "app_banner_enabled", "vapid_public_key"];
+  const appKeys = ["app_name", "app_logo_url", "app_icon_url", "app_banner_enabled", "vapid_public_key"];
 
   if (isLoading) return <div className="text-center py-8">লোড হচ্ছে...</div>;
 
