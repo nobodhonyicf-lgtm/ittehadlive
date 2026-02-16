@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Plus, Edit, Trash2, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { toBengali } from "@/lib/bengali";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const emptyBook = {
   title: "", slug: "", author_name: "", publisher: "", description: "",
@@ -23,6 +24,7 @@ const emptyBook = {
 
 const AdminBooks = () => {
   const queryClient = useQueryClient();
+  const { canEdit, canDelete } = useSectionPermissions();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState(emptyBook);
@@ -90,9 +92,9 @@ const AdminBooks = () => {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold flex items-center gap-2"><BookOpen size={24} /> বই ম্যানেজমেন্ট</h1>
-        <Button onClick={() => { setEditing(null); setForm(emptyBook); setOpen(true); }}>
+        {canEdit && <Button onClick={() => { setEditing(null); setForm(emptyBook); setOpen(true); }}>
           <Plus size={16} /> নতুন বই যোগ করুন
-        </Button>
+        </Button>}
       </div>
 
       {isLoading ? (
@@ -141,8 +143,8 @@ const AdminBooks = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(book)}><Edit size={14} /></Button>
-                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(book.id)}><Trash2 size={14} /></Button>
+                        {canEdit && <Button variant="ghost" size="icon" onClick={() => openEdit(book)}><Edit size={14} /></Button>}
+                        {canDelete && <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(book.id)}><Trash2 size={14} /></Button>}
                       </div>
                     </TableCell>
                   </TableRow>

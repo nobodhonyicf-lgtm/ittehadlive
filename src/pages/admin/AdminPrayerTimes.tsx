@@ -8,9 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { toBengali } from "@/lib/bengali";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const AdminPrayerTimes = () => {
   const { toast } = useToast();
+  const { canEdit, canDelete } = useSectionPermissions();
   const queryClient = useQueryClient();
   const [editItems, setEditItems] = useState<any[] | null>(null);
   const [saving, setSaving] = useState(false);
@@ -104,9 +106,9 @@ const AdminPrayerTimes = () => {
                 placeholder="সময়"
                 className="w-28"
               />
-              <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}>
+              {canDelete && <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}>
                 <Trash2 size={16} className="text-destructive" />
-              </Button>
+              </Button>}
             </div>
           ))}
           {editItems && (
@@ -133,9 +135,9 @@ const AdminPrayerTimes = () => {
               <Input value={newTime} onChange={(e) => setNewTime(e.target.value)} placeholder="৩:৩০" />
             </div>
           </div>
-          <Button onClick={handleAdd} size="sm">
+          {canEdit && <Button onClick={handleAdd} size="sm">
             <Plus size={14} className="mr-1" /> যোগ করুন
-          </Button>
+          </Button>}
         </CardContent>
       </Card>
     </div>

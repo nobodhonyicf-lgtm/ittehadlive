@@ -10,8 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/sonner";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const AdminPages = () => {
+  const { canEdit, canDelete } = useSectionPermissions();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -59,9 +61,9 @@ const AdminPages = () => {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">পেজ ব্যবস্থাপনা</h1>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
+          {canEdit && <DialogTrigger asChild>
             <Button onClick={() => { setEditId(null); setForm({ title: "", content: "", slug: "", cover_image_url: "" }); }}><Plus size={16} /> নতুন পেজ</Button>
-          </DialogTrigger>
+          </DialogTrigger>}
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editId ? "পেজ সম্পাদনা" : "নতুন পেজ"}</DialogTitle></DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
@@ -85,8 +87,8 @@ const AdminPages = () => {
                     <TableCell className="font-medium">{page.title}</TableCell>
                     <TableCell className="text-muted-foreground">{page.slug}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => { setEditId(page.id); setForm({ title: page.title, content: page.content || "", slug: page.slug, cover_image_url: (page as any).cover_image_url || "" }); setOpen(true); }}><Edit size={16} /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(page.id)}><Trash2 size={16} /></Button>
+                      {canEdit && <Button variant="ghost" size="icon" onClick={() => { setEditId(page.id); setForm({ title: page.title, content: page.content || "", slug: page.slug, cover_image_url: (page as any).cover_image_url || "" }); setOpen(true); }}><Edit size={16} /></Button>}
+                      {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(page.id)}><Trash2 size={16} /></Button>}
                     </TableCell>
                   </TableRow>
                 ))}

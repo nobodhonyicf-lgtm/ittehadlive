@@ -5,8 +5,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 import { Trash2, Eye } from "lucide-react";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const AdminContacts = () => {
+  const { canDelete } = useSectionPermissions();
   const qc = useQueryClient();
 
   const { data: contacts, isLoading } = useQuery({
@@ -53,7 +55,7 @@ const AdminContacts = () => {
                   <TableCell className="text-xs">{new Date(c.created_at).toLocaleDateString("bn-BD")}</TableCell>
                   <TableCell className="text-right">
                     {!c.is_read && <Button variant="ghost" size="icon" onClick={() => markRead.mutate(c.id)}><Eye size={16} /></Button>}
-                    <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(c.id)}><Trash2 size={16} /></Button>
+                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(c.id)}><Trash2 size={16} /></Button>}
                   </TableCell>
                 </TableRow>
               ))}

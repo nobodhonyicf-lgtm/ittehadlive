@@ -9,8 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "@/components/ui/sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, BookOpen } from "lucide-react";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const AdminSubjects = () => {
+  const { canEdit, canDelete } = useSectionPermissions();
   const { data: subjects } = useAllSubjects();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -52,7 +54,7 @@ const AdminSubjects = () => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-primary flex items-center gap-2"><BookOpen size={22} /> বিষয় ব্যবস্থাপনা</h2>
         <Dialog open={open} onOpenChange={v => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger asChild><Button className="gap-2"><Plus size={16} /> নতুন বিষয়</Button></DialogTrigger>
+          {canEdit && <DialogTrigger asChild><Button className="gap-2"><Plus size={16} /> নতুন বিষয়</Button></DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editing ? "সম্পাদনা" : "নতুন বিষয়"}</DialogTitle></DialogHeader>
             <div className="space-y-3">
@@ -81,8 +83,8 @@ const AdminSubjects = () => {
                 <p className="text-xs text-muted-foreground">পূর্ণমান: {s.full_marks} | পাস: {s.pass_marks} | ক্লাস: {s.class_name || "সকল"}</p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={() => openEdit(s)}><Edit size={14} /></Button>
-                <Button variant="destructive" size="icon" onClick={() => handleDelete(s.id)}><Trash2 size={14} /></Button>
+                {canEdit && <Button variant="outline" size="icon" onClick={() => openEdit(s)}><Edit size={14} /></Button>}
+                {canDelete && <Button variant="destructive" size="icon" onClick={() => handleDelete(s.id)}><Trash2 size={14} /></Button>}
               </div>
             </CardContent>
           </Card>

@@ -8,10 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, X, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { toBengali } from "@/lib/bengali";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 
 const AdminPolls = () => {
   const { toast } = useToast();
+  const { canEdit, canDelete } = useSectionPermissions();
   const queryClient = useQueryClient();
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", ""]);
@@ -128,9 +130,9 @@ const AdminPolls = () => {
               <Plus size={14} className="mr-1" /> অপশন যোগ করুন
             </Button>
           </div>
-          <Button onClick={handleCreate} disabled={saving}>
+          {canEdit && <Button onClick={handleCreate} disabled={saving}>
             {saving ? "তৈরি হচ্ছে..." : "পোল তৈরি করুন"}
-          </Button>
+          </Button>}
         </CardContent>
       </Card>
 
@@ -168,9 +170,9 @@ const AdminPolls = () => {
                     >
                       {poll.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(poll.id)}>
+                    {canDelete && <Button variant="ghost" size="icon" onClick={() => handleDelete(poll.id)}>
                       <Trash2 size={16} className="text-destructive" />
-                    </Button>
+                    </Button>}
                   </div>
                 </div>
 

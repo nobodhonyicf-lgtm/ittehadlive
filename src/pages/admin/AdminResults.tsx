@@ -11,8 +11,10 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { GraduationCap, Save } from "lucide-react";
 import { getGradeFromMarks, getOverallGPA, getOverallGrade } from "@/lib/grading";
 import { toBengali } from "@/lib/bengali";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const AdminResults = () => {
+  const { canEdit } = useSectionPermissions();
   const { data: exams } = useExams();
   const { data: students } = useAllStudents();
   const { data: subjects } = useAllSubjects();
@@ -204,7 +206,7 @@ const AdminResults = () => {
                 )}
               </table>
             </div>
-            <Button onClick={handleSave} className="mt-4 w-full gap-2"><Save size={16} /> রেজাল্ট সংরক্ষণ করুন</Button>
+            {canEdit && <Button onClick={handleSave} className="mt-4 w-full gap-2"><Save size={16} /> রেজাল্ট সংরক্ষণ করুন</Button>}
           </CardContent>
         </Card>
       )}

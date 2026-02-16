@@ -1282,6 +1282,10 @@ export type Database = {
         }[]
       }
       has_any_role: { Args: never; Returns: boolean }
+      has_section_permission: {
+        Args: { p_action: string; p_section: string }
+        Returns: boolean
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
