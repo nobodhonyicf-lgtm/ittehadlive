@@ -9,10 +9,12 @@ import { timeAgo } from "@/lib/timeAgo";
 import SEOHead from "@/components/SEOHead";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PageSidebar from "@/components/home/PageSidebar";
+import { useIsApp } from "@/hooks/useIsApp";
 
 const POSTS_PER_PAGE = 10;
 
 const PostsList = () => {
+  const isApp = useIsApp();
   const { data: posts, isLoading } = usePosts();
   const { data: categories } = useCategories();
   const [search, setSearch] = useState("");
@@ -51,8 +53,8 @@ const PostsList = () => {
           </select>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
+        <div className={`grid grid-cols-1 ${isApp ? '' : 'lg:grid-cols-3'} gap-6`}>
+          <div className={`${isApp ? '' : 'lg:col-span-2'} space-y-4`}>
             {isLoading ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="animate-pulse bg-muted h-32 rounded" />
@@ -117,9 +119,11 @@ const PostsList = () => {
               </div>
             )}
           </div>
-          <div className="lg:col-span-1">
-            <PageSidebar />
-          </div>
+          {!isApp && (
+            <div className="lg:col-span-1">
+              <PageSidebar />
+            </div>
+          )}
         </div>
       </div>
     </Layout>

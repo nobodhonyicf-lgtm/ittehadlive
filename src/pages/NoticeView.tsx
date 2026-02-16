@@ -4,8 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import Sidebar from "@/components/home/Sidebar";
 import { Calendar } from "lucide-react";
+import { useIsApp } from "@/hooks/useIsApp";
 
 const NoticeView = () => {
+  const isApp = useIsApp();
   const { id } = useParams<{ id: string }>();
   const { data: notice, isLoading } = useQuery({
     queryKey: ["notice", id],
@@ -20,8 +22,8 @@ const NoticeView = () => {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        <div className={`grid grid-cols-1 ${isApp ? '' : 'lg:grid-cols-3'} gap-6`}>
+          <div className={isApp ? '' : 'lg:col-span-2'}>
             {isLoading ? (
               <div className="animate-pulse bg-muted h-40 rounded" />
             ) : notice ? (
@@ -39,9 +41,11 @@ const NoticeView = () => {
               <div className="text-center py-12 text-muted-foreground">নোটিশ পাওয়া যায়নি</div>
             )}
           </div>
-          <div className="lg:col-span-1">
-            <Sidebar />
-          </div>
+          {!isApp && (
+            <div className="lg:col-span-1">
+              <Sidebar />
+            </div>
+          )}
         </div>
       </div>
     </Layout>

@@ -4,8 +4,10 @@ import { useBranches } from "@/hooks/useBoardData";
 import { Building2, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import PageSidebar from "@/components/home/PageSidebar";
+import { useIsApp } from "@/hooks/useIsApp";
 
 const BranchList = () => {
+  const isApp = useIsApp();
   const { data: branches } = useBranches();
 
   return (
@@ -19,8 +21,8 @@ const BranchList = () => {
           <p className="text-muted-foreground mt-2">ইত্তেহাদুল মাদারিসের সকল শাখা</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        <div className={`grid grid-cols-1 ${isApp ? '' : 'lg:grid-cols-3'} gap-6`}>
+          <div className={isApp ? '' : 'lg:col-span-2'}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {branches?.map(branch => (
                 <Link key={branch.id} to={`/branch/${branch.id}`}>
@@ -46,9 +48,11 @@ const BranchList = () => {
               ))}
             </div>
           </div>
-          <div className="lg:col-span-1">
-            <PageSidebar />
-          </div>
+          {!isApp && (
+            <div className="lg:col-span-1">
+              <PageSidebar />
+            </div>
+          )}
         </div>
       </div>
     </Layout>
