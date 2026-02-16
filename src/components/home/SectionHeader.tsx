@@ -9,14 +9,14 @@ interface SectionHeaderProps {
 
 const SectionHeader = ({ title, linkUrl, linkText = "আরও" }: SectionHeaderProps) => {
   return (
-    <div className="flex items-center justify-between border-b-2 border-destructive mb-4">
-      <h2 className="bg-destructive text-destructive-foreground px-4 py-1.5 text-base font-bold">
+    <div className="flex items-center justify-between bg-destructive rounded-t-md mb-4">
+      <h2 className="text-white px-4 py-2 text-[15px] font-bold tracking-wide">
         {title}
       </h2>
       {linkUrl && (
         <Link
           to={linkUrl}
-          className="flex items-center gap-0.5 text-sm font-semibold text-destructive hover:underline pb-1 pr-1"
+          className="flex items-center gap-0.5 text-[13px] font-bold text-white bg-black/20 hover:bg-black/30 px-3 py-2 transition-colors"
         >
           {linkText}
           <ChevronLeft size={14} className="rotate-180" />
