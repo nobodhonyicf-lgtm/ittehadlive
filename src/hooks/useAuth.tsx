@@ -69,13 +69,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             .then(() => {});
         }
 
-        // Only re-check roles if initial load is already done
-        // Do NOT set loading=true here — it unmounts the entire admin UI and closes dialogs
+        // Only re-check roles and set loading=false if initial load is already done
+        // During initial load, initAuth() handles role checking and loading state
         if (initializedRef.current) {
           await checkRoles(newSession.user, true);
+          setLoading(false);
         }
-        // Ensure loading is turned off after sign-in completes
-        setLoading(false);
       } else if (event === 'TOKEN_REFRESHED') {
         // Token refresh — do nothing, keep UI stable
       } else if (event === 'SIGNED_OUT') {
