@@ -139,10 +139,16 @@ const Sidebar = () => {
             </div>
             <h3 className="font-bold text-sm">{leader.name}</h3>
             {leader.bio && (
-              <p className="text-xs text-muted-foreground mt-2 line-clamp-6 text-justify">
+              <p className="text-xs text-muted-foreground mt-2 line-clamp-4 text-justify">
                 {leader.bio}
               </p>
             )}
+            <Link
+              to={`/leader/${leader.id}`}
+              className="inline-block mt-3 text-primary hover:underline font-bold text-sm"
+            >
+              বিস্তারিত →
+            </Link>
           </CardContent>
         </Card>
       ))}
@@ -183,27 +189,97 @@ const Sidebar = () => {
   );
 };
 
+const parseTimeToMinutes = (timeText: string): number | null => {
+  // Try parsing times like "৫:৩০", "5:30", "১২:১৫" etc.
+  const bengaliToEnglish = (s: string) =>
+    s.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
+  const cleaned = bengaliToEnglish(timeText.trim());
+  const match = cleaned.match(/(\d{1,2})[:\.](\d{2})/);
+  if (!match) return null;
+  return parseInt(match[1]) * 60 + parseInt(match[2]);
+};
+
 const PrayerTimesSection = () => {
   const { data: prayerTimes } = usePrayerTimes();
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (!prayerTimes?.length) return null;
 
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  // Find next prayer
+  let nextPrayerIndex = -1;
+  for (let i = 0; i < prayerTimes.length; i++) {
+    const mins = parseTimeToMinutes(prayerTimes[i].time_text);
+    if (mins !== null && mins > currentMinutes) {
+      nextPrayerIndex = i;
+      break;
+    }
+  }
+
+  const getCountdown = (timeText: string): string | null => {
+    const mins = parseTimeToMinutes(timeText);
+    if (mins === null) return null;
+    const diff = mins - currentMinutes;
+    if (diff <= 0) return null;
+    const h = Math.floor(diff / 60);
+    const m = diff % 60;
+    if (h > 0) return `${toBengali(h)} ঘণ্টা ${toBengali(m)} মিনিট`;
+    return `${toBengali(m)} মিনিট`;
+  };
+
   return (
-    <Card className="border-t-4 border-t-primary">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-primary text-base bg-primary/10 rounded py-2 text-center flex items-center justify-center gap-2">
-          <Clock size={16} />
-          নামাজের সময়সূচি
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          {prayerTimes.map((pt) => (
-            <div key={pt.id} className="flex justify-between items-center border-b border-border pb-1.5 last:border-0 text-sm">
-              <span className="font-medium">{pt.name}</span>
-              <span className="text-primary font-semibold">{pt.time_text}</span>
-            </div>
-          ))}
+    <Card className="border-t-4 border-t-emerald-600 overflow-hidden">
+      {/* Islamic header */}
+      <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 text-white py-3 px-4">
+        <div className="text-center">
+          <p className="text-xs opacity-80 mb-0.5">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+          <h3 className="font-bold text-sm flex items-center justify-center gap-2">
+            <Clock size={14} />
+            নামাজের সময়সূচি
+          </h3>
+        </div>
+      </div>
+      <CardContent className="p-0">
+        <div className="divide-y divide-border">
+          {prayerTimes.map((pt, i) => {
+            const isNext = i === nextPrayerIndex;
+            const countdown = isNext ? getCountdown(pt.time_text) : null;
+            return (
+              <div
+                key={pt.id}
+                className={`flex items-center justify-between px-4 py-2.5 text-sm transition-colors
+                  ${isNext ? "bg-emerald-50 dark:bg-emerald-950/30" : ""}
+                `}
+              >
+                <div className="flex items-center gap-2">
+                  {isNext && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+                  <span className={`font-medium ${isNext ? "text-emerald-700 dark:text-emerald-400" : ""}`}>
+                    {pt.name}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className={`font-semibold ${isNext ? "text-emerald-700 dark:text-emerald-400" : "text-primary"}`}>
+                    {pt.time_text}
+                  </span>
+                  {countdown && (
+                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                      আরও {countdown} বাকী
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {/* Decorative footer */}
+        <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 text-white text-center py-1.5 text-[10px] opacity-90">
+          ☪ সময়মতো নামাজ আদায় করুন ☪
         </div>
       </CardContent>
     </Card>

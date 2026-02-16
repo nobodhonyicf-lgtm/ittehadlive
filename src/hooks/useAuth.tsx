@@ -70,11 +70,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Only re-check roles if initial load is already done
-        // keepOnError=true prevents false redirects on network hiccups
+        // Do NOT set loading=true here — it unmounts the entire admin UI and closes dialogs
         if (initializedRef.current) {
-          setLoading(true);
           await checkRoles(newSession.user, true);
-          if (mounted) setLoading(false);
         }
       } else if (event === 'SIGNED_OUT') {
         setIsAdmin(false);
