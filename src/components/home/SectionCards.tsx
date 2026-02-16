@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Users, BookOpen, Briefcase, Megaphone, Mail, GraduationCap, Building2, Search } from "lucide-react";
+import SectionHeader from "./SectionHeader";
 
 const sections = [
   {
@@ -69,32 +69,35 @@ const sections = [
 
 const SectionCards = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {sections.map((section) => (
-        <Card key={section.title} className="hover:shadow-lg transition-all group overflow-hidden">
-          <CardHeader className={`pb-3 bg-gradient-to-r ${section.color}`}>
-            <CardTitle className="flex items-center gap-2 text-primary text-lg group-hover:text-accent transition-colors">
-              <section.icon size={20} />
-              {section.title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-3">
-            <ul className="space-y-2">
-              {section.links.map((link, i) => (
-                <li key={i} className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-accent/60 shrink-0" />
-                  <Link
-                    to={link.url}
-                    className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      ))}
+    <div>
+      <SectionHeader title="বিভাগসমূহ" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {sections.map((section) => (
+          <div key={section.title} className="bg-card border border-border rounded-lg hover:shadow-lg transition-all group overflow-hidden">
+            <div className={`px-4 py-3 bg-gradient-to-r ${section.color}`}>
+              <h3 className="flex items-center gap-2 text-primary text-lg font-semibold group-hover:text-accent transition-colors">
+                <section.icon size={20} />
+                {section.title}
+              </h3>
+            </div>
+            <div className="p-4">
+              <ul className="space-y-2">
+                {section.links.map((link, i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-accent/60 shrink-0" />
+                    <Link
+                      to={link.url}
+                      className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
