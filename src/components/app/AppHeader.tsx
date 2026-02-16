@@ -61,11 +61,11 @@ const AppHeader = () => {
             </div>
           )}
           <div className="min-w-0">
-            <h1 className="font-bold text-[15px] leading-tight truncate max-w-[160px]">
+            <h1 className="font-bold text-[13px] leading-tight truncate max-w-[180px]">
               {appName}
             </h1>
-            <p className="text-[10px] opacity-70 truncate max-w-[160px] leading-tight">
-              {settings?.site_description?.slice(0, 40) || "সমন্বিত শিক্ষা প্ল্যাটফর্ম"}
+            <p className="text-[9px] opacity-70 truncate max-w-[180px] leading-tight">
+              {settings?.site_description?.slice(0, 50) || "সমন্বিত শিক্ষা প্ল্যাটফর্ম"}
             </p>
           </div>
         </Link>
