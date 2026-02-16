@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "@/components/ui/sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, Users } from "lucide-react";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const classes = ["ইবতেদায়ী", "মুতাওয়াসসিতা", "সানাবিয়্যা আম্মা", "সানাবিয়্যা খাসসা", "ফযীলত", "তাকমীল"];
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -24,6 +25,7 @@ const DRAFT_KEY = "admin_student_draft";
 
 const AdminStudents = () => {
   const { data: students, isLoading } = useAllStudents();
+  const { canEdit, canDelete } = useSectionPermissions();
   const { data: branches } = useAllBranches();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -98,7 +100,7 @@ const AdminStudents = () => {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-primary flex items-center gap-2"><Users size={22} /> শিক্ষার্থী ব্যবস্থাপনা</h2>
         <Dialog open={open} onOpenChange={v => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger asChild><Button className="gap-2" onClick={openNew}><Plus size={16} /> নতুন শিক্ষার্থী</Button></DialogTrigger>
+          {canEdit && <DialogTrigger asChild><Button className="gap-2" onClick={openNew}><Plus size={16} /> নতুন শিক্ষার্থী</Button></DialogTrigger>}
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editing ? "সম্পাদনা" : "নতুন শিক্ষার্থী"}</DialogTitle></DialogHeader>
             <div className="space-y-3">
@@ -159,8 +161,8 @@ const AdminStudents = () => {
                 <p className="text-xs text-muted-foreground">{s.class_name} — {(s as any).branches?.name || "—"}</p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={() => openEdit(s)}><Edit size={14} /></Button>
-                <Button variant="destructive" size="icon" onClick={() => handleDelete(s.id)}><Trash2 size={14} /></Button>
+                {canEdit && <Button variant="outline" size="icon" onClick={() => openEdit(s)}><Edit size={14} /></Button>}
+                {canDelete && <Button variant="destructive" size="icon" onClick={() => handleDelete(s.id)}><Trash2 size={14} /></Button>}
               </div>
             </CardContent>
           </Card>

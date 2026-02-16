@@ -11,8 +11,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const AdminNotices = () => {
+  const { canEdit, canDelete } = useSectionPermissions();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -59,9 +61,9 @@ const AdminNotices = () => {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">নোটিশ ব্যবস্থাপনা</h1>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
+          {canEdit && <DialogTrigger asChild>
             <Button onClick={() => { setEditId(null); setForm({ title: "", content: "", is_active: true }); }}><Plus size={16} /> নতুন নোটিশ</Button>
-          </DialogTrigger>
+          </DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editId ? "নোটিশ সম্পাদনা" : "নতুন নোটিশ"}</DialogTitle></DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
@@ -84,8 +86,8 @@ const AdminNotices = () => {
                     <TableCell className="font-medium">{n.title}</TableCell>
                     <TableCell><span className={`text-xs px-2 py-0.5 rounded ${n.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{n.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}</span></TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => { setEditId(n.id); setForm({ title: n.title, content: n.content || "", is_active: n.is_active ?? true }); setOpen(true); }}><Edit size={16} /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(n.id)}><Trash2 size={16} /></Button>
+                      {canEdit && <Button variant="ghost" size="icon" onClick={() => { setEditId(n.id); setForm({ title: n.title, content: n.content || "", is_active: n.is_active ?? true }); setOpen(true); }}><Edit size={16} /></Button>}
+                      {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(n.id)}><Trash2 size={16} /></Button>}
                     </TableCell>
                   </TableRow>
                 ))}

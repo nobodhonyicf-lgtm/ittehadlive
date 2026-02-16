@@ -7,8 +7,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Star, Check, Trash2, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { toBengali } from "@/lib/bengali";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const AdminBookReviews = () => {
+  const { canEdit, canDelete } = useSectionPermissions();
   const queryClient = useQueryClient();
 
   const { data: reviews, isLoading } = useQuery({
@@ -79,12 +81,12 @@ const AdminBookReviews = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => toggleApprove(r.id, r.is_approved)}>
+                        {canEdit && <Button variant="ghost" size="icon" onClick={() => toggleApprove(r.id, r.is_approved)}>
                           <Check size={14} />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(r.id)}>
+                        </Button>}
+                        {canDelete && <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(r.id)}>
                           <Trash2 size={14} />
-                        </Button>
+                        </Button>}
                       </div>
                     </TableCell>
                   </TableRow>

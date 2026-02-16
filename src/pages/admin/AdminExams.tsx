@@ -10,8 +10,10 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, ClipboardList } from "lucide-react";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const AdminExams = () => {
+  const { canEdit, canDelete } = useSectionPermissions();
   const { data: exams } = useExams();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -53,7 +55,7 @@ const AdminExams = () => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-primary flex items-center gap-2"><ClipboardList size={22} /> পরীক্ষা ব্যবস্থাপনা</h2>
         <Dialog open={open} onOpenChange={v => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger asChild><Button className="gap-2"><Plus size={16} /> নতুন পরীক্ষা</Button></DialogTrigger>
+          {canEdit && <DialogTrigger asChild><Button className="gap-2"><Plus size={16} /> নতুন পরীক্ষা</Button></DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editing ? "সম্পাদনা" : "নতুন পরীক্ষা"}</DialogTitle></DialogHeader>
             <div className="space-y-3">
@@ -81,8 +83,8 @@ const AdminExams = () => {
                 <p className="text-xs">{e.is_published ? "✅ প্রকাশিত" : "⏳ অপ্রকাশিত"} | {e.exam_type}</p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={() => openEdit(e)}><Edit size={14} /></Button>
-                <Button variant="destructive" size="icon" onClick={() => handleDelete(e.id)}><Trash2 size={14} /></Button>
+                {canEdit && <Button variant="outline" size="icon" onClick={() => openEdit(e)}><Edit size={14} /></Button>}
+                {canDelete && <Button variant="destructive" size="icon" onClick={() => handleDelete(e.id)}><Trash2 size={14} /></Button>}
               </div>
             </CardContent>
           </Card>

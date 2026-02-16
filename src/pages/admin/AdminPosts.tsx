@@ -13,6 +13,7 @@ import { toast } from "@/components/ui/sonner";
 import { Plus, Edit, Trash2, Link2 } from "lucide-react";
 import { useCategories } from "@/hooks/useData";
 import { useEffect } from "react";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 type PostForm = {
   title: string;
@@ -39,6 +40,7 @@ const DRAFT_KEY = "admin_post_draft";
 
 const AdminPosts = () => {
   const qc = useQueryClient();
+  const { canEdit, canDelete } = useSectionPermissions();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
@@ -154,9 +156,9 @@ const AdminPosts = () => {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">পোস্ট ব্যবস্থাপনা</h1>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
+          {canEdit && <DialogTrigger asChild>
             <Button onClick={openNew}><Plus size={16} /> নতুন পোস্ট</Button>
-          </DialogTrigger>
+          </DialogTrigger>}
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editId ? "পোস্ট সম্পাদনা" : "নতুন পোস্ট"}</DialogTitle>
@@ -322,8 +324,8 @@ const AdminPosts = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(post)}><Edit size={16} /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(post.id)}><Trash2 size={16} /></Button>
+                    {canEdit && <Button variant="ghost" size="icon" onClick={() => openEdit(post)}><Edit size={16} /></Button>}
+                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(post.id)}><Trash2 size={16} /></Button>}
                   </TableCell>
                 </TableRow>
               ))}

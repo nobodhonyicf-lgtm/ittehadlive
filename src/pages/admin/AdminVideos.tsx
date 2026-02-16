@@ -10,8 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/sonner";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const AdminVideos = () => {
+  const { canEdit, canDelete } = useSectionPermissions();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -45,7 +47,7 @@ const AdminVideos = () => {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">ভিডিও ব্যবস্থাপনা</h1>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button onClick={() => { setEditId(null); setForm({ title: "", youtube_url: "", description: "", sort_order: 0 }); }}><Plus size={16} /> নতুন ভিডিও</Button></DialogTrigger>
+          {canEdit && <DialogTrigger asChild><Button onClick={() => { setEditId(null); setForm({ title: "", youtube_url: "", description: "", sort_order: 0 }); }}><Plus size={16} /> নতুন ভিডিও</Button></DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editId ? "সম্পাদনা" : "নতুন ভিডিও"}</DialogTitle></DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
@@ -68,8 +70,8 @@ const AdminVideos = () => {
                   <TableCell>{v.title}</TableCell>
                   <TableCell className="text-muted-foreground text-xs truncate max-w-[200px]">{v.youtube_url}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => { setEditId(v.id); setForm({ title: v.title, youtube_url: v.youtube_url, description: v.description || "", sort_order: v.sort_order ?? 0 }); setOpen(true); }}><Edit size={16} /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(v.id)}><Trash2 size={16} /></Button>
+                    {canEdit && <Button variant="ghost" size="icon" onClick={() => { setEditId(v.id); setForm({ title: v.title, youtube_url: v.youtube_url, description: v.description || "", sort_order: v.sort_order ?? 0 }); setOpen(true); }}><Edit size={16} /></Button>}
+                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(v.id)}><Trash2 size={16} /></Button>}
                   </TableCell>
                 </TableRow>
               ))}

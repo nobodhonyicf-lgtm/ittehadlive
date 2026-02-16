@@ -10,8 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
 import { Plus, Edit, Trash2, Users } from "lucide-react";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const AdminCommittee = () => {
+  const { canEdit, canDelete } = useSectionPermissions();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -72,9 +74,9 @@ const AdminCommittee = () => {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold flex items-center gap-2"><Users size={22} /> কমিটি/উপদেষ্টা ব্যবস্থাপনা</h1>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger asChild>
+          {canEdit && <DialogTrigger asChild>
             <Button onClick={resetForm}><Plus size={16} /> নতুন সদস্য</Button>
-          </DialogTrigger>
+          </DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editId ? "সম্পাদনা" : "নতুন সদস্য"}</DialogTitle></DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
@@ -132,12 +134,12 @@ const AdminCommittee = () => {
                 <TableCell>{m.title}</TableCell>
                 <TableCell>{m.institution || "—"}</TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => {
+                  {canEdit && <Button variant="ghost" size="icon" onClick={() => {
                     setEditId(m.id);
                     setForm({ name: m.name, title: m.title, institution: m.institution || "", photo_url: m.photo_url || "", page_slug: m.page_slug, sort_order: m.sort_order ?? 0 });
                     setOpen(true);
-                  }}><Edit size={16} /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => { if (confirm("মুছে ফেলতে চান?")) deleteMutation.mutate(m.id); }}><Trash2 size={16} /></Button>
+                  }}><Edit size={16} /></Button>}
+                  {canDelete && <Button variant="ghost" size="icon" onClick={() => { if (confirm("মুছে ফেলতে চান?")) deleteMutation.mutate(m.id); }}><Trash2 size={16} /></Button>}
                 </TableCell>
               </TableRow>
             ))}

@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, Building2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const emptyForm = {
   name: "", code: "", address: "", phone: "", email: "", head_name: "",
@@ -18,6 +19,7 @@ const emptyForm = {
 
 const AdminBranches = () => {
   const { data: branches, isLoading } = useAllBranches();
+  const { canEdit, canDelete } = useSectionPermissions();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -74,9 +76,9 @@ const AdminBranches = () => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-primary flex items-center gap-2"><Building2 size={22} /> শাখা ব্যবস্থাপনা</h2>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger asChild>
+          {canEdit && <DialogTrigger asChild>
             <Button className="gap-2"><Plus size={16} /> নতুন শাখা</Button>
-          </DialogTrigger>
+          </DialogTrigger>}
           <DialogContent className="max-w-lg max-h-[90vh]">
             <DialogHeader><DialogTitle>{editing ? "শাখা সম্পাদনা" : "নতুন শাখা"}</DialogTitle></DialogHeader>
             <ScrollArea className="max-h-[70vh] pr-4">
@@ -122,8 +124,8 @@ const AdminBranches = () => {
                 <p className="text-sm text-muted-foreground">{b.address || "—"} | {b.head_name || "—"}</p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={() => openEdit(b)}><Edit size={14} /></Button>
-                <Button variant="destructive" size="icon" onClick={() => handleDelete(b.id)}><Trash2 size={14} /></Button>
+                {canEdit && <Button variant="outline" size="icon" onClick={() => openEdit(b)}><Edit size={14} /></Button>}
+                {canDelete && <Button variant="destructive" size="icon" onClick={() => handleDelete(b.id)}><Trash2 size={14} /></Button>}
               </div>
             </CardContent>
           </Card>

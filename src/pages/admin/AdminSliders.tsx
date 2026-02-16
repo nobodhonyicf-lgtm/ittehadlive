@@ -8,8 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import { Image, Plus, Trash2, Edit2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 const AdminSliders = () => {
+  const { canEdit, canDelete } = useSectionPermissions();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -73,9 +75,9 @@ const AdminSliders = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold flex items-center gap-2"><Image size={22} /> স্লাইডার</h1>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger asChild>
+          {canEdit && <DialogTrigger asChild>
             <Button size="sm"><Plus size={16} className="mr-1" /> নতুন স্লাইড</Button>
-          </DialogTrigger>
+          </DialogTrigger>}
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{editId ? "স্লাইড সম্পাদনা" : "নতুন স্লাইড"}</DialogTitle>
@@ -113,12 +115,12 @@ const AdminSliders = () => {
               <img src={s.image_url} alt={s.title} className="w-full h-32 object-cover rounded mb-2" />
               <p className="font-semibold text-sm">{s.title}</p>
               <div className="flex gap-2 mt-2">
-                <Button size="sm" variant="outline" onClick={() => openEdit(s)}>
+                {canEdit && <Button size="sm" variant="outline" onClick={() => openEdit(s)}>
                   <Edit2 size={14} className="mr-1" /> সম্পাদনা
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => deleteMutation.mutate(s.id)}>
+                </Button>}
+                {canDelete && <Button size="sm" variant="destructive" onClick={() => deleteMutation.mutate(s.id)}>
                   <Trash2 size={14} />
-                </Button>
+                </Button>}
               </div>
             </CardContent>
           </Card>

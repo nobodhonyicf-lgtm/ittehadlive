@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Package, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 import { toBengali } from "@/lib/bengali";
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -21,6 +22,7 @@ const statusMap: Record<string, { label: string; variant: "default" | "secondary
 
 const AdminBookOrders = () => {
   const queryClient = useQueryClient();
+  const { canEdit } = useSectionPermissions();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -102,7 +104,7 @@ const AdminBookOrders = () => {
                     <TableCell>{toBengali(order.phone)}</TableCell>
                     <TableCell className="font-medium">৳{toBengali(order.total_amount)}</TableCell>
                     <TableCell>
-                      <Select value={order.status} onValueChange={(v) => updateStatus(order.id, v)}>
+                      <Select value={order.status} onValueChange={(v) => updateStatus(order.id, v)} disabled={!canEdit}>
                         <SelectTrigger className="w-28 h-7 text-xs">
                           <Badge variant={statusMap[order.status]?.variant || "secondary"}>
                             {statusMap[order.status]?.label || order.status}
