@@ -6,6 +6,7 @@ import Sidebar from "@/components/home/Sidebar";
 import { User } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { useIsApp } from "@/hooks/useIsApp";
 
 const committeePages = ["committee", "advisors"];
 
@@ -14,14 +15,15 @@ const PageView = () => {
   const { data: page, isLoading } = usePage(slug || "");
   const isCommitteePage = committeePages.includes(slug || "");
   const { data: members } = useCommitteeMembers(isCommitteePage ? slug! : undefined);
+  const isApp = useIsApp();
 
   return (
     <Layout>
       {page && <SEOHead title={page.title} description={page.content?.substring(0, 160) || ""} image={(page as any).cover_image_url || undefined} />}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <Breadcrumbs items={page ? [{ label: page.title }] : []} />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        <div className={`grid grid-cols-1 ${isApp ? '' : 'lg:grid-cols-3'} gap-6`}>
+          <div className={isApp ? '' : 'lg:col-span-2'}>
             {isLoading ? (
               <div className="animate-pulse bg-muted h-64 rounded" />
             ) : page ? (
@@ -59,9 +61,11 @@ const PageView = () => {
               </div>
             )}
           </div>
-          <div className="lg:col-span-1">
-            <Sidebar />
-          </div>
+          {!isApp && (
+            <div className="lg:col-span-1">
+              <Sidebar />
+            </div>
+          )}
         </div>
       </div>
     </Layout>

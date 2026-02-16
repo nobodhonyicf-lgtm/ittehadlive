@@ -12,6 +12,7 @@ import InPostAd from "@/components/post/InPostAd";
 import PhotoCardEditor from "@/components/post/PhotoCardEditor";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PageSidebar from "@/components/home/PageSidebar";
+import { useIsApp } from "@/hooks/useIsApp";
 
 const SocialShare = ({ url, title, slug }: { url: string; title: string; slug?: string }) => {
   const encodedTitle = encodeURIComponent(title);
@@ -45,6 +46,7 @@ const PostPage = () => {
   const { data: post, isLoading } = usePost(slug || "");
   const [photoCardOpen, setPhotoCardOpen] = useState(false);
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+  const isApp = useIsApp();
 
   // Split content into paragraphs for in-post ad placement
   const contentParagraphs = post?.content?.split("\n").filter(Boolean) || [];
@@ -68,8 +70,8 @@ const PostPage = () => {
           ...(post?.categories ? [{ label: post.categories.name, href: `/posts?category=${post.categories.slug}` }] : []),
           ...(post ? [{ label: post.title }] : []),
         ]} />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        <div className={`grid grid-cols-1 ${isApp ? '' : 'lg:grid-cols-3'} gap-6`}>
+          <div className={isApp ? '' : 'lg:col-span-2'}>
             {isLoading ? (
               <div className="animate-pulse bg-muted h-64 rounded" />
             ) : post ? (
@@ -194,9 +196,11 @@ const PostPage = () => {
               </div>
             )}
           </div>
-          <div className="lg:col-span-1">
-            <PageSidebar />
-          </div>
+          {!isApp && (
+            <div className="lg:col-span-1">
+              <PageSidebar />
+            </div>
+          )}
         </div>
       </div>
       {post && (

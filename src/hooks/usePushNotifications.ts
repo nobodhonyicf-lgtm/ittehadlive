@@ -15,7 +15,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 export function usePushNotifications() {
   const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [permission, setPermission] = useState<NotificationPermission>('default');
 
   useEffect(() => {
@@ -23,19 +23,22 @@ export function usePushNotifications() {
     setIsSupported(supported);
     if (supported) {
       setPermission(Notification.permission);
-      checkSubscription();
+      checkSubscription().finally(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
     }
   }, []);
 
   const checkSubscription = async () => {
     try {
-      const registration = await navigator.serviceWorker.getRegistration('/push-sw.js');
+      // Wait for any service worker to be ready
+      const registration = await navigator.serviceWorker.ready;
       if (registration) {
         const sub = await (registration as any).pushManager.getSubscription();
         setIsSubscribed(!!sub);
       }
     } catch {
-      // ignore
+      setIsSubscribed(false);
     }
   };
 
@@ -51,7 +54,10 @@ export function usePushNotifications() {
       }
 
       // Register push service worker
-      const registration = await navigator.serviceWorker.register('/push-sw.js', { scope: '/' });
+      let registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) {
+        registration = await navigator.serviceWorker.register('/push-sw.js', { scope: '/' });
+      }
       await navigator.serviceWorker.ready;
 
       const subscription = await (registration as any).pushManager.subscribe({
@@ -84,7 +90,7 @@ export function usePushNotifications() {
   const unsubscribe = useCallback(async () => {
     setIsLoading(true);
     try {
-      const registration = await navigator.serviceWorker.getRegistration('/push-sw.js');
+      const registration = await navigator.serviceWorker.ready;
       if (registration) {
         const sub = await (registration as any).pushManager.getSubscription();
         if (sub) {
