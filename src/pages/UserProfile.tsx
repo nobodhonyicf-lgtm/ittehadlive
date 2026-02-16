@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,24 +41,33 @@ const UserProfile = () => {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [showAvatarInput, setShowAvatarInput] = useState(false);
 
+  // Use shared React Query for profile (syncs with admin panel & header)
+  const { data: profileData } = useQuery({
+    queryKey: ["user_profile", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("*").eq("user_id", user!.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Sync local state from query data
+  useEffect(() => {
+    if (profileData) {
+      setProfile(profileData);
+      setAvatarUrl(profileData.avatar_url || "");
+    }
+  }, [profileData]);
+
   useEffect(() => {
     if (!authLoading && !user) navigate("/login");
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
     if (!user) return;
-    loadProfile();
     loadOrders();
     loadMessages();
   }, [user]);
-
-  const loadProfile = async () => {
-    const { data } = await supabase.from("profiles").select("*").eq("user_id", user!.id).single();
-    if (data) {
-      setProfile(data);
-      setAvatarUrl(data.avatar_url || "");
-    }
-  };
 
   const saveAvatarUrl = async () => {
     if (!user) return;
