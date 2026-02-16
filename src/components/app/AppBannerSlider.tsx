@@ -17,12 +17,12 @@ const AppBannerSlider = () => {
   if (!sliders?.length) return null;
 
   return (
-    <div className="relative w-full aspect-[16/7] overflow-hidden bg-muted">
+    <div className="relative w-full aspect-[16/7] overflow-hidden bg-muted dark:bg-muted/50 transition-colors duration-300">
       {sliders.map((slide, i) => (
         <div
           key={slide.id}
-          className={`absolute inset-0 transition-opacity duration-500 ${
-            i === current ? "opacity-100" : "opacity-0"
+          className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+            i === current ? "opacity-100 scale-100" : "opacity-0 scale-105"
           }`}
         >
           <img
@@ -42,13 +42,13 @@ const AppBannerSlider = () => {
         <>
           <button
             onClick={() => setCurrent((c) => (c - 1 + sliders.length) % sliders.length)}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 text-white flex items-center justify-center"
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 text-white flex items-center justify-center backdrop-blur-sm transition-all duration-200 hover:bg-black/50 active:scale-90"
           >
             <ChevronLeft size={16} />
           </button>
           <button
             onClick={() => setCurrent((c) => (c + 1) % sliders.length)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 text-white flex items-center justify-center"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 text-white flex items-center justify-center backdrop-blur-sm transition-all duration-200 hover:bg-black/50 active:scale-90"
           >
             <ChevronRight size={16} />
           </button>
@@ -56,8 +56,8 @@ const AppBannerSlider = () => {
             {sliders.map((_, i) => (
               <span
                 key={i}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${
-                  i === current ? "bg-white w-4" : "bg-white/50"
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === current ? "bg-white w-5" : "bg-white/50 w-1.5"
                 }`}
               />
             ))}
