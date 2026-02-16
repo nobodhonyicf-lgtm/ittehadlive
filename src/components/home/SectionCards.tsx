@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Users, BookOpen, Briefcase, Megaphone, Mail, GraduationCap, Building2, Search } from "lucide-react";
+import { Users, BookOpen, Briefcase, Megaphone, Mail, GraduationCap, Building2, Search, Globe, Feather, Heart } from "lucide-react";
 import SectionHeader from "./SectionHeader";
 
 const sections = [
@@ -9,9 +9,9 @@ const sections = [
     color: "from-primary/10 to-primary/5",
     links: [
       { label: "পরিচিতি", url: "/page/about" },
-      { label: "ইতিহাস ও প্রতিষ্ঠা", url: "/page/about" },
-      { label: "লক্ষ্য ও উদ্দেশ্য", url: "/page/about" },
-      { label: "নীতিমালা ও দৃষ্টিভঙ্গি", url: "/page/about" },
+      { label: "ইতিহাস ও প্রতিষ্ঠা", url: "/page/history" },
+      { label: "লক্ষ্য ও উদ্দেশ্য", url: "/page/objectives" },
+      { label: "নীতিমালা ও দৃষ্টিভঙ্গি", url: "/page/policy" },
     ],
   },
   {
@@ -50,9 +50,9 @@ const sections = [
     icon: Briefcase,
     color: "from-primary/10 to-primary/5",
     links: [
-      { label: "শিক্ষা উন্নয়ন কমিটি", url: "/posts" },
-      { label: "সেমিনার ও কর্মশালা", url: "/posts" },
-      { label: "বৃত্তি ও প্রতিযোগিতা", url: "/posts" },
+      { label: "শিক্ষা উন্নয়ন কমিটি", url: "/page/education-committee" },
+      { label: "সেমিনার ও কর্মশালা", url: "/page/seminars" },
+      { label: "বৃত্তি ও প্রতিযোগিতা", url: "/page/scholarships" },
     ],
   },
   {
@@ -61,8 +61,38 @@ const sections = [
     color: "from-accent/10 to-accent/5",
     links: [
       { label: "যোগাযোগ তথ্য", url: "/contact" },
-      { label: "পরামর্শ ও সহায়তা", url: "/contact" },
-      { label: "অনুদান ও সংযোজিত", url: "/contact" },
+      { label: "পরামর্শ ও সহায়তা", url: "/page/support" },
+      { label: "অনুদান ও সংযোজিত", url: "/page/donations" },
+    ],
+  },
+  {
+    title: "গবেষণা ও প্রকাশনা",
+    icon: Feather,
+    color: "from-primary/10 to-accent/5",
+    links: [
+      { label: "গবেষণা কার্যক্রম", url: "/page/research" },
+      { label: "প্রকাশনা সমূহ", url: "/page/research" },
+      { label: "বই ও পাঠ্যপুস্তক", url: "/books" },
+    ],
+  },
+  {
+    title: "আন্তর্জাতিক সম্পর্ক",
+    icon: Globe,
+    color: "from-accent/10 to-primary/5",
+    links: [
+      { label: "আন্তর্জাতিক অংশীদার", url: "/page/international" },
+      { label: "শিক্ষক বিনিময় কর্মসূচি", url: "/page/international" },
+      { label: "যৌথ গবেষণা প্রকল্প", url: "/page/international" },
+    ],
+  },
+  {
+    title: "সাংস্কৃতিক কার্যক্রম",
+    icon: Heart,
+    color: "from-primary/10 to-primary/5",
+    links: [
+      { label: "ইসলামী সাংস্কৃতিক সপ্তাহ", url: "/page/cultural" },
+      { label: "কুরআন তিলাওয়াত মাহফিল", url: "/page/cultural" },
+      { label: "গ্যালারী", url: "/page/cultural" },
     ],
   },
 ];
