@@ -24,6 +24,7 @@ import BookDetail from "./pages/BookDetail";
 import CartPage from "./pages/CartPage";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
+import LeaderDetail from "./pages/LeaderDetail";
 import ResetPassword from "./pages/ResetPassword";
 import CustomerLogin from "./pages/CustomerLogin";
 import CustomerRegister from "./pages/CustomerRegister";
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="/page/:slug" element={<PageView />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/notice/:id" element={<NoticeView />} />
+              <Route path="/leader/:id" element={<LeaderDetail />} />
               <Route path="/students" element={<StudentDirectory />} />
               <Route path="/result" element={<ResultCheck />} />
               <Route path="/branches" element={<BranchList />} />
