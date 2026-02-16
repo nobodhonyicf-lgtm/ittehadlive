@@ -235,7 +235,11 @@ const BookDetail = () => {
                 <h3 className="font-bold">প্রিভিউ: {book.title}</h3>
                 <Button variant="ghost" size="sm" onClick={() => setShowPreview(false)}>✕</Button>
               </div>
-              <iframe src={book.preview_pdf_url} className="flex-1 w-full" title="Book Preview" />
+              <iframe 
+                src={`https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(book.preview_pdf_url)}`} 
+                className="flex-1 w-full" 
+                title="Book Preview" 
+              />
             </div>
           </div>
         )}

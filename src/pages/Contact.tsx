@@ -12,6 +12,7 @@ import { useSiteSettings } from "@/hooks/useData";
 import { Phone, Mail, Send } from "lucide-react";
 import { toBengali } from "@/lib/bengali";
 import PageSidebar from "@/components/home/PageSidebar";
+import { useIsApp } from "@/hooks/useIsApp";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "নাম আবশ্যক").max(100),
@@ -23,6 +24,7 @@ const contactSchema = z.object({
 
 const Contact = () => {
   const { data: settings } = useSiteSettings();
+  const isApp = useIsApp();
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [loading, setLoading] = useState(false);
 
@@ -54,8 +56,8 @@ const Contact = () => {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        <div className={`grid grid-cols-1 ${isApp ? '' : 'lg:grid-cols-3'} gap-6`}>
+          <div className={isApp ? '' : 'lg:col-span-2'}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -107,9 +109,11 @@ const Contact = () => {
               </Card>
             </div>
           </div>
-          <div className="lg:col-span-1">
-            <PageSidebar />
-          </div>
+          {!isApp && (
+            <div className="lg:col-span-1">
+              <PageSidebar />
+            </div>
+          )}
         </div>
       </div>
     </Layout>
