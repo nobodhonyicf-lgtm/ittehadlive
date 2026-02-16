@@ -13,7 +13,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
 import { toBengali } from "@/lib/bengali";
-import { User, Package, MessageSquare, LogOut, Save, Send, Search } from "lucide-react";
+import { User, Package, MessageSquare, LogOut, Save, Send, Search, Link as LinkIcon } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const statusMap: Record<string, { label: string; color: string }> = {
   pending: { label: "অপেক্ষমান", color: "bg-yellow-100 text-yellow-800" },
@@ -35,6 +36,8 @@ const UserProfile = () => {
   const [trackOrderNum, setTrackOrderNum] = useState("");
   const [trackedOrder, setTrackedOrder] = useState<any>(null);
   const [tracking, setTracking] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [showAvatarInput, setShowAvatarInput] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/login");
@@ -49,7 +52,21 @@ const UserProfile = () => {
 
   const loadProfile = async () => {
     const { data } = await supabase.from("profiles").select("*").eq("user_id", user!.id).single();
-    if (data) setProfile(data);
+    if (data) {
+      setProfile(data);
+      setAvatarUrl(data.avatar_url || "");
+    }
+  };
+
+  const saveAvatarUrl = async () => {
+    if (!user) return;
+    const { error } = await supabase.from("profiles").update({ avatar_url: avatarUrl || null }).eq("user_id", user.id);
+    if (error) toast.error("ছবি সেভ ব্যর্থ");
+    else {
+      toast.success("প্রোফাইল ছবি আপডেট হয়েছে");
+      setShowAvatarInput(false);
+      setProfile({ ...profile, avatar_url: avatarUrl });
+    }
   };
 
   const loadOrders = async () => {
@@ -116,8 +133,22 @@ const UserProfile = () => {
         {/* Profile Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="text-primary" size={28} />
+            <div className="relative group">
+              <Avatar className="h-14 w-14">
+                {profile?.avatar_url ? (
+                  <AvatarImage src={profile.avatar_url} alt="Profile" />
+                ) : null}
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  <User size={28} />
+                </AvatarFallback>
+              </Avatar>
+              <button
+                onClick={() => setShowAvatarInput(!showAvatarInput)}
+                className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                title="ছবি পরিবর্তন করুন"
+              >
+                <LinkIcon size={16} className="text-white" />
+              </button>
             </div>
             <div>
               <h1 className="text-xl font-bold">{profile?.full_name || "ইউজার"}</h1>
@@ -128,6 +159,22 @@ const UserProfile = () => {
             <LogOut size={16} className="mr-1" /> লগআউট
           </Button>
         </div>
+
+        {/* Avatar URL input */}
+        {showAvatarInput && (
+          <div className="mb-4 p-3 border border-border rounded-lg bg-muted/30 space-y-2">
+            <Label className="text-sm">ছবির লিংক দিন (URL)</Label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="https://example.com/photo.jpg"
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+              />
+              <Button size="sm" onClick={saveAvatarUrl}>সেভ</Button>
+              <Button size="sm" variant="ghost" onClick={() => setShowAvatarInput(false)}>বাতিল</Button>
+            </div>
+          </div>
+        )}
 
         <Tabs defaultValue="profile" className="space-y-4">
           <TabsList className="grid grid-cols-4 w-full">
