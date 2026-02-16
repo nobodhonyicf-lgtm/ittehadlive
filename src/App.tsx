@@ -33,6 +33,7 @@ import UserProfile from "./pages/UserProfile";
 import CustomerResetPassword from "./pages/CustomerResetPassword";
 import OAuthBridge from "./pages/OAuthBridge";
 import OAuthCallback from "./pages/OAuthCallback";
+import Install from "./pages/Install";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -76,6 +77,7 @@ const App = () => (
               <Route path="/reset-password" element={<CustomerResetPassword />} />
               <Route path="/oauth-bridge" element={<OAuthBridge />} />
               <Route path="/oauth-callback" element={<OAuthCallback />} />
+              <Route path="/install" element={<Install />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/reset-password" element={<ResetPassword />} />
               <Route path="/admin/*" element={<AdminDashboard />} />
