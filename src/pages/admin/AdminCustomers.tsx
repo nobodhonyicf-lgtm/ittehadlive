@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Users, MessageCircle, Send, Mail, ShieldCheck, Plus, Trash2, Tag } from "lucide-react";
+import { Users, MessageCircle, Send, Mail, ShieldCheck } from "lucide-react";
 import { format } from "date-fns";
 
 const MAX_REPLY_CHARS = 1000;
@@ -48,64 +47,19 @@ const SECTION_LABELS: Record<string, string> = {
 
 const ALL_SECTIONS = Object.keys(SECTION_LABELS);
 
+const ROLE_OPTIONS: { value: string; label: string }[] = [
+  { value: "user", label: "ইউজার" },
+  { value: "admin", label: "এডমিন" },
+  { value: "moderator", label: "মডারেটর" },
+  { value: "editor", label: "এডিটর" },
+];
+
+const getRoleLabel = (role: string) => ROLE_OPTIONS.find(r => r.value === role)?.label || role;
+
 const AdminUsers = () => {
   const qc = useQueryClient();
   const [replyText, setReplyText] = useState<Record<string, string>>({});
-  const [selectedRole, setSelectedRole] = useState("admin");
-  const [newRoleName, setNewRoleName] = useState("");
-  const [newRoleDisplay, setNewRoleDisplay] = useState("");
-  const [newRoleDesc, setNewRoleDesc] = useState("");
-
-  // Load custom roles
-  const { data: customRoles } = useQuery({
-    queryKey: ["custom_roles"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("custom_roles")
-        .select("*")
-        .order("created_at");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const addRoleMutation = useMutation({
-    mutationFn: async () => {
-      if (!newRoleName.trim() || !newRoleDisplay.trim()) throw new Error("নাম দিন");
-      const { error } = await supabase.from("custom_roles").insert({
-        role_name: newRoleName.trim().toLowerCase().replace(/\s+/g, "_"),
-        display_name: newRoleDisplay.trim(),
-        description: newRoleDesc.trim() || null,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["custom_roles"] });
-      setNewRoleName("");
-      setNewRoleDisplay("");
-      setNewRoleDesc("");
-      toast.success("নতুন রোল যুক্ত হয়েছে");
-    },
-    onError: (e: any) => toast.error(e.message || "রোল যুক্ত করা ব্যর্থ"),
-  });
-
-  const deleteRoleMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("custom_roles").delete().eq("id", id);
-      if (error) throw error;
-      // Also delete associated permissions
-      const role = customRoles?.find((r: any) => r.id === id);
-      if (role) {
-        await supabase.from("admin_permissions").delete().eq("role_name", role.role_name);
-      }
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["custom_roles"] });
-      qc.invalidateQueries({ queryKey: ["admin_permissions"] });
-      toast.success("রোল মুছে ফেলা হয়েছে");
-    },
-    onError: () => toast.error("রোল মুছে ফেলা ব্যর্থ"),
-  });
+  const [selectedRole, setSelectedRole] = useState("moderator");
 
   // Load users via edge function
   const { data: usersData, isLoading: usersLoading } = useQuery({
@@ -167,27 +121,25 @@ const AdminUsers = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin_customer_messages"] }),
   });
 
-  // Role change mutation (standard role)
+  // Role change mutation
   const roleMutation = useMutation({
-    mutationFn: async ({ userId, newRole, customRoleName }: { userId: string; newRole: "admin" | "user"; customRoleName?: string | null }) => {
+    mutationFn: async ({ userId, newRole }: { userId: string; newRole: string }) => {
       const { data: existing } = await supabase
         .from("user_roles")
         .select("id")
         .eq("user_id", userId)
         .maybeSingle();
 
-      const payload: any = { role: newRole, custom_role_name: customRoleName || null };
-
       if (existing) {
         const { error } = await supabase
           .from("user_roles")
-          .update(payload)
+          .update({ role: newRole as any })
           .eq("user_id", userId);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("user_roles")
-          .insert({ user_id: userId, ...payload });
+          .insert({ user_id: userId, role: newRole as any });
         if (error) throw error;
       }
     },
@@ -228,7 +180,7 @@ const AdminUsers = () => {
       }
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin_permissions", selectedRole] });
+      qc.invalidateQueries({ queryKey: ["admin_permissions_raw", selectedRole] });
       toast.success("পারমিশন আপডেট হয়েছে");
     },
     onError: () => toast.error("পারমিশন আপডেট ব্যর্থ"),
@@ -257,9 +209,6 @@ const AdminUsers = () => {
         <TabsList className="flex-wrap">
           <TabsTrigger value="users" className="gap-1">
             <Users size={14} /> ইউজার তালিকা
-          </TabsTrigger>
-          <TabsTrigger value="roles" className="gap-1">
-            <Tag size={14} /> রোল
           </TabsTrigger>
           <TabsTrigger value="permissions" className="gap-1">
             <ShieldCheck size={14} /> পারমিশন
@@ -292,11 +241,10 @@ const AdminUsers = () => {
                         <th className="text-left p-2">নাম</th>
                         <th className="text-left p-2">ফোন</th>
                         <th className="text-left p-2">জেলা</th>
-                        <th className="text-left p-2">রোল</th>
+                        <th className="text-left p-2">বর্তমান রোল</th>
                         <th className="text-left p-2">যোগদান</th>
                         <th className="text-left p-2">সর্বশেষ লগইন</th>
-                        <th className="text-left p-2">স্ট্যান্ডার্ড রোল</th>
-                        <th className="text-left p-2">কাস্টম রোল</th>
+                        <th className="text-left p-2">রোল পরিবর্তন</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -307,16 +255,9 @@ const AdminUsers = () => {
                           <td className="p-2">{user.profile?.phone || "—"}</td>
                           <td className="p-2">{user.profile?.district || "—"}</td>
                           <td className="p-2">
-                            <div className="flex flex-wrap gap-1">
-                              <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                                {user.role === "admin" ? "এডমিন" : "ইউজার"}
-                              </Badge>
-                              {user.custom_role_display && (
-                                <Badge variant="outline" className="text-xs">
-                                  {user.custom_role_display}
-                                </Badge>
-                              )}
-                            </div>
+                            <Badge variant={user.role === "admin" ? "default" : user.role === "moderator" ? "secondary" : "outline"}>
+                              {getRoleLabel(user.role)}
+                            </Badge>
                           </td>
                           <td className="p-2 text-xs text-muted-foreground">
                             {user.created_at ? format(new Date(user.created_at), "dd/MM/yyyy") : "—"}
@@ -325,38 +266,17 @@ const AdminUsers = () => {
                             {user.last_sign_in_at ? format(new Date(user.last_sign_in_at), "dd/MM/yyyy HH:mm") : "—"}
                           </td>
                           <td className="p-2">
-                            <div className="flex gap-1">
-                              <Select
-                                value={user.role}
-                                onValueChange={(val) =>
-                                  roleMutation.mutate({ userId: user.id, newRole: val as "admin" | "user", customRoleName: user.custom_role_name })
-                                }
-                              >
-                                <SelectTrigger className="w-24 h-8 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="user">ইউজার</SelectItem>
-                                  <SelectItem value="admin">এডমিন</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </td>
-                          <td className="p-2">
                             <Select
-                              value={user.custom_role_name || "none"}
-                              onValueChange={(val) =>
-                                roleMutation.mutate({ userId: user.id, newRole: user.role as "admin" | "user", customRoleName: val === "none" ? null : val })
-                              }
+                              value={user.role}
+                              onValueChange={(val) => roleMutation.mutate({ userId: user.id, newRole: val })}
                             >
                               <SelectTrigger className="w-28 h-8 text-xs">
-                                <SelectValue placeholder="কোনটি নয়" />
+                                <SelectValue />
                               </SelectTrigger>
-                                <SelectContent>
-                                <SelectItem value="none">কোনটি নয়</SelectItem>
-                                {(customRoles || []).filter((r: any) => !r.is_system).map((role: any) => (
-                                  <SelectItem key={role.role_name} value={role.role_name}>
-                                    {role.display_name}
+                              <SelectContent>
+                                {ROLE_OPTIONS.map((opt) => (
+                                  <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -368,102 +288,6 @@ const AdminUsers = () => {
                   </table>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Roles Tab */}
-        <TabsContent value="roles" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Tag size={18} /> কাস্টম রোল ম্যানেজমেন্ট
-              </CardTitle>
-              <p className="text-xs text-muted-foreground">
-                নতুন রোল তৈরি করুন এবং পারমিশন ট্যাবে তাদের অনুমতি নির্ধারণ করুন।
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Add new role form */}
-              <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
-                <h3 className="font-semibold text-sm">নতুন রোল যুক্ত করুন</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="text-xs font-medium mb-1 block">রোল কী (ইংরেজি)</label>
-                    <Input
-                      placeholder="যেমন: editor, moderator"
-                      value={newRoleName}
-                      onChange={(e) => setNewRoleName(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium mb-1 block">প্রদর্শন নাম</label>
-                    <Input
-                      placeholder="যেমন: সম্পাদক, মডারেটর"
-                      value={newRoleDisplay}
-                      onChange={(e) => setNewRoleDisplay(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium mb-1 block">বিবরণ (ঐচ্ছিক)</label>
-                    <Input
-                      placeholder="এই রোলের কাজ কী..."
-                      value={newRoleDesc}
-                      onChange={(e) => setNewRoleDesc(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  className="gap-1"
-                  disabled={!newRoleName.trim() || !newRoleDisplay.trim() || addRoleMutation.isPending}
-                  onClick={() => addRoleMutation.mutate()}
-                >
-                  <Plus size={14} /> রোল যুক্ত করুন
-                </Button>
-              </div>
-
-              {/* Existing roles list */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b bg-muted/50">
-                      <th className="text-left p-2">রোল কী</th>
-                      <th className="text-left p-2">প্রদর্শন নাম</th>
-                      <th className="text-left p-2">বিবরণ</th>
-                      <th className="text-left p-2">ধরন</th>
-                      <th className="text-left p-2">অ্যাকশন</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(customRoles || []).map((role: any) => (
-                      <tr key={role.id} className="border-b hover:bg-muted/30">
-                        <td className="p-2 font-mono text-xs">{role.role_name}</td>
-                        <td className="p-2 font-medium">{role.display_name}</td>
-                        <td className="p-2 text-muted-foreground text-xs">{role.description || "—"}</td>
-                        <td className="p-2">
-                          <Badge variant={role.is_system ? "default" : "outline"}>
-                            {role.is_system ? "সিস্টেম" : "কাস্টম"}
-                          </Badge>
-                        </td>
-                        <td className="p-2">
-                          {!role.is_system && (
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="gap-1 h-7 text-xs"
-                              onClick={() => deleteRoleMutation.mutate(role.id)}
-                              disabled={deleteRoleMutation.isPending}
-                            >
-                              <Trash2 size={12} /> মুছুন
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -481,16 +305,16 @@ const AdminUsers = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {(customRoles || []).map((role: any) => (
-                      <SelectItem key={role.role_name} value={role.role_name}>
-                        {role.display_name}
+                    {ROLE_OPTIONS.filter(r => r.value !== "user").map((role) => (
+                      <SelectItem key={role.value} value={role.value}>
+                        {role.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                প্রতিটি সেকশনের জন্য দেখা, এডিট ও ডিলিট করার অনুমতি নির্ধারণ করুন।
+                প্রতিটি সেকশনের জন্য দেখা, এডিট ও ডিলিট করার অনুমতি নির্ধারণ করুন। এডমিন সর্বদা সম্পূর্ণ এক্সেস পায়।
               </p>
             </CardHeader>
             <CardContent>
