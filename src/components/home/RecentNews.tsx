@@ -44,11 +44,11 @@ const RecentNews = () => {
         <SectionHeader title="সর্বশেষ খবর" linkUrl="/posts" />
 
         {/* Top row: Box 1 (left=title, right=image) + Box 2 (top=image, bottom=title) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0.5 rounded-md overflow-hidden">
-          {/* Box 1: Horizontal - left title, right image */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-0.5 rounded-md overflow-hidden">
+          {/* Box 1: Larger - Horizontal - left title, right image (3/5 width) */}
           <Link
             to={`/post/${featured.slug}`}
-            className="group flex bg-muted overflow-hidden md:row-span-2"
+            className="group flex bg-muted overflow-hidden md:col-span-3 min-h-[260px]"
           >
             <div className="flex-1 p-4 flex flex-col justify-end bg-gradient-to-r from-black/90 via-black/70 to-transparent relative z-10">
               {featured.categories && (
@@ -80,11 +80,11 @@ const RecentNews = () => {
             </div>
           </Link>
 
-          {/* Box 2: Vertical - top image, bottom title */}
+          {/* Box 2: Smaller - Vertical - top image, bottom title (2/5 width) */}
           {secondPost && (
             <Link
               to={`/post/${secondPost.slug}`}
-              className="group block relative overflow-hidden bg-muted aspect-[4/3] md:aspect-auto"
+              className="group block relative overflow-hidden bg-muted md:col-span-2"
             >
               <div className="h-3/5 overflow-hidden">
                 {secondPost.image_url ? (
@@ -95,12 +95,17 @@ const RecentNews = () => {
                     loading="lazy"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-muted">
+                  <div className="w-full h-full flex items-center justify-center bg-muted min-h-[140px]">
                     <Newspaper className="text-muted-foreground" size={36} />
                   </div>
                 )}
               </div>
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 pt-10">
+                {secondPost.categories && (
+                  <span className="text-[10px] font-bold text-destructive bg-white/90 px-1.5 py-0.5 rounded mb-1 inline-block w-fit">
+                    {secondPost.categories.name}
+                  </span>
+                )}
                 <h3 className="text-white text-sm font-bold leading-snug line-clamp-2">{secondPost.title}</h3>
                 <span className="text-white/50 text-[10px] mt-0.5 block">{timeAgo(secondPost.created_at)}</span>
               </div>
@@ -149,14 +154,14 @@ const RecentNews = () => {
 
       {/* Right sidebar with scroll */}
       <div className="flex flex-col">
-        <div className="flex items-center justify-between bg-destructive rounded-t-md">
-          <h2 className="flex items-center text-white px-4 py-2 text-[15px] font-bold tracking-wide">
+        <div className="flex items-center justify-between bg-gradient-to-r from-primary to-primary/80 rounded-t-md">
+          <h2 className="flex items-center text-white px-4 py-2.5 text-[15px] font-bold tracking-wide">
             <LiveDot />
             সর্বশেষ নিবন্ধ
           </h2>
           <Link
             to="/posts"
-            className="flex items-center gap-0.5 text-[13px] font-bold text-white bg-black/20 hover:bg-black/30 px-3 py-2 transition-colors"
+            className="flex items-center gap-0.5 text-[13px] font-bold text-white bg-black/20 hover:bg-black/30 px-3 py-2.5 transition-colors"
           >
             আরও ›
           </Link>

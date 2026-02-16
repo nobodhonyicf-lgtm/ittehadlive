@@ -218,11 +218,33 @@ const PrayerTimesSection = () => {
 
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden">
-      <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 text-white py-2.5 px-4">
-        <div className="text-center">
-          <p className="text-xs opacity-80 mb-0.5">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
-          <h3 className="font-bold text-sm flex items-center justify-center gap-2">
-            <Clock size={14} />
+      {/* Mosque dome header */}
+      <div className="relative bg-gradient-to-b from-emerald-800 to-emerald-700 text-white overflow-hidden">
+        {/* Mosque silhouette SVG */}
+        <div className="absolute inset-0 opacity-10">
+          <svg viewBox="0 0 400 120" className="w-full h-full" preserveAspectRatio="xMidYMax slice">
+            {/* Central dome */}
+            <ellipse cx="200" cy="80" rx="60" ry="50" fill="white" />
+            <rect x="195" y="20" width="10" height="30" fill="white" />
+            <ellipse cx="200" cy="20" rx="6" ry="8" fill="white" />
+            {/* Left minaret */}
+            <rect x="80" y="30" width="12" height="70" fill="white" />
+            <ellipse cx="86" cy="30" rx="8" ry="10" fill="white" />
+            <rect x="83" y="15" width="6" height="18" fill="white" />
+            <ellipse cx="86" cy="15" rx="4" ry="5" fill="white" />
+            {/* Right minaret */}
+            <rect x="308" y="30" width="12" height="70" fill="white" />
+            <ellipse cx="314" cy="30" rx="8" ry="10" fill="white" />
+            <rect x="311" y="15" width="6" height="18" fill="white" />
+            <ellipse cx="314" cy="15" rx="4" ry="5" fill="white" />
+            {/* Base */}
+            <rect x="60" y="95" width="280" height="25" fill="white" />
+          </svg>
+        </div>
+        <div className="relative z-10 text-center py-4 px-4">
+          <p className="text-sm opacity-80 mb-1 font-serif">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+          <h3 className="font-bold text-base flex items-center justify-center gap-2">
+            <span className="text-lg">🕌</span>
             নামাজের সময়সূচি
           </h3>
         </div>
@@ -234,23 +256,23 @@ const PrayerTimesSection = () => {
           return (
             <div
               key={pt.id}
-              className={`flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${isNext ? "bg-emerald-50 dark:bg-emerald-950/30" : ""}`}
+              className={`flex items-center justify-between px-4 py-3 text-sm transition-all ${isNext ? "bg-emerald-50 dark:bg-emerald-950/30 border-l-[3px] border-l-emerald-500" : "border-l-[3px] border-l-transparent"}`}
             >
               <div className="flex items-center gap-2">
-                {isNext && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
-                <span className={`font-medium ${isNext ? "text-emerald-700 dark:text-emerald-400" : ""}`}>{pt.name}</span>
+                {isNext && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-400" />}
+                <span className={`font-medium ${isNext ? "text-emerald-700 dark:text-emerald-400 font-bold" : ""}`}>{pt.name}</span>
               </div>
               <div className="text-right">
-                <span className={`font-semibold ${isNext ? "text-emerald-700 dark:text-emerald-400" : "text-primary"}`}>{pt.time_text}</span>
+                <span className={`font-semibold text-[15px] ${isNext ? "text-emerald-700 dark:text-emerald-400" : "text-primary"}`}>{pt.time_text}</span>
                 {countdown && (
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">আরও {countdown} বাকী</p>
+                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">⏳ আরও {countdown} বাকী</p>
                 )}
               </div>
             </div>
           );
         })}
       </div>
-      <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 text-white text-center py-1.5 text-[10px] opacity-90">
+      <div className="bg-gradient-to-r from-emerald-800 to-emerald-700 text-white text-center py-2 text-xs font-medium tracking-wide">
         ☪ সময়মতো নামাজ আদায় করুন ☪
       </div>
     </div>
