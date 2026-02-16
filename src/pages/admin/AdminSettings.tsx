@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Settings, Palette, Image, Globe, Search, ShieldCheck } from "lucide-react";
+import { Settings, Palette, Image, Globe, Search, ShieldCheck, Smartphone } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
 const AdminSettings = () => {
@@ -60,6 +60,9 @@ const AdminSettings = () => {
     two_fa_enabled: "টু-ফ্যাক্টর অথেন্টিকেশন (2FA) সক্রিয়",
     google_login_enabled: "Google লগইন সক্রিয়",
     apple_login_enabled: "Apple লগইন সক্রিয়",
+    app_name: "অ্যাপের নাম",
+    app_logo_url: "অ্যাপ লোগো URL",
+    app_banner_enabled: "অ্যাপ ব্যানার স্লাইডার সক্রিয়",
   };
 
   const brandingKeys = ["logo_url", "favicon_url", "primary_color"];
@@ -67,15 +70,17 @@ const AdminSettings = () => {
   const seoKeys = ["default_og_image", "meta_keywords", "google_analytics_id", "facebook_page_url", "twitter_handle"];
   const adKeys = ["photocard_ad_enabled", "photocard_ad_image"];
   const authKeys = ["otp_enabled", "two_fa_enabled", "google_login_enabled", "apple_login_enabled"];
+  const appKeys = ["app_name", "app_logo_url", "app_banner_enabled"];
 
   if (isLoading) return <div className="text-center py-8">লোড হচ্ছে...</div>;
 
+  const appSettings = settings?.filter(s => appKeys.includes(s.key));
   const brandingSettings = settings?.filter(s => brandingKeys.includes(s.key));
   const signatureSettings = settings?.filter(s => signatureKeys.includes(s.key));
   const seoSettings = settings?.filter(s => seoKeys.includes(s.key));
   const adSettings = settings?.filter(s => adKeys.includes(s.key));
   const authSettings = settings?.filter(s => authKeys.includes(s.key));
-  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key) && !adKeys.includes(s.key) && !authKeys.includes(s.key));
+  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key) && !adKeys.includes(s.key) && !authKeys.includes(s.key) && !appKeys.includes(s.key));
 
   const renderSettingField = (s: any) => (
     <div key={s.id}>
@@ -104,6 +109,19 @@ const AdminSettings = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-bold flex items-center gap-2"><Settings size={22} /> সাইট সেটিংস</h1>
+
+      {/* App Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2"><Smartphone size={18} /> মোবাইল অ্যাপ সেটিংস</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {appSettings?.map(renderSettingField)}
+          <p className="text-xs text-muted-foreground">
+            অ্যাপ লোগো URL দিলে PWA/নেটিভ অ্যাপে আলাদা লোগো দেখাবে। খালি রাখলে ওয়েবসাইটের লোগো ব্যবহার হবে।
+          </p>
+        </CardContent>
+      </Card>
 
       {/* SEO Settings */}
       <Card>
