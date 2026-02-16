@@ -63,80 +63,80 @@ const RecentNews = () => {
         <SectionHeader title="সর্বশেষ খবর" linkUrl="/posts" />
 
         {/* Top row: 3-column grid like bd-pratidin */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-[3px] rounded-md overflow-hidden">
-          {/* Box 1: Main featured - full image background with overlay text at bottom */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+          {/* Box 1: Main featured */}
           <Link
             to={`/post/${featured.slug}`}
-            className="group relative overflow-hidden md:col-span-5 min-h-[280px]"
+            className="group md:col-span-5 flex flex-col"
           >
-            <PostImage src={featured.image_url} alt={featured.title} className="absolute inset-0" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-4">
+            <div className="rounded-lg overflow-hidden aspect-[4/3]">
+              <PostImage src={featured.image_url} alt={featured.title} />
+            </div>
+            <div className="pt-2.5">
               <CategoryBadge name={featured.categories?.name} />
-              <h3 className="text-white text-lg font-bold leading-snug line-clamp-3 mt-1.5">
+              <h3 className="text-foreground text-[15px] font-bold leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
                 {featured.title}
               </h3>
-              {featured.summary && (
-                <p className="text-white/70 text-xs line-clamp-2 mt-1">{featured.summary}</p>
-              )}
-              <span className="text-white/50 text-[11px] mt-1.5 block">{timeAgo(featured.created_at)}</span>
+              <span className="text-muted-foreground text-[11px] mt-1 block">{timeAgo(featured.created_at)}</span>
             </div>
           </Link>
 
-          {/* Box 2: Middle - full image with overlay (slightly smaller) */}
+          {/* Box 2 */}
           {secondPost && (
             <Link
               to={`/post/${secondPost.slug}`}
-              className="group relative overflow-hidden md:col-span-3 min-h-[280px]"
+              className="group md:col-span-3 flex flex-col"
             >
-              <PostImage src={secondPost.image_url} alt={secondPost.title} className="absolute inset-0" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-3">
+              <div className="rounded-lg overflow-hidden aspect-[4/3]">
+                <PostImage src={secondPost.image_url} alt={secondPost.title} />
+              </div>
+              <div className="pt-2">
                 <CategoryBadge name={secondPost.categories?.name} />
-                <h3 className="text-white text-sm font-bold leading-snug line-clamp-2 mt-1">
+                <h3 className="text-foreground text-sm font-bold leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
                   {secondPost.title}
                 </h3>
-                <span className="text-white/50 text-[10px] mt-1 block">{timeAgo(secondPost.created_at)}</span>
+                <span className="text-muted-foreground text-[10px] mt-1 block">{timeAgo(secondPost.created_at)}</span>
               </div>
             </Link>
           )}
 
-          {/* Box 3: Right - full image with overlay */}
+          {/* Box 3 */}
           {thirdPost && (
             <Link
               to={`/post/${thirdPost.slug}`}
-              className="group relative overflow-hidden md:col-span-4 min-h-[280px]"
+              className="group md:col-span-4 flex flex-col"
             >
-              <PostImage src={thirdPost.image_url} alt={thirdPost.title} className="absolute inset-0" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-3">
+              <div className="rounded-lg overflow-hidden aspect-[4/3]">
+                <PostImage src={thirdPost.image_url} alt={thirdPost.title} />
+              </div>
+              <div className="pt-2">
                 <CategoryBadge name={thirdPost.categories?.name} />
-                <h3 className="text-white text-sm font-bold leading-snug line-clamp-2 mt-1">
+                <h3 className="text-foreground text-sm font-bold leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
                   {thirdPost.title}
                 </h3>
-                <span className="text-white/50 text-[10px] mt-1 block">{timeAgo(thirdPost.created_at)}</span>
+                <span className="text-muted-foreground text-[10px] mt-1 block">{timeAgo(thirdPost.created_at)}</span>
               </div>
             </Link>
           )}
         </div>
 
-        {/* Bottom: Box 4 & 5 - image with overlay, side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[3px] mt-[3px] rounded-md overflow-hidden">
+        {/* Bottom row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
           {bottomPosts.map((post) => (
             <Link
               key={post.id}
               to={`/post/${post.slug}`}
-              className="group flex overflow-hidden bg-card min-h-[120px]"
+              className="group flex gap-3"
             >
-              <div className="w-2/5 shrink-0 relative overflow-hidden">
+              <div className="w-28 h-20 rounded-lg overflow-hidden shrink-0">
                 <PostImage src={post.image_url} alt={post.title} />
               </div>
-              <div className="flex-1 p-3 flex flex-col justify-center">
+              <div className="flex-1 flex flex-col justify-center">
                 <CategoryBadge name={post.categories?.name} />
                 <h3 className="text-foreground text-sm font-bold leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
                   {post.title}
                 </h3>
-                <span className="text-muted-foreground text-[10px] mt-1.5 block">{timeAgo(post.created_at)}</span>
+                <span className="text-muted-foreground text-[10px] mt-1 block">{timeAgo(post.created_at)}</span>
               </div>
             </Link>
           ))}
