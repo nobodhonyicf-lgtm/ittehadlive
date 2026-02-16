@@ -49,6 +49,7 @@ const RecentNews = () => {
                     {(post as any).summary}
                   </p>
                 )}
+                <span className="text-white/60 text-[11px] mt-1 block">{timeAgo(post.created_at)}</span>
               </div>
             </Link>
           ))}
@@ -76,6 +77,7 @@ const RecentNews = () => {
                 <h3 className="text-white text-sm font-bold leading-snug line-clamp-2">
                   {post.title}
                 </h3>
+                <span className="text-white/60 text-[10px] mt-0.5 block">{timeAgo(post.created_at)}</span>
               </div>
             </Link>
           ))}
