@@ -62,16 +62,8 @@ Deno.serve(async (req) => {
       .select("*")
       .in("user_id", userIds);
 
-    // Get custom roles definitions for display names
-    const { data: customRolesDefs } = await supabaseAdmin
-      .from("custom_roles")
-      .select("role_name, display_name");
-
     const enrichedUsers = users.map((u) => {
       const userRole = roles?.find((r) => r.user_id === u.id);
-      const customRoleDef = userRole?.custom_role_name
-        ? customRolesDefs?.find((cr) => cr.role_name === userRole.custom_role_name)
-        : null;
       return {
         id: u.id,
         email: u.email,
@@ -79,8 +71,6 @@ Deno.serve(async (req) => {
         last_sign_in_at: u.last_sign_in_at,
         profile: profiles?.find((p) => p.user_id === u.id) || null,
         role: userRole?.role || "user",
-        custom_role_name: userRole?.custom_role_name || null,
-        custom_role_display: customRoleDef?.display_name || null,
       };
     });
 

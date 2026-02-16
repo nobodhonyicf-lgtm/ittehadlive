@@ -14,19 +14,18 @@ export const usePermissions = () => {
   const { data: userRoleData } = useQuery({
     queryKey: ["user_role", user?.id],
     queryFn: async () => {
-      if (!user?.id) return { role: "user", custom_role_name: null };
+      if (!user?.id) return { role: "user" };
       const { data } = await supabase
         .from("user_roles")
-        .select("role, custom_role_name")
+        .select("role")
         .eq("user_id", user.id)
         .maybeSingle();
-      return { role: data?.role || "user", custom_role_name: data?.custom_role_name || null };
+      return { role: data?.role || "user" };
     },
     enabled: !!user?.id,
   });
 
-  // Use custom_role_name for permissions if set, otherwise use standard role
-  const userRole = userRoleData?.custom_role_name || userRoleData?.role || "user";
+  const userRole = userRoleData?.role || "user";
 
   const { data: permissions } = useQuery({
     queryKey: ["admin_permissions", userRole],
@@ -50,7 +49,7 @@ export const usePermissions = () => {
     enabled: !!userRole,
   });
 
-  const isAdminRole = userRoleData?.role === "admin" && !userRoleData?.custom_role_name;
+  const isAdminRole = userRoleData?.role === "admin";
 
   const hasPermission = (section: string, action: "view" | "edit" | "delete" = "view"): boolean => {
     if (!section) return true; // Dashboard home
