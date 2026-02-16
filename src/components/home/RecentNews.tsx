@@ -27,6 +27,24 @@ const LiveDot = () => (
   </span>
 );
 
+const PostImage = ({ src, alt, className = "" }: { src?: string | null; alt: string; className?: string }) => (
+  src ? (
+    <img src={src} alt={alt} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${className}`} loading="lazy" />
+  ) : (
+    <div className={`w-full h-full flex items-center justify-center bg-muted ${className}`}>
+      <Newspaper className="text-muted-foreground" size={36} />
+    </div>
+  )
+);
+
+const CategoryBadge = ({ name }: { name?: string }) => (
+  name ? (
+    <span className="text-[10px] font-bold bg-destructive text-white px-2 py-0.5 rounded-sm inline-block w-fit">
+      {name}
+    </span>
+  ) : null
+);
+
 const RecentNews = () => {
   const { data: posts } = usePosts(12);
 
@@ -34,29 +52,28 @@ const RecentNews = () => {
 
   const featured = posts[0];
   const secondPost = posts[1];
-  const bottomPosts = posts.slice(2, 4);
-  const sidePosts = posts.slice(0, 8);
+  const thirdPost = posts[2];
+  const bottomPosts = posts.slice(3, 5);
+  const sidePosts = posts.slice(0, 10);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      {/* Left column */}
+      {/* Left column - News grid */}
       <div className="lg:col-span-2">
         <SectionHeader title="সর্বশেষ খবর" linkUrl="/posts" />
 
-        {/* Top row: Box 1 (left=title, right=image) + Box 2 (top=image, bottom=title) */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-0.5 rounded-md overflow-hidden">
-          {/* Box 1: Larger - Horizontal - left title, right image (3/5 width) */}
+        {/* Top row: 3-column grid like bd-pratidin */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-[3px] rounded-md overflow-hidden">
+          {/* Box 1: Main featured - full image background with overlay text at bottom */}
           <Link
             to={`/post/${featured.slug}`}
-            className="group flex bg-muted overflow-hidden md:col-span-3 min-h-[260px]"
+            className="group relative overflow-hidden md:col-span-5 min-h-[280px]"
           >
-            <div className="flex-1 p-4 flex flex-col justify-end bg-gradient-to-r from-black/90 via-black/70 to-transparent relative z-10">
-              {featured.categories && (
-                <span className="text-[11px] font-bold text-destructive bg-white/90 px-1.5 py-0.5 rounded mb-2 inline-block w-fit">
-                  {featured.categories.name}
-                </span>
-              )}
-              <h3 className="text-white text-lg font-bold leading-snug line-clamp-3">
+            <PostImage src={featured.image_url} alt={featured.title} className="absolute inset-0" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              <CategoryBadge name={featured.categories?.name} />
+              <h3 className="text-white text-lg font-bold leading-snug line-clamp-3 mt-1.5">
                 {featured.title}
               </h3>
               {featured.summary && (
@@ -64,88 +81,62 @@ const RecentNews = () => {
               )}
               <span className="text-white/50 text-[11px] mt-1.5 block">{timeAgo(featured.created_at)}</span>
             </div>
-            <div className="w-1/2 shrink-0 relative">
-              {featured.image_url ? (
-                <img
-                  src={featured.image_url}
-                  alt={featured.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-muted min-h-[200px]">
-                  <Newspaper className="text-muted-foreground" size={48} />
-                </div>
-              )}
-            </div>
           </Link>
 
-          {/* Box 2: Smaller - Vertical - top image, bottom title (2/5 width) */}
+          {/* Box 2: Middle - full image with overlay (slightly smaller) */}
           {secondPost && (
             <Link
               to={`/post/${secondPost.slug}`}
-              className="group block relative overflow-hidden bg-muted md:col-span-2"
+              className="group relative overflow-hidden md:col-span-3 min-h-[280px]"
             >
-              <div className="h-3/5 overflow-hidden">
-                {secondPost.image_url ? (
-                  <img
-                    src={secondPost.image_url}
-                    alt={secondPost.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-muted min-h-[140px]">
-                    <Newspaper className="text-muted-foreground" size={36} />
-                  </div>
-                )}
+              <PostImage src={secondPost.image_url} alt={secondPost.title} className="absolute inset-0" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-3">
+                <CategoryBadge name={secondPost.categories?.name} />
+                <h3 className="text-white text-sm font-bold leading-snug line-clamp-2 mt-1">
+                  {secondPost.title}
+                </h3>
+                <span className="text-white/50 text-[10px] mt-1 block">{timeAgo(secondPost.created_at)}</span>
               </div>
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 pt-10">
-                {secondPost.categories && (
-                  <span className="text-[10px] font-bold text-destructive bg-white/90 px-1.5 py-0.5 rounded mb-1 inline-block w-fit">
-                    {secondPost.categories.name}
-                  </span>
-                )}
-                <h3 className="text-white text-sm font-bold leading-snug line-clamp-2">{secondPost.title}</h3>
-                <span className="text-white/50 text-[10px] mt-0.5 block">{timeAgo(secondPost.created_at)}</span>
+            </Link>
+          )}
+
+          {/* Box 3: Right - full image with overlay */}
+          {thirdPost && (
+            <Link
+              to={`/post/${thirdPost.slug}`}
+              className="group relative overflow-hidden md:col-span-4 min-h-[280px]"
+            >
+              <PostImage src={thirdPost.image_url} alt={thirdPost.title} className="absolute inset-0" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-3">
+                <CategoryBadge name={thirdPost.categories?.name} />
+                <h3 className="text-white text-sm font-bold leading-snug line-clamp-2 mt-1">
+                  {thirdPost.title}
+                </h3>
+                <span className="text-white/50 text-[10px] mt-1 block">{timeAgo(thirdPost.created_at)}</span>
               </div>
             </Link>
           )}
         </div>
 
-        {/* Divider */}
-        <div className="border-t-2 border-destructive/30 my-3" />
-
-        {/* Bottom: Box 3 & 4 - left image, right title */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0.5 rounded-md overflow-hidden">
+        {/* Bottom: Box 4 & 5 - image with overlay, side by side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[3px] mt-[3px] rounded-md overflow-hidden">
           {bottomPosts.map((post) => (
             <Link
               key={post.id}
               to={`/post/${post.slug}`}
-              className="group flex gap-0 bg-muted overflow-hidden"
+              className="group flex overflow-hidden bg-card min-h-[120px]"
             >
-              <div className="w-2/5 shrink-0 aspect-[4/3] overflow-hidden">
-                {post.image_url ? (
-                  <img
-                    src={post.image_url}
-                    alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-muted">
-                    <Newspaper className="text-muted-foreground" size={28} />
-                  </div>
-                )}
+              <div className="w-2/5 shrink-0 relative overflow-hidden">
+                <PostImage src={post.image_url} alt={post.title} />
               </div>
-              <div className="flex-1 p-3 flex flex-col justify-center bg-gradient-to-l from-black/80 via-black/60 to-black/40">
-                {post.categories && (
-                  <span className="text-[10px] font-bold text-destructive bg-white/90 px-1.5 py-0.5 rounded mb-1 inline-block w-fit">
-                    {post.categories.name}
-                  </span>
-                )}
-                <h3 className="text-white text-sm font-bold leading-snug line-clamp-2">{post.title}</h3>
-                <span className="text-white/50 text-[10px] mt-1 block">{timeAgo(post.created_at)}</span>
+              <div className="flex-1 p-3 flex flex-col justify-center">
+                <CategoryBadge name={post.categories?.name} />
+                <h3 className="text-foreground text-sm font-bold leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
+                  {post.title}
+                </h3>
+                <span className="text-muted-foreground text-[10px] mt-1.5 block">{timeAgo(post.created_at)}</span>
               </div>
             </Link>
           ))}
