@@ -11,7 +11,7 @@ import RelatedPosts from "@/components/post/RelatedPosts";
 import InPostAd from "@/components/post/InPostAd";
 import PhotoCardEditor from "@/components/post/PhotoCardEditor";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import Sidebar from "@/components/home/Sidebar";
+import PageSidebar from "@/components/home/PageSidebar";
 
 const SocialShare = ({ url, title, slug }: { url: string; title: string; slug?: string }) => {
   const encodedTitle = encodeURIComponent(title);
@@ -195,7 +195,7 @@ const PostPage = () => {
             )}
           </div>
           <div className="lg:col-span-1">
-            <Sidebar />
+            <PageSidebar />
           </div>
         </div>
       </div>

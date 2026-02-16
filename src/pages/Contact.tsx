@@ -11,7 +11,7 @@ import { z } from "zod";
 import { useSiteSettings } from "@/hooks/useData";
 import { Phone, Mail, Send } from "lucide-react";
 import { toBengali } from "@/lib/bengali";
-import Sidebar from "@/components/home/Sidebar";
+import PageSidebar from "@/components/home/PageSidebar";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "নাম আবশ্যক").max(100),
@@ -108,7 +108,7 @@ const Contact = () => {
             </div>
           </div>
           <div className="lg:col-span-1">
-            <Sidebar />
+            <PageSidebar />
           </div>
         </div>
       </div>
