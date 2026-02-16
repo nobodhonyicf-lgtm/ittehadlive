@@ -5,87 +5,90 @@ import { timeAgo } from "@/lib/timeAgo";
 import SectionHeader from "./SectionHeader";
 
 const RecentNews = () => {
-  const { data: posts } = usePosts(7);
+  const { data: posts } = usePosts(9);
 
   if (!posts?.length) return null;
 
-  const featured1 = posts[0];
-  const featured2 = posts[1];
-  const bottomPosts = posts.slice(2, 5);
-  const sidePosts = posts.slice(5, 7);
+  const featured = posts[0];
+  const middlePosts = posts.slice(1, 4);
+  const sidePosts = posts.slice(4, 9);
 
   return (
     <div>
       <SectionHeader title="সর্বশেষ খবর" linkUrl="/posts" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-0.5 bg-border rounded-b-md overflow-hidden">
-        {/* Left column: 2 featured large posts stacked */}
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-0.5">
-          {/* Top 2 large posts */}
-          {[featured1, featured2].map((post) => post && (
-            <Link
-              key={post.id}
-              to={`/post/${post.slug}`}
-              className="group block relative overflow-hidden bg-muted aspect-[4/3]"
-            >
-              {post.image_url ? (
-                <img
-                  src={post.image_url}
-                  alt={post.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <Newspaper className="text-muted-foreground" size={48} />
-                </div>
-              )}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent p-3 pt-12">
-                <h3 className="text-white text-base md:text-lg font-bold leading-snug line-clamp-3">
-                  {post.title}
-                </h3>
-                {(post as any).summary && (
-                  <p className="text-white/75 text-xs line-clamp-2 mt-1">
-                    {(post as any).summary}
-                  </p>
-                )}
-                <span className="text-white/60 text-[11px] mt-1 block">{timeAgo(post.created_at)}</span>
+        {/* Left: 1 big + 3 medium */}
+        <div className="lg:col-span-2 flex flex-col gap-0.5">
+          {/* Featured large post */}
+          <Link
+            to={`/post/${featured.slug}`}
+            className="group block relative overflow-hidden bg-muted aspect-[16/9]"
+          >
+            {featured.image_url ? (
+              <img
+                src={featured.image_url}
+                alt={featured.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                loading="lazy"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-muted">
+                <Newspaper className="text-muted-foreground" size={60} />
               </div>
-            </Link>
-          ))}
+            )}
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 pt-16">
+              {featured.categories && (
+                <span className="text-[11px] font-bold text-destructive bg-white/90 px-1.5 py-0.5 rounded mb-1.5 inline-block">
+                  {featured.categories.name}
+                </span>
+              )}
+              <h3 className="text-white text-lg md:text-xl font-bold leading-snug line-clamp-3">
+                {featured.title}
+              </h3>
+              {(featured as any).summary && (
+                <p className="text-white/80 text-sm line-clamp-2 mt-1">
+                  {(featured as any).summary}
+                </p>
+              )}
+              <span className="text-white/60 text-[11px] mt-1.5 block">{timeAgo(featured.created_at)}</span>
+            </div>
+          </Link>
 
-          {/* Bottom 3 smaller posts */}
-          {bottomPosts.map((post) => (
-            <Link
-              key={post.id}
-              to={`/post/${post.slug}`}
-              className="group block relative overflow-hidden bg-muted aspect-[4/3] md:first:col-span-1"
-            >
-              {post.image_url ? (
-                <img
-                  src={post.image_url}
-                  alt={post.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <Newspaper className="text-muted-foreground" size={32} />
+          {/* 3 medium posts */}
+          <div className="grid grid-cols-3 gap-0.5">
+            {middlePosts.map((post) => (
+              <Link
+                key={post.id}
+                to={`/post/${post.slug}`}
+                className="group block relative overflow-hidden bg-muted aspect-[4/3]"
+              >
+                {post.image_url ? (
+                  <img
+                    src={post.image_url}
+                    alt={post.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-muted">
+                    <Newspaper className="text-muted-foreground" size={28} />
+                  </div>
+                )}
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-2 pt-8">
+                  <h3 className="text-white text-xs font-bold leading-snug line-clamp-2">
+                    {post.title}
+                  </h3>
+                  <span className="text-white/60 text-[10px] mt-0.5 block">{timeAgo(post.created_at)}</span>
                 </div>
-              )}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-2.5 pt-10">
-                <h3 className="text-white text-sm font-bold leading-snug line-clamp-2">
-                  {post.title}
-                </h3>
-                <span className="text-white/60 text-[10px] mt-0.5 block">{timeAgo(post.created_at)}</span>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </div>
 
-        {/* Right sidebar list */}
+        {/* Right sidebar: 4-5 posts as list */}
         <div className="bg-card flex flex-col divide-y divide-border">
-          {posts.slice(0, 5).map((post) => (
+          {sidePosts.map((post) => (
             <Link
               key={post.id}
               to={`/post/${post.slug}`}
@@ -109,6 +112,11 @@ const RecentNews = () => {
                 <h3 className="text-sm font-bold group-hover:text-primary transition-colors line-clamp-2 leading-snug">
                   {post.title}
                 </h3>
+                {(post as any).summary && (
+                  <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                    {(post as any).summary}
+                  </p>
+                )}
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[11px] text-muted-foreground">{timeAgo(post.created_at)}</span>
                   {post.categories && (
