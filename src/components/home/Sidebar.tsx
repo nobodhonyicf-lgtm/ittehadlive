@@ -190,13 +190,28 @@ const Sidebar = () => {
 };
 
 const parseTimeToMinutes = (timeText: string): number | null => {
-  // Try parsing times like "৫:৩০", "5:30", "১২:১৫" etc.
   const bengaliToEnglish = (s: string) =>
     s.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
   const cleaned = bengaliToEnglish(timeText.trim());
   const match = cleaned.match(/(\d{1,2})[:\.](\d{2})/);
   if (!match) return null;
   return parseInt(match[1]) * 60 + parseInt(match[2]);
+};
+
+// Convert 12-hour prayer times to proper 24-hour minutes (ascending order)
+const normalizePrayerMinutes = (prayerTimes: { time_text: string }[]): number[] => {
+  const rawMinutes = prayerTimes.map(pt => parseTimeToMinutes(pt.time_text));
+  const result: number[] = [];
+  for (let i = 0; i < rawMinutes.length; i++) {
+    let mins = rawMinutes[i];
+    if (mins === null) { result.push(-1); continue; }
+    // If this time is less than previous valid time, it's PM — add 12 hours
+    if (i > 0 && result[i - 1] >= 0 && mins < result[i - 1]) {
+      mins += 720;
+    }
+    result.push(mins);
+  }
+  return result;
 };
 
 const PrayerTimesSection = () => {
@@ -211,20 +226,20 @@ const PrayerTimesSection = () => {
   if (!prayerTimes?.length) return null;
 
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const normalizedMins = normalizePrayerMinutes(prayerTimes);
 
   // Find next prayer
   let nextPrayerIndex = -1;
   for (let i = 0; i < prayerTimes.length; i++) {
-    const mins = parseTimeToMinutes(prayerTimes[i].time_text);
-    if (mins !== null && mins > currentMinutes) {
+    if (normalizedMins[i] >= 0 && normalizedMins[i] > currentMinutes) {
       nextPrayerIndex = i;
       break;
     }
   }
 
-  const getCountdown = (timeText: string): string | null => {
-    const mins = parseTimeToMinutes(timeText);
-    if (mins === null) return null;
+  const getCountdown = (index: number): string | null => {
+    const mins = normalizedMins[index];
+    if (mins < 0) return null;
     const diff = mins - currentMinutes;
     if (diff <= 0) return null;
     const h = Math.floor(diff / 60);
@@ -249,7 +264,7 @@ const PrayerTimesSection = () => {
         <div className="divide-y divide-border">
           {prayerTimes.map((pt, i) => {
             const isNext = i === nextPrayerIndex;
-            const countdown = isNext ? getCountdown(pt.time_text) : null;
+            const countdown = isNext ? getCountdown(i) : null;
             return (
               <div
                 key={pt.id}

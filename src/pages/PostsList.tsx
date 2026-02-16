@@ -8,6 +8,7 @@ import { toBengali } from "@/lib/bengali";
 import { timeAgo } from "@/lib/timeAgo";
 import SEOHead from "@/components/SEOHead";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Sidebar from "@/components/home/Sidebar";
 
 const POSTS_PER_PAGE = 10;
 
@@ -50,8 +51,8 @@ const PostsList = () => {
           </select>
         </div>
 
-        <div>
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-4">
             {isLoading ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="animate-pulse bg-muted h-32 rounded" />
@@ -72,7 +73,6 @@ const PostsList = () => {
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      {/* Category in red */}
                       {post.categories && (
                         <span className="text-xs font-bold text-destructive uppercase tracking-wide">
                           {post.categories.name}
@@ -116,6 +116,9 @@ const PostsList = () => {
                 ))}
               </div>
             )}
+          </div>
+          <div className="lg:col-span-1">
+            <Sidebar />
           </div>
         </div>
       </div>

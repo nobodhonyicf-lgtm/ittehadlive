@@ -11,6 +11,7 @@ import { z } from "zod";
 import { useSiteSettings } from "@/hooks/useData";
 import { Phone, Mail, Send } from "lucide-react";
 import { toBengali } from "@/lib/bengali";
+import Sidebar from "@/components/home/Sidebar";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "নাম আবশ্যক").max(100),
@@ -52,56 +53,63 @@ const Contact = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-primary">যোগাযোগ ফর্ম</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">নাম *</Label>
-                  <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-                </div>
-                <div>
-                  <Label htmlFor="email">ইমেইল</Label>
-                  <Input id="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-                </div>
-                <div>
-                  <Label htmlFor="phone">ফোন</Label>
-                  <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-                </div>
-                <div>
-                  <Label htmlFor="subject">বিষয়</Label>
-                  <Input id="subject" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} />
-                </div>
-                <div>
-                  <Label htmlFor="message">বার্তা *</Label>
-                  <Textarea id="message" rows={5} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
-                </div>
-                <Button type="submit" disabled={loading} className="w-full">
-                  <Send size={16} />
-                  {loading ? "পাঠানো হচ্ছে..." : "বার্তা পাঠান"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-primary">যোগাযোগ তথ্য</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Phone className="text-primary" size={20} />
-                <span>{toBengali(settings?.contact_phone || "০১৯২৬-৪২৮৯৮৮")}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Mail className="text-primary" size={20} />
-                <span>{settings?.contact_email || "info@ittehad.bd"}</span>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-primary">যোগাযোগ ফর্ম</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                      <Label htmlFor="name">নাম *</Label>
+                      <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">ইমেইল</Label>
+                      <Input id="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">ফোন</Label>
+                      <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label htmlFor="subject">বিষয়</Label>
+                      <Input id="subject" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label htmlFor="message">বার্তা *</Label>
+                      <Textarea id="message" rows={5} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
+                    </div>
+                    <Button type="submit" disabled={loading} className="w-full">
+                      <Send size={16} />
+                      {loading ? "পাঠানো হচ্ছে..." : "বার্তা পাঠান"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-primary">যোগাযোগ তথ্য</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Phone className="text-primary" size={20} />
+                    <span>{toBengali(settings?.contact_phone || "০১৯২৬-৪২৮৯৮৮")}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Mail className="text-primary" size={20} />
+                    <span>{settings?.contact_email || "info@ittehad.bd"}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          <div className="lg:col-span-1">
+            <Sidebar />
+          </div>
         </div>
       </div>
     </Layout>

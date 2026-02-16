@@ -74,6 +74,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (initializedRef.current) {
           await checkRoles(newSession.user, true);
         }
+        // Ensure loading is turned off after sign-in completes
+        setLoading(false);
+      } else if (event === 'TOKEN_REFRESHED') {
+        // Token refresh — do nothing, keep UI stable
       } else if (event === 'SIGNED_OUT') {
         setIsAdmin(false);
         setHasAnyRole(false);
