@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   LayoutDashboard, FileText, Bell, Image, Settings, Menu as MenuIcon,
   Video, Users, Mail, Tag, LogOut, ChevronLeft, Newspaper, Building2,
-  GraduationCap, BookOpen, ClipboardList, BarChart3, Clock, Package, MessageCircle, MessageSquare, X, ChevronDown
+  GraduationCap, BookOpen, ClipboardList, BarChart3, Clock, Package, MessageCircle, MessageSquare, X, ChevronDown, User, Camera
 } from "lucide-react";
 import AdminPosts from "./AdminPosts";
 import AdminPages from "./AdminPages";
@@ -137,8 +140,51 @@ const AdminDashboard = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch profile
+  const { data: profile } = useQuery({
+    queryKey: ["admin_profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, avatar_url, phone")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+    const ext = file.name.split(".").pop();
+    const path = `avatars/${user.id}.${ext}`;
+    const { error: uploadError } = await supabase.storage.from("uploads").upload(path, file, { upsert: true });
+    if (uploadError) return;
+    const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(path);
+    const avatarUrl = urlData.publicUrl + "?t=" + Date.now();
+    await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("user_id", user.id);
+    queryClient.invalidateQueries({ queryKey: ["admin_profile", user.id] });
+  };
 
   useEffect(() => {
     if (isMobile === false) setSidebarOpen(true);
@@ -255,14 +301,69 @@ const AdminDashboard = () => {
       </aside>
 
       <main className="flex-1 min-w-0 overflow-y-auto">
-        {isMobile && (
-          <div className="sticky top-0 z-30 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
-              <MenuIcon size={20} />
-            </Button>
-            <span className="font-bold text-primary text-sm">অ্যাডমিন প্যানেল</span>
+        {/* Top bar with mobile menu + profile */}
+        <div className="sticky top-0 z-30 bg-card border-b border-border px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {isMobile && (
+              <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
+                <MenuIcon size={20} />
+              </Button>
+            )}
+            {isMobile && <span className="font-bold text-primary text-sm">অ্যাডমিন প্যানেল</span>}
           </div>
-        )}
+          {/* Profile dropdown */}
+          <div className="relative" ref={profileRef}>
+            <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <Avatar className="h-8 w-8">
+                {profile?.avatar_url ? (
+                  <AvatarImage src={profile.avatar_url} alt="Profile" />
+                ) : null}
+                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                  {profile?.full_name?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || <User size={14} />}
+                </AvatarFallback>
+              </Avatar>
+              <span className="hidden md:block text-sm font-medium text-foreground max-w-[120px] truncate">
+                {profile?.full_name || user?.email?.split("@")[0]}
+              </span>
+              <ChevronDown size={14} className="text-muted-foreground hidden md:block" />
+            </button>
+            {profileOpen && (
+              <div className="absolute right-0 top-full mt-1 w-64 bg-card border border-border rounded-lg shadow-lg p-3 z-50">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="relative group">
+                    <Avatar className="h-14 w-14">
+                      {profile?.avatar_url ? (
+                        <AvatarImage src={profile.avatar_url} alt="Profile" />
+                      ) : null}
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {profile?.full_name?.charAt(0) || <User size={20} />}
+                      </AvatarFallback>
+                    </Avatar>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Camera size={16} className="text-white" />
+                    </button>
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm text-foreground truncate">{profile?.full_name || "নাম নেই"}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                  </div>
+                </div>
+                <div className="border-t border-border pt-2 space-y-1">
+                  <Link to="/profile" onClick={() => setProfileOpen(false)} className="flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-muted transition-colors text-foreground">
+                    <User size={14} /> প্রোফাইল দেখুন
+                  </Link>
+                  <button onClick={() => { setProfileOpen(false); signOut(); }} className="flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-destructive/10 transition-colors text-destructive w-full text-left">
+                    <LogOut size={14} /> লগআউট
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
         <div className="p-4 md:p-6">
           <Routes>
             <Route

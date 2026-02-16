@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useMenuItems, useSiteSettings } from "@/hooks/useData";
-import { Menu, X, GraduationCap, Users, Building2, Phone, Mail, BookOpen, LogIn, User } from "lucide-react";
+import { Menu, X, GraduationCap, Users, Building2, Phone, Mail, BookOpen, LogIn, User, LayoutDashboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toBengali } from "@/lib/bengali";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 const Header = () => {
   const { data: menuItems } = useMenuItems();
   const { data: settings } = useSiteSettings();
-  const { user } = useAuth();
+  const { user, hasAnyRole } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -42,6 +42,11 @@ const Header = () => {
             <Link to="/books" className="hover:text-accent transition-colors flex items-center gap-1">
               <BookOpen size={13} /> প্রকাশনা
             </Link>
+            {user && hasAnyRole && (
+              <Link to="/admin" className="hover:text-accent transition-colors flex items-center gap-1">
+                <LayoutDashboard size={13} /> ড্যাশবোর্ড
+              </Link>
+            )}
             {user ? (
               <Link to="/profile" className="hover:text-accent transition-colors flex items-center gap-1">
                 <User size={13} /> প্রোফাইল
