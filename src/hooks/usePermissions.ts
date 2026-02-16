@@ -50,14 +50,18 @@ export const usePermissions = () => {
     enabled: !!userRole,
   });
 
+  const isAdminRole = userRoleData?.role === "admin" && !userRoleData?.custom_role_name;
+
   const hasPermission = (section: string, action: "view" | "edit" | "delete" = "view"): boolean => {
-    if (!permissions) return true; // Default allow while loading
+    if (!section) return true; // Dashboard home
+    if (isAdminRole) return true; // Full admin has all access
+    if (!permissions) return false; // Still loading for custom roles - deny
     const perm = permissions[section];
-    if (!perm) return true; // No restriction = allowed
+    if (!perm) return false; // No explicit permission = denied for custom roles
     if (action === "view") return perm.can_view;
     if (action === "edit") return perm.can_edit;
     return perm.can_delete;
   };
 
-  return { permissions, userRole, hasPermission };
+  return { permissions, userRole, isAdminRole, hasPermission };
 };
