@@ -8,7 +8,7 @@ import { toBengali } from "@/lib/bengali";
 import { timeAgo } from "@/lib/timeAgo";
 import SEOHead from "@/components/SEOHead";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import Sidebar from "@/components/home/Sidebar";
+import PageSidebar from "@/components/home/PageSidebar";
 
 const POSTS_PER_PAGE = 10;
 
@@ -118,7 +118,7 @@ const PostsList = () => {
             )}
           </div>
           <div className="lg:col-span-1">
-            <Sidebar />
+            <PageSidebar />
           </div>
         </div>
       </div>

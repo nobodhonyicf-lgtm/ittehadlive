@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useBranches } from "@/hooks/useBoardData";
 import { Building2, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
-import Sidebar from "@/components/home/Sidebar";
+import PageSidebar from "@/components/home/PageSidebar";
 
 const BranchList = () => {
   const { data: branches } = useBranches();
@@ -47,7 +47,7 @@ const BranchList = () => {
             </div>
           </div>
           <div className="lg:col-span-1">
-            <Sidebar />
+            <PageSidebar />
           </div>
         </div>
       </div>
