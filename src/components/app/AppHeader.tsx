@@ -1,7 +1,7 @@
 import { useSiteSettings } from "@/hooks/useData";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { Bell, LayoutDashboard, Moon, Sun } from "lucide-react";
+import { Bell, LayoutDashboard, Moon, Sun, Search } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,46 +41,68 @@ const AppHeader = () => {
   });
 
   const appLogoUrl = settings?.app_logo_url || settings?.logo_url;
+  const appName = settings?.app_name || settings?.site_name || "ইত্তেহাদ";
 
   return (
-    <header className="sticky top-0 z-50 bg-primary text-primary-foreground transition-colors duration-300">
-      <div className="flex items-center justify-between px-4 h-14">
-        <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg">
+      {/* Main header row */}
+      <div className="flex items-center justify-between px-4 h-16">
+        {/* Logo & Name */}
+        <Link to="/" className="flex items-center gap-3 min-w-0">
           {appLogoUrl && (
-            <Link to="/">
-              <img
-                src={appLogoUrl}
-                alt="App Logo"
-                className="h-8 w-8 rounded-lg object-contain bg-white/10 p-0.5 hover-scale"
-              />
-            </Link>
+            <div className="relative">
+              <div className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur-sm p-1 ring-2 ring-white/20 shadow-md">
+                <img
+                  src={appLogoUrl}
+                  alt="App Logo"
+                  className="h-full w-full rounded-lg object-contain"
+                />
+              </div>
+            </div>
           )}
-          <Link to="/" className="font-bold text-base truncate max-w-[180px]">
-            {settings?.app_name || settings?.site_name || "ইত্তেহাদ"}
-          </Link>
-        </div>
+          <div className="min-w-0">
+            <h1 className="font-bold text-[15px] leading-tight truncate max-w-[160px]">
+              {appName}
+            </h1>
+            <p className="text-[10px] opacity-70 truncate max-w-[160px] leading-tight">
+              {settings?.site_description?.slice(0, 40) || "সমন্বিত শিক্ষা প্ল্যাটফর্ম"}
+            </p>
+          </div>
+        </Link>
 
-        <div className="flex items-center gap-1">
+        {/* Action buttons */}
+        <div className="flex items-center gap-0.5">
           <button
             onClick={toggleTheme}
-            className="p-2 hover:bg-white/10 rounded-full transition-all duration-200 active:scale-90"
+            className="p-2.5 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90"
+            aria-label="Toggle theme"
           >
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          <Link to="/posts" className="p-2 hover:bg-white/10 rounded-full transition-all duration-200 active:scale-90">
-            <Bell size={20} />
+
+          <Link
+            to="/posts"
+            className="p-2.5 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90 relative"
+          >
+            <Bell size={18} />
           </Link>
+
           {user && hasAnyRole && (
-            <Link to="/admin" className="p-2 hover:bg-white/10 rounded-full transition-all duration-200 active:scale-90">
+            <Link
+              to="/admin"
+              className="p-2.5 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90"
+              aria-label="Admin Dashboard"
+            >
               <LayoutDashboard size={18} />
             </Link>
           )}
-          <Link to={user ? "/profile" : "/login"} className="p-1">
-            <Avatar className="h-7 w-7 transition-transform duration-200 hover:scale-110">
+
+          <Link to={user ? "/profile" : "/login"} className="ml-1">
+            <Avatar className="h-8 w-8 ring-2 ring-white/25 shadow-sm transition-transform duration-200 hover:scale-110">
               {profile?.avatar_url ? (
                 <AvatarImage src={profile.avatar_url} alt="Profile" />
               ) : null}
-              <AvatarFallback className="bg-white/20 text-primary-foreground text-xs">
+              <AvatarFallback className="bg-white/20 text-primary-foreground text-xs font-bold">
                 {profile?.full_name?.charAt(0) || "?"}
               </AvatarFallback>
             </Avatar>
