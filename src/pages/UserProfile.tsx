@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
 import { toBengali } from "@/lib/bengali";
-import { User, Package, MessageSquare, LogOut, Save, Send, Search, Link as LinkIcon } from "lucide-react";
+import { User, Package, MessageSquare, LogOut, Save, Send, Search, Link as LinkIcon, Trash2 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const statusMap: Record<string, { label: string; color: string }> = {
@@ -77,6 +77,19 @@ const UserProfile = () => {
       toast.success("প্রোফাইল ছবি আপডেট হয়েছে");
       setShowAvatarInput(false);
       setProfile({ ...profile, avatar_url: avatarUrl });
+      queryClient.invalidateQueries({ queryKey: ["user_profile", user.id] });
+    }
+  };
+
+  const removeAvatar = async () => {
+    if (!user) return;
+    const { error } = await supabase.from("profiles").update({ avatar_url: null }).eq("user_id", user.id);
+    if (error) toast.error("ছবি মুছতে ব্যর্থ");
+    else {
+      toast.success("প্রোফাইল ছবি মুছে ফেলা হয়েছে");
+      setAvatarUrl("");
+      setProfile({ ...profile, avatar_url: null });
+      setShowAvatarInput(false);
       queryClient.invalidateQueries({ queryKey: ["user_profile", user.id] });
     }
   };
@@ -186,6 +199,11 @@ const UserProfile = () => {
                 onChange={(e) => setAvatarUrl(e.target.value)}
               />
               <Button size="sm" onClick={saveAvatarUrl}>সেভ</Button>
+              {profile?.avatar_url && (
+                <Button size="sm" variant="destructive" onClick={removeAvatar} title="ছবি মুছুন">
+                  <Trash2 size={14} />
+                </Button>
+              )}
               <Button size="sm" variant="ghost" onClick={() => setShowAvatarInput(false)}>বাতিল</Button>
             </div>
           </div>
