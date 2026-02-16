@@ -4,6 +4,9 @@ import { Menu, X, GraduationCap, Users, Building2, Phone, Mail, BookOpen, LogIn,
 import { useState, useEffect } from "react";
 import { toBengali } from "@/lib/bengali";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Header = () => {
   const { data: menuItems } = useMenuItems();
@@ -11,6 +14,15 @@ const Header = () => {
   const { user, hasAnyRole } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const { data: profile } = useQuery({
+    queryKey: ["user_profile", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("full_name, avatar_url").eq("user_id", user!.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -49,7 +61,13 @@ const Header = () => {
             )}
             {user ? (
               <Link to="/profile" className="hover:text-accent transition-colors flex items-center gap-1">
-                <User size={13} /> প্রোফাইল
+                <Avatar className="h-5 w-5">
+                  {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="Profile" /> : null}
+                  <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground text-[9px]">
+                    {profile?.full_name?.charAt(0) || <User size={10} />}
+                  </AvatarFallback>
+                </Avatar>
+                প্রোফাইল
               </Link>
             ) : (
               <Link to="/login" className="hover:text-accent transition-colors flex items-center gap-1">
