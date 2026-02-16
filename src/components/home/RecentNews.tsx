@@ -80,19 +80,24 @@ const RecentNews = () => {
             </div>
           </Link>
 
-          {/* Box 2: Right - title left, image right (horizontal) */}
+          {/* Box 2: Right - title top-left, image right, summary below */}
           {secondPost && (
             <Link
               to={`/post/${secondPost.slug}`}
               className="group bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col"
             >
               <div className="flex flex-1">
-                <div className="flex-1 p-3 flex flex-col justify-center">
+                <div className="flex-1 p-3 flex flex-col">
                   <CategoryBadge name={secondPost.categories?.name} />
-                  <h3 className="text-foreground text-[15px] font-bold leading-snug line-clamp-4 mt-1.5 group-hover:text-primary transition-colors">
+                  <h3 className="text-foreground text-[15px] font-bold leading-snug line-clamp-3 mt-1.5 group-hover:text-primary transition-colors">
                     {secondPost.title}
                   </h3>
-                  <span className="text-muted-foreground text-[11px] mt-2 block">{timeAgo(secondPost.created_at)}</span>
+                  <span className="text-muted-foreground text-[11px] mt-1.5 block">{timeAgo(secondPost.created_at)}</span>
+                  {secondPost.summary && (
+                    <p className="text-muted-foreground text-[12px] leading-relaxed line-clamp-3 mt-2 border-t border-border pt-2">
+                      {secondPost.summary}
+                    </p>
+                  )}
                 </div>
                 <div className="w-[45%] shrink-0 overflow-hidden">
                   <PostImage src={secondPost.image_url} alt={secondPost.title} className="h-full" />
