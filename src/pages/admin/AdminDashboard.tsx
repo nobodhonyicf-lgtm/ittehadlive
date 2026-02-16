@@ -40,7 +40,7 @@ import AdminBookReviews from "./AdminBookReviews";
 import AdminEmail from "./AdminEmail";
 import AdminSMS from "./AdminSMS";
 import AdminCustomers from "./AdminCustomers";
-
+import AdminPushNotifications from "./AdminPushNotifications";
 interface NavItem {
   label: string;
   icon: any;
@@ -119,6 +119,7 @@ const navCategories: NavCategory[] = [
       { label: "যোগাযোগ", icon: Mail, path: "/admin/contacts", section: "contacts" },
       { label: "ইমেইল", icon: Mail, path: "/admin/email", section: "email" },
       { label: "SMS", icon: MessageSquare, path: "/admin/sms", section: "sms" },
+      { label: "পুশ নোটিফিকেশন", icon: Bell, path: "/admin/push-notifications", section: "notifications" },
     ],
   },
   {
@@ -404,6 +405,7 @@ const AdminDashboard = () => {
             <Route path="email" element={<AdminEmail />} />
             <Route path="sms" element={<AdminSMS />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="push-notifications" element={<AdminPushNotifications />} />
           </Routes>
         </div>
       </main>
