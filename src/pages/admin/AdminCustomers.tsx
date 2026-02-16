@@ -132,7 +132,7 @@ const AdminUsers = () => {
 
   // Load permissions
   const { data: permissions, isLoading: permsLoading } = useQuery({
-    queryKey: ["admin_permissions", selectedRole],
+    queryKey: ["admin_permissions_raw", selectedRole],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("admin_permissions")

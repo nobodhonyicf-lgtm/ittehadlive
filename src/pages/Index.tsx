@@ -9,10 +9,10 @@ import Sidebar from "@/components/home/Sidebar";
 
 const Index = () => {
   return (
-    <Layout>
+    <Layout fullWidth>
       <HeroSection />
       <NoticeTicker />
-      <div className="px-4 py-6">
+      <div className="max-w-[1200px] mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <AboutSection />
