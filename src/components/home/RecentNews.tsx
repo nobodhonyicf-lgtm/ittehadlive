@@ -3,23 +3,39 @@ import { Link } from "react-router-dom";
 import { Newspaper } from "lucide-react";
 import { timeAgo } from "@/lib/timeAgo";
 import SectionHeader from "./SectionHeader";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const LiveDot = () => (
-  <span className="relative flex items-center gap-1 mr-1">
-    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-    <span className="absolute w-2 h-2 rounded-full bg-red-500 animate-ping opacity-75" />
+  <span className="relative flex items-center mr-1.5">
+    <span className="flex gap-[2px] items-end h-3">
+      {[1, 2, 3, 4].map((i) => (
+        <span
+          key={i}
+          className="w-[3px] rounded-full bg-white"
+          style={{
+            animation: `liveWave 1s ease-in-out ${i * 0.15}s infinite`,
+          }}
+        />
+      ))}
+    </span>
+    <style>{`
+      @keyframes liveWave {
+        0%, 100% { height: 4px; }
+        50% { height: 12px; }
+      }
+    `}</style>
   </span>
 );
 
 const RecentNews = () => {
-  const { data: posts } = usePosts(9);
+  const { data: posts } = usePosts(12);
 
   if (!posts?.length) return null;
 
   const featured = posts[0];
-  const topMedium = posts.slice(1, 3);
-  const bottomPosts = posts.slice(3, 6);
-  const sidePosts = posts.slice(0, 5);
+  const secondPost = posts[1];
+  const bottomPosts = posts.slice(2, 4);
+  const sidePosts = posts.slice(0, 8);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -27,106 +43,113 @@ const RecentNews = () => {
       <div className="lg:col-span-2">
         <SectionHeader title="সর্বশেষ খবর" linkUrl="/posts" />
 
-        {/* Top: 1 big + 2 medium side by side */}
+        {/* Top row: Box 1 (left=title, right=image) + Box 2 (top=image, bottom=title) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0.5 rounded-md overflow-hidden">
-          {/* Big featured */}
+          {/* Box 1: Horizontal - left title, right image */}
           <Link
             to={`/post/${featured.slug}`}
-            className="group block relative overflow-hidden bg-muted md:row-span-2 aspect-[4/3] md:aspect-auto"
+            className="group flex bg-muted overflow-hidden md:row-span-2"
           >
-            {featured.image_url ? (
-              <img
-                src={featured.image_url}
-                alt={featured.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                loading="lazy"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-muted min-h-[280px]">
-                <Newspaper className="text-muted-foreground" size={60} />
-              </div>
-            )}
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 pt-20">
+            <div className="flex-1 p-4 flex flex-col justify-end bg-gradient-to-r from-black/90 via-black/70 to-transparent relative z-10">
               {featured.categories && (
-                <span className="text-[11px] font-bold text-destructive bg-white/90 px-1.5 py-0.5 rounded mb-1.5 inline-block">
+                <span className="text-[11px] font-bold text-destructive bg-white/90 px-1.5 py-0.5 rounded mb-2 inline-block w-fit">
                   {featured.categories.name}
                 </span>
               )}
               <h3 className="text-white text-lg font-bold leading-snug line-clamp-3">
                 {featured.title}
               </h3>
-              {(featured as any).summary && (
-                <p className="text-white/80 text-xs line-clamp-2 mt-1">{(featured as any).summary}</p>
+              {featured.summary && (
+                <p className="text-white/70 text-xs line-clamp-2 mt-1">{featured.summary}</p>
               )}
-              <span className="text-white/60 text-[11px] mt-1 block">{timeAgo(featured.created_at)}</span>
+              <span className="text-white/50 text-[11px] mt-1.5 block">{timeAgo(featured.created_at)}</span>
             </div>
-          </Link>
-
-          {/* 2 medium posts stacked */}
-          {topMedium.map((post) => (
-            <Link
-              key={post.id}
-              to={`/post/${post.slug}`}
-              className="group block relative overflow-hidden bg-muted aspect-[16/10]"
-            >
-              {post.image_url ? (
+            <div className="w-1/2 shrink-0 relative">
+              {featured.image_url ? (
                 <img
-                  src={post.image_url}
-                  alt={post.title}
+                  src={featured.image_url}
+                  alt={featured.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   loading="lazy"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <Newspaper className="text-muted-foreground" size={32} />
+                <div className="w-full h-full flex items-center justify-center bg-muted min-h-[200px]">
+                  <Newspaper className="text-muted-foreground" size={48} />
                 </div>
               )}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-3 pt-10">
-                <h3 className="text-white text-sm font-bold leading-snug line-clamp-2">{post.title}</h3>
-                {(post as any).summary && (
-                  <p className="text-white/70 text-[11px] line-clamp-1 mt-0.5">{(post as any).summary}</p>
+            </div>
+          </Link>
+
+          {/* Box 2: Vertical - top image, bottom title */}
+          {secondPost && (
+            <Link
+              to={`/post/${secondPost.slug}`}
+              className="group block relative overflow-hidden bg-muted aspect-[4/3] md:aspect-auto"
+            >
+              <div className="h-3/5 overflow-hidden">
+                {secondPost.image_url ? (
+                  <img
+                    src={secondPost.image_url}
+                    alt={secondPost.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-muted">
+                    <Newspaper className="text-muted-foreground" size={36} />
+                  </div>
                 )}
-                <span className="text-white/60 text-[10px] mt-0.5 block">{timeAgo(post.created_at)}</span>
+              </div>
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 pt-10">
+                <h3 className="text-white text-sm font-bold leading-snug line-clamp-2">{secondPost.title}</h3>
+                <span className="text-white/50 text-[10px] mt-0.5 block">{timeAgo(secondPost.created_at)}</span>
               </div>
             </Link>
-          ))}
+          )}
         </div>
 
         {/* Divider */}
         <div className="border-t-2 border-destructive/30 my-3" />
 
-        {/* Bottom 3 posts */}
-        <div className="grid grid-cols-3 gap-0.5 rounded-md overflow-hidden">
+        {/* Bottom: Box 3 & 4 - left image, right title */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0.5 rounded-md overflow-hidden">
           {bottomPosts.map((post) => (
             <Link
               key={post.id}
               to={`/post/${post.slug}`}
-              className="group block relative overflow-hidden bg-muted aspect-[4/3]"
+              className="group flex gap-0 bg-muted overflow-hidden"
             >
-              {post.image_url ? (
-                <img
-                  src={post.image_url}
-                  alt={post.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <Newspaper className="text-muted-foreground" size={28} />
-                </div>
-              )}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-2 pt-8">
-                <h3 className="text-white text-xs font-bold leading-snug line-clamp-2">{post.title}</h3>
-                <span className="text-white/60 text-[10px] mt-0.5 block">{timeAgo(post.created_at)}</span>
+              <div className="w-2/5 shrink-0 aspect-[4/3] overflow-hidden">
+                {post.image_url ? (
+                  <img
+                    src={post.image_url}
+                    alt={post.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-muted">
+                    <Newspaper className="text-muted-foreground" size={28} />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 p-3 flex flex-col justify-center bg-gradient-to-l from-black/80 via-black/60 to-black/40">
+                {post.categories && (
+                  <span className="text-[10px] font-bold text-destructive bg-white/90 px-1.5 py-0.5 rounded mb-1 inline-block w-fit">
+                    {post.categories.name}
+                  </span>
+                )}
+                <h3 className="text-white text-sm font-bold leading-snug line-clamp-2">{post.title}</h3>
+                <span className="text-white/50 text-[10px] mt-1 block">{timeAgo(post.created_at)}</span>
               </div>
             </Link>
           ))}
         </div>
       </div>
 
-      {/* Right sidebar */}
-      <div>
-        <div className="flex items-center justify-between bg-destructive rounded-t-md mb-0">
+      {/* Right sidebar with scroll */}
+      <div className="flex flex-col">
+        <div className="flex items-center justify-between bg-destructive rounded-t-md">
           <h2 className="flex items-center text-white px-4 py-2 text-[15px] font-bold tracking-wide">
             <LiveDot />
             সর্বশেষ নিবন্ধ
@@ -138,42 +161,41 @@ const RecentNews = () => {
             আরও ›
           </Link>
         </div>
-        <div className="bg-card border border-t-0 border-border rounded-b-md divide-y divide-border">
-          {sidePosts.map((post) => (
-            <Link
-              key={post.id}
-              to={`/post/${post.slug}`}
-              className="group flex gap-3 p-3 hover:bg-muted/50 transition-colors"
-            >
-              <div className="w-20 h-16 rounded overflow-hidden bg-muted shrink-0">
-                {post.image_url ? (
-                  <img src={post.image_url} alt={post.title} className="w-full h-full object-cover" loading="lazy" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Newspaper className="text-muted-foreground" size={18} />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-bold group-hover:text-primary transition-colors line-clamp-2 leading-snug">
-                  {post.title}
-                </h3>
-                {(post as any).summary && (
-                  <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{(post as any).summary}</p>
-                )}
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[11px] text-muted-foreground">{timeAgo(post.created_at)}</span>
-                  {post.categories && (
-                    <>
-                      <span className="text-muted-foreground">|</span>
-                      <span className="text-[11px] font-semibold text-destructive">{post.categories.name}</span>
-                    </>
+        <ScrollArea className="h-[480px] bg-card border border-t-0 border-border rounded-b-md">
+          <div className="divide-y divide-border">
+            {sidePosts.map((post) => (
+              <Link
+                key={post.id}
+                to={`/post/${post.slug}`}
+                className="group flex gap-3 p-3 hover:bg-muted/50 transition-colors"
+              >
+                <div className="w-20 h-16 rounded overflow-hidden bg-muted shrink-0">
+                  {post.image_url ? (
+                    <img src={post.image_url} alt={post.title} className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Newspaper className="text-muted-foreground" size={18} />
+                    </div>
                   )}
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-bold group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                    {post.title}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[11px] text-muted-foreground">{timeAgo(post.created_at)}</span>
+                    {post.categories && (
+                      <>
+                        <span className="text-muted-foreground">|</span>
+                        <span className="text-[11px] font-semibold text-destructive">{post.categories.name}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </ScrollArea>
       </div>
     </div>
   );
