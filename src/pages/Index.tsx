@@ -17,12 +17,16 @@ const Index = () => {
           <div className="lg:col-span-2 space-y-6">
             <AboutSection />
             <SectionCards />
-            <RecentNews />
-            <VideoSection />
           </div>
           <div className="lg:col-span-1">
             <Sidebar />
           </div>
+        </div>
+        <div className="mt-6">
+          <RecentNews />
+        </div>
+        <div className="mt-6">
+          <VideoSection />
         </div>
       </div>
     </Layout>
