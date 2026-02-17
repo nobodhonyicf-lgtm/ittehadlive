@@ -7,7 +7,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
-import { Bell, Send, Users } from "lucide-react";
+import { Bell, Send, Users, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const AdminPushNotifications = () => {
   const qc = useQueryClient();
@@ -42,7 +53,6 @@ const AdminPushNotifications = () => {
 
   const sendMutation = useMutation({
     mutationFn: async () => {
-      // Save to notifications table
       const { data: notif, error: insertErr } = await supabase
         .from("notifications")
         .insert({
@@ -57,7 +67,6 @@ const AdminPushNotifications = () => {
         .single();
       if (insertErr) throw insertErr;
 
-      // Send via edge function
       const { data, error } = await supabase.functions.invoke("send-push", {
         body: { title, body, url, notificationId: notif.id },
       });
@@ -73,6 +82,20 @@ const AdminPushNotifications = () => {
     },
     onError: (err: any) => {
       toast.error("পাঠানো ব্যর্থ: " + err.message);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("notifications").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("নোটিফিকেশন ডিলিট করা হয়েছে");
+      qc.invalidateQueries({ queryKey: ["push_history"] });
+    },
+    onError: (err: any) => {
+      toast.error("ডিলিট ব্যর্থ: " + err.message);
     },
   });
 
@@ -137,10 +160,36 @@ const AdminPushNotifications = () => {
                     <p className="font-semibold">{n.title}</p>
                     <p className="text-sm text-muted-foreground">{n.body}</p>
                   </div>
-                  <div className="text-xs text-muted-foreground whitespace-nowrap ml-4">
-                    {n.is_sent ? "✅ পাঠানো" : "⏳ অপেক্ষমাণ"}
-                    <br />
-                    {new Date(n.created_at).toLocaleDateString("bn-BD")}
+                  <div className="flex items-start gap-2 ml-4">
+                    <div className="text-xs text-muted-foreground whitespace-nowrap text-right">
+                      {n.is_sent ? "✅ পাঠানো" : "⏳ অপেক্ষমাণ"}
+                      <br />
+                      {new Date(n.created_at).toLocaleDateString("bn-BD")}
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive">
+                          <Trash2 size={14} />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>নোটিফিকেশন ডিলিট করুন</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            "{n.title}" নোটিফিকেশনটি ডিলিট করতে চান? এটি পূর্বাবস্থায় ফেরানো যাবে না।
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>বাতিল</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => deleteMutation.mutate(n.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            ডিলিট করুন
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               ))}
