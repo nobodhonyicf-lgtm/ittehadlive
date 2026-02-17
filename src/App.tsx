@@ -38,6 +38,7 @@ import OAuthCallback from "./pages/OAuthCallback";
 import Install from "./pages/Install";
 import NotificationsPage from "./pages/NotificationsPage";
 import AppSettings from "./pages/AppSettings";
+import AppContact from "./pages/AppContact";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -86,6 +87,7 @@ const App = () => (
               <Route path="/install" element={<Install />} />
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/app-settings" element={<AppSettings />} />
+              <Route path="/app-contact" element={<AppContact />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/reset-password" element={<ResetPassword />} />
               <Route path="/admin/*" element={<AdminDashboard />} />

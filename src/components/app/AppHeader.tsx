@@ -1,7 +1,7 @@
 import { useSiteSettings } from "@/hooks/useData";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { Bell, LayoutDashboard } from "lucide-react";
+import { Bell, LayoutDashboard, GraduationCap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -90,6 +90,13 @@ const AppHeader = () => {
 
         {/* Action buttons */}
         <div className="flex items-center gap-0.5">
+          <Link
+            to="/result"
+            className="p-2.5 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90"
+            aria-label="রেজাল্ট"
+          >
+            <GraduationCap size={18} />
+          </Link>
           <NotificationBell />
 
           {user && hasAnyRole && (

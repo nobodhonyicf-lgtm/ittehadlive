@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
+import AppLayout from "@/components/app/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -10,8 +11,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { GraduationCap, Search, User, Printer } from "lucide-react";
 import { getGradeFromMarks, getOverallGPA, getOverallGrade } from "@/lib/grading";
 import { toBengali } from "@/lib/bengali";
+import { useIsApp } from "@/hooks/useIsApp";
 
 const ResultCheck = () => {
+  const isApp = useIsApp();
   const [roll, setRoll] = useState("");
   const [reg, setReg] = useState("");
   const [examId, setExamId] = useState("");
@@ -125,31 +128,45 @@ const ResultCheck = () => {
 
   const logoUrl = getSetting("logo_url");
 
+  const Wrapper = isApp ? AppLayout : Layout;
+
   return (
-    <Layout>
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center mb-8 print:hidden">
-          <h1 className="text-3xl font-bold text-primary flex items-center justify-center gap-3">
-            <GraduationCap size={32} />
-            রেজাল্ট চেক করুন
-          </h1>
-          <p className="text-muted-foreground mt-2">রোল নম্বর, রেজিস্ট্রেশন নম্বর ও পরীক্ষা দিয়ে রেজাল্ট দেখুন</p>
+    <Wrapper>
+      <div className={`max-w-4xl mx-auto px-4 ${isApp ? 'py-4' : 'py-8'}`}>
+        <div className="text-center mb-6 print:hidden">
+          {isApp ? (
+            <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-2xl p-6 mb-4 shadow-lg">
+              <div className="h-14 w-14 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3">
+                <GraduationCap size={28} />
+              </div>
+              <h1 className="text-xl font-bold">রেজাল্ট চেক করুন</h1>
+              <p className="text-sm opacity-80 mt-1">রোল ও রেজিস্ট্রেশন নম্বর দিয়ে খুঁজুন</p>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-3xl font-bold text-primary flex items-center justify-center gap-3">
+                <GraduationCap size={32} />
+                রেজাল্ট চেক করুন
+              </h1>
+              <p className="text-muted-foreground mt-2">রোল নম্বর, রেজিস্ট্রেশন নম্বর ও পরীক্ষা দিয়ে রেজাল্ট দেখুন</p>
+            </>
+          )}
         </div>
 
-        <Card className="mb-8 border-t-4 border-t-accent print:hidden">
-          <CardContent className="p-6">
-            <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input placeholder="রোল নম্বর লিখুন *" value={roll} onChange={e => setRoll(e.target.value)} required />
-              <Input placeholder="রেজিস্ট্রেশন নম্বর লিখুন *" value={reg} onChange={e => setReg(e.target.value)} required />
+        <Card className={`mb-6 print:hidden ${isApp ? 'border-0 shadow-md rounded-2xl' : 'border-t-4 border-t-accent'}`}>
+          <CardContent className={isApp ? 'p-4' : 'p-6'}>
+            <form onSubmit={handleSearch} className="space-y-3">
+              <Input placeholder="রোল নম্বর লিখুন *" value={roll} onChange={e => setRoll(e.target.value)} required className={isApp ? 'rounded-xl h-11' : ''} />
+              <Input placeholder="রেজিস্ট্রেশন নম্বর লিখুন *" value={reg} onChange={e => setReg(e.target.value)} required className={isApp ? 'rounded-xl h-11' : ''} />
               <Select value={examId} onValueChange={setExamId}>
-                <SelectTrigger><SelectValue placeholder="পরীক্ষা নির্বাচন" /></SelectTrigger>
+                <SelectTrigger className={isApp ? 'rounded-xl h-11' : ''}><SelectValue placeholder="পরীক্ষা নির্বাচন" /></SelectTrigger>
                 <SelectContent>
                   {publishedExams?.map(e => (
                     <SelectItem key={e.id} value={e.id}>{e.name} ({toBengali(e.year)})</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <Button type="submit" disabled={!roll || !reg || !examId || isLoading} className="gap-2">
+              <Button type="submit" disabled={!roll || !reg || !examId || isLoading} className={`gap-2 w-full ${isApp ? 'rounded-xl h-11' : ''}`}>
                 <Search size={16} />
                 {isLoading ? "খোঁজা হচ্ছে..." : "রেজাল্ট দেখুন"}
               </Button>
@@ -332,7 +349,7 @@ const ResultCheck = () => {
           </div>
         )}
       </div>
-    </Layout>
+    </Wrapper>
   );
 };
 

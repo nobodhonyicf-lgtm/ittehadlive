@@ -17,7 +17,7 @@ const AppBannerSlider = () => {
   if (!sliders?.length) return null;
 
   return (
-    <div className="relative w-full aspect-[16/7] overflow-hidden bg-muted dark:bg-muted/50 transition-colors duration-300">
+    <div className="relative w-full aspect-[16/7] overflow-hidden bg-muted dark:bg-muted/50 rounded-2xl mx-3 mt-3 shadow-lg transition-colors duration-300">
       {sliders.map((slide, i) => (
         <div
           key={slide.id}
@@ -31,8 +31,8 @@ const AppBannerSlider = () => {
             className="w-full h-full object-cover"
           />
           {slide.title && (
-            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-4 py-3">
-              <p className="text-white text-sm font-medium truncate">{slide.title}</p>
+            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 py-4">
+              <p className="text-white text-sm font-semibold truncate drop-shadow-md">{slide.title}</p>
             </div>
           )}
         </div>
@@ -42,22 +42,23 @@ const AppBannerSlider = () => {
         <>
           <button
             onClick={() => setCurrent((c) => (c - 1 + sliders.length) % sliders.length)}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 text-white flex items-center justify-center backdrop-blur-sm transition-all duration-200 hover:bg-black/50 active:scale-90"
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all duration-200 hover:bg-white/30 active:scale-90"
           >
             <ChevronLeft size={16} />
           </button>
           <button
             onClick={() => setCurrent((c) => (c + 1) % sliders.length)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 text-white flex items-center justify-center backdrop-blur-sm transition-all duration-200 hover:bg-black/50 active:scale-90"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all duration-200 hover:bg-white/30 active:scale-90"
           >
             <ChevronRight size={16} />
           </button>
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1.5">
             {sliders.map((_, i) => (
-              <span
+              <button
                 key={i}
+                onClick={() => setCurrent(i)}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === current ? "bg-white w-5" : "bg-white/50 w-1.5"
+                  i === current ? "bg-white w-6 shadow-md" : "bg-white/40 w-1.5"
                 }`}
               />
             ))}

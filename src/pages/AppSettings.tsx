@@ -170,7 +170,7 @@ const AppSettings = () => {
         </div>
 
         <p className="text-xs text-muted-foreground text-center mt-8">
-          ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ © {new Date().getFullYear()}
+          ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ © {toBengali(new Date().getFullYear())}
         </p>
       </div>
     </AppLayout>

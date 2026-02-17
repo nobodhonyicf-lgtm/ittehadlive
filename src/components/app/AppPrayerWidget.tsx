@@ -33,22 +33,25 @@ const AppPrayerWidget = () => {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 30000);
+    const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
   if (!prayerTimes?.length) return null;
 
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const currentTotalSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
 
   let nextPrayer: typeof prayerTimes[0] | null = null;
   let remainingMinutes = 0;
+  let remainingSeconds = 0;
 
   for (const pt of prayerTimes) {
     const mins = normalizePrayerMinutes(pt.time_text, pt.name);
-    if (mins !== null && mins > currentMinutes) {
+    if (mins !== null && mins * 60 > currentTotalSeconds) {
       nextPrayer = pt;
-      remainingMinutes = mins - currentMinutes;
+      const diff = mins * 60 - currentTotalSeconds;
+      remainingMinutes = Math.floor(diff / 60);
+      remainingSeconds = diff % 60;
       break;
     }
   }
@@ -61,7 +64,7 @@ const AppPrayerWidget = () => {
         </h2>
         {nextPrayer && (
           <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full animate-pulse">
-            {nextPrayer.name} — আরও {toBengali(remainingMinutes)} মিনিট
+            {nextPrayer.name} — আরও {toBengali(remainingMinutes)} মি. {toBengali(remainingSeconds)} সে.
           </span>
         )}
       </div>
