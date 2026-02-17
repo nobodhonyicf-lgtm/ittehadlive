@@ -41,14 +41,45 @@ const AppLayout = ({ children, hideHeader }: { children: ReactNode; hideHeader?:
     document.addEventListener("touchend", onTouchEnd, { passive: true });
     document.addEventListener("touchcancel", onTouchEnd, { passive: true });
 
-    // CSS-only protection for long-press callouts
+    // CSS-only protection for long-press callouts and image saving
     const style = document.createElement('style');
     style.id = 'app-content-protection';
     style.textContent = `
       * { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; }
-      img { -webkit-touch-callout: none !important; }
+      img {
+        -webkit-touch-callout: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        pointer-events: none !important;
+      }
+      a img, button img, [role="button"] img { pointer-events: none !important; }
     `;
     document.head.appendChild(style);
+
+    // Wrap all images in a protective overlay so touch events don't reach the img element
+    const wrapImages = () => {
+      const images = document.querySelectorAll('img:not([data-protected])');
+      images.forEach((img) => {
+        img.setAttribute('data-protected', '1');
+        const parent = img.parentElement;
+        if (parent && !parent.classList.contains('img-protect-wrap')) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'img-protect-wrap';
+          wrapper.style.cssText = 'position:relative;display:inline-block;width:100%;';
+          parent.insertBefore(wrapper, img);
+          wrapper.appendChild(img);
+          // Transparent overlay to intercept touch/click on images
+          const overlay = document.createElement('div');
+          overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;';
+          wrapper.appendChild(overlay);
+        }
+      });
+    };
+
+    // Run on mount and observe DOM changes for dynamically loaded images
+    wrapImages();
+    const observer = new MutationObserver(() => wrapImages());
+    observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
       document.removeEventListener("copy", preventCopy);
@@ -58,6 +89,7 @@ const AppLayout = ({ children, hideHeader }: { children: ReactNode; hideHeader?:
       document.removeEventListener("touchstart", onTouchStart);
       document.removeEventListener("touchend", onTouchEnd);
       document.removeEventListener("touchcancel", onTouchEnd);
+      observer.disconnect();
       const protectionStyle = document.getElementById('app-content-protection');
       if (protectionStyle) protectionStyle.remove();
     };
