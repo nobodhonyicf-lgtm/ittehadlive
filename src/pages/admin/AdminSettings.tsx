@@ -75,16 +75,6 @@ const AdminSettings = () => {
   const authKeys = ["otp_enabled", "two_fa_enabled", "google_login_enabled", "apple_login_enabled"];
   const appKeys = ["app_name", "app_logo_url", "app_icon_url", "app_banner_enabled", "vapid_public_key", "vapid_private_key"];
 
-  if (isLoading) return <div className="text-center py-8">লোড হচ্ছে...</div>;
-
-  const appSettings = settings?.filter(s => appKeys.includes(s.key));
-  const brandingSettings = settings?.filter(s => brandingKeys.includes(s.key));
-  const signatureSettings = settings?.filter(s => signatureKeys.includes(s.key));
-  const seoSettings = settings?.filter(s => seoKeys.includes(s.key));
-  const adSettings = settings?.filter(s => adKeys.includes(s.key));
-  const authSettings = settings?.filter(s => authKeys.includes(s.key));
-  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key) && !adKeys.includes(s.key) && !authKeys.includes(s.key) && !appKeys.includes(s.key));
-
   const upsertMutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
       const existing = settings?.find(s => s.key === key);
@@ -102,6 +92,16 @@ const AdminSettings = () => {
       toast.success("সংরক্ষিত");
     },
   });
+
+  if (isLoading) return <div className="text-center py-8">লোড হচ্ছে...</div>;
+
+  const appSettings = settings?.filter(s => appKeys.includes(s.key));
+  const brandingSettings = settings?.filter(s => brandingKeys.includes(s.key));
+  const signatureSettings = settings?.filter(s => signatureKeys.includes(s.key));
+  const seoSettings = settings?.filter(s => seoKeys.includes(s.key));
+  const adSettings = settings?.filter(s => adKeys.includes(s.key));
+  const authSettings = settings?.filter(s => authKeys.includes(s.key));
+  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key) && !adKeys.includes(s.key) && !authKeys.includes(s.key) && !appKeys.includes(s.key));
 
   const renderSettingField = (s: any) => (
     <div key={s.id}>
