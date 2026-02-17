@@ -9,6 +9,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import PageViewTracker from "@/components/PageViewTracker";
 import DynamicFavicon from "@/components/DynamicFavicon";
+import DynamicManifest from "@/components/DynamicManifest";
 import Index from "./pages/Index";
 import PostPage from "./pages/PostPage";
 import PostsList from "./pages/PostsList";
@@ -58,6 +59,7 @@ const App = () => (
           <CartProvider>
             <PageViewTracker />
             <DynamicFavicon />
+            <DynamicManifest />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/post/:slug" element={<PostPage />} />
