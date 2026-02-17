@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { title, body, icon, url, notificationId } = await req.json();
+    const { title, body, icon, url, notificationId, badge } = await req.json();
 
     if (!title || !body) {
       return new Response(JSON.stringify({ error: 'title and body required' }), {
@@ -44,6 +44,19 @@ Deno.serve(async (req) => {
       privateKey: VAPID_PRIVATE_KEY,
     };
 
+    // Fetch logo URL from site_settings for notification icon
+    let logoUrl = icon || '';
+    if (!logoUrl) {
+      const settingsRes = await fetch(`${SUPABASE_URL}/rest/v1/site_settings?key=eq.app_icon_url&select=value`, {
+        headers: {
+          'apikey': SUPABASE_SERVICE_ROLE_KEY!,
+          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+      });
+      const settingsData = await settingsRes.json();
+      logoUrl = settingsData?.[0]?.value || `${SUPABASE_URL}/storage/v1/object/public/uploads/pwa-192x192.png`;
+    }
+
     // Fetch all push subscriptions
     const subRes = await fetch(`${SUPABASE_URL}/rest/v1/push_subscriptions?select=*`, {
       headers: {
@@ -57,7 +70,8 @@ Deno.serve(async (req) => {
       data: JSON.stringify({
         title,
         body,
-        icon: icon || '/pwa-192x192.png',
+        icon: logoUrl,
+        badge: badge || logoUrl,
         data: { url: url || '/' },
       }),
       options: {
