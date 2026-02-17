@@ -17,7 +17,7 @@ const AppBannerSlider = () => {
   if (!sliders?.length) return null;
 
   return (
-    <div className="relative w-full aspect-[16/7] overflow-hidden bg-muted dark:bg-muted/50 rounded-2xl mx-3 mt-3 shadow-lg transition-colors duration-300">
+    <div className="relative w-[calc(100%-24px)] max-w-full aspect-[2/1] overflow-hidden bg-muted dark:bg-muted/50 rounded-2xl mx-auto mt-3 shadow-lg transition-colors duration-300">
       {sliders.map((slide, i) => (
         <div
           key={slide.id}
