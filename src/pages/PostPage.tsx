@@ -23,20 +23,22 @@ const SocialShare = ({ url, title, slug }: { url: string; title: string; slug?: 
   const encodedUrl = encodeURIComponent(url);
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-sm text-muted-foreground flex items-center gap-1"><Share2 size={14} /> শেয়ার:</span>
-      <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedOgUrl}`} target="_blank" rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 bg-[#1877F2] text-white px-3 py-2 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity">
-        <Facebook size={14} /> Facebook
-      </a>
-      <a href={`https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`} target="_blank" rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 bg-[#25D366] text-white px-3 py-2 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity">
-        <MessageCircle size={14} /> WhatsApp
-      </a>
-      <a href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`} target="_blank" rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 bg-[#1DA1F2] text-white px-3 py-2 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity">
-        <Twitter size={14} /> Twitter
-      </a>
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-muted-foreground flex items-center gap-1 shrink-0"><Share2 size={14} /> শেয়ার:</span>
+      <div className="flex items-center gap-2">
+        <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedOgUrl}`} target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 bg-[#1877F2] text-white px-3 py-2 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity whitespace-nowrap">
+          <Facebook size={14} /> Facebook
+        </a>
+        <a href={`https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`} target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 bg-[#25D366] text-white px-3 py-2 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity whitespace-nowrap">
+          <MessageCircle size={14} /> WhatsApp
+        </a>
+        <a href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`} target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 bg-[#1DA1F2] text-white px-3 py-2 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity whitespace-nowrap">
+          <Twitter size={14} /> Twitter
+        </a>
+      </div>
     </div>
   );
 };

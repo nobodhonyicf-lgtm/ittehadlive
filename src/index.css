@@ -118,14 +118,27 @@
   }
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
+/* Scrollbar styling - hide in standalone/app mode */
+@media (display-mode: standalone) {
+  ::-webkit-scrollbar {
+    width: 0px;
+    display: none;
+  }
+  body {
+    scrollbar-width: none;
+  }
 }
-::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
-}
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary));
-  border-radius: 3px;
+
+/* Scrollbar styling for web mode */
+@media not all and (display-mode: standalone) {
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 3px;
+  }
 }

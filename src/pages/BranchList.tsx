@@ -27,44 +27,44 @@ const BranchList = () => {
 
         <div className={`grid grid-cols-1 ${isApp ? '' : 'lg:grid-cols-3'} gap-6`}>
           <div className={isApp ? '' : 'lg:col-span-2'}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {branches?.map((branch, i) => (
                 <Link key={branch.id} to={`/branch/${branch.id}`}>
-                  <Card className="hover:shadow-xl transition-all duration-300 group h-full border-border/60 overflow-hidden hover:border-primary/30">
+                  <Card className="hover:shadow-lg transition-all duration-300 group h-full border-border/60 overflow-hidden hover:border-primary/30">
                     <CardContent className="p-0">
-                      <div className="h-36 bg-gradient-to-br from-primary/5 to-accent/5 dark:from-primary/10 dark:to-accent/10 flex items-center justify-center overflow-hidden relative">
+                      <div className="h-24 bg-gradient-to-br from-primary/5 to-accent/5 dark:from-primary/10 dark:to-accent/10 flex items-center justify-center overflow-hidden relative">
                         {branch.image_url ? (
                           <img src={branch.image_url} alt={branch.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         ) : (
-                          <Building2 className="text-primary/20" size={56} />
+                          <Building2 className="text-primary/20" size={36} />
                         )}
                         {branch.code && (
-                          <span className="absolute top-2 right-2 bg-primary/90 text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          <span className="absolute top-1.5 right-1.5 bg-primary/90 text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                             {branch.code}
                           </span>
                         )}
                       </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-base text-foreground group-hover:text-primary transition-colors line-clamp-1">{branch.name}</h3>
+                      <div className="p-2.5">
+                        <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">{branch.name}</h3>
                         {branch.address && (
-                          <p className="text-xs text-muted-foreground flex items-start gap-1 mt-1.5 line-clamp-1">
-                            <MapPin size={12} className="shrink-0 mt-0.5" /> {branch.address}
+                          <p className="text-[11px] text-muted-foreground flex items-start gap-1 mt-1 line-clamp-1">
+                            <MapPin size={10} className="shrink-0 mt-0.5" /> {branch.address}
                           </p>
                         )}
-                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border/50">
+                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/50">
                           {(branch.total_teachers ?? 0) > 0 && (
-                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <GraduationCap size={13} className="text-primary/70" />
-                              <span className="font-medium">{toBengali(branch.total_teachers)}</span> শিক্ষক
+                            <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                              <GraduationCap size={11} className="text-primary/70" />
+                              <span className="font-medium">{toBengali(branch.total_teachers)}</span>
                             </span>
                           )}
                           {(branch.total_students ?? 0) > 0 && (
-                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Users size={13} className="text-primary/70" />
-                              <span className="font-medium">{toBengali(branch.total_students)}</span> শিক্ষার্থী
+                            <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                              <Users size={11} className="text-primary/70" />
+                              <span className="font-medium">{toBengali(branch.total_students)}</span>
                             </span>
                           )}
-                          <ChevronRight size={14} className="ml-auto text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                          <ChevronRight size={12} className="ml-auto text-muted-foreground/50 group-hover:text-primary transition-colors" />
                         </div>
                       </div>
                     </CardContent>
