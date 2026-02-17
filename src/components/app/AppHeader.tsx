@@ -1,7 +1,7 @@
 import { useSiteSettings } from "@/hooks/useData";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { Bell, LayoutDashboard, GraduationCap } from "lucide-react";
+import { Bell, LayoutDashboard, GraduationCap, Radio } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -54,6 +54,39 @@ const NotificationBell = () => {
   );
 };
 
+const LiveButton = () => {
+  const { data: latestPost } = useQuery({
+    queryKey: ["latest_post_live"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("posts")
+        .select("id, slug, title")
+        .eq("is_published", true)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: 60000,
+  });
+
+  if (!latestPost) return null;
+
+  return (
+    <Link
+      to={`/post/${latestPost.slug}`}
+      className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded-full transition-all active:scale-90"
+    >
+      <span className="relative flex h-2 w-2">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+      </span>
+      LIVE
+    </Link>
+  );
+};
+
 const AppHeader = () => {
   const { data: settings } = useSiteSettings();
   const { user, hasAnyRole } = useAuth();
@@ -90,6 +123,7 @@ const AppHeader = () => {
 
         {/* Action buttons */}
         <div className="flex items-center gap-0.5">
+          <LiveButton />
           <Link
             to="/result"
             className="p-2.5 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90"
