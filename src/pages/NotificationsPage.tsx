@@ -54,8 +54,8 @@ const NotificationsPage = () => {
             <div key={n.id} className="p-4 bg-card rounded-lg border border-border shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground">{n.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{n.body}</p>
+                  <h3 className="font-semibold text-foreground leading-snug">{n.title}</h3>
+                  {n.body && <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{n.body}</p>}
                   {n.link && (
                     <Link
                       to={n.link}

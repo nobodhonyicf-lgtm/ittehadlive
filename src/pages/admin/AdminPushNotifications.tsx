@@ -67,8 +67,15 @@ const AdminPushNotifications = () => {
         .single();
       if (insertErr) throw insertErr;
 
+      // Fetch app icon for push notification
+      const { data: iconSetting } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "app_icon_url")
+        .maybeSingle();
+
       const { data, error } = await supabase.functions.invoke("send-push", {
-        body: { title, body, url, notificationId: notif.id },
+        body: { title, body, url, icon: iconSetting?.value || undefined, notificationId: notif.id },
       });
       if (error) throw error;
       return data;
