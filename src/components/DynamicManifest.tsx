@@ -21,13 +21,12 @@ const DynamicManifest = () => {
       start_url: "/",
       scope: "/",
       icons: [
-        { src: iconUrl, sizes: "72x72", type: "image/png" },
-        { src: iconUrl, sizes: "96x96", type: "image/png" },
-        { src: iconUrl, sizes: "128x128", type: "image/png" },
-        { src: iconUrl, sizes: "144x144", type: "image/png" },
-        { src: iconUrl, sizes: "192x192", type: "image/png" },
-        { src: iconUrl, sizes: "512x512", type: "image/png" },
-        { src: iconUrl, sizes: "512x512", type: "image/png", purpose: "maskable" },
+        { src: iconUrl, sizes: "72x72", type: "image/png", purpose: "any" },
+        { src: iconUrl, sizes: "96x96", type: "image/png", purpose: "any" },
+        { src: iconUrl, sizes: "128x128", type: "image/png", purpose: "any" },
+        { src: iconUrl, sizes: "144x144", type: "image/png", purpose: "any" },
+        { src: iconUrl, sizes: "192x192", type: "image/png", purpose: "any" },
+        { src: iconUrl, sizes: "512x512", type: "image/png", purpose: "any" },
       ],
     };
 

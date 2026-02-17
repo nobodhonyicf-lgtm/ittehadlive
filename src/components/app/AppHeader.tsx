@@ -69,7 +69,7 @@ const AppHeader = () => {
         <Link to="/" className="flex items-center gap-3 min-w-0">
           {appLogoUrl && (
             <div className="relative">
-              <div className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur-sm p-1 ring-2 ring-white/20 shadow-md">
+              <div className="h-10 w-10 rounded-xl bg-white p-1 ring-2 ring-white/20 shadow-md">
                 <img
                   src={appLogoUrl}
                   alt="App Logo"

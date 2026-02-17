@@ -74,9 +74,9 @@ const BranchDetail = () => {
               </div>
 
               <div className="flex flex-wrap gap-2 mt-4">
-                <Link to={`/students?branch=${branch.id}`}>
+        <Link to={`/students?branch=${branch.id}`}>
                   <Button size="sm" variant="outline" className="gap-1.5 text-xs">
-                    <Users size={14} /> শিক্ষার্থী তালিকা
+                    <Users size={14} /> শিক্ষার্থী তালিকা ({toBengali(branch.total_students || 0)} জন)
                   </Button>
                 </Link>
                 <Link to="/result">
@@ -106,8 +106,8 @@ const BranchDetail = () => {
             {(branch.total_students ?? 0) > 0 && (
               <Card className="border-border/60">
                 <CardContent className="p-4 text-center">
-                  <div className="w-10 h-10 rounded-xl bg-accent/10 dark:bg-accent/20 flex items-center justify-center mx-auto mb-2">
-                    <Users size={20} className="text-accent-foreground" />
+                   <div className="w-10 h-10 rounded-xl bg-accent/10 dark:bg-accent/20 flex items-center justify-center mx-auto mb-2">
+                    <Users size={20} className="text-primary" />
                   </div>
                   <p className="text-2xl font-bold text-primary">{toBengali(branch.total_students)}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">মোট শিক্ষার্থী</p>
