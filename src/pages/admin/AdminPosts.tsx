@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2, Link2 } from "lucide-react";
+import { Plus, Edit, Trash2, Link2, Bell } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useCategories } from "@/hooks/useData";
 import { useEffect } from "react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
@@ -43,6 +44,7 @@ const AdminPosts = () => {
   const { canEdit, canDelete } = useSectionPermissions();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [sendPush, setSendPush] = useState(false);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [linkSearch, setLinkSearch] = useState("");
   const contentRef = useRef<HTMLTextAreaElement>(null);
@@ -86,14 +88,25 @@ const AdminPosts = () => {
   });
 
   const saveMutation = useMutation({
-    mutationFn: async (data: PostForm) => {
+    mutationFn: async ({ data, shouldPush }: { data: PostForm; shouldPush: boolean }) => {
       const payload: any = { ...data, category_id: data.category_id || null, author_name: data.author_name || null };
       if (editId) {
         const { error } = await supabase.from("posts").update(payload).eq("id", editId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("posts").insert([payload]);
+        const { data: inserted, error } = await supabase.from("posts").insert([payload]).select().single();
         if (error) throw error;
+
+        // Send push notification for new post
+        if (shouldPush && inserted) {
+          await supabase.functions.invoke("send-push", {
+            body: {
+              title: inserted.title,
+              body: inserted.summary || inserted.title,
+              url: `/post/${inserted.slug}`,
+            },
+          });
+        }
       }
     },
     onSuccess: () => {
@@ -103,6 +116,7 @@ const AdminPosts = () => {
       setOpen(false);
       setEditId(null);
       setForm(emptyForm);
+      setSendPush(false);
       localStorage.removeItem(DRAFT_KEY);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -167,7 +181,7 @@ const AdminPosts = () => {
               onSubmit={(e) => {
                 e.preventDefault();
                 const slug = form.slug || generateSlug(form.title);
-                saveMutation.mutate({ ...form, slug });
+                saveMutation.mutate({ data: { ...form, slug }, shouldPush: sendPush });
               }}
               className="space-y-4"
             >
@@ -272,6 +286,13 @@ const AdminPosts = () => {
                   প্রকাশিত
                 </label>
               </div>
+              {!editId && (
+                <label className="flex items-center gap-2 text-sm p-3 bg-accent/10 rounded-md border border-accent/30 cursor-pointer">
+                  <Checkbox checked={sendPush} onCheckedChange={(v) => setSendPush(!!v)} />
+                  <Bell size={14} className="text-accent" />
+                  <span>পুশ নোটিফিকেশন পাঠান</span>
+                </label>
+              )}
               {/* SEO Fields */}
               <details className="border border-border rounded-md p-3">
                 <summary className="text-sm font-semibold cursor-pointer">🔍 এসইও সেটিংস</summary>
