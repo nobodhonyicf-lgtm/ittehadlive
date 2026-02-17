@@ -10,14 +10,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Bell } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const AdminNotices = () => {
   const { canEdit, canDelete } = useSectionPermissions();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [sendPush, setSendPush] = useState(false);
   const [form, setForm] = useState({ title: "", content: "", is_active: true });
 
   const { data: notices, isLoading } = useQuery({
@@ -30,20 +32,31 @@ const AdminNotices = () => {
   });
 
   const saveMutation = useMutation({
-    mutationFn: async (data: typeof form) => {
+    mutationFn: async ({ data, shouldPush }: { data: typeof form; shouldPush: boolean }) => {
       if (editId) {
         const { error } = await supabase.from("notices").update(data).eq("id", editId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("notices").insert([data]);
+        const { data: inserted, error } = await supabase.from("notices").insert([data]).select().single();
         if (error) throw error;
+
+        // Send push notification for new notice
+        if (shouldPush && inserted) {
+          await supabase.functions.invoke("send-push", {
+            body: {
+              title: "📢 নতুন নোটিশ",
+              body: inserted.title,
+              url: `/notice/${inserted.id}`,
+            },
+          });
+        }
       }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin_notices"] });
       qc.invalidateQueries({ queryKey: ["notices"] });
       toast.success(editId ? "নোটিশ আপডেট হয়েছে" : "নোটিশ তৈরি হয়েছে");
-      setOpen(false); setEditId(null); setForm({ title: "", content: "", is_active: true });
+      setOpen(false); setEditId(null); setForm({ title: "", content: "", is_active: true }); setSendPush(false);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -66,10 +79,17 @@ const AdminNotices = () => {
           </DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editId ? "নোটিশ সম্পাদনা" : "নতুন নোটিশ"}</DialogTitle></DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
+            <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate({ data: form, shouldPush: sendPush }); }} className="space-y-4">
               <div><Label>শিরোনাম *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></div>
               <div><Label>বিষয়বস্তু</Label><Textarea rows={5} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} /></div>
               <label className="flex items-center gap-2 text-sm"><Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />সক্রিয়</label>
+              {!editId && (
+                <label className="flex items-center gap-2 text-sm p-3 bg-accent/10 rounded-md border border-accent/30 cursor-pointer">
+                  <Checkbox checked={sendPush} onCheckedChange={(v) => setSendPush(!!v)} />
+                  <Bell size={14} className="text-accent" />
+                  <span>পুশ নোটিফিকেশন পাঠান</span>
+                </label>
+              )}
               <Button type="submit" disabled={saveMutation.isPending} className="w-full">{saveMutation.isPending ? "সংরক্ষণ হচ্ছে..." : "সংরক্ষণ"}</Button>
             </form>
           </DialogContent>

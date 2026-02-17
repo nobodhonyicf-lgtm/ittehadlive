@@ -10,24 +10,49 @@ const AppLayout = ({ children, hideHeader }: { children: ReactNode; hideHeader?:
     setMounted(true);
   }, []);
 
-  // Prevent text copy and image download in app mode
+  // Prevent text copy, image download, and long-press actions in app mode
   useEffect(() => {
     const preventCopy = (e: Event) => e.preventDefault();
+    const preventContext = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    };
+    const preventDrag = (e: DragEvent) => e.preventDefault();
+    const preventTouchCallout = (e: TouchEvent) => {
+      // Prevent long-press popup on mobile
+      const target = e.target as HTMLElement;
+      if (target?.tagName === "IMG" || target?.tagName === "A" || target?.closest("img") || target?.closest("a")) {
+        e.preventDefault();
+      }
+    };
+
     document.addEventListener("copy", preventCopy);
     document.addEventListener("cut", preventCopy);
-    document.addEventListener("contextmenu", preventCopy);
-
-    // Prevent image drag
-    const preventDrag = (e: DragEvent) => {
-      if ((e.target as HTMLElement)?.tagName === "IMG") e.preventDefault();
-    };
+    document.addEventListener("contextmenu", preventContext, { capture: true });
     document.addEventListener("dragstart", preventDrag);
+    document.addEventListener("touchstart", preventTouchCallout, { passive: false });
+
+    // Apply CSS to body for extra protection
+    document.body.style.cssText += '-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;';
+
+    // Disable image long-press by making all images non-interactive
+    const style = document.createElement('style');
+    style.id = 'app-content-protection';
+    style.textContent = `
+      img { pointer-events: none !important; -webkit-touch-callout: none !important; }
+      * { -webkit-touch-callout: none !important; }
+    `;
+    document.head.appendChild(style);
 
     return () => {
       document.removeEventListener("copy", preventCopy);
       document.removeEventListener("cut", preventCopy);
-      document.removeEventListener("contextmenu", preventCopy);
+      document.removeEventListener("contextmenu", preventContext, { capture: true });
       document.removeEventListener("dragstart", preventDrag);
+      document.removeEventListener("touchstart", preventTouchCallout);
+      const protectionStyle = document.getElementById('app-content-protection');
+      if (protectionStyle) protectionStyle.remove();
     };
   }, []);
 
