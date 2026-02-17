@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { title, body, icon, url, notificationId, badge } = await req.json();
+    const { title, body, icon, url, notificationId, badge, image } = await req.json();
 
     if (!title || !body) {
       return new Response(JSON.stringify({ error: 'title and body required' }), {
@@ -72,6 +72,7 @@ Deno.serve(async (req) => {
         body,
         icon: logoUrl,
         badge: badge || logoUrl,
+        image: image || undefined,
         data: { url: url || '/' },
       }),
       options: {

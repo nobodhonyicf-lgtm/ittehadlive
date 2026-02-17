@@ -15,42 +15,49 @@ const AppLayout = ({ children, hideHeader }: { children: ReactNode; hideHeader?:
     const preventCopy = (e: Event) => e.preventDefault();
     const preventContext = (e: Event) => {
       e.preventDefault();
-      e.stopPropagation();
       return false;
     };
     const preventDrag = (e: DragEvent) => e.preventDefault();
-    const preventTouchCallout = (e: TouchEvent) => {
-      // Prevent long-press popup on mobile
-      const target = e.target as HTMLElement;
-      if (target?.tagName === "IMG" || target?.tagName === "A" || target?.closest("img") || target?.closest("a")) {
-        e.preventDefault();
+
+    // Long-press timer to block context menu on mobile
+    let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+    const onTouchStart = () => {
+      longPressTimer = setTimeout(() => {
+        // After 500ms, nothing happens — browser default is already blocked by contextmenu listener
+      }, 400);
+    };
+    const onTouchEnd = () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
       }
     };
 
     document.addEventListener("copy", preventCopy);
     document.addEventListener("cut", preventCopy);
-    document.addEventListener("contextmenu", preventContext, { capture: true });
+    document.addEventListener("contextmenu", preventContext);
     document.addEventListener("dragstart", preventDrag);
-    document.addEventListener("touchstart", preventTouchCallout, { passive: false });
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchend", onTouchEnd, { passive: true });
+    document.addEventListener("touchcancel", onTouchEnd, { passive: true });
 
-    // Apply CSS to body for extra protection
-    document.body.style.cssText += '-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;';
-
-    // Disable image long-press by making all images non-interactive
+    // CSS-only protection for long-press callouts
     const style = document.createElement('style');
     style.id = 'app-content-protection';
     style.textContent = `
-      img { pointer-events: none !important; -webkit-touch-callout: none !important; }
-      * { -webkit-touch-callout: none !important; }
+      * { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; }
+      img { -webkit-touch-callout: none !important; }
     `;
     document.head.appendChild(style);
 
     return () => {
       document.removeEventListener("copy", preventCopy);
       document.removeEventListener("cut", preventCopy);
-      document.removeEventListener("contextmenu", preventContext, { capture: true });
+      document.removeEventListener("contextmenu", preventContext);
       document.removeEventListener("dragstart", preventDrag);
-      document.removeEventListener("touchstart", preventTouchCallout);
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchend", onTouchEnd);
+      document.removeEventListener("touchcancel", onTouchEnd);
       const protectionStyle = document.getElementById('app-content-protection');
       if (protectionStyle) protectionStyle.remove();
     };

@@ -128,18 +128,11 @@
     scrollbar-width: none;
   }
 
-  /* Block long-press context menu & callouts in app mode */
+  /* Block long-press callouts in app mode */
   * {
     -webkit-touch-callout: none !important;
     -webkit-user-select: none !important;
     user-select: none !important;
-  }
-  img {
-    pointer-events: none !important;
-    -webkit-touch-callout: none !important;
-  }
-  a img {
-    pointer-events: none !important;
   }
 }
 
