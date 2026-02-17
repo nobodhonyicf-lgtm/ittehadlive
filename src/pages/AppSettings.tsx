@@ -144,26 +144,37 @@ const AppSettings = () => {
 
           {/* Notifications */}
           {isSupported && (
-            <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                  {isSubscribed ? (
-                    <Bell size={18} className="text-primary" />
-                  ) : (
-                    <BellOff size={18} className="text-muted-foreground" />
-                  )}
+            <div className="p-4 bg-card rounded-xl border border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    {isSubscribed ? (
+                      <Bell size={18} className="text-primary" />
+                    ) : (
+                      <BellOff size={18} className="text-muted-foreground" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">নোটিফিকেশন</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isSubscribed ? "নোটিফিকেশন চালু আছে" : "নোটিফিকেশন বন্ধ আছে"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-sm">নোটিফিকেশন</p>
-                  <p className="text-xs text-muted-foreground">
-                    {isSubscribed ? "নোটিফিকেশন চালু আছে" : "নোটিফিকেশন বন্ধ আছে"}
-                  </p>
-                </div>
+                {isLoading ? (
+                  <Loader2 size={18} className="animate-spin text-muted-foreground" />
+                ) : (
+                  <Switch checked={isSubscribed} onCheckedChange={handleNotifToggle} />
+                )}
               </div>
-              {isLoading ? (
-                <Loader2 size={18} className="animate-spin text-muted-foreground" />
-              ) : (
-                <Switch checked={isSubscribed} onCheckedChange={handleNotifToggle} />
+              {!isSubscribed && !isLoading && (
+                <button
+                  onClick={() => handleNotifToggle(true)}
+                  className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+                >
+                  <Bell size={16} />
+                  নোটিফিকেশন চালু করুন
+                </button>
               )}
             </div>
           )}

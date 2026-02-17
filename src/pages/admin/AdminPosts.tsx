@@ -104,6 +104,7 @@ const AdminPosts = () => {
               title: inserted.title,
               body: inserted.summary || inserted.title,
               url: `/post/${inserted.slug}`,
+              image: inserted.image_url || undefined,
             },
           });
         }
