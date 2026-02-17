@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 import { BarChart3 } from "lucide-react";
+import { toBengali } from "@/lib/bengali";
 
 const AppPollWidget = () => {
   const [voted, setVoted] = useState<string | null>(null);
@@ -91,7 +92,7 @@ const AppPollWidget = () => {
                     {option}
                   </span>
                   <span className="relative z-10 text-xs font-bold px-3 text-primary">
-                    {pct}%
+                    {toBengali(pct)}%
                   </span>
                 </div>
               ) : (
@@ -110,7 +111,7 @@ const AppPollWidget = () => {
       </div>
       {showResults && (
         <p className="text-[10px] text-muted-foreground mt-2 text-right">
-          মোট ভোট: {totalVotes}
+          মোট ভোট: {toBengali(totalVotes)}
         </p>
       )}
     </div>

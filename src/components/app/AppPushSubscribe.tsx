@@ -36,7 +36,11 @@ const AppPushSubscribe = () => {
       if (ok) {
         toast.success("নোটিফিকেশন চালু করা হয়েছে!");
       } else {
-        toast.error("নোটিফিকেশন অনুমতি দেওয়া হয়নি");
+        if (Notification.permission === 'denied') {
+          toast.error("ব্রাউজার থেকে নোটিফিকেশন অনুমতি ব্লক করা আছে। সেটিংস থেকে অনুমতি দিন।");
+        } else {
+          toast.error("নোটিফিকেশন চালু করা যায়নি। আবার চেষ্টা করুন।");
+        }
       }
     }
   };
