@@ -31,11 +31,12 @@ export function usePushNotifications() {
 
   const checkSubscription = async () => {
     try {
-      // Wait for any service worker to be ready
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.getRegistration();
       if (registration) {
-        const sub = await (registration as any).pushManager.getSubscription();
+        const sub = await (registration as any).pushManager?.getSubscription();
         setIsSubscribed(!!sub);
+      } else {
+        setIsSubscribed(false);
       }
     } catch {
       setIsSubscribed(false);
@@ -53,12 +54,25 @@ export function usePushNotifications() {
         return false;
       }
 
-      // Register push service worker
+      // Get or register a service worker for push
       let registration = await navigator.serviceWorker.getRegistration();
       if (!registration) {
         registration = await navigator.serviceWorker.register('/push-sw.js', { scope: '/' });
+        await registration.update();
       }
-      await navigator.serviceWorker.ready;
+      // Wait until the service worker is active
+      if (!registration.active) {
+        await new Promise<void>((resolve) => {
+          const sw = registration!.installing || registration!.waiting;
+          if (sw) {
+            sw.addEventListener('statechange', () => {
+              if (sw.state === 'activated') resolve();
+            });
+          } else {
+            resolve();
+          }
+        });
+      }
 
       // Unsubscribe from any existing subscription first (VAPID key may have changed)
       try {
@@ -99,23 +113,11 @@ export function usePushNotifications() {
   const unsubscribe = useCallback(async () => {
     setIsLoading(true);
     try {
-      const registration = await navigator.serviceWorker.getRegistration();
-      if (registration) {
-        const sub = await (registration as any).pushManager?.getSubscription();
-        if (sub) {
-          // Delete from DB first
-          const { error } = await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
-          if (error) console.error('DB delete failed:', error);
-          // Then unsubscribe from browser
-          await sub.unsubscribe();
-        }
-      }
-      // Also unregister the push service worker to fully stop notifications
-      const allRegs = await navigator.serviceWorker.getRegistrations();
-      for (const reg of allRegs) {
-        if (reg.active?.scriptURL?.includes('push-sw')) {
-          await reg.unregister();
-        }
+      const registration = await navigator.serviceWorker.ready;
+      const sub = await (registration as any).pushManager?.getSubscription();
+      if (sub) {
+        await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+        await sub.unsubscribe();
       }
       setIsSubscribed(false);
     } catch (err) {

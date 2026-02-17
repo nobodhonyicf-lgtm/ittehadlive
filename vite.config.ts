@@ -18,8 +18,9 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.png", "favicon.ico", "offline.html"],
+      includeAssets: ["favicon.png", "favicon.ico", "offline.html", "push-sw.js"],
       workbox: {
+        importScripts: ["/push-sw.js"],
         navigateFallbackDenylist: [/^\/~oauth/],
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
         offlineGoogleAnalytics: false,
