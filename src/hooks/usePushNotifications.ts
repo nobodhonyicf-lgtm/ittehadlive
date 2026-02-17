@@ -99,12 +99,22 @@ export function usePushNotifications() {
   const unsubscribe = useCallback(async () => {
     setIsLoading(true);
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.getRegistration();
       if (registration) {
-        const sub = await (registration as any).pushManager.getSubscription();
+        const sub = await (registration as any).pushManager?.getSubscription();
         if (sub) {
-          await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+          // Delete from DB first
+          const { error } = await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+          if (error) console.error('DB delete failed:', error);
+          // Then unsubscribe from browser
           await sub.unsubscribe();
+        }
+      }
+      // Also unregister the push service worker to fully stop notifications
+      const allRegs = await navigator.serviceWorker.getRegistrations();
+      for (const reg of allRegs) {
+        if (reg.active?.scriptURL?.includes('push-sw')) {
+          await reg.unregister();
         }
       }
       setIsSubscribed(false);

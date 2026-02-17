@@ -1,11 +1,59 @@
 import { useSiteSettings } from "@/hooks/useData";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { Bell, LayoutDashboard, Moon, Sun, Search } from "lucide-react";
+import { Bell, LayoutDashboard, Moon, Sun } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { toBengali } from "@/lib/bengali";
+
+const NotificationBell = () => {
+  const { data: notifications } = useQuery({
+    queryKey: ["public_notifications"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("id, sent_at")
+        .eq("is_sent", true)
+        .order("sent_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: 30000,
+  });
+
+  const [lastSeen, setLastSeen] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLastSeen(localStorage.getItem("notifications_last_seen"));
+  }, []);
+
+  const unreadCount = notifications?.filter(
+    (n) => n.sent_at && (!lastSeen || new Date(n.sent_at) > new Date(lastSeen))
+  ).length || 0;
+
+  const handleClick = () => {
+    localStorage.setItem("notifications_last_seen", new Date().toISOString());
+    setLastSeen(new Date().toISOString());
+  };
+
+  return (
+    <Link
+      to="/notifications"
+      onClick={handleClick}
+      className="p-2.5 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90 relative"
+    >
+      <Bell size={18} />
+      {unreadCount > 0 && (
+        <span className="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold px-1 leading-none animate-pulse">
+          {toBengali(unreadCount > 99 ? "99+" : unreadCount)}
+        </span>
+      )}
+    </Link>
+  );
+};
 
 const AppHeader = () => {
   const { data: settings } = useSiteSettings();
@@ -80,12 +128,7 @@ const AppHeader = () => {
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          <Link
-            to="/notifications"
-            className="p-2.5 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90 relative"
-          >
-            <Bell size={18} />
-          </Link>
+          <NotificationBell />
 
           {user && hasAnyRole && (
             <Link
