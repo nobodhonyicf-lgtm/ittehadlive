@@ -65,6 +65,7 @@ const AdminSettings = () => {
     app_icon_url: "অ্যাপ আইকন URL (PWA হোমস্ক্রিন আইকন)",
     app_banner_enabled: "অ্যাপ ব্যানার স্লাইডার সক্রিয়",
     vapid_public_key: "VAPID Public Key (পুশ নোটিফিকেশন)",
+    vapid_private_key: "VAPID Private Key (পুশ নোটিফিকেশন সিক্রেট)",
   };
 
   const brandingKeys = ["logo_url", "favicon_url", "primary_color"];
@@ -72,7 +73,7 @@ const AdminSettings = () => {
   const seoKeys = ["default_og_image", "meta_keywords", "google_analytics_id", "facebook_page_url", "twitter_handle"];
   const adKeys = ["photocard_ad_enabled", "photocard_ad_image"];
   const authKeys = ["otp_enabled", "two_fa_enabled", "google_login_enabled", "apple_login_enabled"];
-  const appKeys = ["app_name", "app_logo_url", "app_icon_url", "app_banner_enabled", "vapid_public_key"];
+  const appKeys = ["app_name", "app_logo_url", "app_icon_url", "app_banner_enabled", "vapid_public_key", "vapid_private_key"];
 
   if (isLoading) return <div className="text-center py-8">লোড হচ্ছে...</div>;
 
@@ -83,6 +84,24 @@ const AdminSettings = () => {
   const adSettings = settings?.filter(s => adKeys.includes(s.key));
   const authSettings = settings?.filter(s => authKeys.includes(s.key));
   const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key) && !adKeys.includes(s.key) && !authKeys.includes(s.key) && !appKeys.includes(s.key));
+
+  const upsertMutation = useMutation({
+    mutationFn: async ({ key, value }: { key: string; value: string }) => {
+      const existing = settings?.find(s => s.key === key);
+      if (existing) {
+        const { error } = await supabase.from("site_settings").update({ value }).eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("site_settings").insert({ key, value });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin_settings"] });
+      qc.invalidateQueries({ queryKey: ["site_settings"] });
+      toast.success("সংরক্ষিত");
+    },
+  });
 
   const renderSettingField = (s: any) => (
     <div key={s.id}>
@@ -102,7 +121,7 @@ const AdminSettings = () => {
           সংরক্ষণ
         </Button>
       </div>
-      {(s.key === "logo_url" || s.key === "default_og_image") && s.value && (
+      {(s.key === "logo_url" || s.key === "default_og_image" || s.key === "app_icon_url" || s.key === "app_logo_url" || s.key === "favicon_url") && s.value && (
         <img src={s.value} alt="Preview" className="h-12 mt-2 rounded" />
       )}
     </div>
@@ -119,8 +138,33 @@ const AdminSettings = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {appSettings?.map(renderSettingField)}
+          {/* Render fields for keys that don't exist in DB yet */}
+          {["app_name", "app_logo_url", "app_icon_url", "app_banner_enabled", "vapid_public_key", "vapid_private_key"]
+            .filter(key => !appSettings?.some(s => s.key === key))
+            .map(key => (
+              <div key={key}>
+                <Label className="mb-1 block font-semibold">{keyLabels[key] || key}</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    onChange={(e) => setValues({ ...values, [`new_${key}`]: e.target.value })}
+                    placeholder={key.includes("vapid") ? "কী পেস্ট করুন" : ""}
+                  />
+                  <Button
+                    onClick={() => upsertMutation.mutate({ key, value: values[`new_${key}`] || "" })}
+                    disabled={upsertMutation.isPending}
+                    size="sm"
+                  >
+                    সংরক্ষণ
+                  </Button>
+                </div>
+              </div>
+            ))}
           <p className="text-xs text-muted-foreground">
             অ্যাপ লোগো URL দিলে PWA/নেটিভ অ্যাপে আলাদা লোগো দেখাবে। খালি রাখলে ওয়েবসাইটের লোগো ব্যবহার হবে।
+          </p>
+          <p className="text-xs text-muted-foreground">
+            <b>VAPID Public Key</b> ব্রাউজারে সাবস্ক্রিপশনের জন্য এবং <b>VAPID Private Key</b> সার্ভার থেকে পুশ পাঠানোর জন্য ব্যবহৃত হয়। দুটোই দিতে হবে।
           </p>
         </CardContent>
       </Card>

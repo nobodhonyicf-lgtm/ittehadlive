@@ -8,6 +8,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/hooks/useAuth";
 import { CartProvider } from "@/hooks/useCart";
 import PageViewTracker from "@/components/PageViewTracker";
+import DynamicFavicon from "@/components/DynamicFavicon";
 import Index from "./pages/Index";
 import PostPage from "./pages/PostPage";
 import PostsList from "./pages/PostsList";
@@ -56,6 +57,7 @@ const App = () => (
         <AuthProvider>
           <CartProvider>
             <PageViewTracker />
+            <DynamicFavicon />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/post/:slug" element={<PostPage />} />
