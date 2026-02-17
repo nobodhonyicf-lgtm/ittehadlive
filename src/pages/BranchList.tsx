@@ -40,7 +40,7 @@ const BranchList = () => {
                         )}
                         {branch.code && (
                           <span className="absolute top-1.5 right-1.5 bg-primary/90 text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full">
-                            {branch.code}
+                            {toBengali(branch.code)}
                           </span>
                         )}
                       </div>

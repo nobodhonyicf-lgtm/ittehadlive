@@ -43,7 +43,7 @@ const BranchDetail = () => {
               <div className="flex items-start gap-2 mb-1">
                 {branch.code && (
                   <span className="bg-primary/10 text-primary text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-primary/20">
-                    {branch.code}
+                    {toBengali(branch.code)}
                   </span>
                 )}
               </div>
