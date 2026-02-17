@@ -1,8 +1,7 @@
 import { useSiteSettings } from "@/hooks/useData";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { Bell, LayoutDashboard, Moon, Sun } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Bell, LayoutDashboard } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -58,35 +57,6 @@ const NotificationBell = () => {
 const AppHeader = () => {
   const { data: settings } = useSiteSettings();
   const { user, hasAnyRole } = useAuth();
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const saved = localStorage.getItem("app-theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const dark = saved === "dark" || (!saved && prefersDark);
-    setIsDark(dark);
-    document.documentElement.classList.toggle("dark", dark);
-  }, []);
-
-  const toggleTheme = () => {
-    const next = !isDark;
-    setIsDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("app-theme", next ? "dark" : "light");
-  };
-
-  const { data: profile } = useQuery({
-    queryKey: ["user_profile", user?.id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("full_name, avatar_url")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-      return data;
-    },
-    enabled: !!user?.id,
-  });
 
   const appLogoUrl = settings?.app_logo_url || settings?.logo_url;
   const appName = settings?.app_name || settings?.site_name || "ইত্তেহাদ";
@@ -120,14 +90,6 @@ const AppHeader = () => {
 
         {/* Action buttons */}
         <div className="flex items-center gap-0.5">
-          <button
-            onClick={toggleTheme}
-            className="p-2.5 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90"
-            aria-label="Toggle theme"
-          >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-
           <NotificationBell />
 
           {user && hasAnyRole && (
@@ -139,17 +101,6 @@ const AppHeader = () => {
               <LayoutDashboard size={18} />
             </Link>
           )}
-
-          <Link to={user ? "/profile" : "/login"} className="ml-1">
-            <Avatar className="h-8 w-8 ring-2 ring-white/25 shadow-sm transition-transform duration-200 hover:scale-110">
-              {profile?.avatar_url ? (
-                <AvatarImage src={profile.avatar_url} alt="Profile" />
-              ) : null}
-              <AvatarFallback className="bg-white/20 text-primary-foreground text-xs font-bold">
-                {profile?.full_name?.charAt(0) || "?"}
-              </AvatarFallback>
-            </Avatar>
-          </Link>
         </div>
       </div>
     </header>

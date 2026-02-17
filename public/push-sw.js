@@ -1,10 +1,19 @@
 // Push notification service worker
+self.addEventListener('install', function(event) {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', function(event) {
+  event.waitUntil(clients.claim());
+});
+
 self.addEventListener('push', function(event) {
   let data = { title: 'নতুন নোটিফিকেশন', body: '', icon: '/pwa-192x192.png', data: { url: '/' } };
   
   try {
     if (event.data) {
-      data = { ...data, ...event.data.json() };
+      const parsed = event.data.json();
+      data = { ...data, ...parsed };
     }
   } catch (e) {
     if (event.data) {
@@ -13,13 +22,16 @@ self.addEventListener('push', function(event) {
   }
 
   const options = {
-    body: data.body,
+    body: data.body || '',
     icon: data.icon || '/pwa-192x192.png',
     badge: '/pwa-192x192.png',
     vibrate: [200, 100, 200],
     data: data.data || { url: '/' },
-    dir: 'rtl',
+    dir: 'auto',
     lang: 'bn',
+    tag: 'push-' + Date.now(),
+    renotify: true,
+    requireInteraction: true,
   };
 
   event.waitUntil(
@@ -33,8 +45,8 @@ self.addEventListener('notificationclick', function(event) {
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
       for (const client of clientList) {
-        if (client.url.includes(url) && 'focus' in client) {
-          return client.focus();
+        if ('focus' in client) {
+          return client.navigate(url).then(function(c) { return c.focus(); });
         }
       }
       if (clients.openWindow) {

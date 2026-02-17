@@ -93,7 +93,7 @@ const AppSettings = () => {
                   )}
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">পুশ নোটিফিকেশন</p>
+                  <p className="font-semibold text-sm">নোটিফিকেশন</p>
                   <p className="text-xs text-muted-foreground">
                     {isSubscribed ? "নোটিফিকেশন চালু আছে" : "নোটিফিকেশন বন্ধ আছে"}
                   </p>

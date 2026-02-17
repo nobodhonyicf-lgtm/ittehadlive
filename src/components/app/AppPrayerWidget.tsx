@@ -2,31 +2,54 @@ import { usePrayerTimes } from "@/hooks/useData";
 import { toBengali } from "@/lib/bengali";
 import { useState, useEffect } from "react";
 
+const bengaliToEnglish = (s: string) =>
+  s.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
+
+// Convert 12-hour Bengali time like "৫:১৫" to minutes since midnight
+// Prayer times are implicitly: ফজর(AM), যোহর(PM), আসর(PM), মাগরিব(PM), এশা(PM)
+const normalizePrayerMinutes = (timeText: string, name: string): number | null => {
+  const cleaned = bengaliToEnglish(timeText.trim());
+  const match = cleaned.match(/(\d{1,2})[:\.](\d{2})/);
+  if (!match) return null;
+  let hours = parseInt(match[1]);
+  const minutes = parseInt(match[2]);
+
+  // Determine AM/PM based on prayer name
+  const amPrayers = ["ফজর"];
+  const isAM = amPrayers.some((p) => name.includes(p));
+
+  if (isAM) {
+    // Already correct for AM (e.g., 5:15 = 5:15 AM)
+  } else {
+    // PM prayers: if hours < 12, add 12
+    if (hours < 12) hours += 12;
+  }
+
+  return hours * 60 + minutes;
+};
+
 const AppPrayerWidget = () => {
   const { data: prayerTimes } = usePrayerTimes();
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 60000);
+    const timer = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(timer);
   }, []);
 
   if (!prayerTimes?.length) return null;
 
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const bengaliToEnglish = (s: string) =>
-    s.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
 
   let nextPrayer: typeof prayerTimes[0] | null = null;
+  let remainingMinutes = 0;
+
   for (const pt of prayerTimes) {
-    const cleaned = bengaliToEnglish(pt.time_text.trim());
-    const match = cleaned.match(/(\d{1,2})[:\.](\d{2})/);
-    if (match) {
-      const mins = parseInt(match[1]) * 60 + parseInt(match[2]);
-      if (mins > currentMinutes) {
-        nextPrayer = pt;
-        break;
-      }
+    const mins = normalizePrayerMinutes(pt.time_text, pt.name);
+    if (mins !== null && mins > currentMinutes) {
+      nextPrayer = pt;
+      remainingMinutes = mins - currentMinutes;
+      break;
     }
   }
 
@@ -37,8 +60,8 @@ const AppPrayerWidget = () => {
           🕌 নামাজের সময়সূচি
         </h2>
         {nextPrayer && (
-          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full animate-scale-in">
-            পরবর্তী: {nextPrayer.name}
+          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full animate-pulse">
+            {nextPrayer.name} — আরও {toBengali(remainingMinutes)} মিনিট
           </span>
         )}
       </div>
