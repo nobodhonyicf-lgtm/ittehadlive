@@ -14,8 +14,10 @@ import { useAuth } from "@/hooks/useAuth"; // refreshed
 import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
 import { toBengali } from "@/lib/bengali";
-import { User, Package, MessageSquare, LogOut, Save, Send, Search, Link as LinkIcon, Trash2 } from "lucide-react";
+import { User, Package, MessageSquare, LogOut, Save, Send, Search, Link as LinkIcon, Trash2, Mail, Phone, MapPin, ChevronRight } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useIsApp } from "@/hooks/useIsApp";
+import AppLayout from "@/components/app/AppLayout";
 
 const statusMap: Record<string, { label: string; color: string }> = {
   pending: { label: "অপেক্ষমান", color: "bg-yellow-100 text-yellow-800" },
@@ -152,41 +154,62 @@ const UserProfile = () => {
     navigate("/");
   };
 
-  if (authLoading || !user) return <Layout><div className="py-20 text-center">লোড হচ্ছে...</div></Layout>;
+  const isApp = useIsApp();
 
-  return (
-    <Layout>
-      <SEOHead title="আমার প্রোফাইল" />
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        {/* Profile Header */}
+  if (authLoading || !user) {
+    const loadingContent = <div className="py-20 text-center">লোড হচ্ছে...</div>;
+    return isApp ? <AppLayout>{loadingContent}</AppLayout> : <Layout>{loadingContent}</Layout>;
+  }
+
+  const profileContent = (
+    <div className={isApp ? "max-w-lg mx-auto px-4 py-6" : "max-w-4xl mx-auto px-4 py-6"}>
+      {/* Profile Header - Professional Card */}
+      {isApp ? (
+        <div className="bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-5 mb-6 text-primary-foreground shadow-lg">
+          <div className="flex items-center gap-4">
+            <div className="relative group">
+              <Avatar className="h-16 w-16 ring-2 ring-white/30 shadow-md">
+                {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="Profile" /> : null}
+                <AvatarFallback className="bg-white/20 text-primary-foreground text-xl font-bold">
+                  {profile?.full_name?.charAt(0) || <User size={28} />}
+                </AvatarFallback>
+              </Avatar>
+              <button
+                onClick={() => setShowAvatarInput(!showAvatarInput)}
+                className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-white text-primary flex items-center justify-center shadow-md"
+              >
+                <LinkIcon size={10} />
+              </button>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg font-bold truncate">{profile?.full_name || "ইউজার"}</h1>
+              <p className="text-xs opacity-80 flex items-center gap-1 truncate">
+                <Mail size={11} /> {user.email}
+              </p>
+              {profile?.phone && (
+                <p className="text-xs opacity-70 flex items-center gap-1 mt-0.5">
+                  <Phone size={11} /> {profile.phone}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <Button size="sm" variant="secondary" className="flex-1 text-xs" onClick={handleSignOut}>
+              <LogOut size={14} className="mr-1" /> লগআউট
+            </Button>
+          </div>
+        </div>
+      ) : (
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="relative group">
               <Avatar className="h-14 w-14">
-                {profile?.avatar_url ? (
-                  <AvatarImage src={profile.avatar_url} alt="Profile" />
-                ) : null}
-                <AvatarFallback className="bg-primary/10 text-primary">
-                  <User size={28} />
-                </AvatarFallback>
+                {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="Profile" /> : null}
+                <AvatarFallback className="bg-primary/10 text-primary"><User size={28} /></AvatarFallback>
               </Avatar>
               <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => setShowAvatarInput(!showAvatarInput)}
-                  title="ছবি পরিবর্তন করুন"
-                  className="text-white hover:scale-110 transition-transform"
-                >
-                  <LinkIcon size={14} />
-                </button>
-                {profile?.avatar_url && (
-                  <button
-                    onClick={removeAvatar}
-                    title="ছবি মুছুন"
-                    className="text-red-300 hover:text-red-100 hover:scale-110 transition-all"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                )}
+                <button onClick={() => setShowAvatarInput(!showAvatarInput)} title="ছবি পরিবর্তন করুন" className="text-white hover:scale-110 transition-transform"><LinkIcon size={14} /></button>
+                {profile?.avatar_url && <button onClick={removeAvatar} title="ছবি মুছুন" className="text-red-300 hover:text-red-100 hover:scale-110 transition-all"><Trash2 size={14} /></button>}
               </div>
             </div>
             <div>
@@ -194,167 +217,150 @@ const UserProfile = () => {
               <p className="text-sm text-muted-foreground">{user.email}</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
-            <LogOut size={16} className="mr-1" /> লগআউট
-          </Button>
+          <Button variant="outline" size="sm" onClick={handleSignOut}><LogOut size={16} className="mr-1" /> লগআউট</Button>
         </div>
+      )}
 
-        {/* Avatar URL input */}
-        {showAvatarInput && (
-          <div className="mb-4 p-3 border border-border rounded-lg bg-muted/30 space-y-2">
-            <Label className="text-sm">ছবির লিংক দিন (URL)</Label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="https://example.com/photo.jpg"
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-              />
-              <Button size="sm" onClick={saveAvatarUrl}>সেভ</Button>
-              {profile?.avatar_url && (
-                <Button size="sm" variant="destructive" onClick={removeAvatar} title="ছবি মুছুন">
-                  <Trash2 size={14} />
-                </Button>
-              )}
-              <Button size="sm" variant="ghost" onClick={() => setShowAvatarInput(false)}>বাতিল</Button>
-            </div>
+      {/* Avatar URL input */}
+      {showAvatarInput && (
+        <div className="mb-4 p-3 border border-border rounded-lg bg-muted/30 space-y-2">
+          <Label className="text-sm">ছবির লিংক দিন (URL)</Label>
+          <div className="flex gap-2">
+            <Input placeholder="https://example.com/photo.jpg" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} />
+            <Button size="sm" onClick={saveAvatarUrl}>সেভ</Button>
+            {profile?.avatar_url && <Button size="sm" variant="destructive" onClick={removeAvatar} title="ছবি মুছুন"><Trash2 size={14} /></Button>}
+            <Button size="sm" variant="ghost" onClick={() => setShowAvatarInput(false)}>বাতিল</Button>
           </div>
-        )}
+        </div>
+      )}
 
-        <Tabs defaultValue="profile" className="space-y-4">
-          <TabsList className="grid grid-cols-4 w-full">
-            <TabsTrigger value="profile">প্রোফাইল</TabsTrigger>
-            <TabsTrigger value="orders">অর্ডার</TabsTrigger>
-            <TabsTrigger value="track">ট্র্যাক</TabsTrigger>
-            <TabsTrigger value="inbox">ইনবক্স</TabsTrigger>
-          </TabsList>
+      <Tabs defaultValue="profile" className="space-y-4">
+        <TabsList className={isApp ? "grid grid-cols-4 w-full rounded-xl" : "grid grid-cols-4 w-full"}>
+          <TabsTrigger value="profile">প্রোফাইল</TabsTrigger>
+          <TabsTrigger value="orders">অর্ডার</TabsTrigger>
+          <TabsTrigger value="track">ট্র্যাক</TabsTrigger>
+          <TabsTrigger value="inbox">ইনবক্স</TabsTrigger>
+        </TabsList>
 
-          {/* Profile Tab */}
-          <TabsContent value="profile">
-            <Card>
-              <CardHeader><CardTitle className="text-lg">প্রোফাইল তথ্য</CardTitle></CardHeader>
+        {/* Profile Tab */}
+        <TabsContent value="profile">
+          <Card className={isApp ? "border-0 shadow-sm" : ""}>
+            <CardHeader><CardTitle className="text-lg">প্রোফাইল তথ্য</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <div><Label>পূর্ণ নাম</Label><Input value={profile?.full_name || ""} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} /></div>
+              <div><Label>ফোন</Label><Input value={profile?.phone || ""} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} /></div>
+              <div><Label>জেলা</Label><Input value={profile?.district || ""} onChange={(e) => setProfile({ ...profile, district: e.target.value })} /></div>
+              <div><Label>ঠিকানা</Label><Textarea value={profile?.address || ""} onChange={(e) => setProfile({ ...profile, address: e.target.value })} /></div>
+              <Button onClick={saveProfile} disabled={saving} className="w-full">
+                <Save size={16} className="mr-1" /> {saving ? "সেভ হচ্ছে..." : "সেভ করুন"}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Orders Tab */}
+        <TabsContent value="orders">
+          <Card className={isApp ? "border-0 shadow-sm" : ""}>
+            <CardHeader><CardTitle className="text-lg">আমার অর্ডারসমূহ</CardTitle></CardHeader>
+            <CardContent>
+              {orders.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">কোনো অর্ডার নেই</p>
+              ) : (
+                <div className="space-y-3">
+                  {orders.map((order) => {
+                    const s = statusMap[order.status] || statusMap.pending;
+                    return (
+                      <div key={order.id} className="border rounded-lg p-3 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-sm">{order.order_number}</span>
+                          <Badge className={s.color}>{s.label}</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          তারিখ: {new Date(order.created_at).toLocaleDateString("bn-BD")} | মোট: ৳{toBengali(order.total_amount)}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Track Tab */}
+        <TabsContent value="track">
+          <Card className={isApp ? "border-0 shadow-sm" : ""}>
+            <CardHeader><CardTitle className="text-lg">অর্ডার ট্র্যাক করুন</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-2">
+                <Input placeholder="অর্ডার নম্বর দিন" value={trackOrderNum} onChange={(e) => setTrackOrderNum(e.target.value)} onKeyDown={(e) => e.key === "Enter" && trackOrder()} />
+                <Button onClick={trackOrder} disabled={tracking}><Search size={16} className="mr-1" /> খুঁজুন</Button>
+              </div>
+              {trackedOrder && (
+                <div className="border rounded-lg p-4 space-y-2 bg-muted/30">
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold">{trackedOrder.order_number}</span>
+                    <Badge className={statusMap[trackedOrder.status]?.color}>{statusMap[trackedOrder.status]?.label}</Badge>
+                  </div>
+                  <p className="text-sm">ক্রেতা: {trackedOrder.customer_name}</p>
+                  <p className="text-sm">মোট: ৳{toBengali(trackedOrder.total_amount)}</p>
+                  <p className="text-sm text-muted-foreground">তারিখ: {new Date(trackedOrder.created_at).toLocaleDateString("bn-BD")}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Inbox Tab */}
+        <TabsContent value="inbox">
+          <div className="space-y-4">
+            <Card className={isApp ? "border-0 shadow-sm" : ""}>
+              <CardHeader><CardTitle className="text-lg">নতুন মেসেজ পাঠান</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                <div>
-                  <Label>পূর্ণ নাম</Label>
-                  <Input value={profile?.full_name || ""} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} />
-                </div>
-                <div>
-                  <Label>ফোন</Label>
-                  <Input value={profile?.phone || ""} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} />
-                </div>
-                <div>
-                  <Label>জেলা</Label>
-                  <Input value={profile?.district || ""} onChange={(e) => setProfile({ ...profile, district: e.target.value })} />
-                </div>
-                <div>
-                  <Label>ঠিকানা</Label>
-                  <Textarea value={profile?.address || ""} onChange={(e) => setProfile({ ...profile, address: e.target.value })} />
-                </div>
-                <Button onClick={saveProfile} disabled={saving}>
-                  <Save size={16} className="mr-1" /> {saving ? "সেভ হচ্ছে..." : "সেভ করুন"}
+                <Input placeholder="বিষয়" value={newMessage.subject} onChange={(e) => setNewMessage({ ...newMessage, subject: e.target.value })} />
+                <Textarea placeholder="আপনার মেসেজ লিখুন..." rows={3} value={newMessage.message} onChange={(e) => setNewMessage({ ...newMessage, message: e.target.value })} />
+                <Button onClick={sendMessage} disabled={sendingMsg} className="w-full">
+                  <Send size={16} className="mr-1" /> {sendingMsg ? "পাঠানো হচ্ছে..." : "পাঠান"}
                 </Button>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          {/* Orders Tab */}
-          <TabsContent value="orders">
-            <Card>
-              <CardHeader><CardTitle className="text-lg">আমার অর্ডারসমূহ</CardTitle></CardHeader>
+            <Card className={isApp ? "border-0 shadow-sm" : ""}>
+              <CardHeader><CardTitle className="text-lg">মেসেজ ইতিহাস</CardTitle></CardHeader>
               <CardContent>
-                {orders.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">কোনো অর্ডার নেই</p>
+                {messages.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-6">কোনো মেসেজ নেই</p>
                 ) : (
                   <div className="space-y-3">
-                    {orders.map((order) => {
-                      const s = statusMap[order.status] || statusMap.pending;
-                      return (
-                        <div key={order.id} className="border rounded-lg p-3 space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-sm">{order.order_number}</span>
-                            <Badge className={s.color}>{s.label}</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            তারিখ: {new Date(order.created_at).toLocaleDateString("bn-BD")} | মোট: ৳{toBengali(order.total_amount)}
-                          </p>
+                    {messages.map((msg) => (
+                      <div key={msg.id} className="border rounded-lg p-3 space-y-2">
+                        <div className="flex justify-between items-start">
+                          <span className="font-semibold text-sm">{msg.subject}</span>
+                          <span className="text-xs text-muted-foreground">{new Date(msg.created_at).toLocaleDateString("bn-BD")}</span>
                         </div>
-                      );
-                    })}
+                        <p className="text-sm">{msg.message}</p>
+                        {msg.admin_reply && (
+                          <div className="bg-primary/5 border-l-2 border-primary p-2 rounded text-sm">
+                            <span className="text-xs font-medium text-primary">উত্তর:</span>
+                            <p className="mt-1">{msg.admin_reply}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 
-          {/* Track Tab */}
-          <TabsContent value="track">
-            <Card>
-              <CardHeader><CardTitle className="text-lg">অর্ডার ট্র্যাক করুন</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Input placeholder="অর্ডার নম্বর দিন (যেমন: ORD-260207-1234)" value={trackOrderNum} onChange={(e) => setTrackOrderNum(e.target.value)} onKeyDown={(e) => e.key === "Enter" && trackOrder()} />
-                  <Button onClick={trackOrder} disabled={tracking}>
-                    <Search size={16} className="mr-1" /> খুঁজুন
-                  </Button>
-                </div>
-                {trackedOrder && (
-                  <div className="border rounded-lg p-4 space-y-2 bg-muted/30">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold">{trackedOrder.order_number}</span>
-                      <Badge className={statusMap[trackedOrder.status]?.color}>{statusMap[trackedOrder.status]?.label}</Badge>
-                    </div>
-                    <p className="text-sm">ক্রেতা: {trackedOrder.customer_name}</p>
-                    <p className="text-sm">মোট: ৳{toBengali(trackedOrder.total_amount)}</p>
-                    <p className="text-sm text-muted-foreground">তারিখ: {new Date(trackedOrder.created_at).toLocaleDateString("bn-BD")}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Inbox Tab */}
-          <TabsContent value="inbox">
-            <div className="space-y-4">
-              <Card>
-                <CardHeader><CardTitle className="text-lg">নতুন মেসেজ পাঠান</CardTitle></CardHeader>
-                <CardContent className="space-y-3">
-                  <Input placeholder="বিষয়" value={newMessage.subject} onChange={(e) => setNewMessage({ ...newMessage, subject: e.target.value })} />
-                  <Textarea placeholder="আপনার মেসেজ লিখুন..." rows={3} value={newMessage.message} onChange={(e) => setNewMessage({ ...newMessage, message: e.target.value })} />
-                  <Button onClick={sendMessage} disabled={sendingMsg}>
-                    <Send size={16} className="mr-1" /> {sendingMsg ? "পাঠানো হচ্ছে..." : "পাঠান"}
-                  </Button>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader><CardTitle className="text-lg">মেসেজ ইতিহাস</CardTitle></CardHeader>
-                <CardContent>
-                  {messages.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-6">কোনো মেসেজ নেই</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {messages.map((msg) => (
-                        <div key={msg.id} className="border rounded-lg p-3 space-y-2">
-                          <div className="flex justify-between items-start">
-                            <span className="font-semibold text-sm">{msg.subject}</span>
-                            <span className="text-xs text-muted-foreground">{new Date(msg.created_at).toLocaleDateString("bn-BD")}</span>
-                          </div>
-                          <p className="text-sm">{msg.message}</p>
-                          {msg.admin_reply && (
-                            <div className="bg-primary/5 border-l-2 border-primary p-2 rounded text-sm">
-                              <span className="text-xs font-medium text-primary">উত্তর:</span>
-                              <p className="mt-1">{msg.admin_reply}</p>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </Layout>
+  return (
+    <>
+      <SEOHead title="আমার প্রোফাইল" />
+      {isApp ? <AppLayout>{profileContent}</AppLayout> : <Layout>{profileContent}</Layout>}
+    </>
   );
 };
 

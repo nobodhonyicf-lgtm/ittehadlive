@@ -8,12 +8,16 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Home } from "lucide-react";
+import { useIsApp } from "@/hooks/useIsApp";
 
 interface BreadcrumbsProps {
   items?: { label: string; href?: string }[];
 }
 
 const Breadcrumbs = ({ items }: BreadcrumbsProps) => {
+  const isApp = useIsApp();
+  if (isApp) return null;
+
   return (
     <Breadcrumb className="mb-4">
       <BreadcrumbList>

@@ -4,7 +4,6 @@ import AppNoticeSection from "./AppNoticeSection";
 import AppRecentPosts from "./AppRecentPosts";
 import AppPrayerWidget from "./AppPrayerWidget";
 import AppLayout from "./AppLayout";
-import AppPushSubscribe from "./AppPushSubscribe";
 import AppPollWidget from "./AppPollWidget";
 
 const AppHome = () => {
@@ -12,7 +11,6 @@ const AppHome = () => {
     <AppLayout>
       <AppBannerSlider />
       <div className="px-4 py-4 space-y-5">
-        <AppPushSubscribe />
         <AppQuickActions />
         <AppPollWidget />
         <AppNoticeSection />
