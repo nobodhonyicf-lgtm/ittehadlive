@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "@/components/ui/sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, Building2 } from "lucide-react";
+import { toBengali } from "@/lib/bengali";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
@@ -120,7 +121,7 @@ const AdminBranches = () => {
           <Card key={b.id}>
             <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="font-bold">{b.name} {b.code && <span className="text-xs text-muted-foreground">({b.code})</span>}</p>
+                <p className="font-bold">{b.name} {b.code && <span className="text-xs text-muted-foreground">({toBengali(b.code)})</span>}</p>
                 <p className="text-sm text-muted-foreground">{b.address || "—"} | {b.head_name || "—"}</p>
               </div>
               <div className="flex gap-2">
