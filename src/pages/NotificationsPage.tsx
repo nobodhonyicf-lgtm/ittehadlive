@@ -11,7 +11,7 @@ const NotificationsPage = () => {
   const isApp = useIsApp();
 
   const { data: notifications, isLoading } = useQuery({
-    queryKey: ["public_notifications"],
+    queryKey: ["public_notifications_full"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("notifications")
