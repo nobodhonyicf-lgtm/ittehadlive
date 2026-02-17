@@ -407,6 +407,7 @@ export type Database = {
       }
       contact_submissions: {
         Row: {
+          admin_reply: string | null
           created_at: string
           email: string | null
           id: string
@@ -414,9 +415,11 @@ export type Database = {
           message: string
           name: string
           phone: string | null
+          replied_at: string | null
           subject: string | null
         }
         Insert: {
+          admin_reply?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -424,9 +427,11 @@ export type Database = {
           message: string
           name: string
           phone?: string | null
+          replied_at?: string | null
           subject?: string | null
         }
         Update: {
+          admin_reply?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -434,6 +439,7 @@ export type Database = {
           message?: string
           name?: string
           phone?: string | null
+          replied_at?: string | null
           subject?: string | null
         }
         Relationships: []
