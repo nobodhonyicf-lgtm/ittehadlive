@@ -41,20 +41,35 @@ const AdminContacts = () => {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin_contacts"] }); },
   });
 
+  const [sendNotification, setSendNotification] = useState(false);
+
   const replyMutation = useMutation({
-    mutationFn: async ({ id, reply }: { id: string; reply: string }) => {
+    mutationFn: async ({ id, reply, notify }: { id: string; reply: string; notify: boolean }) => {
       const { error } = await supabase.from("contact_submissions").update({
         admin_reply: reply,
         replied_at: new Date().toISOString(),
         is_read: true,
       }).eq("id", id);
       if (error) throw error;
+
+      // Send push notification to all subscribers about the reply
+      if (notify) {
+        const contact = contacts?.find(c => c.id === id);
+        await supabase.functions.invoke("send-push", {
+          body: {
+            title: "আপনার বার্তার উত্তর এসেছে",
+            body: reply.substring(0, 200),
+            url: "/app-contact",
+          },
+        });
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin_contacts"] });
       toast.success("উত্তর পাঠানো হয়েছে");
       setReplyTo(null);
       setReplyText("");
+      setSendNotification(false);
     },
   });
 
@@ -118,10 +133,19 @@ const AdminContacts = () => {
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
               />
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={sendNotification}
+                  onChange={(e) => setSendNotification(e.target.checked)}
+                  className="rounded"
+                />
+                <span>পুশ নোটিফিকেশনে উত্তর পাঠান</span>
+              </label>
               <Button
                 className="w-full gap-2"
                 disabled={!replyText.trim() || replyMutation.isPending}
-                onClick={() => replyMutation.mutate({ id: replyTo.id, reply: replyText.trim() })}
+                onClick={() => replyMutation.mutate({ id: replyTo.id, reply: replyText.trim(), notify: sendNotification })}
               >
                 <Send size={16} />
                 {replyMutation.isPending ? "পাঠানো হচ্ছে..." : "উত্তর পাঠান"}

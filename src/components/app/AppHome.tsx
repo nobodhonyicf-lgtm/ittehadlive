@@ -5,6 +5,8 @@ import AppRecentPosts from "./AppRecentPosts";
 import AppPrayerWidget from "./AppPrayerWidget";
 import AppLayout from "./AppLayout";
 import AppPollWidget from "./AppPollWidget";
+import AppGallerySection from "./AppGallerySection";
+import AppVideoSection from "./AppVideoSection";
 
 const AppHome = () => {
   return (
@@ -16,6 +18,8 @@ const AppHome = () => {
         <AppNoticeSection />
         <AppPrayerWidget />
         <AppRecentPosts />
+        <AppGallerySection />
+        <AppVideoSection />
       </div>
     </AppLayout>
   );
