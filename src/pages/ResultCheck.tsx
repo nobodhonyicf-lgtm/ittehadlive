@@ -22,13 +22,22 @@ const ResultCheck = () => {
   const { data: result, isLoading } = useResultByRoll(searchRoll, searchExam, searchReg);
   const { data: branches } = useBranches();
 
-  const { data: settings } = useQuery({
+  const { data: settingsMap } = useQuery({
     queryKey: ["site_settings"],
     queryFn: async () => {
-      const { data } = await supabase.from("site_settings").select("*");
-      return data || [];
+      const { data, error } = await supabase.from("site_settings").select("*");
+      if (error) throw error;
+      const settings: Record<string, string> = {};
+      data?.forEach((s) => {
+        settings[s.key] = s.value || "";
+      });
+      return settings;
     },
   });
+
+  const getSetting = (key: string) => {
+    return settingsMap?.[key] || "";
+  };
 
   // Fetch all results for this exam to calculate positions
   const { data: allExamResults } = useQuery({
@@ -43,11 +52,6 @@ const ResultCheck = () => {
     },
     enabled: !!searchExam && !!result,
   });
-
-  const getSetting = (key: string) => {
-    if (!settings || !Array.isArray(settings)) return "";
-    return settings.find((s: any) => s.key === key)?.value || "";
-  };
 
   const publishedExams = exams?.filter(e => e.is_published);
 

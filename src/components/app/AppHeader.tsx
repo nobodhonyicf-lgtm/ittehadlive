@@ -81,7 +81,7 @@ const AppHeader = () => {
           </button>
 
           <Link
-            to="/posts"
+            to="/notifications"
             className="p-2.5 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90 relative"
           >
             <Bell size={18} />

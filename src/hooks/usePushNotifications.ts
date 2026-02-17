@@ -60,6 +60,15 @@ export function usePushNotifications() {
       }
       await navigator.serviceWorker.ready;
 
+      // Unsubscribe from any existing subscription first (VAPID key may have changed)
+      try {
+        const existingSub = await (registration as any).pushManager.getSubscription();
+        if (existingSub) {
+          await supabase.from('push_subscriptions').delete().eq('endpoint', existingSub.endpoint);
+          await existingSub.unsubscribe();
+        }
+      } catch {}
+
       const subscription = await (registration as any).pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
