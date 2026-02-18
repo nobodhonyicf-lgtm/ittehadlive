@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
         console.log(`Push to ${sub.endpoint.substring(0, 60)}: status=${res.status}, body=${resText.substring(0, 200)}`);
         if (res.status === 201 || res.status === 200) {
           sent++;
-        } else if (res.status === 404 || res.status === 410 || res.status === 403) {
+        } else if (res.status === 404 || res.status === 410 || res.status === 403 || res.status === 401) {
           // 403 = VAPID mismatch (stale subscription), treat as expired
           expiredEndpoints.push(sub.endpoint);
           failed++;
