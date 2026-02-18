@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/share/post/:slug", "destination": "/api/og-proxy?slug=:slug" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "redirects": [
