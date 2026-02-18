@@ -19,7 +19,7 @@ serve(async (req) => {
     // Use origin from request or fallback to published URL
     const url = new URL(req.url);
     const origin = url.searchParams.get("origin");
-    const siteUrl = origin || "https://ittehadlive.lovable.app";
+    const siteUrl = origin || "https://ittehad.bd";
 
     // Fetch all published posts
     const { data: posts } = await supabase
