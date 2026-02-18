@@ -16,7 +16,10 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const siteUrl = "https://ittehad.bd";
+    // Use origin from request or fallback to published URL
+    const url = new URL(req.url);
+    const origin = url.searchParams.get("origin");
+    const siteUrl = origin || "https://ittehadlive.lovable.app";
 
     // Fetch all published posts
     const { data: posts } = await supabase

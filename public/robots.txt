@@ -13,5 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://laasotunayiivssffhnu.supabase.co/functions/v1/sitemap
-Sitemap: https://ittehad.bd/sitemap.xml
+Sitemap: https://laasotunayiivssffhnu.supabase.co/functions/v1/sitemap?origin=https://ittehadlive.lovable.app
