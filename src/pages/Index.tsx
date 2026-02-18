@@ -8,6 +8,7 @@ import VideoSection from "@/components/home/VideoSection";
 import Sidebar from "@/components/home/Sidebar";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppHome from "@/components/app/AppHome";
+import SEOHead from "@/components/SEOHead";
 
 const Index = () => {
   const isApp = useIsApp();
@@ -18,6 +19,11 @@ const Index = () => {
 
   return (
     <Layout fullWidth>
+      <SEOHead
+        title="ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ - প্রাইভেট মাদরাসা সমন্বয় সংগঠন"
+        description="ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ - প্রাইভেট মাদরাসাগুলোর একটি সমন্বিত সংগঠন। রেজাল্ট, শিক্ষার্থী ডিরেক্টরি, শাখা তথ্য, বুকশপ এবং আরো অনেক কিছু।"
+        keywords="ইত্তেহাদ, মাদরাসা, প্রাইভেট মাদরাসা, ইসলামী শিক্ষা, রেজাল্ট, শিক্ষার্থী, বাংলাদেশ"
+      />
       <HeroSection />
       <NoticeTicker />
       <div className="max-w-[1200px] mx-auto px-4 py-6">

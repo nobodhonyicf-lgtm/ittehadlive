@@ -1,5 +1,12 @@
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "redirects": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://laasotunayiivssffhnu.supabase.co/functions/v1/sitemap",
+      "statusCode": 301
+    }
   ]
 }

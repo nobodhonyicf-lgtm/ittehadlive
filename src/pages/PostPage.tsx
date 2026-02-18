@@ -16,7 +16,6 @@ import { useIsApp } from "@/hooks/useIsApp";
 
 const SocialShare = ({ url, title, slug }: { url: string; title: string; slug?: string }) => {
   const encodedTitle = encodeURIComponent(title);
-  // Use OG meta endpoint for Facebook so crawlers get proper meta tags
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const ogUrl = slug ? `${supabaseUrl}/functions/v1/og-meta?slug=${encodeURIComponent(slug)}` : url;
   const encodedOgUrl = encodeURIComponent(ogUrl);
@@ -54,6 +53,48 @@ const PostPage = () => {
   const contentParagraphs = post?.content?.split("\n").filter(Boolean) || [];
   const adInsertIndex = Math.min(3, Math.floor(contentParagraphs.length / 2));
 
+  // Article JSON-LD for Google
+  const articleJsonLd = post ? {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": post.title,
+    "description": (post as any).meta_description || (post as any).summary || post.content?.substring(0, 160) || "",
+    "image": [(post as any).og_image_url || post.image_url || ""].filter(Boolean),
+    "datePublished": post.created_at,
+    "dateModified": post.updated_at || post.created_at,
+    "author": {
+      "@type": "Person",
+      "name": (post as any).author_name || "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ",
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://storage.googleapis.com/gpt-engineer-file-uploads/Jlhgp5SVlNRsWE1kL5rCoZMrbN23/uploads/1770800561345-ittehad_logo-01.png",
+      },
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://ittehad.bd/post/${post.slug}`,
+    },
+    ...(post.categories ? { "articleSection": post.categories.name } : {}),
+  } : undefined;
+
+  // BreadcrumbList JSON-LD
+  const breadcrumbJsonLd = post ? {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "হোম", "item": "https://ittehad.bd" },
+      { "@type": "ListItem", "position": 2, "name": "সকল পোস্ট", "item": "https://ittehad.bd/posts" },
+      ...(post.categories ? [{ "@type": "ListItem", "position": 3, "name": post.categories.name, "item": `https://ittehad.bd/posts?category=${post.categories.slug}` }] : []),
+      { "@type": "ListItem", "position": post.categories ? 4 : 3, "name": post.title },
+    ],
+  } : undefined;
+
+  const jsonLdArray = [articleJsonLd, breadcrumbJsonLd].filter(Boolean);
+
   return (
     <Layout>
       {post && (
@@ -64,6 +105,8 @@ const PostPage = () => {
           type="article"
           publishedTime={post.created_at}
           author={(post as any).author_name || undefined}
+          keywords={`${post.title}, ${post.categories?.name || ""}, ইত্তেহাদ, মাদরাসা`}
+          jsonLd={jsonLdArray}
         />
       )}
       <div className="px-4 py-6">
@@ -77,7 +120,7 @@ const PostPage = () => {
             {isLoading ? (
               <div className="animate-pulse bg-muted h-64 rounded" />
             ) : post ? (
-              <article className="bg-card rounded-lg border shadow-sm">
+              <article className="bg-card rounded-lg border shadow-sm" itemScope itemType="https://schema.org/NewsArticle">
                 {/* Category badge - red */}
                 <div className="px-6 pt-5">
                   {post.categories && (
@@ -91,13 +134,13 @@ const PostPage = () => {
                 </div>
 
                 {/* Title */}
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground px-6 pt-2 pb-1 leading-snug">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground px-6 pt-2 pb-1 leading-snug" itemProp="headline">
                   {post.title}
                 </h1>
 
                 {/* Summary */}
                 {(post as any).summary && (
-                  <p className="text-base text-muted-foreground px-6 pb-3 border-b border-border leading-relaxed">
+                  <p className="text-base text-muted-foreground px-6 pb-3 border-b border-border leading-relaxed" itemProp="description">
                     {(post as any).summary}
                   </p>
                 )}
@@ -105,18 +148,18 @@ const PostPage = () => {
                 {/* Meta info bar */}
                 <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground px-6 py-3 border-b border-border">
                   {(post as any).author_name && (
-                    <span className="flex items-center gap-1 font-medium text-foreground">
+                    <span className="flex items-center gap-1 font-medium text-foreground" itemProp="author">
                       <User size={14} /> {(post as any).author_name}
                     </span>
                   )}
-                  <span className="flex items-center gap-1">
+                  <time className="flex items-center gap-1" itemProp="datePublished" dateTime={post.created_at}>
                     <Calendar size={14} />
                     {new Date(post.created_at).toLocaleDateString("bn-BD", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
                     })}
-                  </span>
+                  </time>
                   <span className="flex items-center gap-1">
                     <Clock size={14} />
                     {timeAgo(post.created_at)}
@@ -126,7 +169,7 @@ const PostPage = () => {
                 {/* Featured image with caption */}
                 {post.image_url && (
                   <figure className="px-6 pt-4">
-                    <img src={post.image_url} alt={post.title} className="w-full rounded-lg" />
+                    <img src={post.image_url} alt={post.title} className="w-full rounded-lg" itemProp="image" />
                     {(post as any).image_caption && (
                       <figcaption className="flex items-center gap-0 mt-0 text-sm bg-muted">
                         <span className="font-bold text-foreground px-3 py-1.5 shrink-0">ছবি</span>
@@ -138,15 +181,12 @@ const PostPage = () => {
                 )}
 
                 {/* Content with in-post ad */}
-                <div className="prose max-w-none text-foreground px-6 py-4">
+                <div className="prose max-w-none text-foreground px-6 py-4" itemProp="articleBody">
                   {contentParagraphs.map((paragraph, index) => {
-                    // Handle inline post link block: 📖 + 🔗 pair
                     if (paragraph.startsWith("📖 ")) {
                       const titleText = paragraph.replace("📖 আরও পড়ুন: ", "").replace("📖 ", "").trim();
-                      // Look ahead for 🔗 line
                       const nextLine = contentParagraphs[index + 1];
                       const linkPath = nextLine?.startsWith("🔗 ") ? nextLine.replace("🔗 ", "").trim() : null;
-                      // Try to find the post image from supabase
                       return (
                         <div key={index} className="my-4">
                           <Link
@@ -166,7 +206,6 @@ const PostPage = () => {
                         </div>
                       );
                     }
-                    // Skip 🔗 lines (already consumed by 📖 handler above)
                     if (paragraph.startsWith("🔗 ")) {
                       return null;
                     }
