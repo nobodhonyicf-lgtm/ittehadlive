@@ -7,6 +7,7 @@ import AppLayout from "./AppLayout";
 import AppPollWidget from "./AppPollWidget";
 import AppGallerySection from "./AppGallerySection";
 import AppVideoSection from "./AppVideoSection";
+import AppIslamicContent from "./AppIslamicContent";
 
 const AppHome = () => {
   return (
@@ -17,6 +18,7 @@ const AppHome = () => {
         <AppPollWidget />
         <AppNoticeSection />
         <AppPrayerWidget />
+        <AppIslamicContent />
         <AppRecentPosts />
         <AppGallerySection />
         <AppVideoSection />

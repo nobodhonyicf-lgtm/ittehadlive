@@ -202,6 +202,20 @@ export const useSliders = () =>
     },
   });
 
+export const useIslamicContents = () =>
+  useQuery({
+    queryKey: ["islamic_contents"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("islamic_contents")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
 export const useCommitteeMembers = (pageSlug?: string) =>
   useQuery({
     queryKey: ["committee_members", pageSlug],
