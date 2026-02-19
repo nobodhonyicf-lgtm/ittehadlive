@@ -1,5 +1,6 @@
 import { useIslamicContents } from "@/hooks/useData";
-import { BookOpen, Quote, HandHelping, Moon } from "lucide-react";
+import { useAladhanPrayerTimes } from "@/hooks/useAladhanPrayerTimes";
+import { BookOpen, Quote, HandHelping, Moon, MapPin, Loader2 } from "lucide-react";
 import { useMemo } from "react";
 
 const categoryConfig = {
@@ -17,6 +18,7 @@ const getDailyContent = (items: any[]) => {
 
 const AppIslamicContent = () => {
   const { data: contents } = useIslamicContents();
+  const { data: prayerApi, isLoading: prayerLoading } = useAladhanPrayerTimes();
 
   const grouped = useMemo(() => {
     if (!contents?.length) return null;
@@ -40,13 +42,13 @@ const AppIslamicContent = () => {
           const config = categoryConfig[key];
           const item = grouped[key];
           const Icon = config.icon;
+          const isIftar = key === "iftar";
 
           return (
             <div
               key={key}
               className={`bg-gradient-to-br ${config.bg} ${config.darkBg} rounded-2xl p-3 text-white relative overflow-hidden min-h-[130px] flex flex-col shadow-md transition-colors duration-300`}
             >
-              {/* Subtle geometric overlay */}
               <div className="absolute inset-0 opacity-[0.04]" style={{
                 backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.1) 8px, rgba(255,255,255,0.1) 16px)`,
               }} />
@@ -60,7 +62,39 @@ const AppIslamicContent = () => {
                 <h3 className="text-[11px] font-bold">{config.label}</h3>
               </div>
 
-              {item ? (
+              {isIftar ? (
+                <div className="flex-1 flex flex-col justify-between relative z-10">
+                  {prayerLoading ? (
+                    <div className="flex items-center gap-1 text-[10px] opacity-70">
+                      <Loader2 size={10} className="animate-spin" /> লোড হচ্ছে...
+                    </div>
+                  ) : prayerApi ? (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-1 text-[9px] opacity-70">
+                        <MapPin size={8} />
+                        <span>{prayerApi.locationName}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <div className="bg-white/15 rounded-lg p-1.5 text-center">
+                          <p className="text-[8px] opacity-80">সেহরি</p>
+                          <p className="text-sm font-bold">{prayerApi.sehri}</p>
+                        </div>
+                        <div className="bg-white/15 rounded-lg p-1.5 text-center">
+                          <p className="text-[8px] opacity-80">ইফতার</p>
+                          <p className="text-sm font-bold">{prayerApi.iftar}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : item ? (
+                    <div>
+                      <p className="text-[10px] font-semibold opacity-90 mb-0.5">{item.title}</p>
+                      <p className="text-[12px] leading-[1.9] font-arabic line-clamp-3" dir="auto">{item.content}</p>
+                    </div>
+                  ) : (
+                    <p className="text-[10px] opacity-50 mt-1">কন্টেন্ট নেই</p>
+                  )}
+                </div>
+              ) : item ? (
                 <div className="flex-1 flex flex-col justify-between relative z-10">
                   <div>
                     <p className="text-[10px] font-semibold opacity-90 mb-0.5">{item.title}</p>
