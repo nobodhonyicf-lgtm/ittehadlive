@@ -41,6 +41,7 @@ import AdminEmail from "./AdminEmail";
 import AdminSMS from "./AdminSMS";
 import AdminCustomers from "./AdminCustomers";
 import AdminPushNotifications from "./AdminPushNotifications";
+import AdminIslamicContent from "./AdminIslamicContent";
 interface NavItem {
   label: string;
   icon: any;
@@ -129,6 +130,7 @@ const navCategories: NavCategory[] = [
       { label: "ইউজার", icon: Users, path: "/admin/customers", section: "users" },
       { label: "পোল", icon: ClipboardList, path: "/admin/polls", section: "polls" },
       { label: "নামাজের সময়", icon: Clock, path: "/admin/prayer-times", section: "prayer-times" },
+      { label: "ইসলামী কন্টেন্ট", icon: BookOpen, path: "/admin/islamic-content", section: "islamic-contents" },
       { label: "মেনু", icon: MenuIcon, path: "/admin/menu", section: "menu" },
       { label: "সেটিংস", icon: Settings, path: "/admin/settings", section: "settings" },
     ],
@@ -406,6 +408,7 @@ const AdminDashboard = () => {
             <Route path="sms" element={<AdminSMS />} />
             <Route path="settings" element={<AdminSettings />} />
             <Route path="push-notifications" element={<AdminPushNotifications />} />
+            <Route path="islamic-content" element={<AdminIslamicContent />} />
           </Routes>
         </div>
       </main>
