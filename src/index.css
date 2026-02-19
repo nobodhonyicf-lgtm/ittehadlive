@@ -10,6 +10,28 @@
   src: local('SolaimanLipi'), url('https://fonts.cdnfonts.com/s/14639/solaimanlipi.woff') format('woff');
 }
 
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/amiri/v27/J7aRnpd8CGxBHqUr.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/amiri/v27/J7acnpd8CGxBHp2VkZY.woff2') format('woff2');
+}
+
+.font-arabic {
+  font-family: 'Amiri', 'Traditional Arabic', serif;
+  line-height: 2;
+  letter-spacing: 0.02em;
+}
+
 @layer base {
   :root {
     --background: 0 0% 96%;
