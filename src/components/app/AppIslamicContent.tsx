@@ -1,24 +1,34 @@
 import { useIslamicContents } from "@/hooks/useData";
 import { BookOpen, Quote, HandHelping, Moon } from "lucide-react";
+import { useMemo } from "react";
 
 const categoryConfig = {
-  quran: { label: "কুরআন", icon: BookOpen, bg: "from-emerald-700 to-emerald-600", darkBg: "dark:from-emerald-800 dark:to-emerald-700", emoji: "📖" },
-  hadith: { label: "হাদিস", icon: Quote, bg: "from-blue-700 to-blue-600", darkBg: "dark:from-blue-800 dark:to-blue-700", emoji: "📜" },
-  dua: { label: "দোয়া", icon: HandHelping, bg: "from-purple-700 to-purple-600", darkBg: "dark:from-purple-800 dark:to-purple-700", emoji: "🤲" },
-  iftar: { label: "ইফতার", icon: Moon, bg: "from-amber-700 to-amber-600", darkBg: "dark:from-amber-800 dark:to-amber-700", emoji: "🌙" },
+  quran: { label: "কুরআন", icon: BookOpen, bg: "from-emerald-800 to-teal-700", darkBg: "dark:from-emerald-900 dark:to-teal-800", pattern: "🕌" },
+  hadith: { label: "হাদিস", icon: Quote, bg: "from-sky-800 to-blue-700", darkBg: "dark:from-sky-900 dark:to-blue-800", pattern: "📿" },
+  dua: { label: "দোয়া", icon: HandHelping, bg: "from-indigo-800 to-purple-700", darkBg: "dark:from-indigo-900 dark:to-purple-800", pattern: "🤲" },
+  iftar: { label: "ইফতার", icon: Moon, bg: "from-amber-800 to-orange-700", darkBg: "dark:from-amber-900 dark:to-orange-800", pattern: "🌙" },
 } as const;
+
+const getDailyContent = (items: any[]) => {
+  if (!items.length) return null;
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  return items[dayOfYear % items.length];
+};
 
 const AppIslamicContent = () => {
   const { data: contents } = useIslamicContents();
 
-  if (!contents?.length) return null;
+  const grouped = useMemo(() => {
+    if (!contents?.length) return null;
+    return {
+      quran: getDailyContent(contents.filter(c => c.category === "quran")),
+      hadith: getDailyContent(contents.filter(c => c.category === "hadith")),
+      dua: getDailyContent(contents.filter(c => c.category === "dua")),
+      iftar: getDailyContent(contents.filter(c => c.category === "iftar")),
+    };
+  }, [contents]);
 
-  const grouped = {
-    quran: contents.filter(c => c.category === "quran")[0],
-    hadith: contents.filter(c => c.category === "hadith")[0],
-    dua: contents.filter(c => c.category === "dua")[0],
-    iftar: contents.filter(c => c.category === "iftar")[0],
-  };
+  if (!grouped) return null;
 
   return (
     <div className="animate-fade-in" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
@@ -34,14 +44,19 @@ const AppIslamicContent = () => {
           return (
             <div
               key={key}
-              className={`bg-gradient-to-br ${config.bg} ${config.darkBg} rounded-2xl p-3 text-white relative overflow-hidden min-h-[120px] flex flex-col shadow-sm transition-colors duration-300`}
+              className={`bg-gradient-to-br ${config.bg} ${config.darkBg} rounded-2xl p-3 text-white relative overflow-hidden min-h-[130px] flex flex-col shadow-md transition-colors duration-300`}
             >
-              <div className="absolute top-1 right-1 opacity-10">
-                <Icon size={36} />
+              {/* Subtle geometric overlay */}
+              <div className="absolute inset-0 opacity-[0.04]" style={{
+                backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.1) 8px, rgba(255,255,255,0.1) 16px)`,
+              }} />
+
+              <div className="absolute top-1 right-1.5 opacity-10 text-2xl">
+                {config.pattern}
               </div>
 
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <span className="text-sm">{config.emoji}</span>
+              <div className="flex items-center gap-1.5 mb-1.5 border-b border-white/15 pb-1.5">
+                <Icon size={12} className="shrink-0" />
                 <h3 className="text-[11px] font-bold">{config.label}</h3>
               </div>
 
@@ -49,12 +64,12 @@ const AppIslamicContent = () => {
                 <div className="flex-1 flex flex-col justify-between relative z-10">
                   <div>
                     <p className="text-[10px] font-semibold opacity-90 mb-0.5">{item.title}</p>
-                    <p className="text-[11px] leading-relaxed line-clamp-3" dir="auto">
+                    <p className="text-[12px] leading-[1.9] font-arabic line-clamp-3" dir="auto">
                       {item.content}
                     </p>
                   </div>
                   {item.source && (
-                    <p className="text-[9px] opacity-60 mt-1 text-right">— {item.source}</p>
+                    <p className="text-[9px] opacity-60 mt-1 text-right italic">— {item.source}</p>
                   )}
                 </div>
               ) : (
