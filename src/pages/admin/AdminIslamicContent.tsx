@@ -16,15 +16,19 @@ const categories = [
   { key: "hadith", label: "হাদিস", emoji: "📜" },
   { key: "dua", label: "দোয়া", emoji: "🤲" },
   { key: "masala", label: "মাসআলা", emoji: "⚖️" },
-  { key: "iftar", label: "ইফতার", emoji: "🌙" },
 ] as const;
+
+const emptyForm = {
+  title: "", content: "", source: "", subcategory: "",
+  transliteration: "", meaning: "", reference: "", question: "",
+};
 
 const AdminIslamicContent = () => {
   const { toast } = useToast();
   const { canEdit, canDelete } = useSectionPermissions();
   const queryClient = useQueryClient();
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", content: "", source: "" });
+  const [form, setForm] = useState(emptyForm);
   const [adding, setAdding] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -45,21 +49,36 @@ const AdminIslamicContent = () => {
 
   const startEdit = (item: any) => {
     setEditId(item.id);
-    setForm({ title: item.title, content: item.content, source: item.source || "" });
+    setForm({
+      title: item.title || "",
+      content: item.content || "",
+      source: item.source || "",
+      subcategory: item.subcategory || "",
+      transliteration: item.transliteration || "",
+      meaning: item.meaning || "",
+      reference: item.reference || "",
+      question: item.question || "",
+    });
   };
 
   const cancelEdit = () => {
     setEditId(null);
-    setForm({ title: "", content: "", source: "" });
+    setForm(emptyForm);
   };
 
   const handleSave = async () => {
     if (!editId) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("islamic_contents")
-      .update({ title: form.title, content: form.content, source: form.source || null })
-      .eq("id", editId);
+    const { error } = await supabase.from("islamic_contents").update({
+      title: form.title,
+      content: form.content,
+      source: form.source || null,
+      subcategory: form.subcategory || null,
+      transliteration: form.transliteration || null,
+      meaning: form.meaning || null,
+      reference: form.reference || null,
+      question: form.question || null,
+    }).eq("id", editId);
     if (error) {
       toast({ title: "ত্রুটি", description: error.message, variant: "destructive" });
     } else {
@@ -82,6 +101,11 @@ const AdminIslamicContent = () => {
       title: form.title.trim(),
       content: form.content.trim(),
       source: form.source.trim() || null,
+      subcategory: form.subcategory.trim() || null,
+      transliteration: form.transliteration.trim() || null,
+      meaning: form.meaning.trim() || null,
+      reference: form.reference.trim() || null,
+      question: form.question.trim() || null,
       sort_order: getByCategory(category).length,
     });
     if (error) {
@@ -89,7 +113,7 @@ const AdminIslamicContent = () => {
     } else {
       toast({ title: "সফল", description: "যুক্ত হয়েছে" });
       setAdding(null);
-      setForm({ title: "", content: "", source: "" });
+      setForm(emptyForm);
       queryClient.invalidateQueries({ queryKey: ["islamic_contents_admin"] });
       queryClient.invalidateQueries({ queryKey: ["islamic_contents"] });
     }
@@ -107,13 +131,78 @@ const AdminIslamicContent = () => {
     }
   };
 
+  const FormFields = ({ cat }: { cat: string }) => (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>শিরোনাম *</Label>
+          <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="শিরোনাম" />
+        </div>
+        <div>
+          <Label>বিষয়/উপশ্রেণি</Label>
+          <Input value={form.subcategory} onChange={e => setForm(f => ({ ...f, subcategory: e.target.value }))}
+            placeholder={cat === "masala" ? "যেমন: নামাজ, পবিত্রতা" : cat === "hadith" ? "যেমন: ঈমান, আমল" : "বিষয়"} />
+        </div>
+      </div>
+
+      {cat === "masala" && (
+        <div>
+          <Label>প্রশ্ন</Label>
+          <Textarea value={form.question} onChange={e => setForm(f => ({ ...f, question: e.target.value }))} placeholder="মাসআলার প্রশ্ন লিখুন" rows={2} />
+        </div>
+      )}
+
+      <div>
+        <Label>{cat === "masala" ? "উত্তর/বিস্তারিত" : "আরবি কন্টেন্ট *"}</Label>
+        <Textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
+          placeholder={cat === "masala" ? "বিস্তারিত উত্তর" : "আরবি টেক্সট"} rows={3} dir="auto" />
+      </div>
+
+      {(cat === "dua" || cat === "hadith") && (
+        <>
+          <div>
+            <Label>উচ্চারণ (বাংলা)</Label>
+            <Textarea value={form.transliteration} onChange={e => setForm(f => ({ ...f, transliteration: e.target.value }))}
+              placeholder="আরবির বাংলা উচ্চারণ" rows={2} />
+          </div>
+          <div>
+            <Label>অর্থ</Label>
+            <Textarea value={form.meaning} onChange={e => setForm(f => ({ ...f, meaning: e.target.value }))}
+              placeholder="বাংলা অর্থ" rows={2} />
+          </div>
+        </>
+      )}
+
+      {cat === "masala" && (
+        <div>
+          <Label>অর্থ/বাংলা ব্যাখ্যা</Label>
+          <Textarea value={form.meaning} onChange={e => setForm(f => ({ ...f, meaning: e.target.value }))}
+            placeholder="বাংলায় ব্যাখ্যা" rows={2} />
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>সূত্র</Label>
+          <Input value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value }))}
+            placeholder={cat === "hadith" ? "বুখারী শরীফ" : "সূত্র"} />
+        </div>
+        <div>
+          <Label>রেফারেন্স/নম্বর</Label>
+          <Input value={form.reference} onChange={e => setForm(f => ({ ...f, reference: e.target.value }))}
+            placeholder={cat === "hadith" ? "হাদিস নং: ১" : "রেফারেন্স"} />
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">ইসলামী কন্টেন্ট</h1>
 
       {isLoading && <p>লোড হচ্ছে...</p>}
 
-      <Tabs defaultValue="quran">
+      <Tabs defaultValue="hadith">
         <TabsList className="grid grid-cols-4 w-full">
           {categories.map(cat => (
             <TabsTrigger key={cat.key} value={cat.key} className="text-xs sm:text-sm">
@@ -129,18 +218,7 @@ const AdminIslamicContent = () => {
                 <CardContent className="pt-4">
                   {editId === item.id ? (
                     <div className="space-y-3">
-                      <div>
-                        <Label>শিরোনাম</Label>
-                        <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
-                      </div>
-                      <div>
-                        <Label>কন্টেন্ট</Label>
-                        <Textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} rows={3} dir="auto" />
-                      </div>
-                      <div>
-                        <Label>সূত্র (ঐচ্ছিক)</Label>
-                        <Input value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value }))} />
-                      </div>
+                      <FormFields cat={cat.key} />
                       <div className="flex gap-2">
                         <Button onClick={handleSave} disabled={saving} size="sm">
                           <Save size={14} className="mr-1" /> {saving ? "সেভ হচ্ছে..." : "সেভ"}
@@ -154,9 +232,18 @@ const AdminIslamicContent = () => {
                     <div>
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm">{item.title}</h3>
-                          <p className="text-sm mt-1 whitespace-pre-wrap" dir="auto">{item.content}</p>
-                          {item.source && <p className="text-xs text-muted-foreground mt-1">সূত্র: {item.source}</p>}
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-sm">{item.title}</h3>
+                            {item.subcategory && (
+                              <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">{item.subcategory}</span>
+                            )}
+                          </div>
+                          {item.question && <p className="text-xs text-muted-foreground mb-1">❓ {item.question}</p>}
+                          <p className="text-sm mt-1 whitespace-pre-wrap font-arabic" dir="auto">{item.content}</p>
+                          {item.meaning && <p className="text-xs text-muted-foreground mt-1">📝 {item.meaning}</p>}
+                          {(item.source || item.reference) && (
+                            <p className="text-xs text-muted-foreground mt-1">📖 {item.reference || item.source}</p>
+                          )}
                         </div>
                         <div className="flex gap-1 shrink-0">
                           {canEdit && (
@@ -185,23 +272,12 @@ const AdminIslamicContent = () => {
               <Card>
                 <CardHeader><CardTitle className="text-base">নতুন {cat.label} যোগ</CardTitle></CardHeader>
                 <CardContent className="space-y-3">
-                  <div>
-                    <Label>শিরোনাম</Label>
-                    <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="শিরোনাম লিখুন" />
-                  </div>
-                  <div>
-                    <Label>কন্টেন্ট</Label>
-                    <Textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} placeholder="আরবি বা বাংলা কন্টেন্ট" rows={3} dir="auto" />
-                  </div>
-                  <div>
-                    <Label>সূত্র (ঐচ্ছিক)</Label>
-                    <Input value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value }))} placeholder="যেমন: বুখারী শরীফ" />
-                  </div>
+                  <FormFields cat={cat.key} />
                   <div className="flex gap-2">
                     <Button onClick={() => handleAdd(cat.key)} disabled={saving} size="sm">
                       <Plus size={14} className="mr-1" /> {saving ? "যুক্ত হচ্ছে..." : "যুক্ত করুন"}
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => { setAdding(null); setForm({ title: "", content: "", source: "" }); }}>
+                    <Button variant="outline" size="sm" onClick={() => { setAdding(null); setForm(emptyForm); }}>
                       বাতিল
                     </Button>
                   </div>
@@ -209,7 +285,7 @@ const AdminIslamicContent = () => {
               </Card>
             ) : (
               canEdit && (
-                <Button variant="outline" size="sm" onClick={() => { setAdding(cat.key); setForm({ title: "", content: "", source: "" }); }}>
+                <Button variant="outline" size="sm" onClick={() => { setAdding(cat.key); setForm(emptyForm); }}>
                   <Plus size={14} className="mr-1" /> নতুন {cat.label} যোগ
                 </Button>
               )
