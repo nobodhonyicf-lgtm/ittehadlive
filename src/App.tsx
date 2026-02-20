@@ -39,6 +39,8 @@ import Install from "./pages/Install";
 import NotificationsPage from "./pages/NotificationsPage";
 import AppSettings from "./pages/AppSettings";
 import AppContact from "./pages/AppContact";
+import QuranPage from "./pages/QuranPage";
+import { HadithPage, DuaPage, MasalaPage } from "./pages/IslamicPages";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -88,6 +90,10 @@ const App = () => (
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/app-settings" element={<AppSettings />} />
               <Route path="/app-contact" element={<AppContact />} />
+              <Route path="/quran" element={<QuranPage />} />
+              <Route path="/hadith" element={<HadithPage />} />
+              <Route path="/dua" element={<DuaPage />} />
+              <Route path="/masala" element={<MasalaPage />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/reset-password" element={<ResetPassword />} />
               <Route path="/admin/*" element={<AdminDashboard />} />

@@ -15,6 +15,7 @@ const categories = [
   { key: "quran", label: "কুরআন", emoji: "📖" },
   { key: "hadith", label: "হাদিস", emoji: "📜" },
   { key: "dua", label: "দোয়া", emoji: "🤲" },
+  { key: "masala", label: "মাসআলা", emoji: "⚖️" },
   { key: "iftar", label: "ইফতার", emoji: "🌙" },
 ] as const;
 
