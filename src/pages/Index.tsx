@@ -4,6 +4,7 @@ import NoticeTicker from "@/components/home/NoticeTicker";
 import AboutSection from "@/components/home/AboutSection";
 import SectionCards from "@/components/home/SectionCards";
 import IslamicContentWidget from "@/components/home/IslamicContentWidget";
+import IslamicNav from "@/components/home/IslamicNav";
 import RecentNews from "@/components/home/RecentNews";
 import VideoSection from "@/components/home/VideoSection";
 import Sidebar from "@/components/home/Sidebar";
@@ -32,6 +33,7 @@ const Index = () => {
           <div className="lg:col-span-2 space-y-6">
             <AboutSection />
             <SectionCards />
+            <IslamicNav />
             <IslamicContentWidget />
           </div>
           <div className="lg:col-span-1">

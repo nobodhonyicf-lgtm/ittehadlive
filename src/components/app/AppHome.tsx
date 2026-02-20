@@ -8,6 +8,7 @@ import AppPollWidget from "./AppPollWidget";
 import AppGallerySection from "./AppGallerySection";
 import AppVideoSection from "./AppVideoSection";
 import AppIslamicContent from "./AppIslamicContent";
+import AppIslamicNav from "./AppIslamicNav";
 
 const AppHome = () => {
   return (
@@ -15,6 +16,7 @@ const AppHome = () => {
       <AppBannerSlider />
       <div className="px-4 py-4 space-y-5">
         <AppQuickActions />
+        <AppIslamicNav />
         <AppPollWidget />
         <AppNoticeSection />
         <AppPrayerWidget />
