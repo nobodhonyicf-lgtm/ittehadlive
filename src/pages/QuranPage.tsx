@@ -2,12 +2,13 @@ import Layout from "@/components/layout/Layout";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useEffect, useState, useRef } from "react";
-import { X, Volume2, VolumeX, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, Volume2, VolumeX, ChevronLeft, ChevronRight, BookOpen, AlignLeft, FileText, Plus, Minus } from "lucide-react";
 
 interface QuranAyah {
   number: number;
   text: string;
   translation: string;
+  tafsir?: string;
   numberInSurah: number;
 }
 
@@ -25,6 +26,8 @@ const toBengaliNum = (n: number | string) => {
   return String(n).replace(/[0-9]/g, (x) => d[+x]);
 };
 
+type DisplayMode = "arabic" | "translation" | "tafsir";
+
 const QuranContent = () => {
   const [surahs, setSurahs] = useState<QuranSurah[]>([]);
   const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
@@ -34,7 +37,10 @@ const QuranContent = () => {
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
   const [showTranslation, setShowTranslation] = useState(true);
+  const [showTafsir, setShowTafsir] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [fontSize, setFontSize] = useState(22); // Arabic font size
+  const [translationSize, setTranslationSize] = useState(14); // Translation font size
   const ayahRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,14 +55,25 @@ const QuranContent = () => {
     setSelectedSurah(num);
     setAyahs([]);
     try {
-      const [arabic, bangla] = await Promise.all([
+      const requests: Promise<any>[] = [
         fetch(`https://api.alquran.cloud/v1/surah/${num}`).then(r => r.json()),
         fetch(`https://api.alquran.cloud/v1/surah/${num}/bn.bengali`).then(r => r.json()),
-      ]);
+      ];
+
+      if (showTafsir) {
+        requests.push(
+          fetch(`https://api.alquran.cloud/v1/surah/${num}/en.tafheem`).then(r => r.json()).catch(() => null)
+        );
+      }
+
+      const results = await Promise.all(requests);
+      const [arabic, bangla, tafheem] = results;
+
       const combined = arabic.data.ayahs.map((a: any, i: number) => ({
         number: a.number,
         text: a.text,
         translation: bangla.data.ayahs[i]?.text || "",
+        tafsir: tafheem?.data?.ayahs?.[i]?.text || "",
         numberInSurah: a.numberInSurah,
       }));
       setAyahs(combined);
@@ -65,6 +82,24 @@ const QuranContent = () => {
       setAyahs([]);
     }
     setLoading(false);
+  };
+
+  const toggleTafsir = async () => {
+    const newShow = !showTafsir;
+    setShowTafsir(newShow);
+
+    // Load tafsir if toggling on and we have a surah selected but no tafsir data
+    if (newShow && selectedSurah && ayahs.length > 0 && !ayahs[0].tafsir) {
+      setLoading(true);
+      try {
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${selectedSurah}/en.tafheem`).then(r => r.json());
+        setAyahs(prev => prev.map((a, i) => ({
+          ...a,
+          tafsir: res.data?.ayahs?.[i]?.text || "",
+        })));
+      } catch {}
+      setLoading(false);
+    }
   };
 
   const playAudio = (ayahNumber: number) => {
@@ -89,7 +124,7 @@ const QuranContent = () => {
     <div className="min-h-screen bg-background">
       <div className="bg-gradient-to-br from-emerald-800 to-teal-700 text-white p-6 text-center">
         <h1 className="text-2xl font-bold mb-1">📖 পবিত্র কুরআন</h1>
-        <p className="text-sm opacity-80">আরবি মূল ও বাংলা অনুবাদসহ — অডিও তেলাওয়াত</p>
+        <p className="text-sm opacity-80">আরবি মূল ও বাংলা অনুবাদ — অডিও তেলাওয়াত — তাফসিরসহ</p>
       </div>
 
       {!selectedSurah ? (
@@ -131,40 +166,67 @@ const QuranContent = () => {
         </div>
       ) : (
         <div className="max-w-2xl mx-auto">
-          <div ref={ayahRef} className="sticky top-0 z-10 bg-card border-b border-border flex items-center gap-3 px-4 py-3 shadow-sm">
-            <button
-              onClick={() => { setSelectedSurah(null); setAyahs([]); audio?.pause(); setPlayingAyah(null); }}
-              className="p-2 hover:bg-muted rounded-xl transition-colors"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <div className="flex-1">
-              {currentSurah && (
-                <>
-                  <p className="font-bold text-sm">{currentSurah.englishName} — <span className="font-arabic text-base">{currentSurah.name}</span></p>
-                  <p className="text-xs text-muted-foreground">
-                    {toBengaliNum(currentSurah.numberOfAyahs)} আয়াত • {currentSurah.revelationType === "Meccan" ? "মক্কি" : "মাদানি"}
-                  </p>
-                </>
-              )}
+          {/* Sticky header */}
+          <div ref={ayahRef} className="sticky top-0 z-10 bg-card border-b border-border shadow-sm">
+            <div className="flex items-center gap-3 px-4 py-3">
+              <button
+                onClick={() => { setSelectedSurah(null); setAyahs([]); audio?.pause(); setPlayingAyah(null); }}
+                className="p-2 hover:bg-muted rounded-xl transition-colors flex-shrink-0"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <div className="flex-1 min-w-0">
+                {currentSurah && (
+                  <>
+                    <p className="font-bold text-sm truncate">{currentSurah.englishName} — <span className="font-arabic text-base">{currentSurah.name}</span></p>
+                    <p className="text-xs text-muted-foreground">
+                      {toBengaliNum(currentSurah.numberOfAyahs)} আয়াত • {currentSurah.revelationType === "Meccan" ? "মক্কি" : "মাদানি"}
+                    </p>
+                  </>
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                {selectedSurah > 1 && (
+                  <button onClick={() => loadSurah(selectedSurah - 1)} className="p-1.5 hover:bg-muted rounded-lg transition-colors">
+                    <ChevronLeft size={16} />
+                  </button>
+                )}
+                {selectedSurah < 114 && (
+                  <button onClick={() => loadSurah(selectedSurah + 1)} className="p-1.5 hover:bg-muted rounded-lg transition-colors">
+                    <ChevronRight size={16} />
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
+
+            {/* Toggle row */}
+            <div className="flex items-center gap-2 px-4 pb-3 flex-wrap">
               <button
                 onClick={() => setShowTranslation(!showTranslation)}
-                className={`text-[10px] px-2.5 py-1 rounded-lg border transition-colors ${showTranslation ? "bg-emerald-700 text-white border-emerald-700" : "border-border text-muted-foreground"}`}
+                className={`text-[10px] px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 ${showTranslation ? "bg-emerald-700 text-white border-emerald-700" : "border-border text-muted-foreground"}`}
               >
-                অনুবাদ
+                <AlignLeft size={11} /> অনুবাদ
               </button>
-              {selectedSurah > 1 && (
-                <button onClick={() => loadSurah(selectedSurah - 1)} className="p-1.5 hover:bg-muted rounded-lg transition-colors">
-                  <ChevronLeft size={16} />
-                </button>
-              )}
-              {selectedSurah < 114 && (
-                <button onClick={() => loadSurah(selectedSurah + 1)} className="p-1.5 hover:bg-muted rounded-lg transition-colors">
-                  <ChevronRight size={16} />
-                </button>
-              )}
+              <button
+                onClick={toggleTafsir}
+                className={`text-[10px] px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 ${showTafsir ? "bg-amber-700 text-white border-amber-700" : "border-border text-muted-foreground"}`}
+              >
+                <FileText size={11} /> তাফসির
+              </button>
+
+              {/* Font size controls */}
+              <div className="flex items-center gap-1 ml-auto">
+                <span className="text-[10px] text-muted-foreground">আরবি:</span>
+                <button onClick={() => setFontSize(f => Math.max(16, f - 2))} className="p-1 hover:bg-muted rounded"><Minus size={11} /></button>
+                <span className="text-[10px] w-5 text-center font-bold">{fontSize}</span>
+                <button onClick={() => setFontSize(f => Math.min(36, f + 2))} className="p-1 hover:bg-muted rounded"><Plus size={11} /></button>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] text-muted-foreground">অর্থ:</span>
+                <button onClick={() => setTranslationSize(f => Math.max(11, f - 1))} className="p-1 hover:bg-muted rounded"><Minus size={11} /></button>
+                <span className="text-[10px] w-5 text-center font-bold">{translationSize}</span>
+                <button onClick={() => setTranslationSize(f => Math.min(20, f + 1))} className="p-1 hover:bg-muted rounded"><Plus size={11} /></button>
+              </div>
             </div>
           </div>
 
@@ -189,13 +251,34 @@ const QuranContent = () => {
                       {playingAyah === ayah.number ? <VolumeX size={16} /> : <Volume2 size={16} />}
                     </button>
                   </div>
-                  <p className="font-arabic text-2xl font-bold text-right leading-[2.6] mb-3 text-foreground" dir="rtl">
+
+                  {/* Arabic text */}
+                  <p
+                    className="font-arabic font-bold text-right leading-[2.6] mb-3 text-foreground"
+                    dir="rtl"
+                    style={{ fontSize: `${fontSize}px` }}
+                  >
                     {ayah.text}
                   </p>
+
+                  {/* Bengali Translation */}
                   {showTranslation && (
-                    <p className="text-sm text-muted-foreground leading-relaxed border-t border-border pt-3 mt-2">
-                      {ayah.translation}
-                    </p>
+                    <div className="border-t border-border pt-3 mt-2">
+                      <p className="text-xs font-semibold text-emerald-700 mb-1">📝 অনুবাদ</p>
+                      <p className="text-muted-foreground leading-relaxed" style={{ fontSize: `${translationSize}px` }}>
+                        {ayah.translation}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Tafsir */}
+                  {showTafsir && ayah.tafsir && (
+                    <div className="border-t border-amber-200 dark:border-amber-900/30 pt-3 mt-2 bg-amber-50/50 dark:bg-amber-950/20 rounded-lg px-3 py-2">
+                      <p className="text-xs font-semibold text-amber-700 dark:text-amber-500 mb-1">📚 তাফসির (তাফহীমুল কুরআন)</p>
+                      <p className="text-muted-foreground leading-relaxed" style={{ fontSize: `${translationSize}px` }}>
+                        {ayah.tafsir}
+                      </p>
+                    </div>
                   )}
                 </div>
               ))}

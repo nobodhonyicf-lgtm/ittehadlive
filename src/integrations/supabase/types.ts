@@ -576,9 +576,14 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          meaning: string | null
+          question: string | null
+          reference: string | null
           sort_order: number | null
           source: string | null
+          subcategory: string | null
           title: string
+          transliteration: string | null
           updated_at: string
         }
         Insert: {
@@ -587,9 +592,14 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          meaning?: string | null
+          question?: string | null
+          reference?: string | null
           sort_order?: number | null
           source?: string | null
+          subcategory?: string | null
           title: string
+          transliteration?: string | null
           updated_at?: string
         }
         Update: {
@@ -598,9 +608,14 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          meaning?: string | null
+          question?: string | null
+          reference?: string | null
           sort_order?: number | null
           source?: string | null
+          subcategory?: string | null
           title?: string
+          transliteration?: string | null
           updated_at?: string
         }
         Relationships: []
