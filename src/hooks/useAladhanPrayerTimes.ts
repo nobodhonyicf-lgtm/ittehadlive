@@ -33,10 +33,10 @@ const toBengaliTime = (time24: string): string => {
   const clean = time24.replace(/\s*\(.*\)/, "").trim();
   const [h, m] = clean.split(":").map(Number);
   const hour12 = h % 12 || 12;
-  const ampm = h < 12 ? "AM" : "PM";
+  const period = h < 12 ? "পূর্বাহ্ণ" : "অপরাহ্ণ";
   const hStr = String(hour12).replace(/\d/g, d => bengaliDigits[+d]);
   const mStr = String(m).padStart(2, "0").replace(/\d/g, d => bengaliDigits[+d]);
-  return `${hStr}:${mStr} ${ampm}`;
+  return `${hStr}:${mStr} ${period}`;
 };
 
 export interface PrayerApiTimes {
