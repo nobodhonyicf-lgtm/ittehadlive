@@ -2,7 +2,7 @@ import Layout from "@/components/layout/Layout";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Volume2, VolumeX, ChevronLeft, ChevronRight, AlignLeft, Plus, Minus, ChevronDown } from "lucide-react";
+import { Volume2, VolumeX, ChevronLeft, ChevronRight, AlignLeft, Plus, Minus, ChevronDown, Play, Pause, Square, BookOpen } from "lucide-react";
 
 interface QuranAyah {
   number: number;
@@ -25,6 +25,20 @@ interface TafsirEntry {
   text: string;
 }
 
+interface WordData {
+  id: number;
+  position: number;
+  text_uthmani: string;
+  translation: { text: string; language_name: string };
+  transliteration: { text: string };
+  char_type_name: string;
+}
+
+interface WordTimingData {
+  verse_key: string;
+  segments: number[][]; // [wordIndex, startMs, endMs]
+}
+
 const toBengaliNum = (n: number | string) => {
   const d = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
   return String(n).replace(/[0-9]/g, (x) => d[+x]);
@@ -38,6 +52,8 @@ const TAFSIR_OPTIONS = [
   { id: 381, name: "তাফসীর ফাতহুল মাজীদ (বাংলা)", slug: "tafisr-fathul-majid-bn" },
 ];
 
+const RECITER_ID = 7; // Mishari Rashid al-Afasy
+
 const QuranContent = () => {
   const [surahs, setSurahs] = useState<QuranSurah[]>([]);
   const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
@@ -47,6 +63,7 @@ const QuranContent = () => {
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
   const [showTranslation, setShowTranslation] = useState(true);
+  const [showWordByWord, setShowWordByWord] = useState(false);
   const [selectedTafsir, setSelectedTafsir] = useState(0);
   const [tafsirData, setTafsirData] = useState<Record<string, string>>({});
   const [tafsirLoading, setTafsirLoading] = useState(false);
@@ -56,6 +73,18 @@ const QuranContent = () => {
   const [translationSize, setTranslationSize] = useState(14);
   const ayahRef = useRef<HTMLDivElement>(null);
 
+  // Word-by-word data
+  const [wordData, setWordData] = useState<Record<string, WordData[]>>({});
+  const [wordDataLoading, setWordDataLoading] = useState(false);
+
+  // Full surah audio
+  const [surahAudio, setSurahAudio] = useState<HTMLAudioElement | null>(null);
+  const [isSurahPlaying, setIsSurahPlaying] = useState(false);
+  const [highlightedWord, setHighlightedWord] = useState<{ verseKey: string; wordIndex: number } | null>(null);
+  const [wordTimings, setWordTimings] = useState<Record<string, number[][]>>({});
+  const surahAudioRef = useRef<HTMLAudioElement | null>(null);
+  const timingIntervalRef = useRef<number | null>(null);
+
   useEffect(() => {
     fetch("https://api.alquran.cloud/v1/surah")
       .then(r => r.json())
@@ -63,11 +92,36 @@ const QuranContent = () => {
       .catch(() => setSurahLoading(false));
   }, []);
 
+  const loadWordByWord = useCallback(async (surahNum: number) => {
+    setWordDataLoading(true);
+    try {
+      const totalPages = Math.ceil((surahs.find(s => s.number === surahNum)?.numberOfAyahs || 7) / 10);
+      const allWords: Record<string, WordData[]> = {};
+      
+      for (let page = 1; page <= totalPages; page++) {
+        const res = await fetch(`https://api.quran.com/api/v4/verses/by_chapter/${surahNum}?language=bn&words=true&word_fields=text_uthmani&translation_fields=text&per_page=10&page=${page}`);
+        const data = await res.json();
+        if (data.verses) {
+          data.verses.forEach((v: any) => {
+            allWords[v.verse_key] = v.words || [];
+          });
+        }
+        if (!data.pagination || page >= data.pagination.total_pages) break;
+      }
+      setWordData(allWords);
+    } catch {
+      setWordData({});
+    }
+    setWordDataLoading(false);
+  }, [surahs]);
+
   const loadSurah = async (num: number) => {
     setLoading(true);
     setSelectedSurah(num);
     setAyahs([]);
     setTafsirData({});
+    setWordData({});
+    stopSurahAudio();
     try {
       const [arabic, bangla] = await Promise.all([
         fetch(`https://api.alquran.cloud/v1/surah/${num}`).then(r => r.json()),
@@ -82,10 +136,8 @@ const QuranContent = () => {
       }));
       setAyahs(combined);
 
-      // Load tafsir if one is selected
-      if (selectedTafsir > 0) {
-        loadTafsir(selectedTafsir, num);
-      }
+      if (selectedTafsir > 0) loadTafsir(selectedTafsir, num);
+      if (showWordByWord) loadWordByWord(num);
 
       setTimeout(() => ayahRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch {
@@ -102,22 +154,24 @@ const QuranContent = () => {
       const data = await res.json();
       const map: Record<string, string> = {};
       if (data.tafsirs) {
-        data.tafsirs.forEach((t: TafsirEntry) => {
-          map[t.verse_key] = t.text;
-        });
+        data.tafsirs.forEach((t: TafsirEntry) => { map[t.verse_key] = t.text; });
       }
       setTafsirData(map);
-    } catch {
-      setTafsirData({});
-    }
+    } catch { setTafsirData({}); }
     setTafsirLoading(false);
   }, []);
 
   const handleTafsirChange = (tafsirId: number) => {
     setSelectedTafsir(tafsirId);
     setShowTafsirDropdown(false);
-    if (selectedSurah) {
-      loadTafsir(tafsirId, selectedSurah);
+    if (selectedSurah) loadTafsir(tafsirId, selectedSurah);
+  };
+
+  const handleWordByWordToggle = () => {
+    const next = !showWordByWord;
+    setShowWordByWord(next);
+    if (next && selectedSurah && Object.keys(wordData).length === 0) {
+      loadWordByWord(selectedSurah);
     }
   };
 
@@ -130,6 +184,103 @@ const QuranContent = () => {
     setAudio(newAudio);
     setPlayingAyah(ayahNumber);
   };
+
+  // Full surah audio with word highlighting
+  const loadTimings = useCallback(async (surahNum: number) => {
+    try {
+      const res = await fetch(`https://api.quran.com/api/v4/recitations/${RECITER_ID}/by_chapter/${surahNum}?fields=segments`);
+      const data = await res.json();
+      const map: Record<string, number[][]> = {};
+      if (data.audio_files) {
+        data.audio_files.forEach((af: any) => {
+          if (af.verse_timings) {
+            af.verse_timings.forEach((vt: any) => {
+              map[vt.verse_key] = vt.segments || [];
+            });
+          }
+        });
+      }
+      setWordTimings(map);
+    } catch { setWordTimings({}); }
+  }, []);
+
+  const playSurahAudio = async () => {
+    if (!selectedSurah) return;
+    
+    if (isSurahPlaying && surahAudioRef.current) {
+      surahAudioRef.current.pause();
+      setIsSurahPlaying(false);
+      if (timingIntervalRef.current) clearInterval(timingIntervalRef.current);
+      return;
+    }
+
+    if (surahAudioRef.current) {
+      surahAudioRef.current.play();
+      setIsSurahPlaying(true);
+      startTimingSync();
+      return;
+    }
+
+    try {
+      const res = await fetch(`https://api.quran.com/api/v4/chapter_recitations/${RECITER_ID}/${selectedSurah}`);
+      const data = await res.json();
+      const audioUrl = data.audio_file?.audio_url;
+      if (!audioUrl) return;
+
+      await loadTimings(selectedSurah);
+
+      const newAudio = new Audio(`https://verses.quran.com/${audioUrl}`);
+      surahAudioRef.current = newAudio;
+      setSurahAudio(newAudio);
+      
+      newAudio.onended = () => {
+        setIsSurahPlaying(false);
+        setHighlightedWord(null);
+        if (timingIntervalRef.current) clearInterval(timingIntervalRef.current);
+      };
+
+      await newAudio.play();
+      setIsSurahPlaying(true);
+      startTimingSync();
+    } catch { /* ignore */ }
+  };
+
+  const startTimingSync = () => {
+    if (timingIntervalRef.current) clearInterval(timingIntervalRef.current);
+    timingIntervalRef.current = window.setInterval(() => {
+      if (!surahAudioRef.current) return;
+      const currentMs = surahAudioRef.current.currentTime * 1000;
+      
+      // Find which verse and word is currently playing
+      for (const [verseKey, segments] of Object.entries(wordTimings)) {
+        for (const seg of segments) {
+          if (seg.length >= 3 && currentMs >= seg[1] && currentMs < seg[2]) {
+            setHighlightedWord({ verseKey, wordIndex: seg[0] - 1 });
+            return;
+          }
+        }
+      }
+    }, 50);
+  };
+
+  const stopSurahAudio = () => {
+    if (surahAudioRef.current) {
+      surahAudioRef.current.pause();
+      surahAudioRef.current = null;
+    }
+    setSurahAudio(null);
+    setIsSurahPlaying(false);
+    setHighlightedWord(null);
+    setWordTimings({});
+    if (timingIntervalRef.current) clearInterval(timingIntervalRef.current);
+  };
+
+  useEffect(() => {
+    return () => {
+      stopSurahAudio();
+      if (audio) audio.pause();
+    };
+  }, []);
 
   const currentSurah = surahs.find(s => s.number === selectedSurah);
   const filteredSurahs = surahs.filter(s =>
@@ -145,7 +296,7 @@ const QuranContent = () => {
     <div className="min-h-screen bg-background">
       <div className="bg-gradient-to-br from-emerald-800 to-teal-700 text-white p-6 text-center">
         <h1 className="text-2xl font-bold mb-1">📖 পবিত্র কুরআন</h1>
-        <p className="text-sm opacity-80">আরবি মূল ও বাংলা অনুবাদ — অডিও তেলাওয়াত — তাফসিরসহ</p>
+        <p className="text-sm opacity-80">আরবি মূল ও বাংলা অনুবাদ — শব্দে শব্দে অর্থ — অডিও তেলাওয়াত — তাফসিরসহ</p>
       </div>
 
       {!selectedSurah ? (
@@ -191,7 +342,7 @@ const QuranContent = () => {
           <div ref={ayahRef} className="sticky top-0 z-10 bg-card border-b border-border shadow-sm">
             <div className="flex items-center gap-3 px-4 py-3">
               <button
-                onClick={() => { setSelectedSurah(null); setAyahs([]); setTafsirData({}); audio?.pause(); setPlayingAyah(null); }}
+                onClick={() => { setSelectedSurah(null); setAyahs([]); setTafsirData({}); setWordData({}); audio?.pause(); setPlayingAyah(null); stopSurahAudio(); }}
                 className="p-2 hover:bg-muted rounded-xl transition-colors flex-shrink-0"
               >
                 <ChevronLeft size={20} />
@@ -228,6 +379,32 @@ const QuranContent = () => {
               >
                 <AlignLeft size={11} /> অনুবাদ
               </button>
+
+              {/* Word by word toggle */}
+              <button
+                onClick={handleWordByWordToggle}
+                className={`text-[10px] px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 ${showWordByWord ? "bg-blue-700 text-white border-blue-700" : "border-border text-muted-foreground"}`}
+              >
+                <BookOpen size={11} /> শব্দার্থ
+              </button>
+
+              {/* Full surah audio */}
+              <button
+                onClick={playSurahAudio}
+                className={`text-[10px] px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 ${isSurahPlaying ? "bg-orange-600 text-white border-orange-600" : "border-border text-muted-foreground"}`}
+              >
+                {isSurahPlaying ? <Pause size={11} /> : <Play size={11} />}
+                {isSurahPlaying ? "বিরতি" : "পুরো সুরা শুনুন"}
+              </button>
+
+              {isSurahPlaying && (
+                <button
+                  onClick={stopSurahAudio}
+                  className="text-[10px] px-2 py-1 rounded-lg border border-red-500 text-red-500 flex items-center gap-1"
+                >
+                  <Square size={9} /> বন্ধ
+                </button>
+              )}
 
               {/* Tafsir dropdown */}
               <div className="relative">
@@ -282,8 +459,11 @@ const QuranContent = () => {
               {ayahs.map(ayah => {
                 const verseKey = `${selectedSurah}:${ayah.numberInSurah}`;
                 const tafsirText = tafsirData[verseKey];
+                const words = wordData[verseKey];
+                const isHighlightedVerse = highlightedWord?.verseKey === verseKey;
+
                 return (
-                  <div key={ayah.number} className="p-4 hover:bg-muted/30 transition-colors">
+                  <div key={ayah.number} className={`p-4 transition-colors ${isHighlightedVerse ? "bg-emerald-50/50 dark:bg-emerald-950/20" : "hover:bg-muted/30"}`}>
                     <div className="flex items-center justify-between gap-3 mb-3">
                       <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-700 text-white text-[11px] font-bold flex items-center justify-center">
                         {toBengaliNum(ayah.numberInSurah)}
@@ -296,14 +476,53 @@ const QuranContent = () => {
                       </button>
                     </div>
 
-                    {/* Arabic text */}
+                    {/* Arabic text with word highlighting */}
                     <p
                       className="font-arabic font-bold text-right leading-[2.6] mb-3 text-foreground"
                       dir="rtl"
                       style={{ fontSize: `${fontSize}px` }}
                     >
-                      {ayah.text}
+                      {isSurahPlaying && words ? (
+                        words.filter(w => w.char_type_name === "word").map((w, wi) => (
+                          <span
+                            key={wi}
+                            className={`transition-colors duration-200 ${
+                              highlightedWord?.verseKey === verseKey && highlightedWord?.wordIndex === wi
+                                ? "bg-yellow-300 dark:bg-yellow-600 text-emerald-900 dark:text-white rounded px-1"
+                                : ""
+                            }`}
+                          >
+                            {w.text_uthmani}{" "}
+                          </span>
+                        ))
+                      ) : (
+                        ayah.text
+                      )}
                     </p>
+
+                    {/* Word by word section */}
+                    {showWordByWord && (
+                      <div className="border-t border-blue-200 dark:border-blue-900/30 pt-3 mt-2">
+                        <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-2">📖 শব্দে শব্দে অনুবাদ</p>
+                        {wordDataLoading ? (
+                          <div className="h-10 bg-muted rounded animate-pulse" />
+                        ) : words ? (
+                          <div className="flex flex-wrap gap-2 justify-end" dir="rtl">
+                            {words.filter(w => w.char_type_name === "word").map((w, wi) => (
+                              <div key={wi} className="bg-card border border-border rounded-lg px-2.5 py-1.5 text-center min-w-[60px] hover:border-blue-400 transition-colors">
+                                <p className="font-arabic font-bold text-base leading-relaxed text-foreground">{w.text_uthmani}</p>
+                                <p className="text-[10px] text-blue-700 dark:text-blue-400 mt-0.5" dir="ltr">{w.translation?.text || ""}</p>
+                                {w.transliteration?.text && (
+                                  <p className="text-[9px] text-muted-foreground italic" dir="ltr">{w.transliteration.text}</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic">শব্দার্থ লোড হচ্ছে...</p>
+                        )}
+                      </div>
+                    )}
 
                     {/* Bengali Translation */}
                     {showTranslation && (
@@ -315,7 +534,7 @@ const QuranContent = () => {
                       </div>
                     )}
 
-                    {/* Tafsir - no repeated ayah text */}
+                    {/* Tafsir */}
                     {selectedTafsir > 0 && (
                       <div className="border-t border-amber-200 dark:border-amber-900/30 pt-3 mt-2 bg-amber-50/50 dark:bg-amber-950/20 rounded-lg px-3 py-2">
                         <p className="text-xs font-semibold text-amber-700 dark:text-amber-500 mb-1">

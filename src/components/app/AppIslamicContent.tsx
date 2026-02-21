@@ -87,10 +87,13 @@ const AppIslamicContent = () => {
                 >
                   <div>
                     <p className="text-[10px] font-semibold opacity-90 mb-1">{item.title}</p>
-                    <p className="text-[15px] font-bold leading-[2.1] font-arabic line-clamp-3" dir="rtl">
+                    <p className="text-[15px] font-bold leading-[2.1] font-arabic" dir="rtl">
                       {item.content}
                     </p>
                   </div>
+                  {item.meaning && (
+                    <p className="text-[9px] opacity-70 mt-1 leading-relaxed">{item.meaning}</p>
+                  )}
                   {item.source && (
                     <p className="text-[9px] opacity-60 mt-1 text-right italic">— {item.source}</p>
                   )}
