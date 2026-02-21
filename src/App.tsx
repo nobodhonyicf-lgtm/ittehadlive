@@ -40,7 +40,8 @@ import NotificationsPage from "./pages/NotificationsPage";
 import AppSettings from "./pages/AppSettings";
 import AppContact from "./pages/AppContact";
 import QuranPage from "./pages/QuranPage";
-import { HadithPage, DuaPage, MasalaPage } from "./pages/IslamicPages";
+import { DuaPage, MasalaPage } from "./pages/IslamicPages";
+import HadithPage from "./pages/HadithPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
