@@ -1,21 +1,44 @@
 import Layout from "@/components/layout/Layout";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
-import { useEffect, useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Search, Volume2, Plus, Minus, BookOpen, Loader2 } from "lucide-react";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { ChevronLeft, ChevronRight, Search, Plus, Minus, Loader2, Copy, Share2, Check, BookOpen } from "lucide-react";
 
 const toBengaliNum = (n: number | string) => {
   const d = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
   return String(n).replace(/[0-9]/g, (x) => d[+x]);
 };
 
+const GRADE_MAP: Record<string, string> = {
+  "sahih": "সহীহ",
+  "hasan": "হাসান",
+  "hasan sahih": "হাসান সহীহ",
+  "da'if": "দুর্বল (যঈফ)",
+  "daif": "দুর্বল (যঈফ)",
+  "maudu": "জাল (মওযু)",
+  "maudu'": "জাল (মওযু)",
+  "munkar": "মুনকার",
+  "mursal": "মুরসাল",
+  "isnad sahih": "সনদ সহীহ",
+  "isnad hasan": "সনদ হাসান",
+};
+
+const getBengaliGrade = (grade: string) => {
+  if (!grade) return "";
+  const lower = grade.toLowerCase().trim();
+  for (const [key, val] of Object.entries(GRADE_MAP)) {
+    if (lower.includes(key)) return val;
+  }
+  return grade;
+};
+
 const HADITH_BOOKS = [
-  { id: "ben-bukhari", arabicId: "ara-bukhari", name: "সহীহ বুখারী", english: "Sahih al-Bukhari", icon: "📗", totalHadith: 7563 },
-  { id: "ben-muslim", arabicId: "ara-muslim", name: "সহীহ মুসলিম", english: "Sahih Muslim", icon: "📘", totalHadith: 7563 },
-  { id: "ben-abudawud", arabicId: "ara-abudawud", name: "সুনানে আবু দাউদ", english: "Sunan Abu Dawud", icon: "📙", totalHadith: 5274 },
-  { id: "ben-tirmidhi", arabicId: "ara-tirmidhi", name: "জামে আত-তিরমিযী", english: "Jami at-Tirmidhi", icon: "📕", totalHadith: 3956 },
-  { id: "ben-nasai", arabicId: "ara-nasai", name: "সুনানে আন-নাসাঈ", english: "Sunan an-Nasa'i", icon: "📓", totalHadith: 5758 },
-  { id: "ben-ibnmajah", arabicId: "ara-ibnmajah", name: "সুনানে ইবনে মাজাহ", english: "Sunan Ibn Majah", icon: "📔", totalHadith: 4341 },
+  { id: "ben-bukhari", arabicId: "ara-bukhari", name: "সহীহ বুখারী", icon: "📗", totalHadith: 7563, color: "from-emerald-700 to-green-600" },
+  { id: "ben-muslim", arabicId: "ara-muslim", name: "সহীহ মুসলিম", icon: "📘", totalHadith: 7563, color: "from-sky-700 to-blue-600" },
+  { id: "ben-abudawud", arabicId: "ara-abudawud", name: "সুনানে আবু দাউদ", icon: "📙", totalHadith: 5274, color: "from-amber-700 to-orange-600" },
+  { id: "ben-tirmidhi", arabicId: "ara-tirmidhi", name: "জামে আত-তিরমিযী", icon: "📕", totalHadith: 3956, color: "from-rose-700 to-red-600" },
+  { id: "ben-nasai", arabicId: "ara-nasai", name: "সুনানে আন-নাসাঈ", icon: "📓", totalHadith: 5758, color: "from-purple-700 to-violet-600" },
+  { id: "ben-ibnmajah", arabicId: "ara-ibnmajah", name: "সুনানে ইবনে মাজাহ", icon: "📔", totalHadith: 4341, color: "from-indigo-700 to-blue-600" },
 ];
 
 interface HadithItem {
@@ -44,6 +67,7 @@ const HadithContent = () => {
   const [arabicSize, setArabicSize] = useState(20);
   const [searchQuery, setSearchQuery] = useState("");
   const [sectionSearch, setSectionSearch] = useState("");
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const BASE = "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1";
 
@@ -52,13 +76,11 @@ const HadithContent = () => {
     setSelectedBook(book);
     setSections({});
     try {
-      // Load metadata from the full book (just need sections map)
       const res = await fetch(`${BASE}/editions/${book.id}.min.json`);
       const data = await res.json();
       setSections(data.metadata?.sections || {});
       setView("sections");
     } catch {
-      // Fallback: try section by section
       setSections({});
       setView("sections");
     }
@@ -93,6 +115,44 @@ const HadithContent = () => {
     if (view === "hadiths") { setView("sections"); setHadiths([]); setSelectedSection(null); }
     else if (view === "sections") { setView("books"); setSelectedBook(null); setSections({}); }
   };
+
+  const copyHadith = useCallback(async (hadith: HadithItem) => {
+    const arabicText = arabicHadiths[hadith.hadithnumber] || "";
+    const grade = hadith.grades?.[0]?.grade ? getBengaliGrade(hadith.grades[0].grade) : "";
+    const text = [
+      arabicText ? `${arabicText}\n` : "",
+      hadith.text,
+      "",
+      `📖 ${selectedBook?.name} — হাদিস নং ${toBengaliNum(hadith.hadithnumber)}`,
+      grade ? `মান: ${grade}` : "",
+    ].filter(Boolean).join("\n");
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(hadith.hadithnumber);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch { /* ignore */ }
+  }, [arabicHadiths, selectedBook]);
+
+  const shareHadith = useCallback(async (hadith: HadithItem) => {
+    const arabicText = arabicHadiths[hadith.hadithnumber] || "";
+    const grade = hadith.grades?.[0]?.grade ? getBengaliGrade(hadith.grades[0].grade) : "";
+    const text = [
+      arabicText ? `${arabicText}\n` : "",
+      hadith.text,
+      "",
+      `📖 ${selectedBook?.name} — হাদিস নং ${toBengaliNum(hadith.hadithnumber)}`,
+      grade ? `মান: ${grade}` : "",
+    ].filter(Boolean).join("\n");
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${selectedBook?.name} — হাদিস ${toBengaliNum(hadith.hadithnumber)}`, text });
+      } catch { /* cancelled */ }
+    } else {
+      copyHadith(hadith);
+    }
+  }, [arabicHadiths, selectedBook, copyHadith]);
 
   const sectionEntries = useMemo(() => {
     return Object.entries(sections)
@@ -138,17 +198,19 @@ const HadithContent = () => {
                 {view === "sections" ? selectedBook?.name : `অধ্যায় ${toBengaliNum(selectedSection || 0)}: ${sections[String(selectedSection)] || ""}`}
               </p>
               <p className="text-xs text-muted-foreground">
-                {view === "sections" ? `${Object.keys(sections).filter(k => k !== "0").length}টি অধ্যায়` : `${filteredHadiths.length}টি হাদিস`}
+                {view === "sections" ? `${toBengaliNum(Object.keys(sections).filter(k => k !== "0").length)}টি অধ্যায়` : `${toBengaliNum(filteredHadiths.length)}টি হাদিস`}
               </p>
             </div>
             {view === "hadiths" && (
               <div className="flex items-center gap-1">
                 <div className="flex items-center gap-0.5 border border-border rounded-lg px-1.5 py-0.5">
+                  <span className="text-[8px] text-muted-foreground">আরবি</span>
                   <button onClick={() => setArabicSize(s => Math.max(14, s - 2))} className="p-0.5 hover:bg-muted rounded"><Minus size={10} /></button>
                   <span className="text-[9px] w-4 text-center">{arabicSize}</span>
                   <button onClick={() => setArabicSize(s => Math.min(32, s + 2))} className="p-0.5 hover:bg-muted rounded"><Plus size={10} /></button>
                 </div>
                 <div className="flex items-center gap-0.5 border border-border rounded-lg px-1.5 py-0.5">
+                  <span className="text-[8px] text-muted-foreground">বাংলা</span>
                   <button onClick={() => setFontSize(s => Math.max(11, s - 1))} className="p-0.5 hover:bg-muted rounded"><Minus size={10} /></button>
                   <span className="text-[9px] w-4 text-center">{fontSize}</span>
                   <button onClick={() => setFontSize(s => Math.min(22, s + 1))} className="p-0.5 hover:bg-muted rounded"><Plus size={10} /></button>
@@ -156,30 +218,16 @@ const HadithContent = () => {
               </div>
             )}
           </div>
-          {/* Search bar */}
-          {view === "sections" && (
+          {/* Search */}
+          {(view === "sections" || view === "hadiths") && (
             <div className="px-4 pb-3">
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="অধ্যায় খুঁজুন..."
-                  value={sectionSearch}
-                  onChange={e => setSectionSearch(e.target.value)}
-                  className="w-full border border-border rounded-xl pl-8 pr-3 py-2 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-sky-600"
-                />
-              </div>
-            </div>
-          )}
-          {view === "hadiths" && (
-            <div className="px-4 pb-3">
-              <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="হাদিস খুঁজুন..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder={view === "sections" ? "অধ্যায় খুঁজুন..." : "হাদিস খুঁজুন..."}
+                  value={view === "sections" ? sectionSearch : searchQuery}
+                  onChange={e => view === "sections" ? setSectionSearch(e.target.value) : setSearchQuery(e.target.value)}
                   className="w-full border border-border rounded-xl pl-8 pr-3 py-2 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-sky-600"
                 />
               </div>
@@ -207,10 +255,12 @@ const HadithContent = () => {
                 className="text-left bg-card border border-border rounded-2xl p-4 hover:border-sky-500 hover:shadow-lg transition-all active:scale-[0.98] group"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">{book.icon}</span>
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${book.color} flex items-center justify-center text-2xl`}>
+                    {book.icon}
+                  </div>
                   <div className="flex-1">
                     <p className="font-bold text-base">{book.name}</p>
-                    <p className="text-xs text-muted-foreground">{book.english}</p>
+                    <p className="text-xs text-muted-foreground">{toBengaliNum(book.totalHadith)}টি হাদিস</p>
                   </div>
                   <ChevronRight size={18} className="text-muted-foreground group-hover:text-sky-600 transition-colors" />
                 </div>
@@ -255,50 +305,81 @@ const HadithContent = () => {
               <p className="text-sm">কোনো হাদিস পাওয়া যায়নি</p>
             </div>
           ) : (
-            filteredHadiths.map(hadith => (
-              <div key={hadith.hadithnumber} className="p-4 hover:bg-muted/30 transition-colors">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-sky-700 text-white text-[10px] font-bold flex items-center justify-center">
-                    {toBengaliNum(hadith.hadithnumber)}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground">
-                    হাদিস নং {toBengaliNum(hadith.hadithnumber)}
-                  </span>
-                  {hadith.grades?.length > 0 && (
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                      hadith.grades[0]?.grade?.toLowerCase().includes("sahih") ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
-                      hadith.grades[0]?.grade?.toLowerCase().includes("hasan") ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
-                      "bg-muted text-muted-foreground"
-                    }`}>
-                      {hadith.grades[0]?.grade}
+            filteredHadiths.map(hadith => {
+              const bengaliGrade = hadith.grades?.[0]?.grade ? getBengaliGrade(hadith.grades[0].grade) : "";
+              const isCopied = copiedId === hadith.hadithnumber;
+              
+              return (
+                <div key={hadith.hadithnumber} className="p-4 hover:bg-muted/30 transition-colors">
+                  {/* Header row */}
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-sky-700 text-white text-[10px] font-bold flex items-center justify-center">
+                      {toBengaliNum(hadith.hadithnumber)}
                     </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      হাদিস নং {toBengaliNum(hadith.hadithnumber)}
+                    </span>
+                    {bengaliGrade && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                        bengaliGrade.includes("সহীহ") ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
+                        bengaliGrade.includes("হাসান") ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
+                        bengaliGrade.includes("দুর্বল") ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" :
+                        "bg-muted text-muted-foreground"
+                      }`}>
+                        {bengaliGrade}
+                      </span>
+                    )}
+                    {/* Action buttons */}
+                    <div className="ml-auto flex items-center gap-1">
+                      <button
+                        onClick={() => copyHadith(hadith)}
+                        className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground"
+                        title="কপি করুন"
+                      >
+                        {isCopied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                      </button>
+                      <button
+                        onClick={() => shareHadith(hadith)}
+                        className="p-1.5 hover:bg-muted rounded-lg transition-colors text-muted-foreground"
+                        title="শেয়ার করুন"
+                      >
+                        <Share2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Arabic text */}
+                  {arabicHadiths[hadith.hadithnumber] && (
+                    <p
+                      className="font-arabic font-bold text-right leading-[2.4] mb-3 text-foreground"
+                      dir="rtl"
+                      style={{ fontSize: `${arabicSize}px` }}
+                    >
+                      {arabicHadiths[hadith.hadithnumber]}
+                    </p>
                   )}
+
+                  {/* Bengali text */}
+                  <div className={arabicHadiths[hadith.hadithnumber] ? "border-t border-border pt-3" : ""}>
+                    <p className="text-foreground leading-relaxed" style={{ fontSize: `${fontSize}px` }}>
+                      {hadith.text}
+                    </p>
+                  </div>
+
+                  {/* Reference & grader */}
+                  <div className="flex items-center justify-between mt-2 flex-wrap gap-1">
+                    <p className="text-[10px] text-muted-foreground italic">
+                      📖 {selectedBook?.name} — বই {toBengaliNum(hadith.reference?.book || 0)}, হাদিস {toBengaliNum(hadith.reference?.hadith || 0)}
+                    </p>
+                    {hadith.grades?.[0]?.name && (
+                      <p className="text-[9px] text-muted-foreground">
+                        গ্রেডকারী: {hadith.grades[0].name}
+                      </p>
+                    )}
+                  </div>
                 </div>
-
-                {/* Arabic text */}
-                {arabicHadiths[hadith.hadithnumber] && (
-                  <p
-                    className="font-arabic font-bold text-right leading-[2.4] mb-3 text-foreground"
-                    dir="rtl"
-                    style={{ fontSize: `${arabicSize}px` }}
-                  >
-                    {arabicHadiths[hadith.hadithnumber]}
-                  </p>
-                )}
-
-                {/* Bengali text */}
-                <div className={arabicHadiths[hadith.hadithnumber] ? "border-t border-border pt-3" : ""}>
-                  <p className="text-foreground leading-relaxed" style={{ fontSize: `${fontSize}px` }}>
-                    {hadith.text}
-                  </p>
-                </div>
-
-                {/* Reference */}
-                <p className="text-[10px] text-muted-foreground mt-2 italic">
-                  📖 {selectedBook?.name} — বই {toBengaliNum(hadith.reference?.book || 0)}, হাদিস {toBengaliNum(hadith.reference?.hadith || 0)}
-                </p>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       )}

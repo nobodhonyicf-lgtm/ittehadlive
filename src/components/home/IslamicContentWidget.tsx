@@ -91,14 +91,16 @@ const IslamicContentWidget = () => {
                   >
                     <div>
                       <p className="text-xs font-semibold mb-2 opacity-90">{item.title}</p>
-                      <p className="text-[18px] font-bold leading-[2.2] font-arabic line-clamp-3" dir="rtl">
+                      <p className="text-[18px] font-bold leading-[2.2] font-arabic" dir="rtl">
                         {item.content}
                       </p>
                     </div>
+                    {item.meaning && (
+                      <p className="text-[11px] opacity-80 mt-2 leading-relaxed">{item.meaning}</p>
+                    )}
                     {item.source && (
                       <p className="text-[10px] opacity-70 mt-2 text-right italic">— {item.source}</p>
                     )}
-                    <p className="text-[10px] opacity-50 mt-1 text-center">ক্লিক করে পুরো দেখুন</p>
                   </button>
                 ) : (
                   <Link to={config.link} className="flex-1 flex items-center justify-center relative z-10">
