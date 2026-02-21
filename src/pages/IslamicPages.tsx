@@ -124,7 +124,7 @@ const IslamicListContent = ({
         <p className="text-sm opacity-80">{description}</p>
       </div>
 
-      <div className="p-4 max-w-2xl mx-auto space-y-3">
+      <div className="p-4 space-y-3">
         {/* Font size + Search row */}
         <div className="flex gap-2 items-center">
           <div className="relative flex-1">
@@ -392,6 +392,6 @@ const makeIslamicPage = (
   };
 };
 
-export const HadithPage = makeIslamicPage("hadith", "হাদিস", "📿", "from-sky-800 to-blue-700", "নবীজি ﷺ এর বাণী ও সুন্নাহ — সহীহ হাদিস বিষয়ভিত্তিক");
+// HadithPage is now in its own file: src/pages/HadithPage.tsx
 export const DuaPage = makeIslamicPage("dua", "দোয়া", "🤲", "from-indigo-800 to-purple-700", "বিষয়ভিত্তিক দোয়া ও আমল — আরবি, উচ্চারণ ও অর্থসহ");
 export const MasalaPage = makeIslamicPage("masala", "মাসআলা", "⚖️", "from-rose-800 to-red-700", "ইসলামী মাসআলা ও ফিকহ — প্রশ্নোত্তর ও বিষয়ভিত্তিক");
