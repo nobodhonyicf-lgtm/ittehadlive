@@ -76,9 +76,13 @@ const HadithContent = () => {
     setSelectedBook(book);
     setSections({});
     try {
-      const res = await fetch(`${BASE}/editions/${book.id}.min.json`);
-      const data = await res.json();
-      setSections(data.metadata?.sections || {});
+      // Load Bengali sections first, fallback to English
+      const [benRes, engRes] = await Promise.all([
+        fetch(`${BASE}/editions/${book.id}.min.json`).then(r => r.json()).catch(() => null),
+        fetch(`${BASE}/editions/${book.id}.json`).then(r => r.json()).catch(() => null),
+      ]);
+      const secs = benRes?.metadata?.sections || engRes?.metadata?.sections || {};
+      setSections(secs);
       setView("sections");
     } catch {
       setSections({});

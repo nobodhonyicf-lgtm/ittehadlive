@@ -30,6 +30,18 @@ const ContentModal = ({ item, onClose }: { item: any; onClose: () => void }) => 
       </div>
       <div className="overflow-y-auto p-6 space-y-4">
         <p className="font-arabic text-2xl font-bold leading-[2.5] text-right" dir="rtl">{item.content}</p>
+        {item.transliteration && (
+          <p className="text-sm text-muted-foreground italic border-t border-border pt-3">উচ্চারণ: {item.transliteration}</p>
+        )}
+        {item.meaning && (
+          <p className="text-sm text-foreground leading-relaxed border-t border-border pt-3">📝 অর্থ: {item.meaning}</p>
+        )}
+        {item.question && (
+          <div className="border-t border-border pt-3">
+            <p className="text-sm font-semibold mb-1">❓ প্রশ্ন: {item.question}</p>
+            <p className="text-sm text-foreground leading-relaxed">{item.content}</p>
+          </div>
+        )}
         {item.source && (
           <p className="text-sm text-muted-foreground italic text-right border-t border-border pt-4">— {item.source}</p>
         )}

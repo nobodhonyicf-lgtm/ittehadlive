@@ -37,21 +37,51 @@ const PageView = () => {
 
                 {/* Committee/Advisors member grid */}
                 {isCommitteePage && members && members.length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {members.map((m: any) => (
-                      <div key={m.id} className="border rounded-lg p-4 text-center bg-muted/30">
-                        <div className="w-20 h-20 rounded-full mx-auto mb-3 bg-secondary flex items-center justify-center overflow-hidden border-2 border-primary/20">
-                          {m.photo_url ? (
-                            <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <User className="text-primary" size={28} />
-                          )}
+                  <div>
+                    {/* Founding Members - First 3 shown prominently */}
+                    {slug === "committee" && members.length >= 3 && (
+                      <div className="mb-8">
+                        <h2 className="text-lg font-bold text-center mb-4 text-primary">🏛️ প্রতিষ্ঠাতা গভর্নিং বডি</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          {members.slice(0, 3).map((m: any, i: number) => (
+                            <div key={m.id} className={`relative overflow-hidden rounded-2xl p-6 text-center shadow-lg border-2 ${
+                              i === 0 ? "bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-950/40 dark:to-yellow-950/30 border-amber-400/50" :
+                              i === 1 ? "bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950/40 dark:to-teal-950/30 border-emerald-400/50" :
+                              "bg-gradient-to-br from-sky-50 to-blue-100 dark:from-sky-950/40 dark:to-blue-950/30 border-sky-400/50"
+                            }`}>
+                              <div className="absolute top-2 right-2 text-3xl opacity-10">⭐</div>
+                              <div className="w-24 h-24 rounded-full mx-auto mb-4 bg-secondary flex items-center justify-center overflow-hidden border-4 border-white dark:border-card shadow-md">
+                                {m.photo_url ? (
+                                  <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <User className="text-primary" size={36} />
+                                )}
+                              </div>
+                              <h3 className="font-bold text-base mb-1">{m.name}</h3>
+                              <p className="text-sm text-primary font-semibold">{m.title}</p>
+                              {m.institution && <p className="text-xs text-muted-foreground mt-1">{m.institution}</p>}
+                            </div>
+                          ))}
                         </div>
-                        <h3 className="font-bold text-sm">{m.name}</h3>
-                        <p className="text-xs text-primary font-medium">{m.title}</p>
-                        {m.institution && <p className="text-xs text-muted-foreground mt-1">{m.institution}</p>}
                       </div>
-                    ))}
+                    )}
+                    {/* Remaining members */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {(slug === "committee" ? members.slice(3) : members).map((m: any) => (
+                        <div key={m.id} className="border rounded-lg p-4 text-center bg-muted/30">
+                          <div className="w-20 h-20 rounded-full mx-auto mb-3 bg-secondary flex items-center justify-center overflow-hidden border-2 border-primary/20">
+                            {m.photo_url ? (
+                              <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <User className="text-primary" size={28} />
+                            )}
+                          </div>
+                          <h3 className="font-bold text-sm">{m.name}</h3>
+                          <p className="text-xs text-primary font-medium">{m.title}</p>
+                          {m.institution && <p className="text-xs text-muted-foreground mt-1">{m.institution}</p>}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </article>
