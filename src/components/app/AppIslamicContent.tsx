@@ -28,7 +28,9 @@ const ContentModal = ({ item, onClose }: { item: any; onClose: () => void }) => 
         <button onClick={onClose} className="p-2 hover:bg-muted rounded-xl"><X size={16} /></button>
       </div>
       <div className="overflow-y-auto p-5 space-y-4">
-        <p className="font-arabic text-2xl font-bold leading-[2.5] text-right" dir="rtl">{item.content}</p>
+        {item.category !== "masala" && (
+          <p className="font-arabic text-2xl font-bold leading-[2.5] text-right" dir="rtl">{item.content}</p>
+        )}
         {item.transliteration && (
           <p className="text-sm text-muted-foreground italic border-t border-border pt-3">উচ্চারণ: {item.transliteration}</p>
         )}
