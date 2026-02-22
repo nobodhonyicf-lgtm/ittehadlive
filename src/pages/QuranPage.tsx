@@ -199,10 +199,50 @@ const QuranContent = () => {
 
   const playAudio = (ayahNumber: number) => {
     if (audio) { audio.pause(); audio.currentTime = 0; }
-    if (playingAyah === ayahNumber) { setPlayingAyah(null); return; }
+    if (timingIntervalRef.current) clearInterval(timingIntervalRef.current);
+    if (playingAyah === ayahNumber) { 
+      setPlayingAyah(null); 
+      setHighlightedWord(null);
+      setHighlightedVerse(null);
+      return; 
+    }
+
+    const ayah = ayahs.find(a => a.number === ayahNumber);
+    const verseKey = selectedSurah && ayah ? `${selectedSurah}:${ayah.numberInSurah}` : null;
+
+    // Load word data if needed for highlighting
+    if (verseKey && Object.keys(wordData).length === 0 && selectedSurah) {
+      loadWordByWord(selectedSurah);
+    }
+
     const newAudio = new Audio(`https://cdn.islamic.network/quran/audio/128/ar.alafasy/${ayahNumber}.mp3`);
     newAudio.play();
-    newAudio.onended = () => setPlayingAyah(null);
+    
+    if (verseKey) setHighlightedVerse(verseKey);
+
+    // Estimate word-by-word highlighting based on audio duration
+    newAudio.onloadedmetadata = () => {
+      if (verseKey && wordData[verseKey]) {
+        const words = wordData[verseKey].filter(w => w.char_type_name === "word" || w.char_type_name === "end");
+        if (words.length > 0) {
+          const duration = newAudio.duration * 1000;
+          const wordDuration = duration / words.length;
+          timingIntervalRef.current = window.setInterval(() => {
+            const currentMs = newAudio.currentTime * 1000;
+            const wordIndex = Math.min(Math.floor(currentMs / wordDuration), words.length - 1);
+            setHighlightedWord({ verseKey, wordIndex });
+          }, 80);
+        }
+      }
+    };
+
+    newAudio.onended = () => {
+      setPlayingAyah(null);
+      setHighlightedWord(null);
+      setHighlightedVerse(null);
+      if (timingIntervalRef.current) clearInterval(timingIntervalRef.current);
+    };
+
     setAudio(newAudio);
     setPlayingAyah(ayahNumber);
   };
