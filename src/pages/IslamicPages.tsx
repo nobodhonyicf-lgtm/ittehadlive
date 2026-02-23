@@ -204,6 +204,9 @@ const IslamicListContent = ({
                       </p>
                     )}
 
+                    {item.meaning && (
+                      <p className="text-[10px] text-muted-foreground mt-1 line-clamp-1">📝 {item.meaning}</p>
+                    )}
                     {item.source && (
                       <p className="text-[11px] text-muted-foreground mt-1 text-right italic">— {item.source}</p>
                     )}
@@ -354,6 +357,9 @@ const AppIslamicListContent = ({
                       </p>
                     )}
 
+                    {item.meaning && (
+                      <p className="text-[9px] text-muted-foreground mt-1 line-clamp-1">📝 {item.meaning}</p>
+                    )}
                     {item.source && (
                       <p className="text-[10px] text-muted-foreground mt-1 text-right italic">— {item.source}</p>
                     )}
