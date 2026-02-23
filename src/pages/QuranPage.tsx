@@ -145,16 +145,25 @@ const QuranContent = () => {
     setWordData({});
     stopSurahAudio();
     try {
-      const [arabic, bangla] = await Promise.all([
-        fetch(`https://api.alquran.cloud/v1/surah/${num}`).then(r => r.json()),
-        fetch(`https://api.alquran.cloud/v1/surah/${num}/bn.bengali`).then(r => r.json()),
-      ]);
-
-      const combined = arabic.data.ayahs.map((a: any, i: number) => ({
-        number: a.number,
-        text: a.text,
-        translation: bangla.data.ayahs[i]?.text || "",
-        numberInSurah: a.numberInSurah,
+      // Use quran.com API for proper Uthmani text with waqf marks
+      const totalAyahs = surahs.find(s => s.number === num)?.numberOfAyahs || 7;
+      const totalPages = Math.ceil(totalAyahs / 50);
+      
+      let allArabicAyahs: any[] = [];
+      for (let page = 1; page <= totalPages; page++) {
+        const res = await fetch(`https://api.quran.com/api/v4/verses/by_chapter/${num}?language=bn&per_page=50&page=${page}&fields=text_uthmani&translations=161`);
+        const data = await res.json();
+        if (data.verses) {
+          allArabicAyahs = [...allArabicAyahs, ...data.verses];
+        }
+        if (!data.pagination || page >= data.pagination.total_pages) break;
+      }
+      
+      const combined = allArabicAyahs.map((v: any, i: number) => ({
+        number: (num === 1 ? 0 : getAyahOffset(num)) + i + 1,
+        text: v.text_uthmani || "",
+        translation: v.translations?.[0]?.text || "",
+        numberInSurah: i + 1,
       }));
       setAyahs(combined);
 
@@ -166,6 +175,28 @@ const QuranContent = () => {
       setAyahs([]);
     }
     setLoading(false);
+  };
+
+  // Helper to get global ayah number offset for a surah
+  const getAyahOffset = (surahNum: number): number => {
+    // Cumulative ayah counts before each surah (approximate, used for audio URLs)
+    const offsets: Record<number, number> = {
+      1: 0, 2: 7, 3: 293, 4: 493, 5: 669, 6: 789, 7: 954, 8: 1160, 9: 1235, 10: 1364,
+      11: 1473, 12: 1596, 13: 1707, 14: 1750, 15: 1802, 16: 1901, 17: 2029, 18: 2140,
+      19: 2250, 20: 2348, 21: 2483, 22: 2595, 23: 2673, 24: 2791, 25: 2855, 26: 2932,
+      27: 3159, 28: 3252, 29: 3340, 30: 3409, 31: 3469, 32: 3503, 33: 3533, 34: 3606,
+      35: 3660, 36: 3705, 37: 3788, 38: 3970, 39: 4058, 40: 4133, 41: 4218, 42: 4272,
+      43: 4325, 44: 4414, 45: 4473, 46: 4510, 47: 4545, 48: 4583, 49: 4612, 50: 4630,
+      51: 4675, 52: 4735, 53: 4784, 54: 4846, 55: 4901, 56: 4979, 57: 5075, 58: 5104,
+      59: 5126, 60: 5150, 61: 5163, 62: 5177, 63: 5188, 64: 5199, 65: 5217, 66: 5229,
+      67: 5241, 68: 5271, 69: 5323, 70: 5375, 71: 5419, 72: 5447, 73: 5475, 74: 5495,
+      75: 5551, 76: 5591, 77: 5622, 78: 5672, 79: 5712, 80: 5758, 81: 5800, 82: 5829,
+      83: 5848, 84: 5884, 85: 5909, 86: 5931, 87: 5948, 88: 5967, 89: 5993, 90: 6023,
+      91: 6043, 92: 6058, 93: 6079, 94: 6090, 95: 6098, 96: 6106, 97: 6125, 98: 6130,
+      99: 6138, 100: 6146, 101: 6157, 102: 6168, 103: 6176, 104: 6179, 105: 6188, 106: 6193,
+      107: 6197, 108: 6204, 109: 6207, 110: 6213, 111: 6216, 112: 6221, 113: 6224, 114: 6229,
+    };
+    return offsets[surahNum] || 0;
   };
 
   const loadTafsir = useCallback(async (tafsirId: number, surahNum: number) => {
@@ -525,7 +556,7 @@ const QuranContent = () => {
               ))}
             </div>
           ) : (
-            <div className="divide-y divide-border">
+            <div className="space-y-0">
               {ayahs.map(ayah => {
                 const verseKey = `${selectedSurah}:${ayah.numberInSurah}`;
                 const tafsirText = tafsirData[verseKey];
@@ -533,7 +564,7 @@ const QuranContent = () => {
                 const isHighlightedVerse = highlightedVerse === verseKey;
 
                 return (
-                  <div key={ayah.number} className={`p-4 transition-colors duration-300 ${isHighlightedVerse ? "bg-emerald-50/60 dark:bg-emerald-950/30" : "hover:bg-muted/30"}`}>
+                  <div key={ayah.number} className={`p-4 border-b border-border transition-colors duration-300 ${isHighlightedVerse ? "bg-emerald-50/60 dark:bg-emerald-950/30" : "hover:bg-muted/30"}`}>
                     <div className="flex items-center justify-between gap-3 mb-3">
                       <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-700 text-white text-[11px] font-bold flex items-center justify-center">
                         {toBengaliNum(ayah.numberInSurah)}
@@ -548,12 +579,15 @@ const QuranContent = () => {
 
                     {/* Arabic text with word highlighting */}
                     <p
-                      className="text-right leading-[2.8] mb-3 text-foreground"
+                      className="text-right mb-4 text-foreground"
                       dir="rtl"
                       style={{ 
                         fontSize: `${fontSize}px`,
                         fontFamily: "'Scheherazade New', 'Amiri', 'Noto Naskh Arabic', serif",
                         fontWeight: 400,
+                        lineHeight: 2.6,
+                        wordSpacing: '4px',
+                        letterSpacing: '0.02em',
                       }}
                     >
                       {(isSurahPlaying || playingAyah) && words ? (
@@ -562,7 +596,7 @@ const QuranContent = () => {
                             key={wi}
                             className={`transition-all duration-150 ${
                               highlightedWord?.verseKey === verseKey && highlightedWord?.wordIndex === wi
-                                ? "bg-yellow-300/80 dark:bg-yellow-600/60 rounded-sm px-0.5"
+                                ? "bg-yellow-300/80 dark:bg-yellow-600/60 rounded px-1 py-0.5"
                                 : ""
                             }`}
                           >
@@ -572,6 +606,9 @@ const QuranContent = () => {
                       ) : (
                         ayah.text
                       )}
+                      <span className="inline-block mx-1 text-emerald-600 dark:text-emerald-400" style={{ fontSize: `${Math.max(14, fontSize - 6)}px` }}>
+                        ﴿{toBengaliNum(ayah.numberInSurah)}﴾
+                      </span>
                     </p>
 
                     {/* Word by word section - no transliteration */}

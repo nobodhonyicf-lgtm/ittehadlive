@@ -3,6 +3,7 @@ import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Search, Plus, Minus, Loader2, Copy, Share2, Check, BookOpen } from "lucide-react";
+import { translateSectionName } from "@/lib/hadithSectionsBn";
 
 const toBengaliNum = (n: number | string) => {
   const d = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
@@ -76,13 +77,15 @@ const HadithContent = () => {
     setSelectedBook(book);
     setSections({});
     try {
-      // Load Bengali sections first, fallback to English
-      const [benRes, engRes] = await Promise.all([
-        fetch(`${BASE}/editions/${book.id}.min.json`).then(r => r.json()).catch(() => null),
-        fetch(`${BASE}/editions/${book.id}.json`).then(r => r.json()).catch(() => null),
-      ]);
-      const secs = benRes?.metadata?.sections || engRes?.metadata?.sections || {};
-      setSections(secs);
+      // Load English edition for metadata (sections are always in English in API)
+      const res = await fetch(`${BASE}/editions/${book.id}.json`).then(r => r.json()).catch(() => null);
+      const secs = res?.metadata?.sections || {};
+      // Translate section names to Bengali
+      const bnSecs: Record<string, string> = {};
+      for (const [key, val] of Object.entries(secs)) {
+        bnSecs[key] = translateSectionName(val as string);
+      }
+      setSections(bnSecs);
       setView("sections");
     } catch {
       setSections({});

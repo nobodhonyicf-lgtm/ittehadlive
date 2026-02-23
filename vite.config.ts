@@ -27,14 +27,68 @@ export default defineConfig(({ mode }) => ({
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: "NetworkFirst",
+            handler: "StaleWhileRevalidate",
             options: {
               cacheName: "supabase-cache",
               expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60, // 1 hour
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
               },
-              networkTimeoutSeconds: 5,
+            },
+          },
+          {
+            urlPattern: /^https:\/\/api\.quran\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "quran-api-cache",
+              expiration: {
+                maxEntries: 500,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/api\.alquran\.cloud\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "alquran-api-cache",
+              expiration: {
+                maxEntries: 500,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/gh\/fawazahmed0\/hadith-api.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "hadith-api-cache",
+              expiration: {
+                maxEntries: 500,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/cdn\.islamic\.network\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "islamic-audio-cache",
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/verses\.quran\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "quran-audio-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
             },
           },
           {
@@ -43,8 +97,30 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "image-cache",
               expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "google-fonts-cache",
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts-webfonts",
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
             },
           },

@@ -65,23 +65,81 @@ const PageView = () => {
                         </div>
                       </div>
                     )}
-                    {/* Remaining members */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                      {(slug === "committee" ? members.slice(3) : members).map((m: any) => (
-                        <div key={m.id} className="border rounded-lg p-4 text-center bg-muted/30">
-                          <div className="w-20 h-20 rounded-full mx-auto mb-3 bg-secondary flex items-center justify-center overflow-hidden border-2 border-primary/20">
-                            {m.photo_url ? (
-                              <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <User className="text-primary" size={28} />
-                            )}
+
+                    {/* President & Secretary - special styling */}
+                    {slug === "committee" && members.length > 3 && (() => {
+                      const remaining = members.slice(3);
+                      const isPresidentOrSecretary = (m: any) => {
+                        const t = (m.title || "").toLowerCase();
+                        return t.includes("সভাপতি") || t.includes("সাধারণ সম্পাদক") || t.includes("president") || t.includes("secretary");
+                      };
+                      const specialMembers = remaining.filter(isPresidentOrSecretary);
+                      const regularMembers = remaining.filter((m: any) => !isPresidentOrSecretary(m));
+                      
+                      return (
+                        <>
+                          {specialMembers.length > 0 && (
+                            <div className="mb-6">
+                              <h2 className="text-lg font-bold text-center mb-4 text-primary">🎖️ নির্বাহী কমিটি</h2>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {specialMembers.map((m: any) => (
+                                  <div key={m.id} className="relative overflow-hidden rounded-2xl p-5 text-center shadow-md border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20">
+                                    <div className="absolute top-2 right-2 text-2xl opacity-10">🎖️</div>
+                                    <div className="w-22 h-22 rounded-full mx-auto mb-3 bg-secondary flex items-center justify-center overflow-hidden border-4 border-primary/20 shadow-md" style={{ width: '5.5rem', height: '5.5rem' }}>
+                                      {m.photo_url ? (
+                                        <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
+                                      ) : (
+                                        <User className="text-primary" size={32} />
+                                      )}
+                                    </div>
+                                    <h3 className="font-bold text-base mb-1">{m.name}</h3>
+                                    <p className="text-sm text-primary font-bold">{m.title}</p>
+                                    {m.institution && <p className="text-xs text-muted-foreground mt-1">{m.institution}</p>}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {/* Regular members */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {regularMembers.map((m: any) => (
+                              <div key={m.id} className="border rounded-lg p-4 text-center bg-muted/30">
+                                <div className="w-20 h-20 rounded-full mx-auto mb-3 bg-secondary flex items-center justify-center overflow-hidden border-2 border-primary/20">
+                                  {m.photo_url ? (
+                                    <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <User className="text-primary" size={28} />
+                                  )}
+                                </div>
+                                <h3 className="font-bold text-sm">{m.name}</h3>
+                                <p className="text-xs text-primary font-medium">{m.title}</p>
+                                {m.institution && <p className="text-xs text-muted-foreground mt-1">{m.institution}</p>}
+                              </div>
+                            ))}
                           </div>
-                          <h3 className="font-bold text-sm">{m.name}</h3>
-                          <p className="text-xs text-primary font-medium">{m.title}</p>
-                          {m.institution && <p className="text-xs text-muted-foreground mt-1">{m.institution}</p>}
-                        </div>
-                      ))}
-                    </div>
+                        </>
+                      );
+                    })()}
+
+                    {/* Non-committee pages (advisors, etc) */}
+                    {slug !== "committee" && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {members.map((m: any) => (
+                          <div key={m.id} className="border rounded-lg p-4 text-center bg-muted/30">
+                            <div className="w-20 h-20 rounded-full mx-auto mb-3 bg-secondary flex items-center justify-center overflow-hidden border-2 border-primary/20">
+                              {m.photo_url ? (
+                                <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <User className="text-primary" size={28} />
+                              )}
+                            </div>
+                            <h3 className="font-bold text-sm">{m.name}</h3>
+                            <p className="text-xs text-primary font-medium">{m.title}</p>
+                            {m.institution && <p className="text-xs text-muted-foreground mt-1">{m.institution}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </article>
