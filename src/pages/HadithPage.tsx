@@ -2,8 +2,9 @@ import Layout from "@/components/layout/Layout";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Search, Plus, Minus, Loader2, Copy, Share2, Check, BookOpen } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Plus, Minus, Loader2, Copy, Share2, Check, BookOpen, Menu, X } from "lucide-react";
 import { translateSectionName } from "@/lib/hadithSectionsBn";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const toBengaliNum = (n: number | string) => {
   const d = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
@@ -69,6 +70,7 @@ const HadithContent = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sectionSearch, setSectionSearch] = useState("");
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   const BASE = "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1";
 
@@ -193,8 +195,69 @@ const HadithContent = () => {
     );
   }, [hadiths, searchQuery]);
 
+  const breadcrumbItems = view === "books"
+    ? [{ label: "হাদিস" }]
+    : view === "sections"
+      ? [{ label: "হাদিস", href: "/hadith" }, { label: selectedBook?.name || "" }]
+      : [{ label: "হাদিস", href: "/hadith" }, { label: selectedBook?.name || "" }, { label: `অধ্যায় ${toBengaliNum(selectedSection || 0)}` }];
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Breadcrumbs */}
+      <div className="px-4 pt-3">
+        <Breadcrumbs items={breadcrumbItems} />
+      </div>
+
+      <div className="flex relative">
+        {/* Left Sidebar - Chapter Index (desktop) */}
+        {view === "hadiths" && Object.keys(sections).length > 0 && (
+          <aside className="hidden lg:block w-64 flex-shrink-0 border-r border-border bg-card sticky top-0 h-screen overflow-y-auto">
+            <div className="p-3 border-b border-border bg-sky-50 dark:bg-sky-950/20">
+              <p className="text-xs font-bold text-sky-800 dark:text-sky-300">📖 অধ্যায় সূচি</p>
+              <p className="text-[10px] text-muted-foreground">{selectedBook?.name}</p>
+            </div>
+            <div className="divide-y divide-border">
+              {Object.entries(sections).filter(([k]) => k !== "0").map(([num, name]) => (
+                <button
+                  key={num}
+                  onClick={() => loadSection(Number(num))}
+                  className={`w-full text-left px-3 py-2 text-xs hover:bg-sky-50 dark:hover:bg-sky-950/20 transition-colors flex items-center gap-2 ${selectedSection === Number(num) ? "bg-sky-100 dark:bg-sky-900/30 font-bold" : ""}`}
+                >
+                  <span className="w-5 h-5 rounded-full bg-sky-700 text-white text-[8px] flex items-center justify-center flex-shrink-0">{toBengaliNum(num)}</span>
+                  <span className="truncate">{name}</span>
+                </button>
+              ))}
+            </div>
+          </aside>
+        )}
+
+        {/* Mobile Sidebar Drawer */}
+        {showSidebar && view === "hadiths" && (
+          <>
+            <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setShowSidebar(false)} />
+            <aside className="fixed left-0 top-0 bottom-0 w-72 bg-card z-50 lg:hidden overflow-y-auto shadow-2xl">
+              <div className="p-3 border-b border-border bg-sky-50 dark:bg-sky-950/20 flex items-center justify-between">
+                <p className="text-xs font-bold text-sky-800 dark:text-sky-300">📖 অধ্যায় সূচি</p>
+                <button onClick={() => setShowSidebar(false)} className="p-1 hover:bg-muted rounded"><X size={16} /></button>
+              </div>
+              <div className="divide-y divide-border">
+                {Object.entries(sections).filter(([k]) => k !== "0").map(([num, name]) => (
+                  <button
+                    key={num}
+                    onClick={() => { loadSection(Number(num)); setShowSidebar(false); }}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-sky-50 dark:hover:bg-sky-950/20 transition-colors flex items-center gap-2 ${selectedSection === Number(num) ? "bg-sky-100 dark:bg-sky-900/30 font-bold" : ""}`}
+                  >
+                    <span className="w-5 h-5 rounded-full bg-sky-700 text-white text-[8px] flex items-center justify-center flex-shrink-0">{toBengaliNum(num)}</span>
+                    <span className="truncate">{name}</span>
+                  </button>
+                ))}
+              </div>
+            </aside>
+          </>
+        )}
+
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
       {/* Header */}
       <div className="bg-gradient-to-br from-sky-800 to-blue-700 text-white p-6 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.06]" style={{
@@ -227,6 +290,9 @@ const HadithContent = () => {
             </div>
             {view === "hadiths" && (
               <div className="flex items-center gap-1">
+                <button onClick={() => setShowSidebar(true)} className="p-1.5 hover:bg-muted rounded-lg transition-colors lg:hidden" title="অধ্যায় সূচি">
+                  <Menu size={16} />
+                </button>
                 <div className="flex items-center gap-0.5 border border-border rounded-lg px-1.5 py-0.5">
                   <span className="text-[8px] text-muted-foreground">আরবি</span>
                   <button onClick={() => setArabicSize(s => Math.max(14, s - 2))} className="p-0.5 hover:bg-muted rounded"><Minus size={10} /></button>
@@ -407,6 +473,8 @@ const HadithContent = () => {
           )}
         </div>
       )}
+        </div>{/* end flex-1 main content */}
+      </div>{/* end flex container */}
     </div>
   );
 };
@@ -416,7 +484,7 @@ const HadithPage = () => {
   if (isApp) {
     return <AppLayout><HadithContent /></AppLayout>;
   }
-  return <Layout><HadithContent /></Layout>;
+  return <Layout fullWidth><HadithContent /></Layout>;
 };
 
 export default HadithPage;
