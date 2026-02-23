@@ -34,12 +34,12 @@ const getBengaliGrade = (grade: string) => {
 };
 
 const HADITH_BOOKS = [
-  { id: "ben-bukhari", arabicId: "ara-bukhari", name: "সহীহ বুখারী", icon: "📗", totalHadith: 7563, color: "from-emerald-700 to-green-600" },
-  { id: "ben-muslim", arabicId: "ara-muslim", name: "সহীহ মুসলিম", icon: "📘", totalHadith: 7563, color: "from-sky-700 to-blue-600" },
-  { id: "ben-abudawud", arabicId: "ara-abudawud", name: "সুনানে আবু দাউদ", icon: "📙", totalHadith: 5274, color: "from-amber-700 to-orange-600" },
-  { id: "ben-tirmidhi", arabicId: "ara-tirmidhi", name: "জামে আত-তিরমিযী", icon: "📕", totalHadith: 3956, color: "from-rose-700 to-red-600" },
-  { id: "ben-nasai", arabicId: "ara-nasai", name: "সুনানে আন-নাসাঈ", icon: "📓", totalHadith: 5758, color: "from-purple-700 to-violet-600" },
-  { id: "ben-ibnmajah", arabicId: "ara-ibnmajah", name: "সুনানে ইবনে মাজাহ", icon: "📔", totalHadith: 4341, color: "from-indigo-700 to-blue-600" },
+  { id: "ben-bukhari", arabicId: "ara-bukhari", engId: "eng-bukhari", name: "সহীহ বুখারী", icon: "📗", totalHadith: 7563, color: "from-emerald-700 to-green-600" },
+  { id: "ben-muslim", arabicId: "ara-muslim", engId: "eng-muslim", name: "সহীহ মুসলিম", icon: "📘", totalHadith: 7563, color: "from-sky-700 to-blue-600" },
+  { id: "ben-abudawud", arabicId: "ara-abudawud", engId: "eng-abudawud", name: "সুনানে আবু দাউদ", icon: "📙", totalHadith: 5274, color: "from-amber-700 to-orange-600" },
+  { id: "ben-tirmidhi", arabicId: "ara-tirmidhi", engId: "eng-tirmidhi", name: "জামে আত-তিরমিযী", icon: "📕", totalHadith: 3956, color: "from-rose-700 to-red-600" },
+  { id: "ben-nasai", arabicId: "ara-nasai", engId: "eng-nasai", name: "সুনানে আন-নাসাঈ", icon: "📓", totalHadith: 5758, color: "from-purple-700 to-violet-600" },
+  { id: "ben-ibnmajah", arabicId: "ara-ibnmajah", engId: "eng-ibnmajah", name: "সুনানে ইবনে মাজাহ", icon: "📔", totalHadith: 4341, color: "from-indigo-700 to-blue-600" },
 ];
 
 interface HadithItem {
@@ -77,15 +77,32 @@ const HadithContent = () => {
     setSelectedBook(book);
     setSections({});
     try {
-      // Load English edition for metadata (sections are always in English in API)
-      const res = await fetch(`${BASE}/editions/${book.id}.json`).then(r => r.json()).catch(() => null);
-      const secs = res?.metadata?.sections || {};
-      // Translate section names to Bengali
-      const bnSecs: Record<string, string> = {};
-      for (const [key, val] of Object.entries(secs)) {
-        bnSecs[key] = translateSectionName(val as string);
+      // Load both Bengali and English editions for metadata
+      const [benRes, engRes] = await Promise.all([
+        fetch(`${BASE}/editions/${book.id}.json`).then(r => r.json()).catch(() => null),
+        fetch(`${BASE}/editions/${book.engId}.json`).then(r => r.json()).catch(() => null),
+      ]);
+      const benSecs = benRes?.metadata?.sections || {};
+      const engSecs = engRes?.metadata?.sections || {};
+      
+      // Use Bengali sections from API, fallback to translated English
+      const finalSecs: Record<string, string> = {};
+      const allKeys = new Set([...Object.keys(benSecs), ...Object.keys(engSecs)]);
+      for (const key of allKeys) {
+        const benName = benSecs[key] as string | undefined;
+        const engName = engSecs[key] as string | undefined;
+        // If Bengali API returns a Bengali name (contains Bengali chars), use it
+        if (benName && /[\u0980-\u09FF]/.test(benName)) {
+          finalSecs[key] = benName;
+        } else if (engName) {
+          // Translate English name to Bengali
+          finalSecs[key] = translateSectionName(engName);
+        } else if (benName) {
+          // Try translating the Bengali edition's English name
+          finalSecs[key] = translateSectionName(benName);
+        }
       }
-      setSections(bnSecs);
+      setSections(finalSecs);
       setView("sections");
     } catch {
       setSections({});

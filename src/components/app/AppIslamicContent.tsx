@@ -101,12 +101,17 @@ const AppIslamicContent = () => {
                 >
                   <div>
                     <p className="text-[10px] font-semibold opacity-90 mb-1">{item.title}</p>
-                    <p className="text-[15px] font-bold leading-[2.1] font-arabic" dir="rtl">
-                      {item.content}
-                    </p>
+                    {key !== "masala" && (
+                      <p className="text-[15px] font-bold leading-[2.1] font-arabic" dir="rtl">
+                        {item.content}
+                      </p>
+                    )}
+                    {key === "masala" && item.question && (
+                      <p className="text-[9px] opacity-90 leading-relaxed">{item.question}</p>
+                    )}
                   </div>
                   {item.meaning && (
-                    <p className="text-[9px] opacity-70 mt-1 leading-relaxed">{item.meaning}</p>
+                    <p className="text-[9px] opacity-70 mt-1 leading-relaxed line-clamp-2">📝 {item.meaning}</p>
                   )}
                   {item.source && (
                     <p className="text-[9px] opacity-60 mt-1 text-right italic">— {item.source}</p>

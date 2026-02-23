@@ -351,17 +351,35 @@ const QuranContent = () => {
           
           // Find current word within verse segments
           if (vt.segments && vt.segments.length > 0) {
-            for (const seg of vt.segments) {
-              if (seg.length >= 3 && currentMs >= seg[1] && currentMs < seg[2]) {
-                setHighlightedWord({ verseKey: vt.verse_key, wordIndex: seg[0] - 1 });
-                return;
+            let foundWord = false;
+            for (let i = 0; i < vt.segments.length; i++) {
+              const seg = vt.segments[i];
+              if (seg.length >= 3) {
+                const segStart = seg[1];
+                const segEnd = seg[2];
+                if (currentMs >= segStart && currentMs < segEnd) {
+                  // seg[0] is 1-based word position from API
+                  setHighlightedWord({ verseKey: vt.verse_key, wordIndex: seg[0] - 1 });
+                  foundWord = true;
+                  break;
+                }
+              }
+            }
+            if (!foundWord) {
+              // Between segments or before first - estimate based on position within verse
+              const verseProgress = (currentMs - vt.timestamp_from) / (vt.timestamp_to - vt.timestamp_from);
+              const estimatedIdx = Math.floor(verseProgress * vt.segments.length);
+              const clampedIdx = Math.min(Math.max(0, estimatedIdx), vt.segments.length - 1);
+              const wordPos = vt.segments[clampedIdx]?.[0];
+              if (wordPos !== undefined) {
+                setHighlightedWord({ verseKey: vt.verse_key, wordIndex: wordPos - 1 });
               }
             }
           }
           return;
         }
       }
-    }, 80);
+    }, 50); // More frequent updates for smoother sync
   };
 
   const stopSurahAudio = () => {
@@ -557,6 +575,23 @@ const QuranContent = () => {
             </div>
           ) : (
             <div className="space-y-0">
+              {/* Bismillah - show for all surahs except Al-Fatiha (1) and At-Tawbah (9) */}
+              {selectedSurah !== 1 && selectedSurah !== 9 && (
+                <div className="text-center py-6 border-b border-border bg-emerald-50/30 dark:bg-emerald-950/10">
+                  <p
+                    className="text-emerald-800 dark:text-emerald-300"
+                    dir="rtl"
+                    style={{
+                      fontSize: `${fontSize + 4}px`,
+                      fontFamily: "'Scheherazade New', 'Amiri', 'Noto Naskh Arabic', serif",
+                      lineHeight: 2.2,
+                    }}
+                  >
+                    بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">পরম করুণাময় অসীম দয়ালু আল্লাহর নামে</p>
+                </div>
+              )}
               {ayahs.map(ayah => {
                 const verseKey = `${selectedSurah}:${ayah.numberInSurah}`;
                 const tafsirText = tafsirData[verseKey];
