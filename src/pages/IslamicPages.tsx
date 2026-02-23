@@ -4,6 +4,7 @@ import AppLayout from "@/components/app/AppLayout";
 import { useIslamicContents } from "@/hooks/useData";
 import { useState, useMemo } from "react";
 import { Search, ChevronRight, X, Plus, Minus, BookOpen, HelpCircle, Filter } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const toBengaliNum = (n: number | string) => {
   const d = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
@@ -119,6 +120,9 @@ const IslamicListContent = ({
 
   return (
     <div className="min-h-screen bg-background">
+      <div className="px-4 pt-3">
+        <Breadcrumbs items={[{ label: title }]} />
+      </div>
       <div className={`bg-gradient-to-br ${gradientClass} text-white p-6 text-center`}>
         <h1 className="text-2xl font-bold mb-1">{emoji} {title}</h1>
         <p className="text-sm opacity-80">{description}</p>

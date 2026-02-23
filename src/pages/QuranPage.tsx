@@ -2,7 +2,8 @@ import Layout from "@/components/layout/Layout";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Volume2, VolumeX, ChevronLeft, ChevronRight, AlignLeft, Plus, Minus, ChevronDown, Play, Pause, Square, BookOpen } from "lucide-react";
+import { Volume2, VolumeX, ChevronLeft, ChevronRight, AlignLeft, Plus, Minus, ChevronDown, Play, Pause, Square, BookOpen, Menu, X } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 interface QuranAyah {
   number: number;
@@ -76,7 +77,7 @@ const TAFSIR_OPTIONS = [
 
 const RECITER_ID = 7; // Mishari Rashid al-Afasy
 
-const QuranContent = () => {
+const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
   const [surahs, setSurahs] = useState<QuranSurah[]>([]);
   const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
   const [ayahs, setAyahs] = useState<QuranAyah[]>([]);
@@ -93,6 +94,7 @@ const QuranContent = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [fontSize, setFontSize] = useState(24);
   const [translationSize, setTranslationSize] = useState(14);
+  const [showSidebar, setShowSidebar] = useState(false);
   const ayahRef = useRef<HTMLDivElement>(null);
 
   // Word-by-word data
@@ -413,8 +415,73 @@ const QuranContent = () => {
 
   const selectedTafsirName = TAFSIR_OPTIONS.find(t => t.id === selectedTafsir)?.name || "তাফসির নেই";
 
+  const breadcrumbItems = selectedSurah && currentSurah
+    ? [{ label: "কুরআন", href: "/quran" }, { label: getBnName(currentSurah) }]
+    : [{ label: "কুরআন" }];
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Breadcrumbs */}
+      <div className="px-4 pt-3">
+        <Breadcrumbs items={breadcrumbItems} />
+      </div>
+
+      <div className="flex relative">
+        {/* Left Sidebar - Surah Index (desktop) */}
+        {selectedSurah && (
+          <aside className="hidden lg:block w-64 flex-shrink-0 border-r border-border bg-card sticky top-0 h-screen overflow-y-auto">
+            <div className="p-3 border-b border-border bg-emerald-50 dark:bg-emerald-950/20">
+              <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">📖 সূচিপত্র</p>
+              <input
+                type="text"
+                placeholder="সুরা খুঁজুন..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full border border-border rounded-lg px-2 py-1.5 mt-2 bg-background text-xs focus:outline-none focus:ring-1 focus:ring-emerald-600"
+              />
+            </div>
+            <div className="divide-y divide-border">
+              {filteredSurahs.map(s => (
+                <button
+                  key={s.number}
+                  onClick={() => loadSurah(s.number)}
+                  className={`w-full text-left px-3 py-2 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-colors flex items-center gap-2 ${selectedSurah === s.number ? "bg-emerald-100 dark:bg-emerald-900/30 font-bold" : ""}`}
+                >
+                  <span className="w-6 h-6 rounded-full bg-emerald-700 text-white text-[9px] flex items-center justify-center flex-shrink-0">{toBengaliNum(s.number)}</span>
+                  <span className="truncate">{getBnName(s)}</span>
+                </button>
+              ))}
+            </div>
+          </aside>
+        )}
+
+        {/* Mobile Sidebar Drawer */}
+        {showSidebar && selectedSurah && (
+          <>
+            <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setShowSidebar(false)} />
+            <aside className="fixed left-0 top-0 bottom-0 w-72 bg-card z-50 lg:hidden overflow-y-auto shadow-2xl">
+              <div className="p-3 border-b border-border bg-emerald-50 dark:bg-emerald-950/20 flex items-center justify-between">
+                <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">📖 সূচিপত্র</p>
+                <button onClick={() => setShowSidebar(false)} className="p-1 hover:bg-muted rounded"><X size={16} /></button>
+              </div>
+              <div className="divide-y divide-border">
+                {surahs.map(s => (
+                  <button
+                    key={s.number}
+                    onClick={() => { loadSurah(s.number); setShowSidebar(false); }}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-colors flex items-center gap-2 ${selectedSurah === s.number ? "bg-emerald-100 dark:bg-emerald-900/30 font-bold" : ""}`}
+                  >
+                    <span className="w-6 h-6 rounded-full bg-emerald-700 text-white text-[9px] flex items-center justify-center flex-shrink-0">{toBengaliNum(s.number)}</span>
+                    <span className="truncate">{getBnName(s)}</span>
+                  </button>
+                ))}
+              </div>
+            </aside>
+          </>
+        )}
+
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
       <div className="bg-gradient-to-br from-emerald-800 to-teal-700 text-white p-6 text-center">
         <h1 className="text-2xl font-bold mb-1">📖 পবিত্র কুরআন</h1>
         <p className="text-sm opacity-80">আরবি মূল ও বাংলা অনুবাদ — শব্দে শব্দে অর্থ — অডিও তেলাওয়াত — তাফসিরসহ</p>
@@ -479,6 +546,9 @@ const QuranContent = () => {
                 )}
               </div>
               <div className="flex items-center gap-1">
+                <button onClick={() => setShowSidebar(true)} className="p-1.5 hover:bg-muted rounded-lg transition-colors lg:hidden" title="সূচিপত্র">
+                  <Menu size={16} />
+                </button>
                 {selectedSurah > 1 && (
                   <button onClick={() => loadSurah(selectedSurah - 1)} className="p-1.5 hover:bg-muted rounded-lg transition-colors">
                     <ChevronLeft size={16} />
@@ -706,6 +776,8 @@ const QuranContent = () => {
           )}
         </div>
       )}
+        </div>{/* end flex-1 main content */}
+      </div>{/* end flex container */}
     </div>
   );
 };
@@ -715,7 +787,7 @@ const QuranPage = () => {
   if (isApp) {
     return <AppLayout><QuranContent /></AppLayout>;
   }
-  return <Layout><QuranContent /></Layout>;
+  return <Layout fullWidth><QuranContent /></Layout>;
 };
 
 export default QuranPage;
