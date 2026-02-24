@@ -482,43 +482,57 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
 
         {/* Main Content */}
         <div className="flex-1 min-w-0">
-      <div className="bg-gradient-to-br from-emerald-800 to-teal-700 text-white p-6 text-center">
-        <h1 className="text-2xl font-bold mb-1">📖 পবিত্র কুরআন</h1>
-        <p className="text-sm opacity-80">আরবি মূল ও বাংলা অনুবাদ — শব্দে শব্দে অর্থ — অডিও তেলাওয়াত — তাফসিরসহ</p>
+      <div className="bg-gradient-to-br from-emerald-800 via-teal-700 to-green-800 text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.06]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+        <div className="relative p-6 pb-8 text-center">
+          <h1 className="text-2xl font-bold mb-2">📖 পবিত্র কুরআন</h1>
+          <p className="text-sm opacity-80">আরবি মূল ও বাংলা অনুবাদ — শব্দে শব্দে অর্থ — অডিও তেলাওয়াত — তাফসিরসহ</p>
+        </div>
       </div>
 
       {!selectedSurah ? (
         <div className="p-4">
-          <input
-            type="text"
-            placeholder="সুরার নাম বা নম্বর দিয়ে খুঁজুন..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="w-full border border-border rounded-xl px-4 py-2.5 mb-4 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
-          />
+          <div className="relative mb-4">
+            <input
+              type="text"
+              placeholder="সুরার নাম বা নম্বর দিয়ে খুঁজুন..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full border border-border rounded-xl px-4 py-3 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 pl-10"
+            />
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">🔍</span>
+          </div>
           {surahLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {Array.from({ length: 12 }).map((_, i) => (
                 <div key={i} className="h-20 bg-muted rounded-xl animate-pulse" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {filteredSurahs.map(s => (
                 <button
                   key={s.number}
                   onClick={() => loadSurah(s.number)}
-                  className="text-left bg-card border border-border rounded-xl p-3 hover:border-emerald-500 hover:shadow-md transition-all active:scale-95 group"
+                  className="text-left bg-card border border-border rounded-2xl p-4 hover:border-emerald-400 hover:shadow-lg transition-all active:scale-[0.98] group"
                 >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">
-                      {toBengaliNum(s.number)}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">{toBengaliNum(s.numberOfAyahs)} আয়াত</span>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-500 text-white flex items-center justify-center text-sm font-bold shadow-md rotate-45">
+                      <span className="-rotate-45">{toBengaliNum(s.number)}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-bold">{getBnName(s)}</p>
+                        <p className="text-lg font-bold text-right" style={{ fontFamily: "'Scheherazade New', 'Amiri', 'Noto Naskh Arabic', serif" }}>{s.name}</p>
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] text-muted-foreground">{s.revelationType === "Meccan" ? "মক্কি" : "মাদানি"}</span>
+                        <span className="text-[10px] text-muted-foreground">• {toBengaliNum(s.numberOfAyahs)} আয়াত</span>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-xl font-bold text-right leading-snug mb-1" style={{ fontFamily: "'Scheherazade New', 'Amiri', 'Noto Naskh Arabic', serif" }}>{s.name}</p>
-                  <p className="text-[11px] text-foreground font-medium">{getBnName(s)}</p>
-                  <p className="text-[10px] text-muted-foreground opacity-70">{s.revelationType === "Meccan" ? "মক্কি" : "মাদানি"}</p>
                 </button>
               ))}
             </div>

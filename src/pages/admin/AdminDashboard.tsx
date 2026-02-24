@@ -110,7 +110,7 @@ const navCategories: NavCategory[] = [
     icon: Users,
     items: [
       { label: "নেতৃবৃন্দ", icon: Users, path: "/admin/leaders", section: "leaders" },
-      { label: "কমিটি/উপদেষ্টা", icon: Users, path: "/admin/committee", section: "committee" },
+      { label: "সংগঠন", icon: Users, path: "/admin/committee", section: "committee" },
     ],
   },
   {

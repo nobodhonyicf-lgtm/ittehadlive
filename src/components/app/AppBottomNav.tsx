@@ -1,10 +1,10 @@
-import { Home, BookOpen, Settings, User, MessageSquare, Moon } from "lucide-react";
+import { Home, BookOpen, User, MessageSquare, BookMarked } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const navItems = [
   { icon: Home, label: "হোম", path: "/" },
   { icon: BookOpen, label: "কুরআন", path: "/quran" },
-  { icon: Moon, label: "ইসলাম", path: "/hadith" },
+  { icon: BookMarked, label: "হাদিস", path: "/hadith" },
   { icon: MessageSquare, label: "যোগাযোগ", path: "/app-contact" },
   { icon: User, label: "প্রোফাইল", path: "/profile" },
 ];

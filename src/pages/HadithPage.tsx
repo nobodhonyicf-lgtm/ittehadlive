@@ -259,12 +259,12 @@ const HadithContent = () => {
         {/* Main Content */}
         <div className="flex-1 min-w-0">
       {/* Header */}
-      <div className="bg-gradient-to-br from-sky-800 to-blue-700 text-white p-6 text-center relative overflow-hidden">
+      <div className="bg-gradient-to-br from-emerald-800 via-teal-700 to-green-800 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.06]" style={{
-          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
         }} />
-        <div className="relative">
-          <h1 className="text-2xl font-bold mb-1">📿 হাদিস শরীফ</h1>
+        <div className="relative p-6 pb-8 text-center">
+          <h1 className="text-2xl font-bold mb-2">📿 হাদীসের কিতাব সমূহ</h1>
           <p className="text-sm opacity-80">
             {view === "books" ? "সহীহ হাদিস গ্রন্থসমূহ — আরবি ও বাংলা" :
               view === "sections" ? `${selectedBook?.name} — অধ্যায়সমূহ` :
@@ -335,24 +335,42 @@ const HadithContent = () => {
 
       {/* Book selection */}
       {view === "books" && !loading && (
-        <div className="p-4 space-y-3">
+        <div className="p-4 space-y-4">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="কিতাবের নাম দিয়ে খুঁজুন..."
+              className="w-full border border-border rounded-xl pl-10 pr-4 py-3 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-sky-600"
+            />
+          </div>
           <p className="text-xs text-muted-foreground">একটি হাদিস গ্রন্থ নির্বাচন করুন</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {HADITH_BOOKS.map(book => (
+            {HADITH_BOOKS.map((book, idx) => (
               <button
                 key={book.id}
                 onClick={() => loadBookSections(book)}
-                className="text-left bg-card border border-border rounded-2xl p-4 hover:border-sky-500 hover:shadow-lg transition-all active:scale-[0.98] group"
+                className="text-left bg-card border border-border rounded-2xl p-4 hover:border-sky-400 hover:shadow-lg transition-all active:scale-[0.98] group"
               >
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${book.color} flex items-center justify-center text-2xl`}>
-                    {book.icon}
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-500 text-white flex items-center justify-center text-sm font-bold shadow-md rotate-45">
+                    <span className="-rotate-45">{toBengaliNum(idx + 1)}</span>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-base">{book.name}</p>
-                    <p className="text-xs text-muted-foreground">{toBengaliNum(book.totalHadith)}টি হাদিস</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-base leading-tight">{book.name}</p>
+                    <p className="text-xs text-muted-foreground font-arabic mt-0.5" dir="rtl">
+                      {book.id === "ben-bukhari" ? "الجامع الصحيح للبخاري" :
+                       book.id === "ben-muslim" ? "المسند الصحيح لمسلم" :
+                       book.id === "ben-abudawud" ? "كتاب السنن للإمام أبي داود" :
+                       book.id === "ben-tirmidhi" ? "الجامع الكبير للترمذي" :
+                       book.id === "ben-nasai" ? "المجتبى من السنن للنسائي" :
+                       "السنن للإمام ابن ماجه"}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      {toBengaliNum(book.totalHadith)}টি হাদিস
+                    </p>
                   </div>
-                  <ChevronRight size={18} className="text-muted-foreground group-hover:text-sky-600 transition-colors" />
+                  <ChevronRight size={18} className="text-muted-foreground group-hover:text-sky-600 transition-colors flex-shrink-0" />
                 </div>
               </button>
             ))}
