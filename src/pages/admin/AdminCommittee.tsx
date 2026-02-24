@@ -17,8 +17,8 @@ const AdminCommittee = () => {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [pageFilter, setPageFilter] = useState("committee");
-  const [form, setForm] = useState({ name: "", title: "", institution: "", photo_url: "", page_slug: "committee", sort_order: 0 });
+  const [pageFilter, setPageFilter] = useState("governing_body");
+  const [form, setForm] = useState({ name: "", title: "", institution: "", photo_url: "", page_slug: "governing_body", sort_order: 0 });
 
   const { data: members, isLoading } = useQuery({
     queryKey: ["admin_committee", pageFilter],
@@ -66,13 +66,13 @@ const AdminCommittee = () => {
 
   const resetForm = () => {
     setEditId(null);
-    setForm({ name: "", title: "", institution: "", photo_url: "", page_slug: pageFilter, sort_order: 0 });
+    setForm({ name: "", title: "", institution: "", photo_url: "", page_slug: pageFilter, sort_order: (members?.length || 0) + 1 });
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold flex items-center gap-2"><Users size={22} /> কমিটি/উপদেষ্টা ব্যবস্থাপনা</h1>
+        <h1 className="text-xl font-bold flex items-center gap-2"><Users size={22} /> সংগঠন ব্যবস্থাপনা</h1>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           {canEdit && <DialogTrigger asChild>
             <Button onClick={resetForm}><Plus size={16} /> নতুন সদস্য</Button>
@@ -88,8 +88,9 @@ const AdminCommittee = () => {
                 <Select value={form.page_slug} onValueChange={(v) => setForm({ ...form, page_slug: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="committee">কমিটি</SelectItem>
-                    <SelectItem value="advisors">উপদেষ্টা</SelectItem>
+                    <SelectItem value="governing_body">প্রতিষ্ঠাতা গভর্নিং বডি</SelectItem>
+                    <SelectItem value="executive">নির্বাহী কমিটি</SelectItem>
+                    <SelectItem value="working">কার্যকরি সদস্য</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -100,9 +101,10 @@ const AdminCommittee = () => {
         </Dialog>
       </div>
 
-      <div className="flex gap-2 mb-4">
-        <Button variant={pageFilter === "committee" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("committee")}>কমিটি</Button>
-        <Button variant={pageFilter === "advisors" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("advisors")}>উপদেষ্টা</Button>
+      <div className="flex gap-2 mb-4 flex-wrap">
+        <Button variant={pageFilter === "governing_body" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("governing_body")}>🏛️ গভর্নিং বডি</Button>
+        <Button variant={pageFilter === "executive" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("executive")}>🎖️ নির্বাহী কমিটি</Button>
+        <Button variant={pageFilter === "working" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("working")}>👥 কার্যকরি সদস্য</Button>
       </div>
 
       <Card><CardContent className="p-0">

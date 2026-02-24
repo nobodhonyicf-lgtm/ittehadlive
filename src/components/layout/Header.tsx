@@ -31,10 +31,10 @@ const Header = () => {
   }, []);
 
   return (
-    <header className={`w-full sticky top-0 z-50 transition-shadow ${scrolled ? "shadow-lg" : "shadow-sm"}`}>
+    <header className={`w-full sticky top-0 z-50 transition-all duration-300 ${scrolled ? "shadow-xl" : "shadow-sm"}`}>
       {/* Top utility bar */}
       <div className="bg-primary text-primary-foreground">
-        <div className="px-4 py-1.5 text-sm flex items-center justify-between">
+        <div className="max-w-[1200px] mx-auto px-4 py-1.5 text-sm flex items-center justify-between">
           <div className="flex items-center gap-4">
             {settings?.contact_phone && (
               <span className="flex items-center gap-1 text-xs opacity-90">
@@ -78,29 +78,29 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Logo section - boxy design */}
-      <div className="bg-card border-b-2 border-primary/20">
-        <div className="px-4 py-5 flex items-center justify-center gap-4">
+      {/* Logo section */}
+      <div className="bg-card border-b border-border">
+        <div className="max-w-[1200px] mx-auto px-4 py-4 flex items-center justify-center gap-4">
           {settings?.logo_url && (
             <Link to="/">
-              <img src={settings.logo_url} alt="Logo" className="h-14 md:h-16 object-contain" />
+              <img src={settings.logo_url} alt="Logo" className="h-14 md:h-16 object-contain drop-shadow-sm" />
             </Link>
           )}
           <Link to="/" className="text-center">
-            <h1 className="text-2xl md:text-3xl font-bold text-primary tracking-tight">
+            <h1 className="text-xl md:text-2xl font-bold text-primary tracking-tight leading-tight">
               {settings?.site_name || "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ"}
             </h1>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-[11px] text-muted-foreground mt-0.5">
               {settings?.site_description || "প্রাইভেট মাদরাসাগুলোর একটি সমন্বিত সংগঠন"}
             </p>
           </Link>
         </div>
       </div>
 
-      {/* Navigation - boxy */}
-      <nav className="bg-primary text-primary-foreground border-b-4 border-primary/80">
-        <div className="px-4">
-          <div className="md:hidden flex items-center justify-between py-2">
+      {/* Navigation */}
+      <nav className="bg-primary text-primary-foreground">
+        <div className="max-w-[1200px] mx-auto px-4">
+          <div className="md:hidden flex items-center justify-between py-2.5">
             <span className="font-semibold text-sm">মেনু</span>
             <button onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
@@ -111,7 +111,7 @@ const Header = () => {
               <li key={item.id}>
                 <Link
                   to={item.url}
-                  className="block px-4 py-2.5 hover:bg-primary-foreground/10 transition-colors text-sm font-medium border-r border-primary-foreground/10 last:border-r-0"
+                  className="block px-4 py-2.5 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md"
                   onClick={() => setMobileOpen(false)}
                 >
                   {item.label}

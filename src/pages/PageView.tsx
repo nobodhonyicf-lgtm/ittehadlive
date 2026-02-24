@@ -8,7 +8,74 @@ import SEOHead from "@/components/SEOHead";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useIsApp } from "@/hooks/useIsApp";
 
-const committeePages = ["committee", "advisors"];
+const committeePages = ["committee", "advisors", "governing_body", "executive", "working"];
+
+const TIER_CONFIG: Record<string, { label: string; emoji: string; gradient: string; border: string; photoSize: string; shadow: string }> = {
+  governing_body: {
+    label: "🏛️ প্রতিষ্ঠাতা গভর্নিং বডি",
+    emoji: "⭐",
+    gradient: "bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/40 dark:to-yellow-950/30",
+    border: "border-2 border-amber-400/60 shadow-amber-200/40",
+    photoSize: "w-28 h-28",
+    shadow: "shadow-xl",
+  },
+  executive: {
+    label: "🎖️ নির্বাহী কমিটি",
+    emoji: "🎖️",
+    gradient: "bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20",
+    border: "border-2 border-primary/30",
+    photoSize: "w-22 h-22",
+    shadow: "shadow-md",
+  },
+  working: {
+    label: "👥 কার্যকরি সদস্য",
+    emoji: "",
+    gradient: "bg-muted/30",
+    border: "border border-border",
+    photoSize: "w-20 h-20",
+    shadow: "shadow-sm",
+  },
+  committee: {
+    label: "🏛️ কমিটি",
+    emoji: "⭐",
+    gradient: "bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/40 dark:to-yellow-950/30",
+    border: "border-2 border-amber-400/60",
+    photoSize: "w-24 h-24",
+    shadow: "shadow-lg",
+  },
+  advisors: {
+    label: "📋 উপদেষ্টামণ্ডলী",
+    emoji: "",
+    gradient: "bg-muted/30",
+    border: "border border-border",
+    photoSize: "w-20 h-20",
+    shadow: "shadow-sm",
+  },
+};
+
+const MemberCard = ({ m, tier }: { m: any; tier: string }) => {
+  const config = TIER_CONFIG[tier] || TIER_CONFIG.working;
+  const isGoverning = tier === "governing_body" || tier === "committee";
+  const isExecutive = tier === "executive";
+
+  return (
+    <div className={`relative overflow-hidden rounded-2xl p-${isGoverning ? "6" : isExecutive ? "5" : "4"} text-center ${config.shadow} ${config.border} ${config.gradient} transition-transform hover:scale-[1.02]`}>
+      {config.emoji && <div className="absolute top-2 right-2 text-3xl opacity-10">{config.emoji}</div>}
+      <div className={`${config.photoSize} rounded-full mx-auto mb-3 bg-secondary flex items-center justify-center overflow-hidden border-4 ${isGoverning ? "border-amber-300/50" : isExecutive ? "border-primary/20" : "border-border"} shadow-md`}
+        style={tier === "governing_body" ? { width: "7rem", height: "7rem" } : tier === "executive" ? { width: "5.5rem", height: "5.5rem" } : { width: "5rem", height: "5rem" }}
+      >
+        {m.photo_url ? (
+          <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
+        ) : (
+          <User className="text-primary" size={isGoverning ? 36 : isExecutive ? 32 : 28} />
+        )}
+      </div>
+      <h3 className={`font-bold ${isGoverning ? "text-base" : "text-sm"} mb-1`}>{m.name}</h3>
+      <p className={`text-primary ${isGoverning ? "text-sm font-semibold" : isExecutive ? "text-sm font-bold" : "text-xs font-medium"}`}>{m.title}</p>
+      {m.institution && <p className="text-xs text-muted-foreground mt-1">{m.institution}</p>}
+    </div>
+  );
+};
 
 const PageView = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -16,6 +83,9 @@ const PageView = () => {
   const isCommitteePage = committeePages.includes(slug || "");
   const { data: members } = useCommitteeMembers(isCommitteePage ? slug! : undefined);
   const isApp = useIsApp();
+
+  // For "committee" slug, group by page_slug for tiered display
+  const isOldCommitteeSlug = slug === "committee";
 
   return (
     <Layout>
@@ -35,111 +105,63 @@ const PageView = () => {
                   </div>
                 )}
 
-                {/* Committee/Advisors member grid */}
                 {isCommitteePage && members && members.length > 0 && (
-                  <div>
-                    {/* Founding Members - First 3 shown prominently */}
-                    {slug === "committee" && members.length >= 3 && (
-                      <div className="mb-8">
-                        <h2 className="text-lg font-bold text-center mb-4 text-primary">🏛️ প্রতিষ্ঠাতা গভর্নিং বডি</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          {members.slice(0, 3).map((m: any, i: number) => (
-                            <div key={m.id} className={`relative overflow-hidden rounded-2xl p-6 text-center shadow-lg border-2 ${
-                              i === 0 ? "bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-950/40 dark:to-yellow-950/30 border-amber-400/50" :
-                              i === 1 ? "bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950/40 dark:to-teal-950/30 border-emerald-400/50" :
-                              "bg-gradient-to-br from-sky-50 to-blue-100 dark:from-sky-950/40 dark:to-blue-950/30 border-sky-400/50"
-                            }`}>
-                              <div className="absolute top-2 right-2 text-3xl opacity-10">⭐</div>
-                              <div className="w-24 h-24 rounded-full mx-auto mb-4 bg-secondary flex items-center justify-center overflow-hidden border-4 border-white dark:border-card shadow-md">
-                                {m.photo_url ? (
-                                  <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
-                                ) : (
-                                  <User className="text-primary" size={36} />
-                                )}
-                              </div>
-                              <h3 className="font-bold text-base mb-1">{m.name}</h3>
-                              <p className="text-sm text-primary font-semibold">{m.title}</p>
-                              {m.institution && <p className="text-xs text-muted-foreground mt-1">{m.institution}</p>}
-                            </div>
+                  <div className="space-y-8">
+                    {/* Simple case: direct slug rendering */}
+                    {!isOldCommitteeSlug && (
+                      <div>
+                        <h2 className="text-lg font-bold text-center mb-4 text-primary">
+                          {TIER_CONFIG[slug || ""]?.label || slug}
+                        </h2>
+                        <div className={`grid grid-cols-1 ${slug === "governing_body" ? "sm:grid-cols-3" : slug === "executive" ? "sm:grid-cols-2" : "sm:grid-cols-2 md:grid-cols-3"} gap-4`}>
+                          {members.map((m: any) => (
+                            <MemberCard key={m.id} m={m} tier={slug || "working"} />
                           ))}
                         </div>
                       </div>
                     )}
 
-                    {/* President & Secretary - special styling */}
-                    {slug === "committee" && members.length > 3 && (() => {
-                      const remaining = members.slice(3);
-                      const isPresidentOrSecretary = (m: any) => {
+                    {/* Legacy committee slug: show tiered */}
+                    {isOldCommitteeSlug && (() => {
+                      // Founding members first 3
+                      const founders = members.slice(0, 3);
+                      const isSpecial = (m: any) => {
                         const t = (m.title || "").toLowerCase();
                         return t.includes("সভাপতি") || t.includes("সাধারণ সম্পাদক") || t.includes("president") || t.includes("secretary");
                       };
-                      const specialMembers = remaining.filter(isPresidentOrSecretary);
-                      const regularMembers = remaining.filter((m: any) => !isPresidentOrSecretary(m));
-                      
+                      const rest = members.slice(3);
+                      const special = rest.filter(isSpecial);
+                      const regular = rest.filter((m: any) => !isSpecial(m));
+
                       return (
                         <>
-                          {specialMembers.length > 0 && (
-                            <div className="mb-6">
-                              <h2 className="text-lg font-bold text-center mb-4 text-primary">🎖️ নির্বাহী কমিটি</h2>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {specialMembers.map((m: any) => (
-                                  <div key={m.id} className="relative overflow-hidden rounded-2xl p-5 text-center shadow-md border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20">
-                                    <div className="absolute top-2 right-2 text-2xl opacity-10">🎖️</div>
-                                    <div className="w-22 h-22 rounded-full mx-auto mb-3 bg-secondary flex items-center justify-center overflow-hidden border-4 border-primary/20 shadow-md" style={{ width: '5.5rem', height: '5.5rem' }}>
-                                      {m.photo_url ? (
-                                        <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
-                                      ) : (
-                                        <User className="text-primary" size={32} />
-                                      )}
-                                    </div>
-                                    <h3 className="font-bold text-base mb-1">{m.name}</h3>
-                                    <p className="text-sm text-primary font-bold">{m.title}</p>
-                                    {m.institution && <p className="text-xs text-muted-foreground mt-1">{m.institution}</p>}
-                                  </div>
-                                ))}
+                          {founders.length > 0 && (
+                            <div>
+                              <h2 className="text-lg font-bold text-center mb-4 text-primary">🏛️ প্রতিষ্ঠাতা গভর্নিং বডি</h2>
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                {founders.map((m: any) => <MemberCard key={m.id} m={m} tier="governing_body" />)}
                               </div>
                             </div>
                           )}
-                          {/* Regular members */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            {regularMembers.map((m: any) => (
-                              <div key={m.id} className="border rounded-lg p-4 text-center bg-muted/30">
-                                <div className="w-20 h-20 rounded-full mx-auto mb-3 bg-secondary flex items-center justify-center overflow-hidden border-2 border-primary/20">
-                                  {m.photo_url ? (
-                                    <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
-                                  ) : (
-                                    <User className="text-primary" size={28} />
-                                  )}
-                                </div>
-                                <h3 className="font-bold text-sm">{m.name}</h3>
-                                <p className="text-xs text-primary font-medium">{m.title}</p>
-                                {m.institution && <p className="text-xs text-muted-foreground mt-1">{m.institution}</p>}
+                          {special.length > 0 && (
+                            <div>
+                              <h2 className="text-lg font-bold text-center mb-4 text-primary">🎖️ নির্বাহী কমিটি</h2>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {special.map((m: any) => <MemberCard key={m.id} m={m} tier="executive" />)}
                               </div>
-                            ))}
-                          </div>
+                            </div>
+                          )}
+                          {regular.length > 0 && (
+                            <div>
+                              <h2 className="text-lg font-bold text-center mb-4 text-primary">👥 কার্যকরি সদস্য</h2>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                {regular.map((m: any) => <MemberCard key={m.id} m={m} tier="working" />)}
+                              </div>
+                            </div>
+                          )}
                         </>
                       );
                     })()}
-
-                    {/* Non-committee pages (advisors, etc) */}
-                    {slug !== "committee" && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        {members.map((m: any) => (
-                          <div key={m.id} className="border rounded-lg p-4 text-center bg-muted/30">
-                            <div className="w-20 h-20 rounded-full mx-auto mb-3 bg-secondary flex items-center justify-center overflow-hidden border-2 border-primary/20">
-                              {m.photo_url ? (
-                                <img src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
-                              ) : (
-                                <User className="text-primary" size={28} />
-                              )}
-                            </div>
-                            <h3 className="font-bold text-sm">{m.name}</h3>
-                            <p className="text-xs text-primary font-medium">{m.title}</p>
-                            {m.institution && <p className="text-xs text-muted-foreground mt-1">{m.institution}</p>}
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 )}
               </article>
