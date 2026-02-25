@@ -32,9 +32,9 @@ const BranchList = () => {
                 <Link key={branch.id} to={`/branch/${branch.id}`}>
                   <Card className="hover:shadow-lg transition-all duration-300 group h-full border-border/60 overflow-hidden hover:border-primary/30">
                     <CardContent className="p-0">
-                      <div className="h-24 bg-gradient-to-br from-primary/5 to-accent/5 dark:from-primary/10 dark:to-accent/10 flex items-center justify-center overflow-hidden relative">
+                      <div className="h-24 bg-gradient-to-br from-primary/5 to-accent/5 dark:from-primary/10 dark:to-accent/10 flex items-center justify-center overflow-hidden relative p-3">
                         {branch.image_url ? (
-                          <img src={branch.image_url} alt={branch.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <img src={branch.image_url} alt={branch.name} className="w-16 h-16 object-contain" />
                         ) : (
                           <Building2 className="text-primary/20" size={36} />
                         )}

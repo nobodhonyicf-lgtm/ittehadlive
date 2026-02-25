@@ -101,11 +101,22 @@ const HadithContent = () => {
     setHadiths([]);
     setArabicHadiths({});
     try {
-      const [benRes, araRes] = await Promise.all([
+      const [benRes, araRes, engRes] = await Promise.all([
         fetch(`${BASE}/editions/${selectedBook.id}/sections/${sectionNum}.json`).then(r => r.json()),
         fetch(`${BASE}/editions/${selectedBook.arabicId}/sections/${sectionNum}.json`).then(r => r.json()).catch(() => null),
+        fetch(`${BASE}/editions/${selectedBook.engId}/sections/${sectionNum}.json`).then(r => r.json()).catch(() => null),
       ]);
-      setHadiths(benRes.hadiths || []);
+      let hadithsList = benRes.hadiths || [];
+      // Merge grades from English edition if Bengali grades are missing
+      if (engRes?.hadiths) {
+        const engGradeMap: Record<number, any[]> = {};
+        engRes.hadiths.forEach((h: any) => { if (h.grades?.length) engGradeMap[h.hadithnumber] = h.grades; });
+        hadithsList = hadithsList.map((h: any) => ({
+          ...h,
+          grades: (h.grades?.length ? h.grades : engGradeMap[h.hadithnumber]) || [],
+        }));
+      }
+      setHadiths(hadithsList);
       if (araRes?.hadiths) {
         const araMap: Record<number, string> = {};
         araRes.hadiths.forEach((h: any) => { araMap[h.hadithnumber] = h.text; });

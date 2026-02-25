@@ -1,12 +1,13 @@
 import { useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { usePage } from "@/hooks/useData";
-import { useCommitteeMembers } from "@/hooks/useData";
 import Sidebar from "@/components/home/Sidebar";
 import { User } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useIsApp } from "@/hooks/useIsApp";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const committeePages = ["committee", "advisors", "governing_body", "executive", "working"];
 
@@ -77,15 +78,44 @@ const MemberCard = ({ m, tier }: { m: any; tier: string }) => {
   );
 };
 
+// Hook to fetch ALL committee members grouped by page_slug
+const useAllCommitteeMembers = () =>
+  useQuery({
+    queryKey: ["committee_members_all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("committee_members")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
 const PageView = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: page, isLoading } = usePage(slug || "");
   const isCommitteePage = committeePages.includes(slug || "");
-  const { data: members } = useCommitteeMembers(isCommitteePage ? slug! : undefined);
   const isApp = useIsApp();
 
-  // For "committee" slug, group by page_slug for tiered display
+  // For the "committee" slug, load ALL members and group them
   const isOldCommitteeSlug = slug === "committee";
+  const { data: allMembers } = useAllCommitteeMembers();
+  
+  // For specific slugs (governing_body, executive, working), filter from allMembers
+  const members = isCommitteePage && allMembers
+    ? isOldCommitteeSlug
+      ? allMembers // show all grouped
+      : allMembers.filter((m: any) => m.page_slug === slug)
+    : [];
+
+  // Group members by tier for committee page
+  const groupedMembers = isOldCommitteeSlug && allMembers ? {
+    governing_body: allMembers.filter((m: any) => m.page_slug === "governing_body"),
+    executive: allMembers.filter((m: any) => m.page_slug === "executive"),
+    working: allMembers.filter((m: any) => m.page_slug === "working"),
+  } : null;
 
   return (
     <Layout>
@@ -105,10 +135,40 @@ const PageView = () => {
                   </div>
                 )}
 
-                {isCommitteePage && members && members.length > 0 && (
+                {isCommitteePage && (
                   <div className="space-y-8">
-                    {/* Simple case: direct slug rendering */}
-                    {!isOldCommitteeSlug && (
+                    {/* Old committee slug: show all tiers */}
+                    {isOldCommitteeSlug && groupedMembers && (
+                      <>
+                        {groupedMembers.governing_body.length > 0 && (
+                          <div>
+                            <h2 className="text-lg font-bold text-center mb-4 text-primary">🏛️ প্রতিষ্ঠাতা গভর্নিং বডি</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                              {groupedMembers.governing_body.map((m: any) => <MemberCard key={m.id} m={m} tier="governing_body" />)}
+                            </div>
+                          </div>
+                        )}
+                        {groupedMembers.executive.length > 0 && (
+                          <div>
+                            <h2 className="text-lg font-bold text-center mb-4 text-primary">🎖️ নির্বাহী কমিটি</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              {groupedMembers.executive.map((m: any) => <MemberCard key={m.id} m={m} tier="executive" />)}
+                            </div>
+                          </div>
+                        )}
+                        {groupedMembers.working.length > 0 && (
+                          <div>
+                            <h2 className="text-lg font-bold text-center mb-4 text-primary">👥 কার্যকরি সদস্য</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                              {groupedMembers.working.map((m: any) => <MemberCard key={m.id} m={m} tier="working" />)}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Direct slug rendering */}
+                    {!isOldCommitteeSlug && members && members.length > 0 && (
                       <div>
                         <h2 className="text-lg font-bold text-center mb-4 text-primary">
                           {TIER_CONFIG[slug || ""]?.label || slug}
@@ -120,48 +180,6 @@ const PageView = () => {
                         </div>
                       </div>
                     )}
-
-                    {/* Legacy committee slug: show tiered */}
-                    {isOldCommitteeSlug && (() => {
-                      // Founding members first 3
-                      const founders = members.slice(0, 3);
-                      const isSpecial = (m: any) => {
-                        const t = (m.title || "").toLowerCase();
-                        return t.includes("সভাপতি") || t.includes("সাধারণ সম্পাদক") || t.includes("president") || t.includes("secretary");
-                      };
-                      const rest = members.slice(3);
-                      const special = rest.filter(isSpecial);
-                      const regular = rest.filter((m: any) => !isSpecial(m));
-
-                      return (
-                        <>
-                          {founders.length > 0 && (
-                            <div>
-                              <h2 className="text-lg font-bold text-center mb-4 text-primary">🏛️ প্রতিষ্ঠাতা গভর্নিং বডি</h2>
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                {founders.map((m: any) => <MemberCard key={m.id} m={m} tier="governing_body" />)}
-                              </div>
-                            </div>
-                          )}
-                          {special.length > 0 && (
-                            <div>
-                              <h2 className="text-lg font-bold text-center mb-4 text-primary">🎖️ নির্বাহী কমিটি</h2>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {special.map((m: any) => <MemberCard key={m.id} m={m} tier="executive" />)}
-                              </div>
-                            </div>
-                          )}
-                          {regular.length > 0 && (
-                            <div>
-                              <h2 className="text-lg font-bold text-center mb-4 text-primary">👥 কার্যকরি সদস্য</h2>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                {regular.map((m: any) => <MemberCard key={m.id} m={m} tier="working" />)}
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      );
-                    })()}
                   </div>
                 )}
               </article>

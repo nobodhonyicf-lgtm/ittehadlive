@@ -2,8 +2,9 @@ import Layout from "@/components/layout/Layout";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Volume2, VolumeX, ChevronLeft, ChevronRight, AlignLeft, Plus, Minus, ChevronDown, Play, Pause, Square, BookOpen, Menu, X, Share2, Bookmark } from "lucide-react";
+import { Volume2, VolumeX, ChevronLeft, ChevronRight, AlignLeft, Plus, Minus, ChevronDown, Play, Pause, Square, BookOpen, Menu, X, Share2, Bookmark, BookMarked } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { toast } from "@/components/ui/sonner";
 
 interface QuranAyah {
   number: number;
@@ -73,6 +74,9 @@ const TAFSIR_OPTIONS = [
   { id: 166, name: "তাফসীর আবু বকর যাকারিয়া (মারেফুল কুরআন)", slug: "bn-tafsir-abu-bakr-zakaria" },
   { id: 165, name: "তাফসীর আহসানুল বায়ান (বাংলা)", slug: "bn-tafsir-ahsanul-bayaan" },
   { id: 381, name: "তাফসীর ফাতহুল মাজীদ (বাংলা)", slug: "tafisr-fathul-majid-bn" },
+  { id: 97, name: "তাফসীর জালালাইন (আরবি)", slug: "ar-tafsir-al-jalalayn" },
+  { id: 169, name: "তাফসীর মুয়াসসার (আরবি)", slug: "ar-tafsir-muyassar" },
+  { id: 171, name: "তাফসীর বাগভী (আরবি)", slug: "ar-tafseer-al-baghawi" },
 ];
 
 const RECITER_ID = 7;
@@ -95,7 +99,10 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
   const [fontSize, setFontSize] = useState(32);
   const [translationSize, setTranslationSize] = useState(18);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<"surah" | "ayah">("surah");
+  const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Set<string>>(new Set());
   const ayahRef = useRef<HTMLDivElement>(null);
+  const ayahRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   const [wordData, setWordData] = useState<Record<string, WordData[]>>({});
   const [wordDataLoading, setWordDataLoading] = useState(false);
@@ -106,6 +113,40 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
   const [verseTimings, setVerseTimings] = useState<{ verse_key: string; timestamp_from: number; timestamp_to: number; segments: number[][] }[]>([]);
   const surahAudioRef = useRef<HTMLAudioElement | null>(null);
   const timingIntervalRef = useRef<number | null>(null);
+
+  // Load bookmarks from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("quran_bookmarks");
+      if (saved) setBookmarkedAyahs(new Set(JSON.parse(saved)));
+    } catch {}
+  }, []);
+
+  const toggleBookmark = (verseKey: string) => {
+    setBookmarkedAyahs(prev => {
+      const next = new Set(prev);
+      if (next.has(verseKey)) {
+        next.delete(verseKey);
+        toast.success("বুকমার্ক মুছে ফেলা হয়েছে");
+      } else {
+        next.add(verseKey);
+        toast.success("বুকমার্ক যোগ করা হয়েছে");
+      }
+      localStorage.setItem("quran_bookmarks", JSON.stringify([...next]));
+      return next;
+    });
+  };
+
+  const shareAyah = async (ayah: QuranAyah) => {
+    const currentSurahData = surahs.find(s => s.number === selectedSurah);
+    const surahName = currentSurahData ? getBnName(currentSurahData) : "";
+    const text = `${ayah.text}\n\n${ayah.translation}\n\n— সূরা ${surahName}, আয়াত ${toBengaliNum(ayah.numberInSurah)}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: `সূরা ${surahName} — আয়াত ${toBengaliNum(ayah.numberInSurah)}`, text }); } catch {}
+    } else {
+      try { await navigator.clipboard.writeText(text); toast.success("কপি করা হয়েছে"); } catch {}
+    }
+  };
 
   useEffect(() => {
     fetch("https://api.alquran.cloud/v1/surah")
@@ -302,6 +343,12 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
     return () => { stopSurahAudio(); if (audio) audio.pause(); };
   }, []);
 
+  const scrollToAyah = (ayahNum: number) => {
+    const el = ayahRefs.current[ayahNum];
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    setShowSidebar(false);
+  };
+
   const currentSurah = surahs.find(s => s.number === selectedSurah);
   const getBnName = (s: QuranSurah) => SURAH_NAMES_BN[s.number] || s.englishName;
   const filteredSurahs = surahs.filter(s =>
@@ -315,46 +362,81 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
     ? [{ label: "কুরআন", href: "/quran" }, { label: getBnName(currentSurah) }]
     : [{ label: "কুরআন" }];
 
+  // Sidebar content (shared between desktop & mobile)
+  const renderSidebarContent = () => (
+    <>
+      <div className="p-4 border-b border-border bg-gradient-to-b from-emerald-50 to-white dark:from-emerald-950/30 dark:to-card">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-lg">📖</span>
+          <div>
+            <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">সূচিপত্র</p>
+            {currentSurah && <p className="text-[11px] text-muted-foreground">{getBnName(currentSurah)}</p>}
+          </div>
+        </div>
+        <input
+          type="text"
+          placeholder="অনুসন্ধান করুন..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="w-full border border-border rounded-lg px-3 py-2 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        />
+      </div>
+      {/* Two tabs: সূরা | আয়াত */}
+      <div className="flex border-b border-border">
+        <button 
+          onClick={() => setSidebarTab("surah")}
+          className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${sidebarTab === "surah" ? "text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-600" : "text-muted-foreground"}`}
+        >
+          সূরা
+        </button>
+        <button 
+          onClick={() => setSidebarTab("ayah")}
+          className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${sidebarTab === "ayah" ? "text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-600" : "text-muted-foreground"}`}
+        >
+          আয়াত
+        </button>
+      </div>
+      <div>
+        {sidebarTab === "surah" ? (
+          filteredSurahs.map(s => (
+            <button
+              key={s.number}
+              onClick={() => { loadSurah(s.number); setShowSidebar(false); }}
+              className={`w-full text-left px-4 py-3 text-sm hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-colors flex items-center gap-3 border-b border-border/50 ${selectedSurah === s.number ? "bg-emerald-100 dark:bg-emerald-900/30 font-bold" : ""}`}
+            >
+              <span className="flex-shrink-0 text-sm font-medium text-muted-foreground w-8">{toBengaliNum(s.number)}.</span>
+              <span className="flex-1 truncate">{getBnName(s)}</span>
+              <span className="text-muted-foreground text-xs">{toBengaliNum(s.numberOfAyahs)}</span>
+            </button>
+          ))
+        ) : (
+          /* Ayah index */
+          ayahs.length > 0 ? ayahs.map(a => (
+            <button
+              key={a.numberInSurah}
+              onClick={() => scrollToAyah(a.numberInSurah)}
+              className={`w-full text-left px-4 py-2.5 text-sm hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-colors flex items-center gap-3 border-b border-border/50 ${highlightedVerse === `${selectedSurah}:${a.numberInSurah}` ? "bg-emerald-100 dark:bg-emerald-900/30 font-bold" : ""}`}
+            >
+              <span className="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xs font-bold">{toBengaliNum(a.numberInSurah)}</span>
+              <span className="flex-1 text-xs text-muted-foreground line-clamp-1 truncate" dir="rtl" style={{ fontFamily: "'Scheherazade New', 'Amiri', serif" }}>
+                {a.text.substring(0, 50)}...
+              </span>
+            </button>
+          )) : (
+            <p className="text-center text-sm text-muted-foreground py-8">একটি সূরা নির্বাচন করুন</p>
+          )
+        )}
+      </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <div className="flex relative">
-        {/* Left Sidebar - Surah Index */}
+        {/* Left Sidebar - Desktop */}
         {selectedSurah && (
           <aside className="hidden lg:block w-72 flex-shrink-0 border-r border-border bg-card sticky top-0 h-screen overflow-y-auto">
-            <div className="p-4 border-b border-border bg-gradient-to-b from-emerald-50 to-white dark:from-emerald-950/30 dark:to-card">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">📖</span>
-                <div>
-                  <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">সূরা</p>
-                  <p className="text-[11px] text-muted-foreground">পারা</p>
-                </div>
-              </div>
-              <input
-                type="text"
-                placeholder="অনুসন্ধান করুন..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full border border-border rounded-lg px-3 py-2 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-            {/* Two tabs: সূরা | আয়াত */}
-            <div className="flex border-b border-border">
-              <button className="flex-1 py-2.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-600">সূরা</button>
-              <button className="flex-1 py-2.5 text-sm text-muted-foreground">আয়াত</button>
-            </div>
-            <div>
-              {filteredSurahs.map(s => (
-                <button
-                  key={s.number}
-                  onClick={() => loadSurah(s.number)}
-                  className={`w-full text-left px-4 py-3 text-sm hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-colors flex items-center gap-3 border-b border-border/50 ${selectedSurah === s.number ? "bg-emerald-100 dark:bg-emerald-900/30 font-bold" : ""}`}
-                >
-                  <span className="flex-shrink-0 text-sm font-medium text-muted-foreground w-8">{toBengaliNum(s.number)}.</span>
-                  <span className="flex-1 truncate">{getBnName(s)}</span>
-                  <span className="text-muted-foreground text-xs">{toBengaliNum(s.numberOfAyahs)}</span>
-                </button>
-              ))}
-            </div>
+            {renderSidebarContent()}
           </aside>
         )}
 
@@ -363,22 +445,11 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
           <>
             <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setShowSidebar(false)} />
             <aside className="fixed left-0 top-0 bottom-0 w-80 bg-card z-50 lg:hidden overflow-y-auto shadow-2xl">
-              <div className="p-4 border-b border-border bg-emerald-50 dark:bg-emerald-950/20 flex items-center justify-between">
+              <div className="flex items-center justify-between p-3 border-b border-border bg-emerald-50 dark:bg-emerald-950/20">
                 <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">📖 সূচিপত্র</p>
                 <button onClick={() => setShowSidebar(false)} className="p-1.5 hover:bg-muted rounded-lg"><X size={18} /></button>
               </div>
-              <div>
-                {surahs.map(s => (
-                  <button
-                    key={s.number}
-                    onClick={() => { loadSurah(s.number); setShowSidebar(false); }}
-                    className={`w-full text-left px-4 py-3 text-sm hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-colors flex items-center gap-3 border-b border-border/50 ${selectedSurah === s.number ? "bg-emerald-100 dark:bg-emerald-900/30 font-bold" : ""}`}
-                  >
-                    <span className="text-sm text-muted-foreground w-8">{toBengaliNum(s.number)}.</span>
-                    <span className="flex-1 truncate">{getBnName(s)}</span>
-                  </button>
-                ))}
-              </div>
+              {renderSidebarContent()}
             </aside>
           </>
         )}
@@ -451,7 +522,7 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
             </>
           ) : (
             <div>
-              {/* Surah Title Banner - Muslim Bangla style */}
+              {/* Surah Title Banner */}
               <div ref={ayahRef} className="text-center py-6 border-b border-border">
                 {currentSurah && (
                   <>
@@ -467,7 +538,7 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                 )}
               </div>
 
-              {/* Action buttons row - Muslim Bangla style */}
+              {/* Action buttons row */}
               <div className="flex items-center justify-center gap-3 py-4 border-b border-border bg-card">
                 <button
                   onClick={() => setShowTafsirDropdown(!showTafsirDropdown)}
@@ -475,20 +546,11 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                 >
                   📖 তাফসীর
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-border hover:bg-muted text-sm">
-                  <Share2 size={16} />
-                </button>
                 <button
                   onClick={playSurahAudio}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-full border transition-colors text-sm ${isSurahPlaying ? "bg-emerald-600 text-white border-emerald-600" : "bg-emerald-50 border-emerald-300 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400"}`}
                 >
-                  {isSurahPlaying ? <Pause size={16} /> : <Play size={16} />}
-                </button>
-                <button
-                  onClick={playSurahAudio}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-full border transition-colors text-sm ${isSurahPlaying ? "bg-orange-600 text-white border-orange-600" : "border-border hover:bg-muted"}`}
-                >
-                  ▶ অডিও
+                  {isSurahPlaying ? <><Pause size={16} /> পজ</> : <><Play size={16} /> পুরো সূরা শুনুন</>}
                 </button>
               </div>
 
@@ -604,11 +666,49 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                     const tafsirText = tafsirData[verseKey];
                     const words = wordData[verseKey];
                     const isHighlightedVerse = highlightedVerse === verseKey;
+                    const isBookmarked = bookmarkedAyahs.has(verseKey);
 
                     return (
-                      <div key={ayah.number} className={`border-b border-border transition-colors duration-300 ${isHighlightedVerse ? "bg-emerald-50/60 dark:bg-emerald-950/30" : "hover:bg-muted/20"}`}>
-                        {/* Arabic text - large, centered like Muslim Bangla */}
-                        <div className="px-6 pt-8 pb-4">
+                      <div 
+                        key={ayah.number} 
+                        ref={el => { ayahRefs.current[ayah.numberInSurah] = el; }}
+                        className={`border-b border-border transition-colors duration-300 ${isHighlightedVerse ? "bg-emerald-50/60 dark:bg-emerald-950/30" : "hover:bg-muted/20"}`}
+                      >
+                        {/* Ayah number badge */}
+                        <div className="flex items-center justify-between px-6 pt-5 pb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-sm font-bold">
+                              {toBengaliNum(ayah.numberInSurah)}
+                            </span>
+                            <span className="text-xs text-muted-foreground">আয়াত {toBengaliNum(ayah.numberInSurah)}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => toggleBookmark(verseKey)}
+                              className={`p-2 rounded-lg transition-colors ${isBookmarked ? "text-amber-500" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                              title="বুকমার্ক"
+                            >
+                              {isBookmarked ? <BookMarked size={16} /> : <Bookmark size={16} />}
+                            </button>
+                            <button
+                              onClick={() => shareAyah(ayah)}
+                              className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                              title="শেয়ার করুন"
+                            >
+                              <Share2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => playAudio(ayah.number)}
+                              className={`p-2 rounded-lg transition-colors ${playingAyah === ayah.number ? "bg-emerald-600 text-white" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                              title="অডিও"
+                            >
+                              {playingAyah === ayah.number ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Arabic text - with waqf symbols preserved */}
+                        <div className="px-6 pt-2 pb-4">
                           <p
                             className="text-right leading-[2.8] text-foreground"
                             dir="rtl"
@@ -621,7 +721,7 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                             }}
                           >
                             {(isSurahPlaying || playingAyah) && words ? (
-                              words.filter(w => w.char_type_name === "word" || w.char_type_name === "end").map((w, wi) => (
+                              words.map((w, wi) => (
                                 <span
                                   key={wi}
                                   className={`transition-all duration-150 ${
@@ -636,23 +736,19 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                             ) : (
                               ayah.text
                             )}
+                            {/* Verse end marker */}
+                            <span className="text-emerald-600 dark:text-emerald-400 mx-1" style={{ fontSize: `${fontSize * 0.7}px` }}>
+                              ﴿{toBengaliNum(ayah.numberInSurah)}﴾
+                            </span>
                           </p>
                         </div>
 
-                        {/* Transliteration line */}
-                        <div className="px-6 pb-2 text-right">
-                          <p className="text-sm text-muted-foreground italic" dir="rtl">
-                            {/* transliteration placeholder */}
-                          </p>
-                        </div>
-
-                        {/* Mufti name & Bengali translation */}
+                        {/* Bengali translation */}
                         {showTranslation && (
                           <div className="px-6 pb-4 border-t border-border/50 pt-3">
                             <p className="text-xs text-muted-foreground mb-1.5 italic">মুফতী তাকী উসমানী</p>
                             <p className="text-foreground leading-relaxed" style={{ fontSize: `${translationSize}px` }}>
                               {ayah.translation}
-                              <sup className="text-emerald-600 ml-1 text-xs">{toBengaliNum(ayah.numberInSurah)}</sup>
                             </p>
                           </div>
                         )}
@@ -671,7 +767,7 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                                       fontSize: `${Math.max(18, fontSize - 8)}px`,
                                       fontFamily: "'Scheherazade New', 'Amiri', 'Noto Naskh Arabic', serif" 
                                     }}>{w.text_uthmani}</p>
-                                    <p className="text-sm text-blue-700 dark:text-blue-400" dir="ltr">{w.translation?.text || ""}</p>
+                                    <p className="text-sm text-foreground font-medium" dir="ltr">{w.translation?.text || ""}</p>
                                   </div>
                                 ))}
                               </div>
@@ -700,28 +796,6 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                             )}
                           </div>
                         )}
-
-                        {/* Action bar for each ayah */}
-                        <div className="flex items-center justify-center gap-3 py-3 border-t border-border/50 bg-muted/20">
-                          <button
-                            onClick={() => setShowTafsirDropdown(!showTafsirDropdown)}
-                            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-full hover:bg-muted"
-                          >
-                            📖 তাফসীর
-                          </button>
-                          <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-full hover:bg-muted">
-                            <Share2 size={13} />
-                          </button>
-                          <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-full hover:bg-muted">
-                            <Bookmark size={13} />
-                          </button>
-                          <button
-                            onClick={() => playAudio(ayah.number)}
-                            className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full transition-colors ${playingAyah === ayah.number ? "bg-emerald-600 text-white" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}
-                          >
-                            {playingAyah === ayah.number ? <VolumeX size={13} /> : <Volume2 size={13} />} অডিও
-                          </button>
-                        </div>
                       </div>
                     );
                   })}
