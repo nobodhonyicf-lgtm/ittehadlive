@@ -17,8 +17,8 @@ const AppQuickActions = () => {
 
   const actions = [
     { icon: GraduationCap, label: "রেজাল্ট", path: "/result", color: "bg-blue-500 dark:bg-blue-600" },
-    { icon: Users, label: "গভর্নিং বডি", path: "/page/governing_body", color: "bg-emerald-500 dark:bg-emerald-600" },
-    { icon: Users, label: "নির্বাহী", path: "/page/executive", color: "bg-cyan-500 dark:bg-cyan-600" },
+    { icon: Users, label: "কমিটি", path: "/page/committee", color: "bg-emerald-500 dark:bg-emerald-600" },
+    { icon: Users, label: "উপদেষ্টামন্ডলী", path: "/page/advisors", color: "bg-cyan-500 dark:bg-cyan-600" },
     { icon: Building2, label: "শাখা", path: "/branches", color: "bg-orange-500 dark:bg-orange-600" },
     { icon: BookOpen, label: "প্রকাশনা", path: "/books", color: "bg-purple-500 dark:bg-purple-600" },
     { icon: Bell, label: "নোটিশ", path: "/posts", color: "bg-red-500 dark:bg-red-600" },
