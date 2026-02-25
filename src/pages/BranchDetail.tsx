@@ -32,9 +32,9 @@ const BranchDetail = () => {
         {/* Hero Header */}
         <div className="relative rounded-2xl overflow-hidden mb-6 bg-gradient-to-br from-primary/10 to-accent/5 dark:from-primary/20 dark:to-accent/10 border border-border">
           <div className="grid grid-cols-1 md:grid-cols-5">
-            <div className="md:col-span-2 h-48 md:h-64 flex items-center justify-center overflow-hidden">
+            <div className="md:col-span-2 h-48 md:h-64 flex items-center justify-center overflow-hidden p-6">
               {branch.image_url ? (
-                <img src={branch.image_url} alt={branch.name} className="w-full h-full object-cover" />
+                <img src={branch.image_url} alt={branch.name} className="max-w-[140px] max-h-[140px] object-contain" />
               ) : (
                 <Building2 className="text-primary/25" size={80} />
               )}

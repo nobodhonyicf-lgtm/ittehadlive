@@ -83,7 +83,7 @@ const IftarCountdownWidget = () => {
         ].map(({ val, label: lbl }, i) => (
           <div key={i} className="flex flex-col items-center">
             <div className="bg-white/20 rounded-xl w-14 h-14 flex items-center justify-center backdrop-blur-sm border border-white/10">
-              <span className="text-2xl font-bold font-mono">
+              <span className="text-2xl font-bold" style={{ fontFamily: "'Noto Sans Bengali', 'SolaimanLipi', sans-serif", fontVariantNumeric: "tabular-nums" }}>
                 {toBengaliNum(String(val).padStart(2, "0"))}
               </span>
             </div>

@@ -77,7 +77,7 @@ const AppIftarCountdown = ({ compact = false }: Props) => {
       <div className={`flex items-center gap-2 bg-gradient-to-r ${bgClass} text-white rounded-xl px-3 py-2 text-[11px] font-bold`}>
         <Icon size={12} />
         <span>{label} পর্যন্ত:</span>
-        <span className="font-mono tracking-widest">
+        <span className="tracking-widest" style={{ fontFamily: "'Noto Sans Bengali', 'SolaimanLipi', sans-serif", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
           {toBengaliNum(String(hrs).padStart(2, "0"))}:{toBengaliNum(String(mins).padStart(2, "0"))}:{toBengaliNum(String(secs).padStart(2, "0"))}
         </span>
       </div>
@@ -98,7 +98,7 @@ const AppIftarCountdown = ({ compact = false }: Props) => {
         ].map(({ val, label: lbl }, i) => (
           <div key={i} className="flex flex-col items-center">
             <div className="bg-white/20 rounded-lg w-10 h-10 flex items-center justify-center backdrop-blur-sm">
-              <span className="text-lg font-bold font-mono leading-none">
+              <span className="text-lg font-bold leading-none" style={{ fontFamily: "'Noto Sans Bengali', 'SolaimanLipi', sans-serif", fontVariantNumeric: "tabular-nums" }}>
                 {toBengaliNum(String(val).padStart(2, "0"))}
               </span>
             </div>
