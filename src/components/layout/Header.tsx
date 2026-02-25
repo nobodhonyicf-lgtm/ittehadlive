@@ -118,6 +118,27 @@ const Header = () => {
                 </Link>
               </li>
             ))}
+            {/* Islamic sections */}
+            <li>
+              <Link to="/quran" className="block px-4 py-2.5 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+                কুরআন
+              </Link>
+            </li>
+            <li>
+              <Link to="/hadith" className="block px-4 py-2.5 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+                হাদিস
+              </Link>
+            </li>
+            <li>
+              <Link to="/islamic/dua" className="block px-4 py-2.5 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+                দোয়া
+              </Link>
+            </li>
+            <li>
+              <Link to="/islamic/masala" className="block px-4 py-2.5 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+                মাসআলা
+              </Link>
+            </li>
           </ul>
         </div>
       </nav>

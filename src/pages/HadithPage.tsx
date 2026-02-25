@@ -391,11 +391,12 @@ const HadithContent = () => {
                           হাদিস নং {toBengaliNum(hadith.hadithnumber)}
                         </span>
                         {bengaliGrade && (
-                          <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-                            bengaliGrade.includes("সহীহ") ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
-                            bengaliGrade.includes("হাসান") ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
-                            bengaliGrade.includes("দুর্বল") ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" :
-                            "bg-muted text-muted-foreground"
+                          <span className={`text-xs px-3 py-1 rounded-md font-bold border ${
+                            bengaliGrade.includes("সহীহ") ? "bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-700" :
+                            bengaliGrade.includes("হাসান") ? "bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700" :
+                            bengaliGrade.includes("দুর্বল") || bengaliGrade.includes("যঈফ") ? "bg-red-50 text-red-600 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700" :
+                            bengaliGrade.includes("জাল") ? "bg-red-100 text-red-700 border-red-400 dark:bg-red-900/40 dark:text-red-400 dark:border-red-600" :
+                            "bg-muted text-muted-foreground border-border"
                           }`}>
                             {bengaliGrade}
                           </span>

@@ -641,7 +641,7 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                   ))}
                 </div>
               ) : (
-                <div className="max-w-4xl mx-auto">
+              <div className="max-w-4xl mx-auto">
                   {/* Bismillah */}
                   {selectedSurah !== 1 && selectedSurah !== 9 && (
                     <div className="text-center py-8 bg-gradient-to-b from-emerald-50/50 to-transparent dark:from-emerald-950/20">
@@ -660,8 +660,62 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                     </div>
                   )}
 
-                  {/* Ayahs */}
-                  {ayahs.map(ayah => {
+                  {/* Flowing mode: when translation is off, show all ayahs together */}
+                  {!showTranslation && !showWordByWord && selectedTafsir === 0 ? (
+                    <div className="px-6 py-8 bg-gradient-to-b from-emerald-50/30 to-transparent dark:from-emerald-950/10">
+                      <p
+                        className="text-right leading-[2.8] text-foreground"
+                        dir="rtl"
+                        style={{
+                          fontSize: `${fontSize}px`,
+                          fontFamily: "'Scheherazade New', 'Amiri', 'Noto Naskh Arabic', serif",
+                          fontWeight: 400,
+                          wordSpacing: '6px',
+                          letterSpacing: '0.02em',
+                        }}
+                      >
+                        {ayahs.map((ayah, idx) => {
+                          const verseKey = `${selectedSurah}:${ayah.numberInSurah}`;
+                          const isHighlightedVerse = highlightedVerse === verseKey;
+
+                          return (
+                            <span
+                              key={ayah.number}
+                              ref={el => { ayahRefs.current[ayah.numberInSurah] = el as any; }}
+                              className={`transition-colors duration-300 ${isHighlightedVerse ? "bg-emerald-100/80 dark:bg-emerald-900/40 rounded-md" : ""}`}
+                            >
+                              {(isSurahPlaying || playingAyah) && wordData[verseKey] ? (
+                                wordData[verseKey].map((w, wi) => (
+                                  <span
+                                    key={wi}
+                                    className={`transition-all duration-150 ${
+                                      highlightedWord?.verseKey === verseKey && highlightedWord?.wordIndex === wi
+                                        ? "bg-yellow-300/80 dark:bg-yellow-600/60 rounded-md px-1 py-1"
+                                        : ""
+                                    }`}
+                                  >
+                                    {w.text_uthmani}{" "}
+                                  </span>
+                                ))
+                              ) : (
+                                ayah.text
+                              )}
+                              <span
+                                className="text-emerald-600 dark:text-emerald-400 mx-1 cursor-pointer hover:text-emerald-800"
+                                style={{ fontSize: `${fontSize * 0.75}px` }}
+                                onClick={() => playAudio(ayah.number)}
+                              >
+                                ﴿{toBengaliNum(ayah.numberInSurah)}﴾
+                              </span>
+                              {" "}
+                            </span>
+                          );
+                        })}
+                      </p>
+                    </div>
+                  ) : (
+                  /* Individual ayah mode */
+                  ayahs.map(ayah => {
                     const verseKey = `${selectedSurah}:${ayah.numberInSurah}`;
                     const tafsirText = tafsirData[verseKey];
                     const words = wordData[verseKey];
@@ -798,7 +852,8 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                         )}
                       </div>
                     );
-                  })}
+                  })
+                  )}
                 </div>
               )}
             </div>

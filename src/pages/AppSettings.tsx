@@ -1,4 +1,4 @@
-import { Bell, BellOff, Loader2, Moon, Sun, Settings, Type, Minus, Plus } from "lucide-react";
+import { Bell, BellOff, Loader2, Moon, Sun, Settings, Type, Minus, Plus, MapPin } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,30 @@ import AppLayout from "@/components/app/AppLayout";
 import { Switch } from "@/components/ui/switch";
 import { useState, useEffect } from "react";
 import { toBengali } from "@/lib/bengali";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const BD_LOCATIONS = [
+  { name: "ঢাকা", lat: 23.8103, lng: 90.4125 },
+  { name: "চট্টগ্রাম", lat: 22.3569, lng: 91.7832 },
+  { name: "রাজশাহী", lat: 24.3636, lng: 88.6241 },
+  { name: "খুলনা", lat: 22.8456, lng: 89.5403 },
+  { name: "সিলেট", lat: 24.8949, lng: 91.8687 },
+  { name: "বরিশাল", lat: 22.701, lng: 90.3535 },
+  { name: "রংপুর", lat: 25.7439, lng: 89.2752 },
+  { name: "ময়মনসিংহ", lat: 24.7471, lng: 90.4203 },
+  { name: "কুমিল্লা", lat: 23.4607, lng: 91.1809 },
+  { name: "গাজীপুর", lat: 23.9999, lng: 90.4203 },
+  { name: "নারায়ণগঞ্জ", lat: 23.6238, lng: 90.5 },
+  { name: "ব্রাহ্মণবাড়িয়া", lat: 23.9571, lng: 91.1115 },
+  { name: "যশোর", lat: 23.1667, lng: 89.2 },
+  { name: "কক্সবাজার", lat: 21.4272, lng: 92.0058 },
+  { name: "দিনাজপুর", lat: 25.6279, lng: 88.6332 },
+  { name: "বগুড়া", lat: 24.8465, lng: 89.3773 },
+  { name: "নোয়াখালী", lat: 22.8696, lng: 91.0995 },
+  { name: "পাবনা", lat: 24.0064, lng: 89.2372 },
+  { name: "টাঙ্গাইল", lat: 24.2513, lng: 89.9164 },
+  { name: "স্বয়ংক্রিয় (GPS)", lat: 0, lng: 0 },
+];
 
 const FONT_SIZES = [
   { label: "ছোট", value: 14 },
@@ -33,6 +57,7 @@ const AppSettings = () => {
 
   const [isDark, setIsDark] = useState(false);
   const [fontSizeIndex, setFontSizeIndex] = useState(1);
+  const [selectedLocation, setSelectedLocation] = useState("ঢাকা");
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains("dark"));
@@ -41,6 +66,8 @@ const AppSettings = () => {
       const idx = FONT_SIZES.findIndex((f) => f.value === parseInt(saved));
       if (idx >= 0) setFontSizeIndex(idx);
     }
+    const savedLoc = localStorage.getItem("prayer-location");
+    if (savedLoc) setSelectedLocation(savedLoc);
   }, []);
 
   useEffect(() => {
@@ -86,6 +113,33 @@ const AppSettings = () => {
         </h1>
 
         <div className="space-y-1">
+          {/* Location */}
+          <div className="p-4 bg-card rounded-xl border border-border">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                <MapPin size={18} className="text-primary" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">লোকেশন</p>
+                <p className="text-xs text-muted-foreground">নামাজের সময় ও ইফতারের জন্য</p>
+              </div>
+            </div>
+            <Select value={selectedLocation} onValueChange={(v) => {
+              setSelectedLocation(v);
+              localStorage.setItem("prayer-location", v);
+              toast.success(`লোকেশন পরিবর্তন: ${v}`);
+            }}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="লোকেশন নির্বাচন করুন" />
+              </SelectTrigger>
+              <SelectContent>
+                {BD_LOCATIONS.map(loc => (
+                  <SelectItem key={loc.name} value={loc.name}>{loc.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Theme */}
           <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border">
             <div className="flex items-center gap-3">
