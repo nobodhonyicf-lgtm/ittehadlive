@@ -181,16 +181,23 @@ const HadithContent = () => {
               />
             </div>
             <div>
-              {Object.entries(sections).filter(([k]) => k !== "0").map(([num, name]) => (
-                <button
-                  key={num}
-                  onClick={() => loadSection(Number(num))}
-                  className={`w-full text-left px-4 py-3 text-sm hover:bg-sky-50 dark:hover:bg-sky-950/20 transition-colors flex items-center gap-3 border-b border-border/50 ${selectedSection === Number(num) ? "bg-sky-100 dark:bg-sky-900/30 font-bold" : ""}`}
-                >
-                  <span className="text-sm text-muted-foreground w-8 flex-shrink-0">{toBengaliNum(num)}.</span>
-                  <span className="flex-1 truncate">{name}</span>
-                </button>
-              ))}
+              {Object.entries(sections).filter(([k]) => k !== "0").map(([num, name]) => {
+                const sectionHadiths = hadiths.filter(h => String(h.reference?.book) === num);
+                const hadithRange = sectionHadiths.length > 0 
+                  ? `${toBengaliNum(sectionHadiths[0].hadithnumber)}-${toBengaliNum(sectionHadiths[sectionHadiths.length - 1].hadithnumber)}`
+                  : "";
+                return (
+                  <button
+                    key={num}
+                    onClick={() => loadSection(Number(num))}
+                    className={`w-full text-left px-4 py-3 text-sm hover:bg-sky-50 dark:hover:bg-sky-950/20 transition-colors flex items-center gap-3 border-b border-border/50 ${selectedSection === Number(num) ? "bg-sky-100 dark:bg-sky-900/30 font-bold" : ""}`}
+                  >
+                    <span className="text-sm text-muted-foreground w-8 flex-shrink-0">{toBengaliNum(num)}.</span>
+                    <span className="flex-1 truncate">{name}</span>
+                    {hadithRange && <span className="text-[10px] text-muted-foreground flex-shrink-0">({hadithRange})</span>}
+                  </button>
+                );
+              })}
             </div>
           </aside>
         )}
@@ -205,7 +212,12 @@ const HadithContent = () => {
                 <button onClick={() => setShowSidebar(false)} className="p-1.5 hover:bg-muted rounded-lg"><X size={18} /></button>
               </div>
               <div>
-                {Object.entries(sections).filter(([k]) => k !== "0").map(([num, name]) => (
+              {Object.entries(sections).filter(([k]) => k !== "0").map(([num, name]) => {
+                const sectionHadiths = hadiths.filter(h => String(h.reference?.book) === num);
+                const hadithRange = sectionHadiths.length > 0 
+                  ? `${toBengaliNum(sectionHadiths[0].hadithnumber)}-${toBengaliNum(sectionHadiths[sectionHadiths.length - 1].hadithnumber)}`
+                  : "";
+                return (
                   <button
                     key={num}
                     onClick={() => { loadSection(Number(num)); setShowSidebar(false); }}
@@ -213,8 +225,10 @@ const HadithContent = () => {
                   >
                     <span className="text-sm text-muted-foreground w-8">{toBengaliNum(num)}.</span>
                     <span className="truncate">{name}</span>
+                    {hadithRange && <span className="text-[10px] text-muted-foreground flex-shrink-0">({hadithRange})</span>}
                   </button>
-                ))}
+                );
+              })}
               </div>
             </aside>
           </>

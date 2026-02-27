@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useMenuItems, useSiteSettings } from "@/hooks/useData";
-import { Menu, X, GraduationCap, Users, Building2, Phone, Mail, BookOpen, LogIn, User, LayoutDashboard } from "lucide-react";
+import { Menu, X, GraduationCap, Users, Building2, Phone, Mail, BookOpen, LogIn, User, LayoutDashboard, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toBengali } from "@/lib/bengali";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,6 +48,9 @@ const Header = () => {
             )}
           </div>
           <div className="flex items-center gap-3 text-xs">
+            <Link to="/branches" className="hover:text-accent transition-colors flex items-center gap-1">
+              <MapPin size={13} /> শাখাসমূহ
+            </Link>
             <Link to="/result" className="hover:text-accent transition-colors flex items-center gap-1">
               <GraduationCap size={13} /> রেজাল্ট
             </Link>
@@ -130,12 +133,12 @@ const Header = () => {
               </Link>
             </li>
             <li>
-              <Link to="/islamic/dua" className="block px-4 py-2.5 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+              <Link to="/dua" className="block px-4 py-2.5 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
                 দোয়া
               </Link>
             </li>
             <li>
-              <Link to="/islamic/masala" className="block px-4 py-2.5 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+              <Link to="/masala" className="block px-4 py-2.5 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
                 মাসআলা
               </Link>
             </li>
