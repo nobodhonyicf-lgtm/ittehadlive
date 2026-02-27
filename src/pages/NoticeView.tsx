@@ -111,9 +111,9 @@ const NoticeView = () => {
     const html2canvas = (await import("html2canvas")).default;
     const el = padRef.current;
 
-    // Preload Amiri font
+    // Preload Arabic font
     try {
-      await document.fonts.load("700 26px Amiri");
+      await document.fonts.load("400 22px Andalus");
       await document.fonts.ready;
     } catch {}
 
@@ -140,25 +140,35 @@ const NoticeView = () => {
           cloned.style.overflow = "hidden";
           cloned.style.transform = "none";
         }
+        // Reduce header spacing in export
+        const headerWrap = cloned?.querySelector("[data-header]") as HTMLElement;
+        if (headerWrap) {
+          headerWrap.style.padding = "2px 40px 4px";
+        }
+        const bismillah = cloned?.querySelector("[data-bismillah]") as HTMLElement;
+        if (bismillah) {
+          bismillah.style.paddingTop = "8px";
+          bismillah.style.paddingBottom = "2px";
+        }
         // Replace Arabic text with SVG for proper ligature rendering
         const arabicEls = doc.querySelectorAll("[data-arabic]");
         arabicEls.forEach((ael: any) => {
           const svgNS = "http://www.w3.org/2000/svg";
           const svg = doc.createElementNS(svgNS, "svg");
           svg.setAttribute("width", "700");
-          svg.setAttribute("height", "50");
-          svg.setAttribute("viewBox", "0 0 700 50");
+          svg.setAttribute("height", "44");
+          svg.setAttribute("viewBox", "0 0 700 44");
           svg.style.display = "block";
           svg.style.margin = "0 auto";
           svg.style.width = "auto";
-          svg.style.height = "40px";
+          svg.style.height = "34px";
           const text = doc.createElementNS(svgNS, "text");
           text.setAttribute("x", "350");
-          text.setAttribute("y", "35");
+          text.setAttribute("y", "32");
           text.setAttribute("text-anchor", "middle");
-          text.setAttribute("font-family", "Amiri, serif");
-          text.setAttribute("font-size", "26");
-          text.setAttribute("font-weight", "700");
+          text.setAttribute("font-family", "Andalus, Amiri, serif");
+          text.setAttribute("font-size", "24");
+          text.setAttribute("font-weight", "400");
           text.setAttribute("fill", "#1a1a1a");
           text.setAttribute("direction", "rtl");
           text.textContent = ARABIC_TEXT;
@@ -291,18 +301,18 @@ const NoticeView = () => {
                     <div style={{ height: "1px", background: "linear-gradient(90deg, transparent, #c5a55a, transparent)", position: "relative", zIndex: 1 }} />
 
                     {/* Bismillah in Bengali */}
-                    <div style={{ textAlign: "center", paddingTop: "14px", paddingBottom: "6px", position: "relative", zIndex: 1 }}>
-                      <p style={{ fontSize: "14px", color: "#555", letterSpacing: "1px" }}>
+                    <div data-bismillah="true" style={{ textAlign: "center", paddingTop: "14px", paddingBottom: "4px", position: "relative", zIndex: 1 }}>
+                      <p style={{ fontSize: "14px", color: "#555", letterSpacing: "1px", margin: 0 }}>
                         বিসমিল্লাহির রাহমানির রাহীম
                       </p>
                     </div>
 
                     {/* Header: centered logo + text */}
-                    <div style={{
+                    <div data-header="true" style={{
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                      padding: "4px 40px 8px",
+                      padding: "2px 40px 6px",
                       position: "relative",
                       zIndex: 1,
                     }}>
@@ -320,11 +330,11 @@ const NoticeView = () => {
 
                       {/* Arabic name */}
                       <p data-arabic="true" style={{
-                        fontFamily: "'Amiri', serif",
+                        fontFamily: "'Andalus', 'Amiri', 'Traditional Arabic', serif",
                         fontSize: "22px",
-                        fontWeight: 700,
+                        fontWeight: 400,
                         color: "#1a1a1a",
-                        lineHeight: "1.2",
+                        lineHeight: "1.1",
                         direction: "rtl",
                         letterSpacing: "1px",
                         margin: "0",
@@ -395,10 +405,15 @@ const NoticeView = () => {
                         background: "linear-gradient(90deg, #0a5c2e, #0d7a3e, #1a9e52, #0d7a3e, #0a5c2e)",
                         padding: "8px 24px",
                       }}>
-                        <p style={{ textAlign: "center", color: "#ffffff", fontSize: "11px", lineHeight: "1.6" }}>
-                          স্থায়ী কার্যালয়: {orgAddress}
-                          <br />
-                          মোবাইল: {orgPhone}
+                        <p style={{ textAlign: "center", color: "#ffffff", fontSize: "11px", lineHeight: "1.6", margin: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                            {orgAddress}
+                          </span>
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            {orgPhone}
+                          </span>
                         </p>
                       </div>
                     </div>
