@@ -137,17 +137,19 @@ const Sidebar = () => {
       {/* Notices */}
       <div className="bg-card border border-border rounded-lg overflow-hidden">
         <SectionHeader title="নোটিশ" linkUrl="/posts" />
-        <div className="px-4 pb-4">
-          <ul className="space-y-3">
-            {notices?.slice(0, 8).map((notice) => (
-              <li key={notice.id} className="border-b border-border pb-2 last:border-0">
-                <Link to={`/notice/${notice.id}`} className="text-sm hover:text-primary transition-colors flex items-start gap-2">
-                  <span className="bg-destructive text-destructive-foreground text-xs px-1.5 py-0.5 rounded shrink-0 mt-0.5">৪</span>
-                  <span className="line-clamp-2">{notice.title}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <div className="divide-y divide-border">
+          {notices?.slice(0, 8).map((notice) => (
+            <Link
+              key={notice.id}
+              to={`/notice/${notice.id}`}
+              className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-muted/50 transition-colors group"
+            >
+              <span className="w-6 h-6 rounded-md bg-destructive/15 text-destructive flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
+                <Bell size={13} />
+              </span>
+              <span className="text-sm line-clamp-2 group-hover:text-primary transition-colors">{notice.title}</span>
+            </Link>
+          ))}
         </div>
       </div>
 
