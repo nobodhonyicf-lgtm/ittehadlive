@@ -106,16 +106,36 @@ const NoticeView = () => {
     return `${day} ${month}, ${year}`;
   };
 
+  // Pre-render Arabic text to a data URL for use in exports
+  const [arabicImgSrc, setArabicImgSrc] = useState<string>("");
+  useEffect(() => {
+    const renderArabic = async () => {
+      try {
+        await document.fonts.load("700 26px Amiri");
+        await document.fonts.ready;
+      } catch {}
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      const fontSize = 26;
+      canvas.width = 700;
+      canvas.height = 60;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = `700 ${fontSize}px Amiri, serif`;
+      ctx.fillStyle = "#1a1a1a";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.direction = "rtl";
+      ctx.fillText(ARABIC_TEXT, canvas.width / 2, canvas.height / 2);
+      setArabicImgSrc(canvas.toDataURL("image/png"));
+    };
+    renderArabic();
+  }, []);
+
   const captureCanvas = async () => {
     if (!padRef.current) return null;
     const html2canvas = (await import("html2canvas")).default;
     const el = padRef.current;
-
-    // Preload Amiri font
-    try {
-      await document.fonts.load("700 26px Amiri");
-      await document.fonts.ready;
-    } catch {}
 
     return html2canvas(el, {
       scale: 3,
@@ -140,31 +160,6 @@ const NoticeView = () => {
           cloned.style.overflow = "hidden";
           cloned.style.transform = "none";
         }
-        // Replace Arabic text element with a pre-rendered canvas image
-        const arabicEls = doc.querySelectorAll("[data-arabic]");
-        arabicEls.forEach((ael: any) => {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          if (!ctx) return;
-          const text = ARABIC_TEXT;
-          const fontSize = 26;
-          canvas.width = 700;
-          canvas.height = 60;
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.font = `700 ${fontSize}px Amiri, serif`;
-          ctx.fillStyle = "#1a1a1a";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.direction = "rtl";
-          ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-          const img = doc.createElement("img");
-          img.src = canvas.toDataURL("image/png");
-          img.style.width = "auto";
-          img.style.height = `${fontSize + 14}px`;
-          img.style.display = "block";
-          img.style.margin = "0 auto";
-          ael.replaceWith(img);
-        });
       }
     });
   };
@@ -318,20 +313,28 @@ const NoticeView = () => {
                         </div>
                       )}
 
-                      {/* Arabic name */}
-                      <p data-arabic="true" style={{
-                        fontFamily: "'Amiri', serif",
-                        fontSize: "26px",
-                        fontWeight: 700,
-                        color: "#1a1a1a",
-                        lineHeight: "1.5",
-                        direction: "rtl",
-                        letterSpacing: "1px",
-                        margin: "0",
-                        textAlign: "center",
-                      }}>
-                        اِتِّحَادُ الْمَدَارِسِ الْخُصُوصِيَّة
-                      </p>
+                      {/* Arabic name - rendered as image to prevent breaking in exports */}
+                      {arabicImgSrc ? (
+                        <img
+                          src={arabicImgSrc}
+                          alt="اِتِّحَادُ الْمَدَارِسِ الْخُصُوصِيَّة"
+                          style={{ height: "40px", width: "auto", display: "block", margin: "0 auto" }}
+                        />
+                      ) : (
+                        <p data-arabic="true" style={{
+                          fontFamily: "'Amiri', serif",
+                          fontSize: "26px",
+                          fontWeight: 700,
+                          color: "#1a1a1a",
+                          lineHeight: "1.5",
+                          direction: "rtl",
+                          letterSpacing: "1px",
+                          margin: "0",
+                          textAlign: "center",
+                        }}>
+                          اِتِّحَادُ الْمَدَارِسِ الْخُصُوصِيَّة
+                        </p>
+                      )}
 
                       {/* Bengali name */}
                       <h1 style={{ fontSize: "22px", fontWeight: "bold", color: "#111", margin: "2px 0 0", textAlign: "center" }}>
