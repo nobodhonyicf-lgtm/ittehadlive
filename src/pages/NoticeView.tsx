@@ -39,9 +39,11 @@ const NoticeView = () => {
         const padding = 16;
         const available = containerWidth - padding;
         let scale = Math.min(1, available / PAD_W);
-        // In app mode, shrink further so full pad is visible
+        // In app mode, shrink further so full pad is visible in viewport
         if (isApp) {
-          scale = Math.min(scale, 0.42);
+          const viewportH = window.innerHeight - 140; // account for header + bottom nav + buttons
+          const scaleByHeight = viewportH / PAD_H;
+          scale = Math.min(scale, scaleByHeight, 0.38);
         }
         setPadScale(scale);
       }
@@ -115,13 +117,24 @@ const NoticeView = () => {
     const html2canvas = (await import("html2canvas")).default;
     const el = padRef.current;
 
+    // Temporarily reset transform on parent for accurate capture
+    const scaledParent = el.parentElement;
+    let origTransform = "";
+    let origHeight = "";
+    if (scaledParent) {
+      origTransform = scaledParent.style.transform;
+      origHeight = scaledParent.style.height;
+      scaledParent.style.transform = "none";
+      scaledParent.style.height = `${PAD_H}px`;
+    }
+
     // Preload Arabic font
     try {
       await document.fonts.load("700 22px 'Scheherazade New'");
       await document.fonts.ready;
     } catch {}
 
-    return html2canvas(el, {
+    const canvas = await html2canvas(el, {
       scale: 3,
       useCORS: true,
       allowTaint: false,
@@ -181,6 +194,14 @@ const NoticeView = () => {
         });
       }
     });
+
+    // Restore transform
+    if (scaledParent) {
+      scaledParent.style.transform = origTransform;
+      scaledParent.style.height = origHeight;
+    }
+
+    return canvas;
   };
 
   const handleDownloadImage = async () => {
@@ -415,13 +436,13 @@ const NoticeView = () => {
                         padding: "8px 24px",
                       }}>
                         <div style={{ textAlign: "center", color: "#ffffff", fontSize: "11px", lineHeight: "1.8", margin: 0 }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>
-                            <span style={{ fontSize: "12px", lineHeight: 1, flexShrink: 0 }}>📍</span>
-                            <span>{orgAddress}</span>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, display: "inline-block", verticalAlign: "middle" }}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <span style={{ verticalAlign: "middle" }}>{orgAddress}</span>
                           </div>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", marginTop: "1px" }}>
-                            <span style={{ fontSize: "12px", lineHeight: 1, flexShrink: 0 }}>📞</span>
-                            <span>{orgPhone}</span>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", marginTop: "1px" }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, display: "inline-block", verticalAlign: "middle" }}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            <span style={{ verticalAlign: "middle" }}>{orgPhone}</span>
                           </div>
                         </div>
                       </div>
