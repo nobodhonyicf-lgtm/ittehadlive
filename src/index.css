@@ -26,7 +26,9 @@
   src: url('https://fonts.gstatic.com/s/amiri/v27/J7acnpd8CGxBHp2VkZY.woff2') format('woff2');
 }
 
-/* Noto Naskh Arabic - professional calligraphic Arabic */
+/* Scheherazade New - beautiful calligraphic Arabic */
+@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;500;600;700&display=swap');
+/* Noto Naskh Arabic - professional Arabic */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
 
 .font-arabic {

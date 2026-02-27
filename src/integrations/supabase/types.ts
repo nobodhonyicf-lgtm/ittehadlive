@@ -695,6 +695,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           signature_url: string | null
+          source: string | null
           title: string
           updated_at: string
         }
@@ -704,6 +705,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           signature_url?: string | null
+          source?: string | null
           title: string
           updated_at?: string
         }
@@ -713,6 +715,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           signature_url?: string | null
+          source?: string | null
           title?: string
           updated_at?: string
         }
