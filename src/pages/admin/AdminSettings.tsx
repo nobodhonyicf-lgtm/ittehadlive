@@ -49,6 +49,7 @@ const AdminSettings = () => {
     primary_color: "প্রাইমারি কালার",
     signature_principal: "প্রধান শিক্ষক/মুহতামিমের স্বাক্ষর (ছবি URL)",
     signature_controller: "পরীক্ষা নিয়ন্ত্রকের স্বাক্ষর (ছবি URL)",
+    signature_president: "সভাপতির স্বাক্ষর - নোটিশ প্যাড (ছবি URL)",
     default_og_image: "ডিফল্ট OG ছবি (সোশ্যাল শেয়ার প্রিভিউ)",
     meta_keywords: "মেটা কীওয়ার্ড (কমা দিয়ে আলাদা)",
     google_analytics_id: "Google Analytics ID",
@@ -69,7 +70,7 @@ const AdminSettings = () => {
   };
 
   const brandingKeys = ["logo_url", "favicon_url", "primary_color"];
-  const signatureKeys = ["signature_principal", "signature_controller"];
+  const signatureKeys = ["signature_principal", "signature_controller", "signature_president"];
   const seoKeys = ["default_og_image", "meta_keywords", "google_analytics_id", "facebook_page_url", "twitter_handle"];
   const adKeys = ["photocard_ad_enabled", "photocard_ad_image"];
   const authKeys = ["otp_enabled", "two_fa_enabled", "google_login_enabled", "apple_login_enabled"];
@@ -205,7 +206,7 @@ const AdminSettings = () => {
       {/* Signatures */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">✍️ মার্কশিট স্বাক্ষর</CardTitle>
+          <CardTitle className="text-base flex items-center gap-2">✍️ স্বাক্ষর সেটিংস</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {signatureSettings?.map((s) => (
@@ -230,6 +231,28 @@ const AdminSettings = () => {
               )}
             </div>
           ))}
+          {/* Render fields for signature keys that don't exist in DB yet */}
+          {signatureKeys
+            .filter(key => !signatureSettings?.some(s => s.key === key))
+            .map(key => (
+              <div key={key}>
+                <Label className="mb-1 block font-semibold">{keyLabels[key] || key}</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    onChange={(e) => setValues({ ...values, [`new_${key}`]: e.target.value })}
+                    placeholder="স্বাক্ষরের ছবির URL দিন"
+                  />
+                  <Button
+                    onClick={() => upsertMutation.mutate({ key, value: values[`new_${key}`] || "" })}
+                    disabled={upsertMutation.isPending}
+                    size="sm"
+                  >
+                    সংরক্ষণ
+                  </Button>
+                </div>
+              </div>
+            ))}
         </CardContent>
       </Card>
 
