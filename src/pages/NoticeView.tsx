@@ -104,6 +104,7 @@ const NoticeView = () => {
 
   const orgPhone = settings?.phone || "০১৯১৯-৯২৯১৯৯";
   const orgAddress = settings?.address || "শাহ সুজা জামে মসজিদ, মোগলটুলী, কুমিল্লা।";
+  const logoUrl = settings?.app_logo_url || settings?.logo_url || "";
 
   return (
     <Layout>
@@ -118,18 +119,30 @@ const NoticeView = () => {
                 <div
                   ref={padRef}
                   className="bg-white mx-auto shadow-xl border border-border"
-                  style={{ width: "794px", maxWidth: "100%", minHeight: "1123px", position: "relative", fontFamily: "'Noto Sans Bengali', 'SolaimanLipi', sans-serif" }}
+                  style={{ width: "794px", maxWidth: "100%", minHeight: "1123px", position: "relative", fontFamily: "'Noto Sans Bengali', 'SolaimanLipi', sans-serif", overflow: "hidden" }}
                 >
+                  {/* Watermark logo in center */}
+                  {logoUrl && (
+                    <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: 0.06, pointerEvents: "none", zIndex: 0 }}>
+                      <img src={logoUrl} alt="" style={{ width: "400px", height: "400px", objectFit: "contain" }} crossOrigin="anonymous" />
+                    </div>
+                  )}
+
                   {/* Decorative top border */}
-                  <div style={{ height: "8px", background: "linear-gradient(90deg, #0d7a3e, #1a9e52, #0d7a3e)" }} />
+                  <div style={{ height: "8px", background: "linear-gradient(90deg, #0d7a3e, #1a9e52, #0d7a3e)", position: "relative", zIndex: 1 }} />
 
                   {/* Islamic border pattern top */}
-                  <div className="flex justify-center pt-3 pb-1">
+                  <div className="flex justify-center pt-3 pb-1" style={{ position: "relative", zIndex: 1 }}>
                     <p className="text-xs text-gray-500" style={{ fontFamily: "'Scheherazade New', serif" }}>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
                   </div>
 
-                  {/* Header / Position 1 */}
-                  <div className="text-center px-8 pb-2">
+                  {/* Header / Position 1 with Logo */}
+                  <div className="text-center px-8 pb-2" style={{ position: "relative", zIndex: 1 }}>
+                    {logoUrl && (
+                      <div className="flex justify-center mb-1">
+                        <img src={logoUrl} alt="লোগো" style={{ width: "60px", height: "60px", objectFit: "contain" }} crossOrigin="anonymous" />
+                      </div>
+                    )}
                     <p className="text-sm text-gray-600 leading-relaxed" dir="rtl" style={{ fontFamily: "'Scheherazade New', serif", fontSize: "16px" }}>
                       اِتِّحَادُ الْمَدَارِسِ الْخُصُوصِيَّة
                     </p>
@@ -149,21 +162,21 @@ const NoticeView = () => {
                   </div>
 
                   {/* Position 2 - Title */}
-                  <div className="text-center px-12 pt-6 pb-4">
+                  <div className="text-center px-12 pt-6 pb-4" style={{ position: "relative", zIndex: 1 }}>
                     <h2 className="text-lg font-bold text-gray-900 underline underline-offset-4" style={{ fontSize: "20px" }}>
                       {notice.title}
                     </h2>
                   </div>
 
                   {/* Content - Middle */}
-                  <div className="px-12 pb-16" style={{ minHeight: "500px" }}>
+                  <div className="px-12 pb-32" style={{ minHeight: "500px", position: "relative", zIndex: 1 }}>
                     <div className="text-base text-gray-800 whitespace-pre-wrap leading-8 text-justify" style={{ fontSize: "15px" }}>
                       {notice.content}
                     </div>
                   </div>
 
-                  {/* Position 4 - Signature (right aligned) */}
-                  <div className="px-12 pb-6 flex justify-end">
+                  {/* Position 4 - Signature (right aligned, just above footer) */}
+                  <div className="px-12 flex justify-end" style={{ position: "absolute", bottom: "52px", right: 0, zIndex: 1 }}>
                     <div className="text-center">
                       {(notice as any).signature_url && (
                         <img
@@ -187,6 +200,7 @@ const NoticeView = () => {
                       right: 0,
                       background: "linear-gradient(90deg, #0d7a3e, #1a9e52)",
                       padding: "8px 24px",
+                      zIndex: 1,
                     }}
                   >
                     <p className="text-center text-white text-xs leading-5">
