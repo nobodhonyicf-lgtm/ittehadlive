@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useSelectedDistrict } from "@/hooks/useLocationStore";
 
 interface AladhanTimings {
   Fajr: string;
@@ -26,10 +27,8 @@ interface AladhanResponse {
   };
 }
 
-// Convert 24h time string "HH:MM" to Bengali
 const toBengaliTime = (time24: string): string => {
   const bengaliDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-  // Remove timezone info like " (BST)"
   const clean = time24.replace(/\s*\(.*\)/, "").trim();
   const [h, m] = clean.split(":").map(Number);
   const hour12 = h % 12 || 12;
@@ -40,19 +39,15 @@ const toBengaliTime = (time24: string): string => {
 };
 
 export interface PrayerApiTimes {
-  sehri: string;   // Bengali formatted
-  iftar: string;    // Bengali formatted
-  sehriRaw: string; // raw HH:MM
-  iftarRaw: string; // raw HH:MM
+  sehri: string;
+  iftar: string;
+  sehriRaw: string;
+  iftarRaw: string;
   hijriDate: string;
   loading: boolean;
   error: boolean;
   locationName: string;
 }
-
-const DEFAULT_LAT = 23.8103; // Dhaka
-const DEFAULT_LNG = 90.4125;
-const DEFAULT_CITY = "ঢাকা";
 
 const fetchPrayerTimes = async (lat: number, lng: number): Promise<{
   sehri: string;
@@ -86,32 +81,15 @@ const fetchPrayerTimes = async (lat: number, lng: number): Promise<{
 };
 
 export const useAladhanPrayerTimes = () => {
+  const [district] = useSelectedDistrict();
+
   return useQuery({
-    queryKey: ["aladhan_prayer_times"],
+    queryKey: ["aladhan_prayer_times", district.name],
     queryFn: async () => {
-      let lat = DEFAULT_LAT;
-      let lng = DEFAULT_LNG;
-      let city = DEFAULT_CITY;
-
-      // Try to get user location
-      try {
-        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            timeout: 5000,
-            maximumAge: 3600000, // cache 1 hour
-          });
-        });
-        lat = pos.coords.latitude;
-        lng = pos.coords.longitude;
-        city = "আপনার অবস্থান";
-      } catch {
-        // Use Dhaka defaults
-      }
-
-      const times = await fetchPrayerTimes(lat, lng);
-      return { ...times, locationName: city };
+      const times = await fetchPrayerTimes(district.lat, district.lng);
+      return { ...times, locationName: district.name };
     },
-    staleTime: 1000 * 60 * 30, // 30 min
+    staleTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
   });
 };

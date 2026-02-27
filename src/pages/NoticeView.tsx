@@ -86,34 +86,42 @@ const NoticeView = () => {
     return `${day} ${month}, ${year}`;
   };
 
+  const captureCanvas = async () => {
+    if (!padRef.current) return null;
+    const html2canvas = (await import("html2canvas")).default;
+    const el = padRef.current;
+    return html2canvas(el, {
+      scale: 3,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: "#ffffff",
+      width: PAD_W,
+      height: PAD_H,
+      windowWidth: PAD_W,
+      windowHeight: PAD_H,
+      scrollX: 0,
+      scrollY: 0,
+      x: 0,
+      y: 0,
+      onclone: (doc) => {
+        const cloned = doc.querySelector("[data-pad]") as HTMLElement;
+        if (cloned) {
+          cloned.style.width = `${PAD_W}px`;
+          cloned.style.minWidth = `${PAD_W}px`;
+          cloned.style.maxWidth = `${PAD_W}px`;
+          cloned.style.height = `${PAD_H}px`;
+          cloned.style.overflow = "hidden";
+          cloned.style.transform = "none";
+        }
+      }
+    });
+  };
+
   const handleDownloadImage = async () => {
-    if (!padRef.current) return;
     setDownloading(true);
     try {
-      const html2canvas = (await import("html2canvas")).default;
-      const el = padRef.current;
-      const canvas = await html2canvas(el, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: "#ffffff",
-        width: PAD_W,
-        height: PAD_H,
-        windowWidth: PAD_W,
-        windowHeight: PAD_H,
-        scrollX: 0,
-        scrollY: 0,
-        x: 0,
-        y: 0,
-        onclone: (doc) => {
-          const cloned = doc.querySelector("[data-pad]") as HTMLElement;
-          if (cloned) {
-            cloned.style.width = `${PAD_W}px`;
-            cloned.style.height = `${PAD_H}px`;
-            cloned.style.overflow = "hidden";
-          }
-        }
-      });
+      const canvas = await captureCanvas();
+      if (!canvas) return;
       const link = document.createElement("a");
       link.download = `notice-${notice?.title || "pad"}.png`;
       link.href = canvas.toDataURL("image/png");
@@ -129,34 +137,11 @@ const NoticeView = () => {
   };
 
   const handleDownloadPdf = async () => {
-    if (!padRef.current) return;
     setDownloading(true);
     try {
-      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await captureCanvas();
+      if (!canvas) return;
       const { jsPDF } = await import("jspdf");
-      const el = padRef.current;
-      const canvas = await html2canvas(el, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: "#ffffff",
-        width: PAD_W,
-        height: PAD_H,
-        windowWidth: PAD_W,
-        windowHeight: PAD_H,
-        scrollX: 0,
-        scrollY: 0,
-        x: 0,
-        y: 0,
-        onclone: (doc) => {
-          const cloned = doc.querySelector("[data-pad]") as HTMLElement;
-          if (cloned) {
-            cloned.style.width = `${PAD_W}px`;
-            cloned.style.height = `${PAD_H}px`;
-            cloned.style.overflow = "hidden";
-          }
-        }
-      });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: [PAD_W, PAD_H] });
       pdf.addImage(imgData, "PNG", 0, 0, PAD_W, PAD_H);
@@ -205,138 +190,161 @@ const NoticeView = () => {
               <div className="animate-pulse bg-muted h-96 rounded" />
             ) : notice ? (
               <>
-                {/* The Notice Pad */}
-                <div
-                  ref={padRef}
-                  data-pad="true"
-                  style={{
-                    width: `${PAD_W}px`,
-                    height: `${PAD_H}px`,
-                    maxWidth: "100%",
-                    position: "relative",
-                    fontFamily: "'Noto Sans Bengali', 'SolaimanLipi', sans-serif",
-                    overflow: "hidden",
-                    boxSizing: "border-box",
-                    backgroundColor: "#ffffff",
-                    margin: "0 auto",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                  }}
-                >
-                  {/* Watermark logo - bigger and lower */}
-                  {proxiedLogo && logoLoaded && (
-                    <div style={{ position: "absolute", top: "55%", left: "50%", transform: "translate(-50%, -50%)", opacity: 0.04, pointerEvents: "none", zIndex: 0 }}>
-                      <img src={proxiedLogo} alt="" style={{ width: "480px", height: "480px", objectFit: "contain" }} crossOrigin="anonymous" />
-                    </div>
-                  )}
-
-                  {/* Top green bar */}
-                  <div style={{ height: "5px", background: "linear-gradient(90deg, #0a5c2e, #0d7a3e, #1a9e52, #0d7a3e, #0a5c2e)", position: "relative", zIndex: 1 }} />
-                  
-                  {/* Thin gold accent line */}
-                  <div style={{ height: "1px", background: "linear-gradient(90deg, transparent, #c5a55a, transparent)", position: "relative", zIndex: 1 }} />
-
-                  {/* Bismillah in Bengali */}
-                  <div style={{ textAlign: "center", paddingTop: "14px", paddingBottom: "4px", position: "relative", zIndex: 1 }}>
-                    <p style={{
-                      fontSize: "14px",
-                      color: "#555",
-                      letterSpacing: "1px",
-                    }}>
-                      বিসমিল্লাহির রাহমানির রাহীম
-                    </p>
-                  </div>
-
-                  {/* Header with logo on left */}
-                  <div style={{ display: "flex", alignItems: "center", padding: "4px 40px 8px", position: "relative", zIndex: 1, gap: "16px" }}>
-                    {/* Logo on left */}
+                {/* Notice Pad - fixed A4 size, scaled down for display */}
+                <div className="overflow-x-auto flex justify-center">
+                  <div
+                    ref={padRef}
+                    data-pad="true"
+                    style={{
+                      width: `${PAD_W}px`,
+                      minWidth: `${PAD_W}px`,
+                      height: `${PAD_H}px`,
+                      position: "relative",
+                      fontFamily: "'SolaimanLipi', 'Noto Sans Bengali', sans-serif",
+                      overflow: "hidden",
+                      boxSizing: "border-box",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
+                      border: "1px solid #e5e5e5",
+                    }}
+                  >
+                    {/* Watermark logo - large, centered lower */}
                     {proxiedLogo && logoLoaded && (
-                      <div style={{ flexShrink: 0 }}>
-                        <img src={proxiedLogo} alt="লোগো" style={{ width: "72px", height: "72px", objectFit: "contain" }} crossOrigin="anonymous" />
+                      <div style={{
+                        position: "absolute",
+                        top: "58%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        opacity: 0.04,
+                        pointerEvents: "none",
+                        zIndex: 0,
+                      }}>
+                        <img
+                          src={proxiedLogo}
+                          alt=""
+                          style={{ width: "520px", height: "520px", objectFit: "contain" }}
+                          crossOrigin="anonymous"
+                        />
                       </div>
                     )}
 
-                    {/* Text center */}
-                    <div style={{ flex: 1, textAlign: "center" }}>
-                      {/* Arabic name - Amiri calligraphic */}
-                      <p style={{
-                        fontFamily: "'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif",
-                        fontSize: "28px",
-                        fontWeight: 700,
-                        color: "#1a1a1a",
-                        lineHeight: "1.6",
-                        direction: "rtl",
-                        letterSpacing: "1px",
-                      }}>
-                        اِتِّحَادُ الْمَدَارِسِ الْخُصُوصِيَّة
+                    {/* Top green border */}
+                    <div style={{ height: "4px", background: "linear-gradient(90deg, #0a5c2e, #1a9e52, #0a5c2e)", position: "relative", zIndex: 1 }} />
+                    <div style={{ height: "1px", background: "linear-gradient(90deg, transparent, #c5a55a, transparent)", position: "relative", zIndex: 1 }} />
+
+                    {/* Bismillah in Bengali */}
+                    <div style={{ textAlign: "center", paddingTop: "14px", paddingBottom: "6px", position: "relative", zIndex: 1 }}>
+                      <p style={{ fontSize: "14px", color: "#555", letterSpacing: "1px" }}>
+                        বিসমিল্লাহির রাহমানির রাহীম
                       </p>
-
-                      {/* Bengali name */}
-                      <h1 style={{ fontSize: "22px", fontWeight: "bold", color: "#111", margin: "0" }}>
-                        ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ
-                      </h1>
-                      <p style={{ fontSize: "11px", color: "#666", marginTop: "2px" }}>(প্রাইভেট মাদরাসাগুলোর একটি সমন্বিত সংগঠন)</p>
                     </div>
-                  </div>
 
-                  {/* Divider */}
-                  <div style={{ height: "2px", background: "linear-gradient(90deg, transparent, #0d7a3e, transparent)", margin: "4px 40px 8px", position: "relative", zIndex: 1 }} />
-
-                  {/* সূত্র ও তারিখ */}
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#444", padding: "0 48px 4px", position: "relative", zIndex: 1 }}>
-                    <span>সূত্র: {noticeSource}</span>
-                    <div style={{ textAlign: "right" }}>
-                      <span>তারিখ: {formatDate(notice.created_at)}</span>
-                      <br />
-                      <span style={{ fontSize: "11px", color: "#666" }}>{toHijriBengali(new Date(notice.created_at))}</span>
-                    </div>
-                  </div>
-
-                  {/* Title */}
-                  <div style={{ textAlign: "center", padding: "20px 48px 14px", position: "relative", zIndex: 1 }}>
-                    <h2 style={{ fontSize: "20px", fontWeight: "bold", color: "#111", textDecoration: "underline", textUnderlineOffset: "4px" }}>
-                      {notice.title}
-                    </h2>
-                  </div>
-
-                  {/* Content */}
-                  <div style={{ padding: "0 48px", minHeight: "360px", position: "relative", zIndex: 1 }}>
-                    <div style={{ fontSize: "15px", color: "#333", whiteSpace: "pre-wrap", lineHeight: "2", textAlign: "justify" }}>
-                      {notice.content}
-                    </div>
-                  </div>
-
-                  {/* Signature */}
-                  <div style={{ position: "absolute", bottom: "56px", right: "48px", zIndex: 1, textAlign: "center" }}>
-                    {proxiedSignature && sigLoaded && (
-                      <img
-                        src={proxiedSignature}
-                        alt="স্বাক্ষর"
-                        style={{ height: "50px", objectFit: "contain", margin: "0 auto 4px" }}
-                        crossOrigin="anonymous"
-                      />
-                    )}
-                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#333", borderTop: "1px solid #999", paddingTop: "4px", paddingLeft: "24px", paddingRight: "24px" }}>সভাপতি</p>
-                  </div>
-
-                  {/* Footer */}
-                  <div style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    zIndex: 1,
-                  }}>
-                    {/* Gold accent line */}
-                    <div style={{ height: "1px", background: "linear-gradient(90deg, transparent, #c5a55a, transparent)" }} />
+                    {/* Header: logo left + text center */}
                     <div style={{
-                      background: "linear-gradient(90deg, #0a5c2e, #0d7a3e, #1a9e52, #0d7a3e, #0a5c2e)",
-                      padding: "8px 24px",
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "4px 40px 8px",
+                      position: "relative",
+                      zIndex: 1,
+                      gap: "16px",
                     }}>
-                      <p style={{ textAlign: "center", color: "#ffffff", fontSize: "11px", lineHeight: "1.6" }}>
-                        স্থায়ী কার্যালয়: {orgAddress}
+                      {/* Logo - square, matching text height */}
+                      {proxiedLogo && logoLoaded && (
+                        <div style={{ flexShrink: 0 }}>
+                          <img
+                            src={proxiedLogo}
+                            alt="লোগো"
+                            style={{ width: "75px", height: "75px", objectFit: "contain" }}
+                            crossOrigin="anonymous"
+                          />
+                        </div>
+                      )}
+
+                      {/* Center text */}
+                      <div style={{ flex: 1, textAlign: "center" }}>
+                        {/* Arabic name - Amiri calligraphic */}
+                        <p style={{
+                          fontFamily: "'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif",
+                          fontSize: "26px",
+                          fontWeight: 700,
+                          color: "#1a1a1a",
+                          lineHeight: "1.5",
+                          direction: "rtl",
+                          letterSpacing: "1px",
+                          margin: "0",
+                        }}>
+                          اِتِّحَادُ الْمَدَارِسِ الْخُصُوصِيَّة
+                        </p>
+
+                        {/* Bengali name */}
+                        <h1 style={{ fontSize: "22px", fontWeight: "bold", color: "#111", margin: "2px 0 0" }}>
+                          ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ
+                        </h1>
+                        <p style={{ fontSize: "11px", color: "#666", marginTop: "2px" }}>
+                          (প্রাইভেট মাদরাসাগুলোর একটি সমন্বিত সংগঠন)
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Green divider line */}
+                    <div style={{ height: "2px", background: "linear-gradient(90deg, transparent 5%, #0d7a3e, transparent 95%)", margin: "4px 40px 8px", position: "relative", zIndex: 1 }} />
+
+                    {/* সূত্র ও তারিখ */}
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#444", padding: "0 48px 4px", position: "relative", zIndex: 1 }}>
+                      <span>সূত্র: {noticeSource}</span>
+                      <div style={{ textAlign: "right" }}>
+                        <span>তারিখ: {formatDate(notice.created_at)}</span>
                         <br />
-                        মোবাইল: {orgPhone}
-                      </p>
+                        <span style={{ fontSize: "11px", color: "#666" }}>{toHijriBengali(new Date(notice.created_at))}</span>
+                      </div>
+                    </div>
+
+                    {/* Title */}
+                    <div style={{ textAlign: "center", padding: "20px 48px 14px", position: "relative", zIndex: 1 }}>
+                      <h2 style={{ fontSize: "20px", fontWeight: "bold", color: "#111", textDecoration: "underline", textUnderlineOffset: "4px" }}>
+                        {notice.title}
+                      </h2>
+                    </div>
+
+                    {/* Content */}
+                    <div style={{ padding: "0 48px", minHeight: "360px", position: "relative", zIndex: 1 }}>
+                      <div style={{ fontSize: "15px", color: "#333", whiteSpace: "pre-wrap", lineHeight: "2", textAlign: "justify" }}>
+                        {notice.content}
+                      </div>
+                    </div>
+
+                    {/* Signature */}
+                    <div style={{ position: "absolute", bottom: "56px", right: "48px", zIndex: 1, textAlign: "center" }}>
+                      {proxiedSignature && sigLoaded && (
+                        <img
+                          src={proxiedSignature}
+                          alt="স্বাক্ষর"
+                          style={{ height: "50px", objectFit: "contain", margin: "0 auto 4px" }}
+                          crossOrigin="anonymous"
+                        />
+                      )}
+                      <p style={{ fontSize: "13px", fontWeight: 600, color: "#333", borderTop: "1px solid #999", paddingTop: "4px", paddingLeft: "24px", paddingRight: "24px" }}>সভাপতি</p>
+                    </div>
+
+                    {/* Footer */}
+                    <div style={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      zIndex: 1,
+                    }}>
+                      <div style={{ height: "1px", background: "linear-gradient(90deg, transparent, #c5a55a, transparent)" }} />
+                      <div style={{
+                        background: "linear-gradient(90deg, #0a5c2e, #0d7a3e, #1a9e52, #0d7a3e, #0a5c2e)",
+                        padding: "8px 24px",
+                      }}>
+                        <p style={{ textAlign: "center", color: "#ffffff", fontSize: "11px", lineHeight: "1.6" }}>
+                          স্থায়ী কার্যালয়: {orgAddress}
+                          <br />
+                          মোবাইল: {orgPhone}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -351,7 +359,7 @@ const NoticeView = () => {
                   </Button>
                 </div>
 
-                {/* Share popup */}
+                {/* Share dialog */}
                 <Dialog open={shareOpen} onOpenChange={setShareOpen}>
                   <DialogContent className="max-w-xs">
                     <DialogHeader><DialogTitle>শেয়ার করুন</DialogTitle></DialogHeader>
@@ -374,7 +382,7 @@ const NoticeView = () => {
                   </DialogContent>
                 </Dialog>
 
-                {/* Download popup */}
+                {/* Download dialog */}
                 <Dialog open={dlOpen} onOpenChange={setDlOpen}>
                   <DialogContent className="max-w-xs">
                     <DialogHeader><DialogTitle>ডাউনলোড ফরম্যাট</DialogTitle></DialogHeader>
