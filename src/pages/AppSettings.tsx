@@ -1,4 +1,4 @@
-import { Bell, BellOff, Loader2, Moon, Sun, Settings, Type, Minus, Plus, MapPin, ChevronRight, Palette, Info, Shield } from "lucide-react";
+import { Bell, BellOff, Loader2, Moon, Sun, Settings, Type, Minus, Plus, MapPin, ChevronRight, Info, Shield, User, LogOut } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,8 @@ import { useState, useEffect } from "react";
 import { toBengali } from "@/lib/bengali";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const BD_LOCATIONS = [
   { name: "ঢাকা", lat: 23.8103, lng: 90.4125 },
@@ -42,6 +44,16 @@ const FONT_SIZES = [
 
 const AppSettings = () => {
   const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } = usePushNotifications();
+  const { user, signOut } = useAuth();
+
+  const { data: profile } = useQuery({
+    queryKey: ["user_profile", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("full_name, avatar_url, phone").eq("user_id", user!.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   const { data: vapidKey } = useQuery({
     queryKey: ["vapid_public_key"],
@@ -94,7 +106,7 @@ const AppSettings = () => {
         toast.success("নোটিফিকেশন চালু করা হয়েছে!");
       } else {
         if (Notification.permission === "denied") {
-          toast.error("ব্রাউজার থেকে নোটিফিকেশন অনুমতি ব্লক করা আছে। সেটিংস থেকে অনুমতি দিন।");
+          toast.error("ব্রাউজার থেকে নোটিফিকেশন অনুমতি ব্লক করা আছে।");
         } else {
           toast.error("নোটিফিকেশন চালু করা যায়নি।");
         }
@@ -107,10 +119,10 @@ const AppSettings = () => {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6 max-w-lg mx-auto">
+      <div className="px-4 py-6 max-w-lg mx-auto space-y-5 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-2xl bg-primary flex items-center justify-center shadow-md">
             <Settings size={20} className="text-primary-foreground" />
           </div>
           <div>
@@ -119,9 +131,52 @@ const AppSettings = () => {
           </div>
         </div>
 
+        {/* Account Section */}
+        <div>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">একাউন্ট</p>
+          <div className="bg-card rounded-2xl border border-border overflow-hidden">
+            {user ? (
+              <>
+                <Link to="/profile" className="flex items-center gap-3 p-4 active:bg-muted/50 transition-colors">
+                  <Avatar className="h-11 w-11">
+                    {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} /> : null}
+                    <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                      {profile?.full_name?.charAt(0) || <User size={18} />}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm truncate">{profile?.full_name || "প্রোফাইল"}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                  <ChevronRight size={16} className="text-muted-foreground shrink-0" />
+                </Link>
+                <div className="border-t border-border">
+                  <button onClick={() => signOut()} className="flex items-center gap-3 p-4 w-full text-left active:bg-muted/50 transition-colors text-destructive">
+                    <div className="h-9 w-9 rounded-xl bg-destructive/10 flex items-center justify-center">
+                      <LogOut size={16} />
+                    </div>
+                    <p className="font-semibold text-sm">লগআউট</p>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <Link to="/login" className="flex items-center gap-3 p-4 active:bg-muted/50 transition-colors">
+                <div className="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User size={20} className="text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm">লগইন করুন</p>
+                  <p className="text-[11px] text-muted-foreground">একাউন্টে প্রবেশ করুন</p>
+                </div>
+                <ChevronRight size={16} className="text-muted-foreground" />
+              </Link>
+            )}
+          </div>
+        </div>
+
         {/* General Section */}
-        <div className="mb-6">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">সাধারণ</p>
+        <div>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">সাধারণ</p>
           <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
             {/* Location */}
             <div className="p-4">
@@ -154,7 +209,7 @@ const AppSettings = () => {
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                  {isDark ? <Moon size={18} className="text-purple-500" /> : <Sun size={18} className="text-amber-500" />}
+                  {isDark ? <Moon size={18} className="text-purple-400" /> : <Sun size={18} className="text-amber-500" />}
                 </div>
                 <div>
                   <p className="font-semibold text-sm">ডার্ক মোড</p>
@@ -167,8 +222,8 @@ const AppSettings = () => {
             {/* Font Size */}
             <div className="p-4">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-9 w-9 rounded-xl bg-green-500/10 flex items-center justify-center">
-                  <Type size={18} className="text-green-600" />
+                <div className="h-9 w-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <Type size={18} className="text-emerald-600" />
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-sm">ফন্ট সাইজ</p>
@@ -210,8 +265,8 @@ const AppSettings = () => {
 
         {/* Notifications Section */}
         {isSupported && (
-          <div className="mb-6">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">নোটিফিকেশন</p>
+          <div>
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">নোটিফিকেশন</p>
             <div className="bg-card rounded-2xl border border-border overflow-hidden">
               <div className="p-4">
                 <div className="flex items-center justify-between">
@@ -236,23 +291,14 @@ const AppSettings = () => {
                     <Switch checked={isSubscribed} onCheckedChange={handleNotifToggle} />
                   )}
                 </div>
-                {!isSubscribed && !isLoading && (
-                  <button
-                    onClick={() => handleNotifToggle(true)}
-                    className="w-full mt-3 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-sm"
-                  >
-                    <Bell size={16} />
-                    নোটিফিকেশন চালু করুন
-                  </button>
-                )}
               </div>
             </div>
           </div>
         )}
 
         {/* Links Section */}
-        <div className="mb-6">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">অন্যান্য</p>
+        <div>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">অন্যান্য</p>
           <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
             <Link to="/app-contact" className="flex items-center justify-between p-4 active:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3">
@@ -275,7 +321,7 @@ const AppSettings = () => {
           </div>
         </div>
 
-        <p className="text-[11px] text-muted-foreground text-center mt-8 opacity-60">
+        <p className="text-[11px] text-muted-foreground text-center mt-6 opacity-60">
           ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ © {toBengali(new Date().getFullYear())}
         </p>
       </div>

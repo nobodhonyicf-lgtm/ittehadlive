@@ -31,19 +31,27 @@ const Index = () => {
       <div className="max-w-[1200px] mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <AboutSection />
-            <SectionCards />
-            <IslamicNav />
-            <IslamicContentWidget />
+            <div className="animate-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+              <AboutSection />
+            </div>
+            <div className="animate-fade-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
+              <SectionCards />
+            </div>
+            <div className="animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
+              <IslamicNav />
+            </div>
+            <div className="animate-fade-in" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>
+              <IslamicContentWidget />
+            </div>
           </div>
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 animate-fade-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
             <Sidebar />
           </div>
         </div>
-        <div className="mt-6">
+        <div className="mt-6 animate-fade-in" style={{ animationDelay: "0.5s", animationFillMode: "both" }}>
           <RecentNews />
         </div>
-        <div className="mt-6">
+        <div className="mt-6 animate-fade-in" style={{ animationDelay: "0.6s", animationFillMode: "both" }}>
           <VideoSection />
         </div>
       </div>
