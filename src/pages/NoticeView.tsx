@@ -243,7 +243,7 @@ const NoticeView = () => {
             ) : notice ? (
               <>
                 {/* Notice Pad - fixed A4 size, scaled for mobile */}
-                <div ref={wrapRef} className="flex justify-center overflow-hidden">
+                <div ref={wrapRef} style={{ overflow: "hidden", maxWidth: "100%", display: "flex", justifyContent: "center" }}>
                   <div style={{
                     transform: `scale(${padScale})`,
                     transformOrigin: "top center",
@@ -321,10 +321,10 @@ const NoticeView = () => {
                       {/* Arabic name */}
                       <p data-arabic="true" style={{
                         fontFamily: "'Amiri', serif",
-                        fontSize: "26px",
+                        fontSize: "22px",
                         fontWeight: 700,
                         color: "#1a1a1a",
-                        lineHeight: "1.5",
+                        lineHeight: "1.2",
                         direction: "rtl",
                         letterSpacing: "1px",
                         margin: "0",
@@ -334,7 +334,7 @@ const NoticeView = () => {
                       </p>
 
                       {/* Bengali name */}
-                      <h1 style={{ fontSize: "22px", fontWeight: "bold", color: "#111", margin: "2px 0 0", textAlign: "center" }}>
+                      <h1 style={{ fontSize: "22px", fontWeight: "bold", color: "#111", margin: "0", lineHeight: "1.3", textAlign: "center" }}>
                         ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ
                       </h1>
                       <p style={{ fontSize: "11px", color: "#666", marginTop: "2px", textAlign: "center" }}>
@@ -370,7 +370,7 @@ const NoticeView = () => {
                     </div>
 
                     {/* Signature */}
-                    <div style={{ position: "absolute", bottom: "56px", right: "48px", zIndex: 1, textAlign: "center" }}>
+                    <div style={{ position: "absolute", bottom: "70px", right: "48px", zIndex: 1, textAlign: "center" }}>
                       {proxiedSignature && sigLoaded && (
                         <img
                           src={proxiedSignature}
