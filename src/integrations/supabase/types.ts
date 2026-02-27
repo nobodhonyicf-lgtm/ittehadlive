@@ -288,7 +288,6 @@ export type Database = {
           address: string | null
           code: string | null
           created_at: string
-          description: string | null
           email: string | null
           head_name: string | null
           head_photo_url: string | null
@@ -306,7 +305,6 @@ export type Database = {
           address?: string | null
           code?: string | null
           created_at?: string
-          description?: string | null
           email?: string | null
           head_name?: string | null
           head_photo_url?: string | null
@@ -324,7 +322,6 @@ export type Database = {
           address?: string | null
           code?: string | null
           created_at?: string
-          description?: string | null
           email?: string | null
           head_name?: string | null
           head_photo_url?: string | null
@@ -693,7 +690,6 @@ export type Database = {
       }
       notices: {
         Row: {
-          branch_id: string | null
           content: string | null
           created_at: string
           id: string
@@ -704,7 +700,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          branch_id?: string | null
           content?: string | null
           created_at?: string
           id?: string
@@ -715,7 +710,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          branch_id?: string | null
           content?: string | null
           created_at?: string
           id?: string
@@ -725,15 +719,7 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "notices_branch_id_fkey"
-            columns: ["branch_id"]
-            isOneToOne: false
-            referencedRelation: "branches"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -1353,7 +1339,6 @@ export type Database = {
           address: string
           code: string
           created_at: string
-          description: string
           email: string
           head_name: string
           head_photo_url: string

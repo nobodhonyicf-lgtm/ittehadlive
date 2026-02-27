@@ -10,11 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2, Bell, Building2 } from "lucide-react";
+import { Plus, Edit, Trash2, Bell } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAllBranches } from "@/hooks/useBoardData";
 
 const AdminNotices = () => {
   const { canEdit, canDelete } = useSectionPermissions();
@@ -22,28 +20,27 @@ const AdminNotices = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [sendPush, setSendPush] = useState(false);
-  const [form, setForm] = useState({ title: "", content: "", is_active: true, source: "", branch_id: "" });
-  const { data: branches } = useAllBranches();
+  const [form, setForm] = useState({ title: "", content: "", is_active: true, source: "" });
 
   const { data: notices, isLoading } = useQuery({
     queryKey: ["admin_notices"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("notices").select("*, branches(name)").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
 
   const saveMutation = useMutation({
-    mutationFn: async ({ data, shouldPush }: { data: any; shouldPush: boolean }) => {
-      const payload = { ...data, branch_id: data.branch_id || null };
+    mutationFn: async ({ data, shouldPush }: { data: typeof form; shouldPush: boolean }) => {
       if (editId) {
-        const { error } = await supabase.from("notices").update(payload).eq("id", editId);
+        const { error } = await supabase.from("notices").update(data).eq("id", editId);
         if (error) throw error;
       } else {
-        const { data: inserted, error } = await supabase.from("notices").insert([payload]).select().single();
+        const { data: inserted, error } = await supabase.from("notices").insert([data]).select().single();
         if (error) throw error;
 
+        // Send push notification for new notice
         if (shouldPush && inserted) {
           await supabase.functions.invoke("send-push", {
             body: {
@@ -59,7 +56,7 @@ const AdminNotices = () => {
       qc.invalidateQueries({ queryKey: ["admin_notices"] });
       qc.invalidateQueries({ queryKey: ["notices"] });
       toast.success(editId ? "নোটিশ আপডেট হয়েছে" : "নোটিশ তৈরি হয়েছে");
-      setOpen(false); setEditId(null); setForm({ title: "", content: "", is_active: true, source: "", branch_id: "" }); setSendPush(false);
+      setOpen(false); setEditId(null); setForm({ title: "", content: "", is_active: true, source: "" }); setSendPush(false);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -72,15 +69,13 @@ const AdminNotices = () => {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin_notices"] }); qc.invalidateQueries({ queryKey: ["notices"] }); toast.success("মুছে ফেলা হয়েছে"); },
   });
 
-  const resetForm = () => { setEditId(null); setForm({ title: "", content: "", is_active: true, source: "", branch_id: "" }); };
-
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold">নোটিশ ব্যবস্থাপনা</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           {canEdit && <DialogTrigger asChild>
-            <Button onClick={resetForm}><Plus size={16} /> নতুন নোটিশ</Button>
+            <Button onClick={() => { setEditId(null); setForm({ title: "", content: "", is_active: true, source: "" }); }}><Plus size={16} /> নতুন নোটিশ</Button>
           </DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editId ? "নোটিশ সম্পাদনা" : "নতুন নোটিশ"}</DialogTitle></DialogHeader>
@@ -88,18 +83,6 @@ const AdminNotices = () => {
               <div><Label>শিরোনাম *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></div>
               <div><Label>বিষয়বস্তু</Label><Textarea rows={5} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} /></div>
               <div><Label>সূত্র নম্বর</Label><Input value={form.source} onChange={(e) => setForm({ ...form, source: e.target.value })} placeholder="যেমন: ১২৩/২০২৬" /></div>
-              <div>
-                <Label className="flex items-center gap-1"><Building2 size={14} /> শাখা (ঐচ্ছিক)</Label>
-                <Select value={form.branch_id} onValueChange={(v) => setForm({ ...form, branch_id: v === "none" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="মূল সাইট (সকল)" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">মূল সাইট (সকল)</SelectItem>
-                    {branches?.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
               <label className="flex items-center gap-2 text-sm"><Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />সক্রিয়</label>
               {!editId && (
                 <label className="flex items-center gap-2 text-sm p-3 bg-accent/10 rounded-md border border-accent/30 cursor-pointer">
@@ -116,22 +99,15 @@ const AdminNotices = () => {
       <Card>
         <CardContent className="p-0">
           <Table>
-            <TableHeader><TableRow><TableHead>শিরোনাম</TableHead><TableHead>শাখা</TableHead><TableHead>স্ট্যাটাস</TableHead><TableHead className="text-right">অ্যাকশন</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>শিরোনাম</TableHead><TableHead>স্ট্যাটাস</TableHead><TableHead className="text-right">অ্যাকশন</TableHead></TableRow></TableHeader>
             <TableBody>
-              {isLoading ? <TableRow><TableCell colSpan={4} className="text-center">লোড হচ্ছে...</TableCell></TableRow> :
-                notices?.map((n: any) => (
+              {isLoading ? <TableRow><TableCell colSpan={3} className="text-center">লোড হচ্ছে...</TableCell></TableRow> :
+                notices?.map((n) => (
                   <TableRow key={n.id}>
                     <TableCell className="font-medium">{n.title}</TableCell>
-                    <TableCell>
-                      {n.branches?.name ? (
-                        <span className="text-xs px-2 py-0.5 rounded bg-accent/10 text-accent-foreground">{n.branches.name}</span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">মূল সাইট</span>
-                      )}
-                    </TableCell>
                     <TableCell><span className={`text-xs px-2 py-0.5 rounded ${n.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{n.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}</span></TableCell>
                     <TableCell className="text-right">
-                      {canEdit && <Button variant="ghost" size="icon" onClick={() => { setEditId(n.id); setForm({ title: n.title, content: n.content || "", is_active: n.is_active ?? true, source: n.source || "", branch_id: n.branch_id || "" }); setOpen(true); }}><Edit size={16} /></Button>}
+                      {canEdit && <Button variant="ghost" size="icon" onClick={() => { setEditId(n.id); setForm({ title: n.title, content: n.content || "", is_active: n.is_active ?? true, source: (n as any).source || "" }); setOpen(true); }}><Edit size={16} /></Button>}
                       {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(n.id)}><Trash2 size={16} /></Button>}
                     </TableCell>
                   </TableRow>

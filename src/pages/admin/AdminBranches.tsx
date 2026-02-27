@@ -16,7 +16,6 @@ import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 const emptyForm = {
   name: "", code: "", address: "", phone: "", email: "", head_name: "",
   head_photo_url: "", image_url: "", website: "", total_teachers: 0, total_students: 0, sort_order: 0,
-  description: "",
 };
 
 const AdminBranches = () => {
@@ -36,7 +35,7 @@ const AdminBranches = () => {
       email: b.email || "", head_name: b.head_name || "", head_photo_url: b.head_photo_url || "",
       image_url: b.image_url || "", website: b.website || "",
       total_teachers: b.total_teachers || 0, total_students: b.total_students || 0,
-      sort_order: b.sort_order || 0, description: b.description || "",
+      sort_order: b.sort_order || 0,
     });
     setOpen(true);
   };
@@ -50,7 +49,6 @@ const AdminBranches = () => {
       total_students: Number(form.total_students) || 0,
       head_photo_url: form.head_photo_url || null,
       website: form.website || null,
-      description: form.description || null,
     };
     if (editing) {
       const { error } = await supabase.from("branches").update(payload).eq("id", editing.id);
@@ -103,10 +101,6 @@ const AdminBranches = () => {
                   <div><Label>ইমেইল</Label><Input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></div>
                 </div>
                 <div><Label>ওয়েবসাইট</Label><Input value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} placeholder="https://..." /></div>
-
-                <hr className="my-2" />
-                <p className="text-sm font-bold text-primary">শাখা সম্পর্কে বিবরণ</p>
-                <div><Label>বিবরণ / আমাদের সম্পর্কে</Label><textarea className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring min-h-[100px]" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="এই শাখা সম্পর্কে বিস্তারিত লিখুন..." /></div>
 
                 <hr className="my-2" />
                 <p className="text-sm font-bold text-primary">পরিসংখ্যান</p>
