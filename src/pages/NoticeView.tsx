@@ -106,36 +106,16 @@ const NoticeView = () => {
     return `${day} ${month}, ${year}`;
   };
 
-  // Pre-render Arabic text to a data URL for use in exports
-  const [arabicImgSrc, setArabicImgSrc] = useState<string>("");
-  useEffect(() => {
-    const renderArabic = async () => {
-      try {
-        await document.fonts.load("700 26px Amiri");
-        await document.fonts.ready;
-      } catch {}
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      const fontSize = 26;
-      canvas.width = 700;
-      canvas.height = 60;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.font = `700 ${fontSize}px Amiri, serif`;
-      ctx.fillStyle = "#1a1a1a";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.direction = "rtl";
-      ctx.fillText(ARABIC_TEXT, canvas.width / 2, canvas.height / 2);
-      setArabicImgSrc(canvas.toDataURL("image/png"));
-    };
-    renderArabic();
-  }, []);
-
   const captureCanvas = async () => {
     if (!padRef.current) return null;
     const html2canvas = (await import("html2canvas")).default;
     const el = padRef.current;
+
+    // Preload Amiri font
+    try {
+      await document.fonts.load("700 26px Amiri");
+      await document.fonts.ready;
+    } catch {}
 
     return html2canvas(el, {
       scale: 3,
@@ -160,6 +140,31 @@ const NoticeView = () => {
           cloned.style.overflow = "hidden";
           cloned.style.transform = "none";
         }
+        // Replace Arabic text with SVG for proper ligature rendering
+        const arabicEls = doc.querySelectorAll("[data-arabic]");
+        arabicEls.forEach((ael: any) => {
+          const svgNS = "http://www.w3.org/2000/svg";
+          const svg = doc.createElementNS(svgNS, "svg");
+          svg.setAttribute("width", "700");
+          svg.setAttribute("height", "50");
+          svg.setAttribute("viewBox", "0 0 700 50");
+          svg.style.display = "block";
+          svg.style.margin = "0 auto";
+          svg.style.width = "auto";
+          svg.style.height = "40px";
+          const text = doc.createElementNS(svgNS, "text");
+          text.setAttribute("x", "350");
+          text.setAttribute("y", "35");
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("font-family", "Amiri, serif");
+          text.setAttribute("font-size", "26");
+          text.setAttribute("font-weight", "700");
+          text.setAttribute("fill", "#1a1a1a");
+          text.setAttribute("direction", "rtl");
+          text.textContent = ARABIC_TEXT;
+          svg.appendChild(text);
+          ael.replaceWith(svg);
+        });
       }
     });
   };
@@ -313,28 +318,20 @@ const NoticeView = () => {
                         </div>
                       )}
 
-                      {/* Arabic name - rendered as image to prevent breaking in exports */}
-                      {arabicImgSrc ? (
-                        <img
-                          src={arabicImgSrc}
-                          alt="اِتِّحَادُ الْمَدَارِسِ الْخُصُوصِيَّة"
-                          style={{ height: "40px", width: "auto", display: "block", margin: "0 auto" }}
-                        />
-                      ) : (
-                        <p data-arabic="true" style={{
-                          fontFamily: "'Amiri', serif",
-                          fontSize: "26px",
-                          fontWeight: 700,
-                          color: "#1a1a1a",
-                          lineHeight: "1.5",
-                          direction: "rtl",
-                          letterSpacing: "1px",
-                          margin: "0",
-                          textAlign: "center",
-                        }}>
-                          اِتِّحَادُ الْمَدَارِسِ الْخُصُوصِيَّة
-                        </p>
-                      )}
+                      {/* Arabic name */}
+                      <p data-arabic="true" style={{
+                        fontFamily: "'Amiri', serif",
+                        fontSize: "26px",
+                        fontWeight: 700,
+                        color: "#1a1a1a",
+                        lineHeight: "1.5",
+                        direction: "rtl",
+                        letterSpacing: "1px",
+                        margin: "0",
+                        textAlign: "center",
+                      }}>
+                        اِتِّحَادُ الْمَدَارِسِ الْخُصُوصِيَّة
+                      </p>
 
                       {/* Bengali name */}
                       <h1 style={{ fontSize: "22px", fontWeight: "bold", color: "#111", margin: "2px 0 0", textAlign: "center" }}>
