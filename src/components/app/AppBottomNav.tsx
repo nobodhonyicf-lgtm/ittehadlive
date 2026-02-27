@@ -1,12 +1,12 @@
-import { Home, BookOpen, User, Settings, BookMarked } from "lucide-react";
+import { Home, BookOpen, Bell, Settings, BookMarked } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const navItems = [
   { icon: Home, label: "হোম", path: "/" },
   { icon: BookOpen, label: "কুরআন", path: "/quran" },
+  { icon: Bell, label: "নোটিশ", path: "/notifications" },
   { icon: BookMarked, label: "হাদিস", path: "/hadith" },
   { icon: Settings, label: "সেটিংস", path: "/app-settings" },
-  { icon: User, label: "প্রোফাইল", path: "/profile" },
 ];
 
 const AppBottomNav = () => {
@@ -16,7 +16,7 @@ const AppBottomNav = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 dark:bg-card/95 backdrop-blur-xl border-t border-border/50 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)] transition-colors duration-300">
-      <div className="flex items-center justify-around h-[60px] max-w-lg mx-auto px-2">
+      <div className="flex items-center justify-around h-[58px] max-w-lg mx-auto px-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path ||
             (item.path !== "/" && location.pathname.startsWith(item.path));

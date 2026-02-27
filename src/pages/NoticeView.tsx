@@ -206,16 +206,21 @@ const NoticeView = () => {
     setDownloading(true);
     try {
       const canvas = await captureCanvas();
-      if (!canvas) return;
-      const { jsPDF } = await import("jspdf");
-      const imgData = canvas.toDataURL("image/png");
+      if (!canvas) {
+        toast.error("ক্যানভাস তৈরি করা যায়নি");
+        setDownloading(false);
+        return;
+      }
+      const jspdfModule = await import("jspdf");
+      const jsPDF = jspdfModule.jsPDF || jspdfModule.default;
+      const imgData = canvas.toDataURL("image/png", 1.0);
       const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: [PAD_W, PAD_H] });
       pdf.addImage(imgData, "PNG", 0, 0, PAD_W, PAD_H);
       pdf.save(`notice-${notice?.title || "pad"}.pdf`);
       toast.success("পিডিএফ ডাউনলোড হয়েছে");
-    } catch (e) {
+    } catch (e: any) {
       console.error("PDF error:", e);
-      toast.error("ডাউনলোড ব্যর্থ হয়েছে");
+      toast.error("পিডিএফ ডাউনলোড ব্যর্থ: " + (e?.message || "অজানা ত্রুটি"));
     } finally {
       setDownloading(false);
       setDlOpen(false);
