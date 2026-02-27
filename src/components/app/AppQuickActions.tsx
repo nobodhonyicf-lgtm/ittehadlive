@@ -16,16 +16,16 @@ const AppQuickActions = () => {
   const { user, hasAnyRole } = useAuth();
 
   const actions = [
-    { icon: GraduationCap, label: "রেজাল্ট", path: "/result", color: "bg-blue-500 dark:bg-blue-600" },
-    { icon: Users, label: "কমিটি", path: "/page/committee", color: "bg-emerald-500 dark:bg-emerald-600" },
-    { icon: Users, label: "উপদেষ্টামন্ডলী", path: "/page/advisors", color: "bg-cyan-500 dark:bg-cyan-600" },
-    { icon: Building2, label: "শাখা", path: "/branches", color: "bg-orange-500 dark:bg-orange-600" },
-    { icon: BookOpen, label: "প্রকাশনা", path: "/books", color: "bg-purple-500 dark:bg-purple-600" },
-    { icon: Bell, label: "নোটিশ", path: "/posts", color: "bg-red-500 dark:bg-red-600" },
-    { icon: FileText, label: "পরিচিতি", path: "/page/about", color: "bg-teal-500 dark:bg-teal-600" },
-    { icon: Mail, label: "যোগাযোগ", path: "/contact", color: "bg-indigo-500 dark:bg-indigo-600" },
+    { icon: GraduationCap, label: "রেজাল্ট", path: "/result", gradient: "from-blue-500 to-blue-600" },
+    { icon: Users, label: "কমিটি", path: "/page/committee", gradient: "from-emerald-500 to-emerald-600" },
+    { icon: Users, label: "উপদেষ্টামন্ডলী", path: "/page/advisors", gradient: "from-cyan-500 to-cyan-600" },
+    { icon: Building2, label: "শাখা", path: "/branches", gradient: "from-orange-500 to-orange-600" },
+    { icon: BookOpen, label: "প্রকাশনা", path: "/books", gradient: "from-purple-500 to-purple-600" },
+    { icon: Bell, label: "নোটিশ", path: "/posts", gradient: "from-red-500 to-red-600" },
+    { icon: FileText, label: "পরিচিতি", path: "/page/about", gradient: "from-teal-500 to-teal-600" },
+    { icon: Mail, label: "যোগাযোগ", path: "/app-contact", gradient: "from-indigo-500 to-indigo-600" },
     ...(user && hasAnyRole
-      ? [{ icon: LayoutDashboard, label: "ড্যাশবোর্ড", path: "/admin", color: "bg-slate-700 dark:bg-slate-600" }]
+      ? [{ icon: LayoutDashboard, label: "ড্যাশবোর্ড", path: "/admin", gradient: "from-slate-600 to-slate-700" }]
       : []),
   ];
 
@@ -41,7 +41,7 @@ const AppQuickActions = () => {
             style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'both' }}
           >
             <div
-              className={`${action.color} w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-sm transition-all duration-200 group-hover:scale-110 group-active:scale-95 group-hover:shadow-md`}
+              className={`bg-gradient-to-br ${action.gradient} w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-sm transition-all duration-200 group-hover:scale-110 group-active:scale-95 group-hover:shadow-md`}
             >
               <action.icon size={22} />
             </div>

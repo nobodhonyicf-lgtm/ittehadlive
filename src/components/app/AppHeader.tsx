@@ -42,11 +42,11 @@ const NotificationBell = () => {
     <Link
       to="/notifications"
       onClick={handleClick}
-      className="p-2.5 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90 relative"
+      className="p-2 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90 relative"
     >
       <Bell size={18} />
       {unreadCount > 0 && (
-        <span className="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold px-1 leading-none animate-pulse">
+        <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold px-1 leading-none animate-pulse">
           {toBengali(unreadCount > 99 ? "99+" : unreadCount)}
         </span>
       )}
@@ -76,7 +76,7 @@ const LiveButton = () => {
   return (
     <Link
       to={`/post/${latestPost.slug}`}
-      className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded-full transition-all active:scale-90"
+      className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-full transition-all active:scale-90 shadow-sm"
     >
       <span className="relative flex h-2 w-2">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
@@ -95,27 +95,24 @@ const AppHeader = () => {
   const appName = settings?.app_name || settings?.site_name || "ইত্তেহাদ";
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg">
-      {/* Main header row */}
-      <div className="flex items-center justify-between px-4 h-16">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-primary via-primary/95 to-primary/90 text-primary-foreground shadow-lg backdrop-blur-sm">
+      <div className="flex items-center justify-between px-4 h-14">
         {/* Logo & Name */}
-        <Link to="/" className="flex items-center gap-3 min-w-0">
+        <Link to="/" className="flex items-center gap-2.5 min-w-0">
           {appLogoUrl && (
-            <div className="relative">
-              <div className="h-10 w-10 rounded-xl bg-white p-1 ring-2 ring-white/20 shadow-md">
-                <img
-                  src={appLogoUrl}
-                  alt="App Logo"
-                  className="h-full w-full rounded-lg object-contain"
-                />
-              </div>
+            <div className="h-9 w-9 rounded-xl bg-white/95 p-0.5 shadow-md ring-1 ring-white/20">
+              <img
+                src={appLogoUrl}
+                alt="App Logo"
+                className="h-full w-full rounded-lg object-contain"
+              />
             </div>
           )}
           <div className="min-w-0">
             <h1 className="font-bold text-[13px] leading-tight truncate max-w-[180px]">
               {appName}
             </h1>
-            <p className="text-[9px] opacity-70 truncate max-w-[180px] leading-tight">
+            <p className="text-[9px] opacity-60 truncate max-w-[180px] leading-tight">
               {settings?.site_description?.slice(0, 50) || "সমন্বিত শিক্ষা প্ল্যাটফর্ম"}
             </p>
           </div>
@@ -126,7 +123,7 @@ const AppHeader = () => {
           <LiveButton />
           <Link
             to="/result"
-            className="p-2.5 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90"
+            className="p-2 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90"
             aria-label="রেজাল্ট"
           >
             <GraduationCap size={18} />
@@ -136,7 +133,7 @@ const AppHeader = () => {
           {user && hasAnyRole && (
             <Link
               to="/admin"
-              className="p-2.5 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90"
+              className="p-2 hover:bg-white/10 rounded-xl transition-all duration-200 active:scale-90"
               aria-label="Admin Dashboard"
             >
               <LayoutDashboard size={18} />

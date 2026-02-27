@@ -1,4 +1,4 @@
-import { Bell, BellOff, Loader2, Moon, Sun, Settings, Type, Minus, Plus, MapPin } from "lucide-react";
+import { Bell, BellOff, Loader2, Moon, Sun, Settings, Type, Minus, Plus, MapPin, ChevronRight, Palette, Info, Shield } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { useState, useEffect } from "react";
 import { toBengali } from "@/lib/bengali";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Link } from "react-router-dom";
 
 const BD_LOCATIONS = [
   { name: "ঢাকা", lat: 23.8103, lng: 90.4125 },
@@ -107,134 +108,174 @@ const AppSettings = () => {
   return (
     <AppLayout>
       <div className="px-4 py-6 max-w-lg mx-auto">
-        <h1 className="text-xl font-bold flex items-center gap-2 mb-6">
-          <Settings size={22} className="text-primary" />
-          সেটিংস
-        </h1>
-
-        <div className="space-y-1">
-          {/* Location */}
-          <div className="p-4 bg-card rounded-xl border border-border">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                <MapPin size={18} className="text-primary" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm">লোকেশন</p>
-                <p className="text-xs text-muted-foreground">নামাজের সময় ও ইফতারের জন্য</p>
-              </div>
-            </div>
-            <Select value={selectedLocation} onValueChange={(v) => {
-              setSelectedLocation(v);
-              localStorage.setItem("prayer-location", v);
-              toast.success(`লোকেশন পরিবর্তন: ${v}`);
-            }}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="লোকেশন নির্বাচন করুন" />
-              </SelectTrigger>
-              <SelectContent>
-                {BD_LOCATIONS.map(loc => (
-                  <SelectItem key={loc.name} value={loc.name}>{loc.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md">
+            <Settings size={20} className="text-primary-foreground" />
           </div>
-
-          {/* Theme */}
-          <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                {isDark ? <Moon size={18} className="text-primary" /> : <Sun size={18} className="text-primary" />}
-              </div>
-              <div>
-                <p className="font-semibold text-sm">ডার্ক মোড</p>
-                <p className="text-xs text-muted-foreground">অ্যাপের থিম পরিবর্তন করুন</p>
-              </div>
-            </div>
-            <Switch checked={isDark} onCheckedChange={toggleTheme} />
+          <div>
+            <h1 className="text-lg font-bold text-foreground">সেটিংস</h1>
+            <p className="text-xs text-muted-foreground">অ্যাপ কাস্টমাইজ করুন</p>
           </div>
-
-          {/* Font Size */}
-          <div className="p-4 bg-card rounded-xl border border-border">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Type size={18} className="text-primary" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm">ফন্ট সাইজ</p>
-                <p className="text-xs text-muted-foreground">
-                  {FONT_SIZES[fontSizeIndex].label} ({toBengali(FONT_SIZES[fontSizeIndex].value)}px)
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between gap-3 px-1">
-              <button
-                onClick={() => setFontSizeIndex((p) => Math.max(0, p - 1))}
-                disabled={fontSizeIndex === 0}
-                className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary disabled:opacity-30 active:scale-90 transition-all"
-              >
-                <Minus size={16} />
-              </button>
-              <div className="flex-1 flex items-center gap-1">
-                {FONT_SIZES.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setFontSizeIndex(i)}
-                    className={`flex-1 h-2 rounded-full transition-all ${
-                      i <= fontSizeIndex ? "bg-primary" : "bg-border"
-                    }`}
-                  />
-                ))}
-              </div>
-              <button
-                onClick={() => setFontSizeIndex((p) => Math.min(FONT_SIZES.length - 1, p + 1))}
-                disabled={fontSizeIndex === FONT_SIZES.length - 1}
-                className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary disabled:opacity-30 active:scale-90 transition-all"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-          </div>
-
-          {/* Notifications */}
-          {isSupported && (
-            <div className="p-4 bg-card rounded-xl border border-border space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                    {isSubscribed ? (
-                      <Bell size={18} className="text-primary" />
-                    ) : (
-                      <BellOff size={18} className="text-muted-foreground" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">নোটিফিকেশন</p>
-                    <p className="text-xs text-muted-foreground">
-                      {isSubscribed ? "নোটিফিকেশন চালু আছে" : "নোটিফিকেশন বন্ধ আছে"}
-                    </p>
-                  </div>
-                </div>
-                {isLoading ? (
-                  <Loader2 size={18} className="animate-spin text-muted-foreground" />
-                ) : (
-                  <Switch checked={isSubscribed} onCheckedChange={handleNotifToggle} />
-                )}
-              </div>
-              {!isSubscribed && !isLoading && (
-                <button
-                  onClick={() => handleNotifToggle(true)}
-                  className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
-                >
-                  <Bell size={16} />
-                  নোটিফিকেশন চালু করুন
-                </button>
-              )}
-            </div>
-          )}
         </div>
 
-        <p className="text-xs text-muted-foreground text-center mt-8">
+        {/* General Section */}
+        <div className="mb-6">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">সাধারণ</p>
+          <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+            {/* Location */}
+            <div className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-9 w-9 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <MapPin size={18} className="text-blue-500" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm">লোকেশন</p>
+                  <p className="text-[11px] text-muted-foreground">নামাজের সময় ও ইফতারের জন্য</p>
+                </div>
+              </div>
+              <Select value={selectedLocation} onValueChange={(v) => {
+                setSelectedLocation(v);
+                localStorage.setItem("prayer-location", v);
+                toast.success(`লোকেশন পরিবর্তন: ${v}`);
+              }}>
+                <SelectTrigger className="w-full h-10 rounded-xl">
+                  <SelectValue placeholder="লোকেশন নির্বাচন করুন" />
+                </SelectTrigger>
+                <SelectContent>
+                  {BD_LOCATIONS.map(loc => (
+                    <SelectItem key={loc.name} value={loc.name}>{loc.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Theme */}
+            <div className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                  {isDark ? <Moon size={18} className="text-purple-500" /> : <Sun size={18} className="text-amber-500" />}
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">ডার্ক মোড</p>
+                  <p className="text-[11px] text-muted-foreground">{isDark ? "চালু আছে" : "বন্ধ আছে"}</p>
+                </div>
+              </div>
+              <Switch checked={isDark} onCheckedChange={toggleTheme} />
+            </div>
+
+            {/* Font Size */}
+            <div className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-9 w-9 rounded-xl bg-green-500/10 flex items-center justify-center">
+                  <Type size={18} className="text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-sm">ফন্ট সাইজ</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {FONT_SIZES[fontSizeIndex].label} ({toBengali(FONT_SIZES[fontSizeIndex].value)}px)
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-3 px-1">
+                <button
+                  onClick={() => setFontSizeIndex((p) => Math.max(0, p - 1))}
+                  disabled={fontSizeIndex === 0}
+                  className="h-9 w-9 rounded-xl bg-muted flex items-center justify-center text-foreground disabled:opacity-30 active:scale-90 transition-all"
+                >
+                  <Minus size={16} />
+                </button>
+                <div className="flex-1 flex items-center gap-1.5">
+                  {FONT_SIZES.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setFontSizeIndex(i)}
+                      className={`flex-1 h-2.5 rounded-full transition-all duration-200 ${
+                        i <= fontSizeIndex ? "bg-primary shadow-sm" : "bg-border"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <button
+                  onClick={() => setFontSizeIndex((p) => Math.min(FONT_SIZES.length - 1, p + 1))}
+                  disabled={fontSizeIndex === FONT_SIZES.length - 1}
+                  className="h-9 w-9 rounded-xl bg-muted flex items-center justify-center text-foreground disabled:opacity-30 active:scale-90 transition-all"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Notifications Section */}
+        {isSupported && (
+          <div className="mb-6">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">নোটিফিকেশন</p>
+            <div className="bg-card rounded-2xl border border-border overflow-hidden">
+              <div className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${isSubscribed ? 'bg-red-500/10' : 'bg-muted'}`}>
+                      {isSubscribed ? (
+                        <Bell size={18} className="text-red-500" />
+                      ) : (
+                        <BellOff size={18} className="text-muted-foreground" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">পুশ নোটিফিকেশন</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {isSubscribed ? "সক্রিয়" : "নিষ্ক্রিয়"}
+                      </p>
+                    </div>
+                  </div>
+                  {isLoading ? (
+                    <Loader2 size={18} className="animate-spin text-muted-foreground" />
+                  ) : (
+                    <Switch checked={isSubscribed} onCheckedChange={handleNotifToggle} />
+                  )}
+                </div>
+                {!isSubscribed && !isLoading && (
+                  <button
+                    onClick={() => handleNotifToggle(true)}
+                    className="w-full mt-3 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-sm"
+                  >
+                    <Bell size={16} />
+                    নোটিফিকেশন চালু করুন
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Links Section */}
+        <div className="mb-6">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">অন্যান্য</p>
+          <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+            <Link to="/app-contact" className="flex items-center justify-between p-4 active:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                  <Info size={18} className="text-indigo-500" />
+                </div>
+                <p className="font-semibold text-sm">যোগাযোগ</p>
+              </div>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </Link>
+            <Link to="/page/about" className="flex items-center justify-between p-4 active:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-teal-500/10 flex items-center justify-center">
+                  <Shield size={18} className="text-teal-500" />
+                </div>
+                <p className="font-semibold text-sm">আমাদের সম্পর্কে</p>
+              </div>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </Link>
+          </div>
+        </div>
+
+        <p className="text-[11px] text-muted-foreground text-center mt-8 opacity-60">
           ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ © {toBengali(new Date().getFullYear())}
         </p>
       </div>
