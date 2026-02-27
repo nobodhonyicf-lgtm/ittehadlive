@@ -1353,6 +1353,7 @@ export type Database = {
           address: string
           code: string
           created_at: string
+          description: string
           email: string
           head_name: string
           head_photo_url: string

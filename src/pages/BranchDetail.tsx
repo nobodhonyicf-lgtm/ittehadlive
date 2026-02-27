@@ -17,13 +17,18 @@ const BranchDetail = () => {
   const branch = branches?.find((b: any) => b.id === id);
   const { data: students } = useStudents(id, undefined);
 
-  // Fetch latest notices
+  // Fetch branch-specific notices (fallback to main notices if none)
   const { data: notices } = useQuery({
-    queryKey: ["notices_latest"],
+    queryKey: ["branch_notices", id],
     queryFn: async () => {
-      const { data } = await supabase.from("notices").select("id, title, created_at").eq("is_active", true).order("created_at", { ascending: false }).limit(5);
+      // First try branch-specific notices
+      const { data: branchNotices } = await supabase.from("notices").select("id, title, created_at").eq("is_active", true).eq("branch_id", id!).order("created_at", { ascending: false }).limit(5);
+      if (branchNotices && branchNotices.length > 0) return branchNotices;
+      // Fallback to main site notices (no branch_id)
+      const { data } = await supabase.from("notices").select("id, title, created_at").eq("is_active", true).is("branch_id", null).order("created_at", { ascending: false }).limit(5);
       return data || [];
     },
+    enabled: !!id,
   });
 
   if (!branch) {
@@ -162,8 +167,8 @@ const BranchDetail = () => {
               <CardContent className="p-5">
                 <div className="flex flex-col md:flex-row gap-5">
                   <div className="flex-1">
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      মানব জীবনকে সুন্দর, আলোকিত ও উন্নত করতে শিক্ষার বিকল্প নেই। একজন মুসলমানের জন্য সর্বোত্তম শিক্ষা হলো দ্বীনি শিক্ষা। দুনিয়া-আখিরাতের সার্বিক কল্যাণ লাভ এবং ব্যক্তি, পরিবার ও সমাজকে আল্লাহর রঙে রঙিন করতে হলে দ্বীনি ইলম অর্জন ও জীবনে বাস্তবায়ন করা প্রয়োজন।
+                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {branch.description || "মানব জীবনকে সুন্দর, আলোকিত ও উন্নত করতে শিক্ষার বিকল্প নেই। একজন মুসলমানের জন্য সর্বোত্তম শিক্ষা হলো দ্বীনি শিক্ষা। দুনিয়া-আখিরাতের সার্বিক কল্যাণ লাভ এবং ব্যক্তি, পরিবার ও সমাজকে আল্লাহর রঙে রঙিন করতে হলে দ্বীনি ইলম অর্জন ও জীবনে বাস্তবায়ন করা প্রয়োজন।"}
                     </p>
                   </div>
                   {branch.image_url && (
