@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useMenuItems, useSiteSettings } from "@/hooks/useData";
-import { Menu, X, GraduationCap, Users, Building2, Phone, Mail, BookOpen, LogIn, User, LayoutDashboard, MapPin } from "lucide-react";
+import { Menu, X, GraduationCap, Phone, Mail, BookOpen, LogIn, User, LayoutDashboard } from "lucide-react";
+import LocationPicker from "@/components/LocationPicker";
 import { useState, useEffect } from "react";
 import { toBengali } from "@/lib/bengali";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,9 +49,7 @@ const Header = () => {
             )}
           </div>
           <div className="flex items-center gap-3 text-xs">
-            <Link to="/branches" className="hover:text-accent transition-colors flex items-center gap-1">
-              <MapPin size={13} /> শাখাসমূহ
-            </Link>
+            <LocationPicker />
             <Link to="/result" className="hover:text-accent transition-colors flex items-center gap-1">
               <GraduationCap size={13} /> রেজাল্ট
             </Link>
