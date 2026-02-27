@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useIsApp } from "@/hooks/useIsApp";
 import { Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { useBooks } from "@/hooks/useBookData";
@@ -13,6 +14,7 @@ import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
 
 const BookStore = () => {
+  const isApp = useIsApp();
   const { data: books, isLoading } = useBooks();
   const { addToCart, totalItems } = useCart();
   const [search, setSearch] = useState("");
@@ -165,8 +167,8 @@ const BookStore = () => {
           </div>
         )}
       </div>
-      {/* Floating Cart Button */}
-      {totalItems > 0 && (
+      {/* Floating Cart Button - hidden in app mode */}
+      {totalItems > 0 && !isApp && (
         <Link
           to="/cart"
           className="fixed bottom-6 right-6 z-50 bg-primary text-primary-foreground rounded-full w-14 h-14 flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
