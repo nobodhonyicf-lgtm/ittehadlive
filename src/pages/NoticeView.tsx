@@ -31,21 +31,25 @@ const NoticeView = () => {
   const [sigLoaded, setSigLoaded] = useState(false);
   const [padScale, setPadScale] = useState(1);
 
-  // Responsive scaling for mobile
+  // Responsive scaling for mobile / app
   useEffect(() => {
     const updateScale = () => {
       if (wrapRef.current) {
         const containerWidth = wrapRef.current.parentElement?.clientWidth || window.innerWidth;
-        const padding = 16; // 8px each side
+        const padding = 16;
         const available = containerWidth - padding;
-        const scale = Math.min(1, available / PAD_W);
+        let scale = Math.min(1, available / PAD_W);
+        // In app mode, shrink further so full pad is visible
+        if (isApp) {
+          scale = Math.min(scale, 0.42);
+        }
         setPadScale(scale);
       }
     };
     updateScale();
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
-  }, []);
+  }, [isApp]);
 
   const { data: notice, isLoading } = useQuery({
     queryKey: ["notice", id],
@@ -113,7 +117,7 @@ const NoticeView = () => {
 
     // Preload Arabic font
     try {
-      await document.fonts.load("400 22px Andalus");
+      await document.fonts.load("700 22px 'Scheherazade New'");
       await document.fonts.ready;
     } catch {}
 
@@ -166,9 +170,9 @@ const NoticeView = () => {
           text.setAttribute("x", "350");
           text.setAttribute("y", "32");
           text.setAttribute("text-anchor", "middle");
-          text.setAttribute("font-family", "Andalus, Amiri, serif");
+          text.setAttribute("font-family", "'Scheherazade New', Amiri, serif");
           text.setAttribute("font-size", "24");
-          text.setAttribute("font-weight", "400");
+          text.setAttribute("font-weight", "700");
           text.setAttribute("fill", "#1a1a1a");
           text.setAttribute("direction", "rtl");
           text.textContent = ARABIC_TEXT;
@@ -283,14 +287,14 @@ const NoticeView = () => {
                         top: "62%",
                         left: "50%",
                         transform: "translate(-50%, -50%)",
-                        opacity: 0.04,
+                        opacity: 0.06,
                         pointerEvents: "none",
                         zIndex: 0,
                       }}>
                         <img
                           src={proxiedLogo}
                           alt=""
-                          style={{ width: "600px", height: "auto", objectFit: "contain" }}
+                          style={{ width: "700px", height: "auto", objectFit: "contain" }}
                           crossOrigin="anonymous"
                         />
                       </div>
@@ -330,9 +334,9 @@ const NoticeView = () => {
 
                       {/* Arabic name */}
                       <p data-arabic="true" style={{
-                        fontFamily: "'Andalus', 'Amiri', 'Traditional Arabic', serif",
+                        fontFamily: "'Scheherazade New', 'Amiri', 'Traditional Arabic', serif",
                         fontSize: "22px",
-                        fontWeight: 400,
+                        fontWeight: 700,
                         color: "#1a1a1a",
                         lineHeight: "1.1",
                         direction: "rtl",
