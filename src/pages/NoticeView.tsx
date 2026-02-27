@@ -10,6 +10,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toBengali } from "@/lib/bengali";
+import { toHijriBengali } from "@/lib/hijri";
 import { toast } from "@/components/ui/sonner";
 
 const NoticeView = () => {
@@ -129,6 +130,7 @@ const NoticeView = () => {
   const orgPhone = settings?.phone || "০১৯১৯-৯২৯১৯৯";
   const orgAddress = settings?.address || "শাহ সুজা জামে মসজিদ, মোগলটুলী, কুমিল্লা।";
   const logoUrl = settings?.app_logo_url || settings?.logo_url || "";
+  const signatureUrl = settings?.signature_president || "";
 
   // SVG mandala corner pattern
   const mandalaCorner = (rotate: string) => (
@@ -216,7 +218,11 @@ const NoticeView = () => {
                     {/* সূত্র ও তারিখ */}
                     <div className="flex justify-between text-sm text-gray-700 px-2">
                       <span>সূত্র:</span>
-                      <span>তারিখ: {formatDate(notice.created_at)}</span>
+                      <div className="text-right">
+                        <span>তারিখ: {formatDate(notice.created_at)}</span>
+                        <br />
+                        <span className="text-xs text-gray-500">{toHijriBengali(new Date(notice.created_at))}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -237,9 +243,9 @@ const NoticeView = () => {
                   {/* Signature - positioned absolutely */}
                   <div className="px-12 flex justify-end" style={{ position: "absolute", bottom: "62px", right: 0, zIndex: 1 }}>
                     <div className="text-center">
-                      {notice.signature_url && (
+                      {signatureUrl && (
                         <img
-                          src={notice.signature_url}
+                          src={signatureUrl}
                           alt="স্বাক্ষর"
                           className="h-14 mx-auto mb-1"
                           crossOrigin="anonymous"

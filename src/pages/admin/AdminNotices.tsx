@@ -20,7 +20,7 @@ const AdminNotices = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [sendPush, setSendPush] = useState(false);
-  const [form, setForm] = useState({ title: "", content: "", is_active: true, signature_url: "" });
+  const [form, setForm] = useState({ title: "", content: "", is_active: true });
 
   const { data: notices, isLoading } = useQuery({
     queryKey: ["admin_notices"],
@@ -56,7 +56,7 @@ const AdminNotices = () => {
       qc.invalidateQueries({ queryKey: ["admin_notices"] });
       qc.invalidateQueries({ queryKey: ["notices"] });
       toast.success(editId ? "নোটিশ আপডেট হয়েছে" : "নোটিশ তৈরি হয়েছে");
-      setOpen(false); setEditId(null); setForm({ title: "", content: "", is_active: true, signature_url: "" }); setSendPush(false);
+      setOpen(false); setEditId(null); setForm({ title: "", content: "", is_active: true }); setSendPush(false);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -75,14 +75,13 @@ const AdminNotices = () => {
         <h1 className="text-xl font-bold">নোটিশ ব্যবস্থাপনা</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           {canEdit && <DialogTrigger asChild>
-            <Button onClick={() => { setEditId(null); setForm({ title: "", content: "", is_active: true, signature_url: "" }); }}><Plus size={16} /> নতুন নোটিশ</Button>
+            <Button onClick={() => { setEditId(null); setForm({ title: "", content: "", is_active: true }); }}><Plus size={16} /> নতুন নোটিশ</Button>
           </DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editId ? "নোটিশ সম্পাদনা" : "নতুন নোটিশ"}</DialogTitle></DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate({ data: form, shouldPush: sendPush }); }} className="space-y-4">
               <div><Label>শিরোনাম *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></div>
               <div><Label>বিষয়বস্তু</Label><Textarea rows={5} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} /></div>
-              <div><Label>সভাপতির স্বাক্ষর (ছবি URL)</Label><Input placeholder="https://example.com/signature.png" value={form.signature_url} onChange={(e) => setForm({ ...form, signature_url: e.target.value })} /></div>
               <label className="flex items-center gap-2 text-sm"><Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />সক্রিয়</label>
               {!editId && (
                 <label className="flex items-center gap-2 text-sm p-3 bg-accent/10 rounded-md border border-accent/30 cursor-pointer">
@@ -107,7 +106,7 @@ const AdminNotices = () => {
                     <TableCell className="font-medium">{n.title}</TableCell>
                     <TableCell><span className={`text-xs px-2 py-0.5 rounded ${n.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{n.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}</span></TableCell>
                     <TableCell className="text-right">
-                      {canEdit && <Button variant="ghost" size="icon" onClick={() => { setEditId(n.id); setForm({ title: n.title, content: n.content || "", is_active: n.is_active ?? true, signature_url: (n as any).signature_url || "" }); setOpen(true); }}><Edit size={16} /></Button>}
+                      {canEdit && <Button variant="ghost" size="icon" onClick={() => { setEditId(n.id); setForm({ title: n.title, content: n.content || "", is_active: n.is_active ?? true }); setOpen(true); }}><Edit size={16} /></Button>}
                       {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(n.id)}><Trash2 size={16} /></Button>}
                     </TableCell>
                   </TableRow>
