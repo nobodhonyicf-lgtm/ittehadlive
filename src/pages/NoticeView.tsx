@@ -16,16 +16,36 @@ import { toast } from "@/components/ui/sonner";
 const PAD_W = 794;
 const PAD_H = 1123;
 
+const ARABIC_TEXT = "اِتِّحَادُ الْمَدَارِسِ الْخُصُوصِيَّة";
+
 const NoticeView = () => {
   const isApp = useIsApp();
   const { id } = useParams<{ id: string }>();
   const padRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const [dlOpen, setDlOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const { data: settings } = useSiteSettings();
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [sigLoaded, setSigLoaded] = useState(false);
+  const [padScale, setPadScale] = useState(1);
+
+  // Responsive scaling for mobile
+  useEffect(() => {
+    const updateScale = () => {
+      if (wrapRef.current) {
+        const containerWidth = wrapRef.current.parentElement?.clientWidth || window.innerWidth;
+        const padding = 16; // 8px each side
+        const available = containerWidth - padding;
+        const scale = Math.min(1, available / PAD_W);
+        setPadScale(scale);
+      }
+    };
+    updateScale();
+    window.addEventListener("resize", updateScale);
+    return () => window.removeEventListener("resize", updateScale);
+  }, []);
 
   const { data: notice, isLoading } = useQuery({
     queryKey: ["notice", id],
@@ -91,7 +111,7 @@ const NoticeView = () => {
     const html2canvas = (await import("html2canvas")).default;
     const el = padRef.current;
 
-    // Preload Amiri font to prevent Arabic text breaking
+    // Preload Amiri font
     try {
       await document.fonts.load("700 26px Amiri");
       await document.fonts.ready;
@@ -120,12 +140,30 @@ const NoticeView = () => {
           cloned.style.overflow = "hidden";
           cloned.style.transform = "none";
         }
-        // Force Arabic text rendering in cloned doc
+        // Replace Arabic text element with a pre-rendered canvas image
         const arabicEls = doc.querySelectorAll("[data-arabic]");
         arabicEls.forEach((ael: any) => {
-          ael.style.direction = "rtl";
-          ael.style.unicodeBidi = "bidi-override";
-          ael.style.fontFamily = "'Amiri', serif";
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return;
+          const text = ARABIC_TEXT;
+          const fontSize = 26;
+          canvas.width = 700;
+          canvas.height = 60;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.font = `700 ${fontSize}px Amiri, serif`;
+          ctx.fillStyle = "#1a1a1a";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.direction = "rtl";
+          ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+          const img = doc.createElement("img");
+          img.src = canvas.toDataURL("image/png");
+          img.style.width = "auto";
+          img.style.height = `${fontSize + 14}px`;
+          img.style.display = "block";
+          img.style.margin = "0 auto";
+          ael.replaceWith(img);
         });
       }
     });
@@ -204,8 +242,14 @@ const NoticeView = () => {
               <div className="animate-pulse bg-muted h-96 rounded" />
             ) : notice ? (
               <>
-                {/* Notice Pad - fixed A4 size, scaled down for display */}
-                <div className="overflow-x-auto flex justify-center">
+                {/* Notice Pad - fixed A4 size, scaled for mobile */}
+                <div ref={wrapRef} className="flex justify-center overflow-hidden">
+                  <div style={{
+                    transform: `scale(${padScale})`,
+                    transformOrigin: "top center",
+                    width: `${PAD_W}px`,
+                    height: `${Math.ceil(PAD_H * padScale)}px`,
+                  }}>
                   <div
                     ref={padRef}
                     data-pad="true"
@@ -358,6 +402,7 @@ const NoticeView = () => {
                         </p>
                       </div>
                     </div>
+                   </div>
                   </div>
                 </div>
 
