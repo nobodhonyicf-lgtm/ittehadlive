@@ -414,16 +414,16 @@ const NoticeView = () => {
                         background: "linear-gradient(90deg, #0a5c2e, #0d7a3e, #1a9e52, #0d7a3e, #0a5c2e)",
                         padding: "8px 24px",
                       }}>
-                        <p style={{ textAlign: "center", color: "#ffffff", fontSize: "11px", lineHeight: "1.6", margin: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
-                          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", verticalAlign: "middle" }}>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, display: "inline-block", verticalAlign: "middle", position: "relative", top: "-1px" }}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                            <span style={{ verticalAlign: "middle" }}>{orgAddress}</span>
-                          </span>
-                          <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", verticalAlign: "middle" }}>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, display: "inline-block", verticalAlign: "middle", position: "relative", top: "-1px" }}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                            <span style={{ verticalAlign: "middle" }}>{orgPhone}</span>
-                          </span>
-                        </p>
+                        <div style={{ textAlign: "center", color: "#ffffff", fontSize: "11px", lineHeight: "1.8", margin: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px" }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, width: "11px", height: "11px" }}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <span>{orgAddress}</span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", marginTop: "1px" }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, width: "11px", height: "11px" }}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            <span>{orgPhone}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                    </div>
