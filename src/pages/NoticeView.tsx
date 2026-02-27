@@ -90,6 +90,13 @@ const NoticeView = () => {
     if (!padRef.current) return null;
     const html2canvas = (await import("html2canvas")).default;
     const el = padRef.current;
+
+    // Preload Amiri font to prevent Arabic text breaking
+    try {
+      await document.fonts.load("700 26px Amiri");
+      await document.fonts.ready;
+    } catch {}
+
     return html2canvas(el, {
       scale: 3,
       useCORS: true,
@@ -113,6 +120,13 @@ const NoticeView = () => {
           cloned.style.overflow = "hidden";
           cloned.style.transform = "none";
         }
+        // Force Arabic text rendering in cloned doc
+        const arabicEls = doc.querySelectorAll("[data-arabic]");
+        arabicEls.forEach((ael: any) => {
+          ael.style.direction = "rtl";
+          ael.style.unicodeBidi = "bidi-override";
+          ael.style.fontFamily = "'Amiri', serif";
+        });
       }
     });
   };
@@ -212,7 +226,7 @@ const NoticeView = () => {
                     {proxiedLogo && logoLoaded && (
                       <div style={{
                         position: "absolute",
-                        top: "58%",
+                        top: "62%",
                         left: "50%",
                         transform: "translate(-50%, -50%)",
                         opacity: 0.04,
@@ -222,7 +236,7 @@ const NoticeView = () => {
                         <img
                           src={proxiedLogo}
                           alt=""
-                          style={{ width: "520px", height: "520px", objectFit: "contain" }}
+                          style={{ width: "600px", height: "auto", objectFit: "contain" }}
                           crossOrigin="anonymous"
                         />
                       </div>
@@ -239,55 +253,53 @@ const NoticeView = () => {
                       </p>
                     </div>
 
-                    {/* Header: logo left + text center */}
+                    {/* Header: centered logo + text */}
                     <div style={{
                       display: "flex",
+                      flexDirection: "column",
                       alignItems: "center",
                       padding: "4px 40px 8px",
                       position: "relative",
                       zIndex: 1,
-                      gap: "16px",
                     }}>
-                      {/* Logo - square, matching text height */}
+                      {/* Logo */}
                       {proxiedLogo && logoLoaded && (
-                        <div style={{ flexShrink: 0 }}>
+                        <div style={{ marginBottom: "6px" }}>
                           <img
                             src={proxiedLogo}
                             alt="লোগো"
-                            style={{ width: "75px", height: "75px", objectFit: "contain" }}
+                            style={{ width: "70px", height: "auto", objectFit: "contain" }}
                             crossOrigin="anonymous"
                           />
                         </div>
                       )}
 
-                      {/* Center text */}
-                      <div style={{ flex: 1, textAlign: "center" }}>
-                        {/* Arabic name - Amiri calligraphic */}
-                        <p style={{
-                          fontFamily: "'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif",
-                          fontSize: "26px",
-                          fontWeight: 700,
-                          color: "#1a1a1a",
-                          lineHeight: "1.5",
-                          direction: "rtl",
-                          letterSpacing: "1px",
-                          margin: "0",
-                        }}>
-                          اِتِّحَادُ الْمَدَارِسِ الْخُصُوصِيَّة
-                        </p>
+                      {/* Arabic name */}
+                      <p data-arabic="true" style={{
+                        fontFamily: "'Amiri', serif",
+                        fontSize: "26px",
+                        fontWeight: 700,
+                        color: "#1a1a1a",
+                        lineHeight: "1.5",
+                        direction: "rtl",
+                        letterSpacing: "1px",
+                        margin: "0",
+                        textAlign: "center",
+                      }}>
+                        اِتِّحَادُ الْمَدَارِسِ الْخُصُوصِيَّة
+                      </p>
 
-                        {/* Bengali name */}
-                        <h1 style={{ fontSize: "22px", fontWeight: "bold", color: "#111", margin: "2px 0 0" }}>
-                          ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ
-                        </h1>
-                        <p style={{ fontSize: "11px", color: "#666", marginTop: "2px" }}>
-                          (প্রাইভেট মাদরাসাগুলোর একটি সমন্বিত সংগঠন)
-                        </p>
-                      </div>
+                      {/* Bengali name */}
+                      <h1 style={{ fontSize: "22px", fontWeight: "bold", color: "#111", margin: "2px 0 0", textAlign: "center" }}>
+                        ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ
+                      </h1>
+                      <p style={{ fontSize: "11px", color: "#666", marginTop: "2px", textAlign: "center" }}>
+                        (প্রাইভেট মাদরাসাগুলোর একটি সমন্বিত সংগঠন)
+                      </p>
                     </div>
 
-                    {/* Green divider line */}
-                    <div style={{ height: "2px", background: "linear-gradient(90deg, transparent 5%, #0d7a3e, transparent 95%)", margin: "4px 40px 8px", position: "relative", zIndex: 1 }} />
+                    {/* Green divider line - full width */}
+                    <div style={{ height: "2px", background: "linear-gradient(90deg, #0d7a3e, #1a9e52, #0d7a3e)", margin: "4px 0 8px", position: "relative", zIndex: 1 }} />
 
                     {/* সূত্র ও তারিখ */}
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#444", padding: "0 48px 4px", position: "relative", zIndex: 1 }}>
