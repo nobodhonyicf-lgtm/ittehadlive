@@ -694,6 +694,7 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean | null
+          signature_url: string | null
           title: string
           updated_at: string
         }
@@ -702,6 +703,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean | null
+          signature_url?: string | null
           title: string
           updated_at?: string
         }
@@ -710,6 +712,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean | null
+          signature_url?: string | null
           title?: string
           updated_at?: string
         }
