@@ -1,88 +1,228 @@
 import { useSiteSettings } from "@/hooks/useData";
-import { Phone, Mail, MapPin, Download, Smartphone } from "lucide-react";
+import { Phone, Mail, MapPin, Download, Smartphone, Facebook, Youtube, ChevronUp, Send } from "lucide-react";
 import { Link } from "react-router-dom";
 import logoImg from "@/assets/logo.png";
 import { toBengali } from "@/lib/bengali";
+import { useState, useEffect } from "react";
+
+const BackToTop = () => {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 400);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      className="fixed bottom-20 right-4 z-50 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-fade-in"
+      aria-label="Back to top"
+    >
+      <ChevronUp size={20} />
+    </button>
+  );
+};
 
 const Footer = () => {
   const { data: settings } = useSiteSettings();
 
   return (
-    <footer className="bg-primary text-primary-foreground mt-12">
-      <div className="max-w-[1200px] mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* About */}
-          <div>
-            <img src={logoImg} alt="Logo" className="h-16 mb-3 object-contain" />
-            <h3 className="text-lg font-bold mb-2">
-              {settings?.site_name || "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ"}
-            </h3>
-            <p className="text-sm opacity-80 leading-relaxed">
-              {settings?.site_description || "প্রাইভেট মাদরাসাগুলোর একটি সমন্বিত সংগঠন"}
-            </p>
-          </div>
+    <>
+      <BackToTop />
+      <footer className="relative bg-primary text-primary-foreground mt-12 overflow-hidden">
+        {/* Islamic geometric pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.04]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23fff' stroke-width='1'%3E%3Cpath d='M0 0l40 40L0 80zM80 0L40 40l40 40z'/%3E%3Cpath d='M40 0L0 40l40 40 40-40z'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='10'/%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundSize: '80px 80px'
+        }} />
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-lg font-bold mb-3">গুরুত্বপূর্ণ লিংক</h3>
-            <ul className="text-sm opacity-80 space-y-2">
-              <li><a href="/page/about" className="hover:underline hover:opacity-100 transition-opacity">আমাদের সম্পর্কে</a></li>
-              <li><a href="/posts" className="hover:underline hover:opacity-100 transition-opacity">সাম্প্রতিক খবর</a></li>
-              <li><a href="/result" className="hover:underline hover:opacity-100 transition-opacity">রেজাল্ট দেখুন</a></li>
-              <li><a href="/branches" className="hover:underline hover:opacity-100 transition-opacity">শাখা সমূহ</a></li>
-            </ul>
-          </div>
+        {/* Top decorative border */}
+        <div className="h-1 bg-gradient-to-r from-transparent via-primary-foreground/30 to-transparent" />
 
-          {/* Services + App Download */}
-          <div>
-            <h3 className="text-lg font-bold mb-3">সেবা সমূহ</h3>
-            <ul className="text-sm opacity-80 space-y-2">
-              <li><a href="/students" className="hover:underline hover:opacity-100 transition-opacity">শিক্ষার্থী ডিরেক্টরি</a></li>
-              <li><a href="/contact" className="hover:underline hover:opacity-100 transition-opacity">যোগাযোগ</a></li>
-              <li><a href="/books" className="hover:underline hover:opacity-100 transition-opacity">প্রকাশনা</a></li>
-            </ul>
+        <div className="relative max-w-[1200px] mx-auto px-4 pt-12 pb-6">
+          {/* Main content grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+            {/* About */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary-foreground/10 rounded-xl backdrop-blur-sm">
+                  <img src={logoImg} alt="Logo" className="h-14 object-contain" />
+                </div>
+              </div>
+              <h3 className="text-lg font-bold leading-snug">
+                {settings?.site_name || "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ"}
+              </h3>
+              <p className="text-sm opacity-70 leading-relaxed">
+                {settings?.site_description || "প্রাইভেট মাদরাসাগুলোর একটি সমন্বিত সংগঠন"}
+              </p>
 
-            {/* App download */}
-            <div className="mt-4 pt-4 border-t border-primary-foreground/20">
-              <h4 className="text-sm font-bold mb-2 flex items-center gap-1.5">
-                <Smartphone size={14} /> অ্যাপ ডাউনলোড
-              </h4>
-              <Link
-                to="/install"
-                className="inline-flex items-center gap-2 px-3 py-2 bg-primary-foreground/10 hover:bg-primary-foreground/20 rounded-lg transition-colors text-sm"
-              >
-                <Download size={16} />
-                <span>অ্যাপ ইনস্টল করুন</span>
-              </Link>
+              {/* Social icons */}
+              <div className="flex items-center gap-2 pt-2">
+                <a
+                  href={settings?.facebook_url || "https://www.facebook.com/aborawabdarpul"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2.5 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-all duration-300 hover:scale-110"
+                  aria-label="Facebook"
+                >
+                  <Facebook size={18} />
+                </a>
+                <a
+                  href={settings?.youtube_url || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2.5 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-all duration-300 hover:scale-110"
+                  aria-label="YouTube"
+                >
+                  <Youtube size={18} />
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="text-base font-bold mb-4 flex items-center gap-2">
+                <span className="w-8 h-0.5 bg-primary-foreground/40 rounded-full" />
+                গুরুত্বপূর্ণ লিংক
+              </h3>
+              <ul className="text-sm space-y-2.5">
+                {[
+                  { href: "/page/about", label: "আমাদের সম্পর্কে" },
+                  { href: "/posts", label: "সাম্প্রতিক খবর" },
+                  { href: "/result", label: "রেজাল্ট দেখুন" },
+                  { href: "/branches", label: "শাখা সমূহ" },
+                  { href: "/books", label: "প্রকাশনা" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      to={link.href}
+                      className="opacity-70 hover:opacity-100 transition-all duration-200 hover:translate-x-1 inline-flex items-center gap-1.5"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground/40" />
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Services + App */}
+            <div>
+              <h3 className="text-base font-bold mb-4 flex items-center gap-2">
+                <span className="w-8 h-0.5 bg-primary-foreground/40 rounded-full" />
+                সেবা সমূহ
+              </h3>
+              <ul className="text-sm space-y-2.5">
+                {[
+                  { href: "/students", label: "শিক্ষার্থী ডিরেক্টরি" },
+                  { href: "/contact", label: "যোগাযোগ" },
+                  { href: "/quran", label: "কুরআন পাঠ" },
+                  { href: "/hadith", label: "হাদিস সংকলন" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      to={link.href}
+                      className="opacity-70 hover:opacity-100 transition-all duration-200 hover:translate-x-1 inline-flex items-center gap-1.5"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground/40" />
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+
+              {/* App download */}
+              <div className="mt-5 pt-4 border-t border-primary-foreground/10">
+                <Link
+                  to="/install"
+                  className="inline-flex items-center gap-2.5 px-4 py-2.5 bg-primary-foreground/10 hover:bg-primary-foreground/20 rounded-xl transition-all duration-300 text-sm font-medium group"
+                >
+                  <Smartphone size={18} className="group-hover:animate-pulse" />
+                  <div>
+                    <div className="text-xs opacity-60">মোবাইল অ্যাপ</div>
+                    <div className="font-semibold -mt-0.5">ডাউনলোড করুন</div>
+                  </div>
+                  <Download size={14} className="opacity-60 ml-1" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Contact + Newsletter */}
+            <div>
+              <h3 className="text-base font-bold mb-4 flex items-center gap-2">
+                <span className="w-8 h-0.5 bg-primary-foreground/40 rounded-full" />
+                যোগাযোগ
+              </h3>
+              <ul className="text-sm space-y-3">
+                <li className="flex items-center gap-2.5 opacity-80">
+                  <div className="p-1.5 rounded-lg bg-primary-foreground/10 shrink-0">
+                    <Phone size={14} />
+                  </div>
+                  {toBengali(settings?.contact_phone || "০১৯২৬-৪২৮৯৮৮")}
+                </li>
+                <li className="flex items-center gap-2.5 opacity-80">
+                  <div className="p-1.5 rounded-lg bg-primary-foreground/10 shrink-0">
+                    <Mail size={14} />
+                  </div>
+                  {settings?.contact_email || "info@ittehad.bd"}
+                </li>
+                <li className="flex items-start gap-2.5 opacity-80">
+                  <div className="p-1.5 rounded-lg bg-primary-foreground/10 shrink-0 mt-0.5">
+                    <MapPin size={14} />
+                  </div>
+                  <span className="leading-relaxed">{settings?.contact_address || "মারকাযুস সুন্নাহ ক্যাডেট মাদরাসা, ওয়াবদারপুল তালতলা বাজার, ফতুল্লা, নারায়ণগঞ্জ"}</span>
+                </li>
+              </ul>
+
+              {/* Newsletter */}
+              <div className="mt-5 pt-4 border-t border-primary-foreground/10">
+                <h4 className="text-sm font-semibold mb-2.5">আপডেট পেতে সংযুক্ত থাকুন</h4>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    window.open(settings?.facebook_url || "https://www.facebook.com/aborawabdarpul", "_blank");
+                  }}
+                  className="flex gap-1.5"
+                >
+                  <input
+                    type="email"
+                    placeholder="ইমেইল দিন..."
+                    className="flex-1 px-3 py-2 rounded-lg bg-primary-foreground/10 border border-primary-foreground/10 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-primary-foreground/30 transition-colors"
+                  />
+                  <button
+                    type="submit"
+                    className="p-2 rounded-lg bg-primary-foreground/15 hover:bg-primary-foreground/25 transition-colors"
+                    aria-label="Subscribe"
+                  >
+                    <Send size={16} />
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
 
-          {/* Contact */}
-          <div>
-            <h3 className="text-lg font-bold mb-3">যোগাযোগ</h3>
-            <ul className="text-sm opacity-80 space-y-2">
-              <li className="flex items-center gap-2">
-                <Phone size={14} className="shrink-0" />
-                {toBengali(settings?.contact_phone || "০১৯২৬-৪২৮৯৮৮")}
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail size={14} className="shrink-0" />
-                {settings?.contact_email || "info@ittehad.bd"}
-              </li>
-              <li className="flex items-start gap-2">
-                <MapPin size={14} className="shrink-0 mt-0.5" />
-                <span>{settings?.contact_address || "মারকাযুস সুন্নাহ ক্যাডেট মাদরাসা, ওয়াবদারপুল তালতলা বাজার, ফতুল্লা, নারায়ণগঞ্জ"}</span>
-              </li>
-            </ul>
+          {/* Bottom bar */}
+          <div className="border-t border-primary-foreground/10 mt-10 pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm opacity-50">
+            <p>{toBengali(settings?.copyright_text || "© ২০২৪ ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ। সর্বস্বত্ব সংরক্ষিত।")}</p>
+            <p>
+              কারিগরি সহায়তায়:{" "}
+              <a
+                href="https://www.facebook.com/hasanprofile/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:opacity-100 transition-opacity"
+              >
+                মাহমুদুল হাসান
+              </a>
+            </p>
           </div>
         </div>
-
-        <div className="border-t border-primary-foreground/20 mt-8 pt-4 text-center text-sm opacity-60">
-          {toBengali(settings?.copyright_text || "© ২০২৪ ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ। সর্বস্বত্ব সংরক্ষিত।")}
-          <span className="ml-2 opacity-50">· কারিগরি সহায়তায়: <a href="https://www.facebook.com/hasanprofile/" target="_blank" rel="noopener noreferrer" className="underline hover:opacity-100 transition-opacity">মাহমুদুল হাসান</a></span>
-        </div>
-      </div>
-    </footer>
+      </footer>
+    </>
   );
 };
 
