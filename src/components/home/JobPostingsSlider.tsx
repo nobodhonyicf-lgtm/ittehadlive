@@ -49,16 +49,6 @@ const JobPostingsSlider = () => {
                   <h4 className="text-xs font-semibold line-clamp-2 group-hover:text-primary transition-colors">
                     {j.title}
                   </h4>
-                  {branch && (
-                    <div className="flex items-center gap-1.5 mt-1.5">
-                      {branch.image_url ? (
-                        <img src={branch.image_url} alt="" className="w-4 h-4 rounded object-contain bg-muted" />
-                      ) : (
-                        <Building2 size={11} className="text-muted-foreground" />
-                      )}
-                      <span className="text-[10px] text-muted-foreground font-medium line-clamp-1">{branch.name}</span>
-                    </div>
-                  )}
                   <div className="flex flex-wrap gap-1 mt-2 text-[9px] text-muted-foreground">
                     {j.subject && <span className="bg-muted px-1.5 py-0.5 rounded-full">📚 {j.subject}</span>}
                     {j.location && <span className="bg-muted px-1.5 py-0.5 rounded-full">📍 {j.location}</span>}
@@ -67,6 +57,16 @@ const JobPostingsSlider = () => {
                     <div className="flex items-center gap-1 mt-2 text-[10px] text-destructive">
                       <Clock size={10} />
                       <span>শেষ: {new Date(j.deadline).toLocaleDateString("bn-BD")}</span>
+                    </div>
+                  )}
+                  {branch && (
+                    <div className="mt-2 pt-2 border-t border-border flex items-center gap-1.5">
+                      {branch.image_url ? (
+                        <img src={branch.image_url} alt="" className="w-4 h-4 rounded object-contain bg-muted" />
+                      ) : (
+                        <Building2 size={11} className="text-primary" />
+                      )}
+                      <span className="text-[10px] text-primary font-semibold line-clamp-1">{branch.name}</span>
                     </div>
                   )}
                 </div>

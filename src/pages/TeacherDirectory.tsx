@@ -48,61 +48,6 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">{j.title}</h3>
-                    {branch && (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <div className="flex items-center gap-1.5 mt-1 cursor-pointer hover:text-primary transition-colors">
-                            {branch.image_url ? (
-                              <img src={branch.image_url} alt="" className="w-4 h-4 rounded object-contain bg-muted" />
-                            ) : (
-                              <Building2 size={12} className="text-muted-foreground" />
-                            )}
-                            <span className="text-[11px] text-muted-foreground font-medium underline decoration-dotted">{branch.name}</span>
-                          </div>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-72 p-0" side="bottom" align="start">
-                          <div className="p-3 space-y-2">
-                            <div className="flex items-center gap-2">
-                              {branch.image_url ? (
-                                <img src={branch.image_url} alt="" className="w-10 h-10 rounded-lg object-contain bg-muted border" />
-                              ) : (
-                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Building2 size={20} className="text-primary" /></div>
-                              )}
-                              <div>
-                                <h4 className="text-sm font-semibold">{branch.name}</h4>
-                                {branch.code && <p className="text-[10px] text-muted-foreground">কোড: {branch.code}</p>}
-                              </div>
-                            </div>
-                            {branch.address && (
-                              <p className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                <MapPin size={11} className="shrink-0 mt-0.5" /> {branch.address}
-                              </p>
-                            )}
-                            {branch.head_name && (
-                              <div className="flex items-center gap-2 bg-muted/50 rounded-md p-2">
-                                {branch.head_photo_url ? (
-                                  <img src={branch.head_photo_url} alt="" className="w-7 h-7 rounded-full object-cover" />
-                                ) : (
-                                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs">👤</div>
-                                )}
-                                <div>
-                                  <div className="text-[10px] text-muted-foreground">প্রধান</div>
-                                  <div className="text-xs font-medium">{branch.head_name}</div>
-                                </div>
-                              </div>
-                            )}
-                            <div className="flex gap-3 text-[10px] text-muted-foreground">
-                              {branch.phone && <span className="flex items-center gap-1"><Phone size={10} /> {branch.phone}</span>}
-                              {branch.email && <span className="flex items-center gap-1"><Mail size={10} /> {branch.email}</span>}
-                            </div>
-                            <div className="flex gap-3 text-[10px]">
-                              {branch.total_teachers > 0 && <span>👨‍🏫 {branch.total_teachers} জন শিক্ষক</span>}
-                              {branch.total_students > 0 && <span>👨‍🎓 {branch.total_students} জন ছাত্র</span>}
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    )}
                     {j.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{j.description}</p>}
                   </div>
                   {j.deadline && (
@@ -117,6 +62,63 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
                   {j.location && <span className="bg-muted px-2 py-0.5 rounded-full">📍 {j.location}</span>}
                   {j.salary_range && <span className="bg-muted px-2 py-0.5 rounded-full">💰 {j.salary_range}</span>}
                 </div>
+                {branch && (
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 rounded-md p-1.5 -m-1.5 transition-colors">
+                          {branch.image_url ? (
+                            <img src={branch.image_url} alt="" className="w-5 h-5 rounded object-contain bg-muted" />
+                          ) : (
+                            <Building2 size={14} className="text-primary" />
+                          )}
+                          <span className="text-[11px] text-primary font-semibold">{branch.name}</span>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-72 p-0" side="bottom" align="start">
+                        <div className="p-3 space-y-2">
+                          <div className="flex items-center gap-2">
+                            {branch.image_url ? (
+                              <img src={branch.image_url} alt="" className="w-10 h-10 rounded-lg object-contain bg-muted border" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Building2 size={20} className="text-primary" /></div>
+                            )}
+                            <div>
+                              <h4 className="text-sm font-semibold">{branch.name}</h4>
+                              {branch.code && <p className="text-[10px] text-muted-foreground">কোড: {branch.code}</p>}
+                            </div>
+                          </div>
+                          {branch.address && (
+                            <p className="text-xs text-muted-foreground flex items-start gap-1.5">
+                              <MapPin size={11} className="shrink-0 mt-0.5" /> {branch.address}
+                            </p>
+                          )}
+                          {branch.head_name && (
+                            <div className="flex items-center gap-2 bg-muted/50 rounded-md p-2">
+                              {branch.head_photo_url ? (
+                                <img src={branch.head_photo_url} alt="" className="w-7 h-7 rounded-full object-cover" />
+                              ) : (
+                                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs">👤</div>
+                              )}
+                              <div>
+                                <div className="text-[10px] text-muted-foreground">প্রধান</div>
+                                <div className="text-xs font-medium">{branch.head_name}</div>
+                              </div>
+                            </div>
+                          )}
+                          <div className="flex gap-3 text-[10px] text-muted-foreground">
+                            {branch.phone && <span className="flex items-center gap-1"><Phone size={10} /> {branch.phone}</span>}
+                            {branch.email && <span className="flex items-center gap-1"><Mail size={10} /> {branch.email}</span>}
+                          </div>
+                          <div className="flex gap-3 text-[10px]">
+                            {branch.total_teachers > 0 && <span>👨‍🏫 {branch.total_teachers} জন শিক্ষক</span>}
+                            {branch.total_students > 0 && <span>👨‍🎓 {branch.total_students} জন ছাত্র</span>}
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
                 <div className="flex gap-2 mt-3">
                   <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => setSelectedJob(j)}>
                     <Eye size={12} /> বিস্তারিত দেখুন
