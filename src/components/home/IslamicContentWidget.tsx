@@ -6,10 +6,10 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 const categoryConfig = {
-  quran: { label: "কুরআন", icon: BookOpen, gradient: "from-emerald-800 to-teal-700", darkGradient: "dark:from-emerald-900 dark:to-teal-800", pattern: "🕌", link: "/quran" },
-  hadith: { label: "হাদিস", icon: Quote, gradient: "from-sky-800 to-blue-700", darkGradient: "dark:from-sky-900 dark:to-blue-800", pattern: "📿", link: "/hadith" },
-  dua: { label: "দোয়া", icon: HandHelping, gradient: "from-indigo-800 to-purple-700", darkGradient: "dark:from-indigo-900 dark:to-purple-800", pattern: "🤲", link: "/dua" },
-  masala: { label: "মাসআলা", icon: BookOpen, gradient: "from-rose-800 to-red-700", darkGradient: "dark:from-rose-900 dark:to-red-800", pattern: "📖", link: "/masala" },
+  quran: { label: "কুরআন", icon: BookOpen, gradient: "from-emerald-800 to-teal-700", darkGradient: "dark:from-emerald-900 dark:to-teal-800", link: "/quran" },
+  hadith: { label: "হাদিস", icon: Quote, gradient: "from-sky-800 to-blue-700", darkGradient: "dark:from-sky-900 dark:to-blue-800", link: "/hadith" },
+  dua: { label: "দোয়া", icon: HandHelping, gradient: "from-indigo-800 to-purple-700", darkGradient: "dark:from-indigo-900 dark:to-purple-800", link: "/dua" },
+  masala: { label: "মাসআলা", icon: BookOpen, gradient: "from-rose-800 to-red-700", darkGradient: "dark:from-rose-900 dark:to-red-800", link: "/masala" },
 } as const;
 
 const getDailyContent = (items: any[]) => {
@@ -36,11 +36,11 @@ const ContentModal = ({ item, onClose }: { item: any; onClose: () => void }) => 
           <p className="text-sm text-muted-foreground italic border-t border-border pt-3">উচ্চারণ: {item.transliteration}</p>
         )}
         {item.meaning && (
-          <p className="text-sm text-foreground leading-relaxed border-t border-border pt-3">📝 অর্থ: {item.meaning}</p>
+          <p className="text-sm text-foreground leading-relaxed border-t border-border pt-3">অর্থ: {item.meaning}</p>
         )}
         {item.question && (
           <div className="border-t border-border pt-3">
-            <p className="text-sm font-semibold mb-1">❓ প্রশ্ন: {item.question}</p>
+            <p className="text-sm font-semibold mb-1">প্রশ্ন: {item.question}</p>
             <p className="text-sm text-foreground leading-relaxed">{item.content}</p>
           </div>
         )}
@@ -70,7 +70,7 @@ const IslamicContentWidget = () => {
 
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden">
-      <SectionHeader title="📚 ইসলামী কন্টেন্ট" />
+      <SectionHeader title="ইসলামী কন্টেন্ট" />
       <div className="p-4 space-y-4">
         <IftarCountdownWidget />
 
@@ -88,7 +88,7 @@ const IslamicContentWidget = () => {
                 <div className="absolute inset-0 opacity-[0.04]" style={{
                   backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)`,
                 }} />
-                <div className="absolute top-2 right-2 opacity-10 text-4xl">{config.pattern}</div>
+                <div className="absolute top-2 right-2 opacity-10"><Icon size={32} /></div>
 
                 <div className="flex items-center gap-2 mb-2.5 border-b border-white/20 pb-2">
                   <Icon size={16} className="shrink-0" />
@@ -115,7 +115,7 @@ const IslamicContentWidget = () => {
                       )}
                     </div>
                     {item.meaning && (
-                      <p className="text-[11px] opacity-80 mt-2 leading-relaxed line-clamp-2">📝 {item.meaning}</p>
+                      <p className="text-[11px] opacity-80 mt-2 leading-relaxed line-clamp-2">{item.meaning}</p>
                     )}
                     {item.source && (
                       <p className="text-[10px] opacity-70 mt-2 text-right italic">— {item.source}</p>

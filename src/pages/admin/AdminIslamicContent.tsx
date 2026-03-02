@@ -7,16 +7,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, Save, Edit2, X, BookOpen } from "lucide-react";
+import { Plus, Trash2, Save, Edit2, X, BookOpen, ScrollText, HandHelping, Scale, HelpCircle, PenLine } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
 const categories = [
-  { key: "quran", label: "কুরআন", emoji: "📖" },
-  { key: "hadith", label: "হাদিস", emoji: "📜" },
-  { key: "dua", label: "দোয়া", emoji: "🤲" },
-  { key: "masala", label: "মাসআলা", emoji: "⚖️" },
+  { key: "quran", label: "কুরআন", icon: BookOpen },
+  { key: "hadith", label: "হাদিস", icon: ScrollText },
+  { key: "dua", label: "দোয়া", icon: HandHelping },
+  { key: "masala", label: "মাসআলা", icon: Scale },
 ] as const;
 
 const emptyForm = { title: "", content: "", source: "", subcategory: "", transliteration: "", meaning: "", reference: "", question: "" };
@@ -107,7 +107,7 @@ const AdminIslamicContent = () => {
       {isLoading && <p className="text-muted-foreground">লোড হচ্ছে...</p>}
       <Tabs defaultValue="hadith">
         <TabsList className="grid grid-cols-4 w-full">
-          {categories.map(cat => <TabsTrigger key={cat.key} value={cat.key} className="text-xs sm:text-sm">{cat.emoji} {cat.label}</TabsTrigger>)}
+          {categories.map(cat => <TabsTrigger key={cat.key} value={cat.key} className="text-xs sm:text-sm gap-1"><cat.icon size={14} /> {cat.label}</TabsTrigger>)}
         </TabsList>
         {categories.map(cat => (
           <TabsContent key={cat.key} value={cat.key} className="space-y-3 mt-4">
@@ -129,10 +129,10 @@ const AdminIslamicContent = () => {
                           <h3 className="font-semibold text-sm">{item.title}</h3>
                           {item.subcategory && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">{item.subcategory}</span>}
                         </div>
-                        {item.question && <p className="text-xs text-muted-foreground mb-1">❓ {item.question}</p>}
+                        {item.question && <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1"><HelpCircle size={12} /> {item.question}</p>}
                         <p className="text-sm mt-1 whitespace-pre-wrap" dir="auto">{item.content}</p>
-                        {item.meaning && <p className="text-xs text-muted-foreground mt-1">📝 {item.meaning}</p>}
-                        {(item.source || item.reference) && <p className="text-xs text-muted-foreground mt-1">📖 {item.reference || item.source}</p>}
+                        {item.meaning && <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><PenLine size={12} /> {item.meaning}</p>}
+                        {(item.source || item.reference) && <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><BookOpen size={12} /> {item.reference || item.source}</p>}
                       </div>
                       <div className="flex gap-1 shrink-0">
                         {canEdit && <Button variant="ghost" size="icon" onClick={() => startEdit(item)}><Edit2 size={14} /></Button>}

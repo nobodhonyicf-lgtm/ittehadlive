@@ -80,7 +80,7 @@ const AdminExams = () => {
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="font-bold">{e.name} <span className="text-muted-foreground text-sm">({e.year})</span></p>
-                <p className="text-xs">{e.is_published ? "✅ প্রকাশিত" : "⏳ অপ্রকাশিত"} | {e.exam_type}</p>
+                <p className="text-xs">{e.is_published ? "প্রকাশিত" : "অপ্রকাশিত"} | {e.exam_type}</p>
               </div>
               <div className="flex gap-2">
                 {canEdit && <Button variant="outline" size="icon" onClick={() => openEdit(e)}><Edit size={14} /></Button>}

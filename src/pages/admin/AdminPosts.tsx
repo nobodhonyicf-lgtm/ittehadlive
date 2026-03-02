@@ -232,7 +232,7 @@ const AdminPosts = () => {
                             type="button"
                             className="w-full text-left px-3 py-2 rounded text-sm hover:bg-muted border border-transparent hover:border-border transition-colors"
                             onClick={() => {
-                              const linkText = `\n\n📖 আরও পড়ুন: ${p.title}\n🔗 /post/${p.slug}\n`;
+                              const linkText = `\n\nআরও পড়ুন: ${p.title}\n/post/${p.slug}\n`;
                               const textarea = contentRef.current;
                               if (textarea) {
                                 const start = textarea.selectionStart;
@@ -301,7 +301,7 @@ const AdminPosts = () => {
               )}
               {/* SEO Fields */}
               <details className="border border-border rounded-md p-3">
-                <summary className="text-sm font-semibold cursor-pointer">🔍 এসইও সেটিংস</summary>
+                <summary className="text-sm font-semibold cursor-pointer flex items-center gap-1.5"><Search size={14} /> এসইও সেটিংস</summary>
                 <div className="space-y-3 mt-3">
                   <div>
                     <Label>মেটা টাইটেল</Label>

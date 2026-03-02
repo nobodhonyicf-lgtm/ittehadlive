@@ -184,10 +184,10 @@ const PostPage = () => {
                 {/* Content with in-post ad */}
                 <div className="prose max-w-none text-foreground px-6 py-4" itemProp="articleBody">
                   {contentParagraphs.map((paragraph, index) => {
-                    if (paragraph.startsWith("📖 ")) {
-                      const titleText = paragraph.replace("📖 আরও পড়ুন: ", "").replace("📖 ", "").trim();
+                    if (paragraph.startsWith("📖 ") || paragraph.startsWith("আরও পড়ুন:")) {
+                      const titleText = paragraph.replace("📖 আরও পড়ুন: ", "").replace("📖 ", "").replace("আরও পড়ুন: ", "").trim();
                       const nextLine = contentParagraphs[index + 1];
-                      const linkPath = nextLine?.startsWith("🔗 ") ? nextLine.replace("🔗 ", "").trim() : null;
+                      const linkPath = nextLine?.startsWith("🔗 ") ? nextLine.replace("🔗 ", "").trim() : (nextLine?.startsWith("/post/") ? nextLine.trim() : null);
                       return (
                         <div key={index} className="my-4">
                           <Link
@@ -207,7 +207,7 @@ const PostPage = () => {
                         </div>
                       );
                     }
-                    if (paragraph.startsWith("🔗 ")) {
+                    if (paragraph.startsWith("🔗 ") || paragraph.startsWith("/post/")) {
                       return null;
                     }
                     return (

@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2, GraduationCap, Search, Eye, CheckCircle, XCircle, Clock, BadgeCheck, UserPlus } from "lucide-react";
+import { Plus, Edit, Trash2, GraduationCap, Search, Eye, CheckCircle, XCircle, Clock, BadgeCheck, UserPlus, BookOpen, MapPin, DollarSign, CalendarDays, Star, ClipboardList, Megaphone } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
@@ -399,10 +399,10 @@ const JobPostingsTab = () => {
                   <Badge variant={j.is_active ? "default" : "secondary"}>{j.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}</Badge>
                 </div>
                 <div className="text-xs text-muted-foreground mt-1 space-x-3">
-                  {j.subject && <span>📚 {j.subject}</span>}
-                  {j.location && <span>📍 {j.location}</span>}
-                  {j.salary_range && <span>💰 {j.salary_range}</span>}
-                  {j.deadline && <span>📅 {new Date(j.deadline).toLocaleDateString("bn-BD")}</span>}
+                  {j.subject && <span className="inline-flex items-center gap-0.5"><BookOpen size={10} /> {j.subject}</span>}
+                  {j.location && <span className="inline-flex items-center gap-0.5"><MapPin size={10} /> {j.location}</span>}
+                  {j.salary_range && <span className="inline-flex items-center gap-0.5"><DollarSign size={10} /> {j.salary_range}</span>}
+                  {j.deadline && <span className="inline-flex items-center gap-0.5"><CalendarDays size={10} /> {new Date(j.deadline).toLocaleDateString("bn-BD")}</span>}
                 </div>
               </div>
               <div className="flex gap-1 shrink-0">
@@ -469,7 +469,7 @@ const ReviewsTab = () => {
                   <TableCell className="font-medium text-sm">{(r as any).teachers?.name || "—"}</TableCell>
                   <TableCell className="text-sm">{r.reviewer_name}</TableCell>
                   <TableCell className="text-sm">{r.institution_name || "—"}</TableCell>
-                  <TableCell><span className="text-sm">{"⭐".repeat(r.rating)}</span></TableCell>
+                  <TableCell><div className="flex items-center gap-0.5">{Array.from({length: r.rating}).map((_, i) => <Star key={i} size={12} className="fill-yellow-400 text-yellow-400" />)}</div></TableCell>
                   <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{r.comment || "—"}</TableCell>
                   <TableCell>
                     <Badge variant={r.is_approved ? "default" : "secondary"}>{r.is_approved ? "অনুমোদিত" : "অপেক্ষমান"}</Badge>
@@ -501,10 +501,10 @@ const AdminTeachers = () => (
   <AdminPageWrapper title="শিক্ষক সার্ভিস সেন্টার" icon={GraduationCap}>
     <Tabs defaultValue="teachers">
       <TabsList className="grid grid-cols-4 w-full max-w-lg">
-        <TabsTrigger value="teachers">👨‍🏫 শিক্ষক</TabsTrigger>
-        <TabsTrigger value="applications">📋 আবেদন</TabsTrigger>
-        <TabsTrigger value="jobs">📢 বিজ্ঞপ্তি</TabsTrigger>
-        <TabsTrigger value="reviews">⭐ রিভিউ</TabsTrigger>
+        <TabsTrigger value="teachers" className="gap-1"><GraduationCap size={14} /> শিক্ষক</TabsTrigger>
+        <TabsTrigger value="applications" className="gap-1"><ClipboardList size={14} /> আবেদন</TabsTrigger>
+        <TabsTrigger value="jobs" className="gap-1"><Megaphone size={14} /> বিজ্ঞপ্তি</TabsTrigger>
+        <TabsTrigger value="reviews" className="gap-1"><Star size={14} /> রিভিউ</TabsTrigger>
       </TabsList>
       <TabsContent value="teachers" className="mt-4"><TeachersTab /></TabsContent>
       <TabsContent value="applications" className="mt-4"><ApplicationsTab /></TabsContent>

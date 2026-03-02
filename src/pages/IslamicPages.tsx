@@ -3,7 +3,7 @@ import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useIslamicContents } from "@/hooks/useData";
 import { useState, useMemo } from "react";
-import { Search, ChevronRight, X, Plus, Minus, BookOpen, HelpCircle, Filter } from "lucide-react";
+import { Search, ChevronRight, X, Plus, Minus, BookOpen, HelpCircle, Filter, HandHelping, Scale, PenLine, CheckCircle, Languages } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 const toBengaliNum = (n: number | string) => {
@@ -41,7 +41,7 @@ const ContentModal = ({ item, onClose, fontSize, category }: { item: ContentItem
         {/* Q&A format for masala */}
         {item.question && (
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
-            <p className="text-xs font-bold text-primary mb-1">❓ প্রশ্ন</p>
+            <p className="text-xs font-bold text-primary mb-1 flex items-center gap-1"><HelpCircle size={14} /> প্রশ্ন</p>
             <p className="text-sm font-medium">{item.question}</p>
           </div>
         )}
@@ -50,7 +50,7 @@ const ContentModal = ({ item, onClose, fontSize, category }: { item: ContentItem
         {item.content && (
           <div>
             {(category === "hadith" || category === "dua" || category === "quran") && (
-              <p className="text-xs font-bold text-emerald-700 mb-2">📿 আরবি</p>
+              <p className="text-xs font-bold text-emerald-700 mb-2 flex items-center gap-1"><BookOpen size={14} /> আরবি</p>
             )}
             <p className="font-arabic font-bold leading-[2.5] text-right text-foreground" dir="rtl" style={{ fontSize: `${fontSize + 4}px` }}>
               {item.content}
@@ -61,7 +61,7 @@ const ContentModal = ({ item, onClose, fontSize, category }: { item: ContentItem
         {/* Transliteration */}
         {item.transliteration && (
           <div className="bg-muted/50 rounded-lg p-3">
-            <p className="text-xs font-bold text-muted-foreground mb-1">🔤 উচ্চারণ</p>
+            <p className="text-xs font-bold text-muted-foreground mb-1 flex items-center gap-1"><Languages size={14} /> উচ্চারণ</p>
             <p className="text-sm italic text-foreground">{item.transliteration}</p>
           </div>
         )}
@@ -69,8 +69,8 @@ const ContentModal = ({ item, onClose, fontSize, category }: { item: ContentItem
         {/* Meaning/Answer */}
         {item.meaning && (
           <div className="border-t border-border pt-3">
-            <p className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-1">
-              {category === "masala" ? "✅ উত্তর" : "📝 অর্থ"}
+            <p className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-1 flex items-center gap-1">
+              {category === "masala" ? <><CheckCircle size={14} /> উত্তর</> : <><PenLine size={14} /> অর্থ</>}
             </p>
             <p className="text-sm text-foreground leading-relaxed">{item.meaning}</p>
           </div>
@@ -78,8 +78,8 @@ const ContentModal = ({ item, onClose, fontSize, category }: { item: ContentItem
 
         {/* Source/Reference */}
         {(item.source || item.reference) && (
-          <p className="text-xs text-muted-foreground italic border-t border-border pt-3">
-            📖 সূত্র: {item.reference || item.source}
+          <p className="text-xs text-muted-foreground italic border-t border-border pt-3 flex items-center gap-1">
+            <BookOpen size={12} /> সূত্র: {item.reference || item.source}
           </p>
         )}
       </div>
@@ -209,7 +209,7 @@ const IslamicListContent = ({
                     )}
 
                     {item.meaning && (
-                      <p className="text-[10px] text-muted-foreground mt-1 line-clamp-1">📝 {item.meaning}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 line-clamp-1 flex items-center gap-1"><PenLine size={10} /> {item.meaning}</p>
                     )}
                     {item.source && (
                       <p className="text-[11px] text-muted-foreground mt-1 text-right italic">— {item.source}</p>
@@ -362,7 +362,7 @@ const AppIslamicListContent = ({
                     )}
 
                     {item.meaning && (
-                      <p className="text-[9px] text-muted-foreground mt-1 line-clamp-1">📝 {item.meaning}</p>
+                      <p className="text-[9px] text-muted-foreground mt-1 line-clamp-1 flex items-center gap-0.5"><PenLine size={9} /> {item.meaning}</p>
                     )}
                     {item.source && (
                       <p className="text-[10px] text-muted-foreground mt-1 text-right italic">— {item.source}</p>
@@ -404,4 +404,4 @@ const makeIslamicPage = (
 
 // HadithPage is now in its own file: src/pages/HadithPage.tsx
 export const DuaPage = makeIslamicPage("dua", "দোয়া", "🤲", "from-indigo-800 to-purple-700", "বিষয়ভিত্তিক দোয়া ও আমল — আরবি, উচ্চারণ ও অর্থসহ");
-export const MasalaPage = makeIslamicPage("masala", "মাসআলা", "⚖️", "from-rose-800 to-red-700", "ইসলামী মাসআলা ও ফিকহ — প্রশ্নোত্তর ও বিষয়ভিত্তিক");
+export const MasalaPage = makeIslamicPage("masala", "মাসআলা", "⚖", "from-rose-800 to-red-700", "ইসলামী মাসআলা ও ফিকহ — প্রশ্নোত্তর ও বিষয়ভিত্তিক");
