@@ -9,14 +9,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Menu, Search } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
+import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
 const AdminMenu = () => {
   const { canEdit, canDelete } = useSectionPermissions();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState({ label: "", url: "#", sort_order: 0, is_active: true });
 
   const { data: items, isLoading } = useQuery({
@@ -27,26 +29,29 @@ const AdminMenu = () => {
     },
   });
 
+  const filtered = items?.filter(i => i.label.toLowerCase().includes(search.toLowerCase())) || [];
+
   const saveMutation = useMutation({
     mutationFn: async (data: typeof form) => {
       if (editId) { const { error } = await supabase.from("menu_items").update(data).eq("id", editId); if (error) throw error; }
       else { const { error } = await supabase.from("menu_items").insert([data]); if (error) throw error; }
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin_menu"] }); qc.invalidateQueries({ queryKey: ["menu_items"] }); toast.success("সংরক্ষিত"); setOpen(false); },
+    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("menu_items").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin_menu"] }); toast.success("মুছে ফেলা হয়েছে"); },
+    onSuccess: () => toast.success("মুছে ফেলা হয়েছে"),
   });
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">মেনু ব্যবস্থাপনা</h1>
+    <AdminPageWrapper
+      title="মেনু ব্যবস্থাপনা"
+      icon={Menu}
+      action={
         <Dialog open={open} onOpenChange={setOpen}>
-          {canEdit && <DialogTrigger asChild><Button onClick={() => { setEditId(null); setForm({ label: "", url: "#", sort_order: 0, is_active: true }); }}><Plus size={16} /> নতুন মেনু</Button></DialogTrigger>}
+          {canEdit && <DialogTrigger asChild><Button size="sm" onClick={() => { setEditId(null); setForm({ label: "", url: "#", sort_order: 0, is_active: true }); }}><Plus size={16} className="mr-1" /> নতুন মেনু</Button></DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editId ? "সম্পাদনা" : "নতুন মেনু আইটেম"}</DialogTitle></DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
@@ -58,27 +63,33 @@ const AdminMenu = () => {
             </form>
           </DialogContent>
         </Dialog>
+      }
+    >
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+        <Input placeholder="মেনু খুঁজুন..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
       </div>
       <Card><CardContent className="p-0">
         <Table>
           <TableHeader><TableRow><TableHead>লেবেল</TableHead><TableHead>URL</TableHead><TableHead>ক্রম</TableHead><TableHead className="text-right">অ্যাকশন</TableHead></TableRow></TableHeader>
           <TableBody>
-            {isLoading ? <TableRow><TableCell colSpan={4} className="text-center">লোড হচ্ছে...</TableCell></TableRow> :
-              items?.map((item) => (
+            {isLoading ? <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">লোড হচ্ছে...</TableCell></TableRow> :
+              filtered.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">কোনো মেনু নেই</TableCell></TableRow> :
+              filtered.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell>{item.label}</TableCell>
+                  <TableCell className="font-medium">{item.label}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{item.url}</TableCell>
                   <TableCell>{item.sort_order}</TableCell>
                   <TableCell className="text-right">
                     {canEdit && <Button variant="ghost" size="icon" onClick={() => { setEditId(item.id); setForm({ label: item.label, url: item.url, sort_order: item.sort_order ?? 0, is_active: item.is_active ?? true }); setOpen(true); }}><Edit size={16} /></Button>}
-                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(item.id)}><Trash2 size={16} /></Button>}
+                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(item.id)}><Trash2 size={16} className="text-destructive" /></Button>}
                   </TableCell>
                 </TableRow>
               ))}
           </TableBody>
         </Table>
       </CardContent></Card>
-    </div>
+    </AdminPageWrapper>
   );
 };
 

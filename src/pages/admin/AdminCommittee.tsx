@@ -9,8 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2, Users } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Search } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
+import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
 const AdminCommittee = () => {
   const { canEdit, canDelete } = useSectionPermissions();
@@ -18,50 +19,33 @@ const AdminCommittee = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [pageFilter, setPageFilter] = useState("governing_body");
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState({ name: "", title: "", institution: "", photo_url: "", page_slug: "governing_body", sort_order: 0 });
 
   const { data: members, isLoading } = useQuery({
     queryKey: ["admin_committee", pageFilter],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("committee_members")
-        .select("*")
-        .eq("page_slug", pageFilter)
-        .order("sort_order");
+      const { data, error } = await supabase.from("committee_members").select("*").eq("page_slug", pageFilter).order("sort_order");
       if (error) throw error;
       return data;
     },
   });
 
+  const filtered = members?.filter(m => m.name.toLowerCase().includes(search.toLowerCase())) || [];
+
   const saveMutation = useMutation({
     mutationFn: async (data: typeof form) => {
       const payload = { ...data, institution: data.institution || null, photo_url: data.photo_url || null };
-      if (editId) {
-        const { error } = await supabase.from("committee_members").update(payload).eq("id", editId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("committee_members").insert([payload]);
-        if (error) throw error;
-      }
+      if (editId) { const { error } = await supabase.from("committee_members").update(payload).eq("id", editId); if (error) throw error; }
+      else { const { error } = await supabase.from("committee_members").insert([payload]); if (error) throw error; }
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin_committee"] });
-      qc.invalidateQueries({ queryKey: ["committee_members"] });
-      toast.success("সংরক্ষিত");
-      setOpen(false);
-    },
+    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("committee_members").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin_committee"] });
-      toast.success("মুছে ফেলা হয়েছে");
-    },
+    mutationFn: async (id: string) => { const { error } = await supabase.from("committee_members").delete().eq("id", id); if (error) throw error; },
+    onSuccess: () => toast.success("মুছে ফেলা হয়েছে"),
   });
 
   const resetForm = () => {
@@ -70,13 +54,12 @@ const AdminCommittee = () => {
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold flex items-center gap-2"><Users size={22} /> সংগঠন ব্যবস্থাপনা</h1>
+    <AdminPageWrapper
+      title="সংগঠন ব্যবস্থাপনা"
+      icon={Users}
+      action={
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-          {canEdit && <DialogTrigger asChild>
-            <Button onClick={resetForm}><Plus size={16} /> নতুন সদস্য</Button>
-          </DialogTrigger>}
+          {canEdit && <DialogTrigger asChild><Button size="sm" onClick={resetForm}><Plus size={16} className="mr-1" /> নতুন সদস্য</Button></DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editId ? "সম্পাদনা" : "নতুন সদস্য"}</DialogTitle></DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
@@ -99,56 +82,45 @@ const AdminCommittee = () => {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
-
-      <div className="flex gap-2 mb-4 flex-wrap">
-        <Button variant={pageFilter === "governing_body" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("governing_body")}>🏛️ গভর্নিং বডি</Button>
-        <Button variant={pageFilter === "executive" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("executive")}>🎖️ নির্বাহী কমিটি</Button>
-        <Button variant={pageFilter === "working" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("working")}>👥 কার্যকরি সদস্য</Button>
+      }
+    >
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex gap-2 flex-wrap">
+          <Button variant={pageFilter === "governing_body" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("governing_body")}>🏛️ গভর্নিং বডি</Button>
+          <Button variant={pageFilter === "executive" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("executive")}>🎖️ নির্বাহী কমিটি</Button>
+          <Button variant={pageFilter === "working" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("working")}>👥 কার্যকরি সদস্য</Button>
+        </div>
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+          <Input placeholder="সদস্য খুঁজুন..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+        </div>
       </div>
 
       <Card><CardContent className="p-0">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ছবি</TableHead>
-              <TableHead>নাম</TableHead>
-              <TableHead>পদবী</TableHead>
-              <TableHead>প্রতিষ্ঠান</TableHead>
-              <TableHead className="text-right">অ্যাকশন</TableHead>
-            </TableRow>
-          </TableHeader>
+          <TableHeader><TableRow><TableHead>ছবি</TableHead><TableHead>নাম</TableHead><TableHead>পদবী</TableHead><TableHead>প্রতিষ্ঠান</TableHead><TableHead className="text-right">অ্যাকশন</TableHead></TableRow></TableHeader>
           <TableBody>
-            {isLoading ? (
-              <TableRow><TableCell colSpan={5} className="text-center">লোড হচ্ছে...</TableCell></TableRow>
-            ) : members?.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">কোনো সদস্য নেই</TableCell></TableRow>
-            ) : members?.map((m) => (
-              <TableRow key={m.id}>
-                <TableCell>
-                  {m.photo_url ? (
-                    <img src={m.photo_url} alt={m.name} className="w-10 h-10 rounded-full object-cover" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-xs">ছবি</div>
-                  )}
-                </TableCell>
-                <TableCell className="font-medium">{m.name}</TableCell>
-                <TableCell>{m.title}</TableCell>
-                <TableCell>{m.institution || "—"}</TableCell>
-                <TableCell className="text-right">
-                  {canEdit && <Button variant="ghost" size="icon" onClick={() => {
-                    setEditId(m.id);
-                    setForm({ name: m.name, title: m.title, institution: m.institution || "", photo_url: m.photo_url || "", page_slug: m.page_slug, sort_order: m.sort_order ?? 0 });
-                    setOpen(true);
-                  }}><Edit size={16} /></Button>}
-                  {canDelete && <Button variant="ghost" size="icon" onClick={() => { if (confirm("মুছে ফেলতে চান?")) deleteMutation.mutate(m.id); }}><Trash2 size={16} /></Button>}
-                </TableCell>
-              </TableRow>
-            ))}
+            {isLoading ? <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">লোড হচ্ছে...</TableCell></TableRow> :
+              filtered.length === 0 ? <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">কোনো সদস্য নেই</TableCell></TableRow> :
+              filtered.map((m) => (
+                <TableRow key={m.id}>
+                  <TableCell>
+                    {m.photo_url ? <img src={m.photo_url} alt={m.name} className="w-10 h-10 rounded-full object-cover" /> :
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-xs">ছবি</div>}
+                  </TableCell>
+                  <TableCell className="font-medium">{m.name}</TableCell>
+                  <TableCell>{m.title}</TableCell>
+                  <TableCell>{m.institution || "—"}</TableCell>
+                  <TableCell className="text-right">
+                    {canEdit && <Button variant="ghost" size="icon" onClick={() => { setEditId(m.id); setForm({ name: m.name, title: m.title, institution: m.institution || "", photo_url: m.photo_url || "", page_slug: m.page_slug, sort_order: m.sort_order ?? 0 }); setOpen(true); }}><Edit size={16} /></Button>}
+                    {canDelete && <Button variant="ghost" size="icon" onClick={() => { if (confirm("মুছে ফেলতে চান?")) deleteMutation.mutate(m.id); }}><Trash2 size={16} className="text-destructive" /></Button>}
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </CardContent></Card>
-    </div>
+    </AdminPageWrapper>
   );
 };
 
