@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2, GraduationCap, Search, Eye, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Plus, Edit, Trash2, GraduationCap, Search, Eye, CheckCircle, XCircle, Clock, BadgeCheck, UserPlus } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
@@ -26,7 +26,7 @@ const TeachersTab = () => {
     name: "", phone: "", email: "", address: "", district: "", subject: "",
     qualification: "", experience_years: 0, specialization: "", certification: "",
     bio: "", photo_url: "", preferred_area: "", expected_salary: "",
-    is_available: true, is_active: true, sort_order: 0,
+    is_available: true, is_active: true, is_verified: false, sort_order: 0,
   });
 
   const { data: teachers, isLoading } = useQuery({
@@ -42,7 +42,7 @@ const TeachersTab = () => {
 
   const saveMutation = useMutation({
     mutationFn: async (d: typeof form) => {
-      const payload = { ...d, email: d.email || null, photo_url: d.photo_url || null, bio: d.bio || null, certification: d.certification || null, specialization: d.specialization || null, preferred_area: d.preferred_area || null, expected_salary: d.expected_salary || null };
+      const payload = { ...d, email: d.email || null, photo_url: d.photo_url || null, bio: d.bio || null, certification: d.certification || null, specialization: d.specialization || null, preferred_area: d.preferred_area || null, expected_salary: d.expected_salary || null } as any;
       if (editId) { const { error } = await supabase.from("teachers").update(payload).eq("id", editId); if (error) throw error; }
       else { const { error } = await supabase.from("teachers").insert([payload]); if (error) throw error; }
     },
@@ -55,7 +55,7 @@ const TeachersTab = () => {
     onSuccess: () => toast.success("মুছে ফেলা হয়েছে"),
   });
 
-  const resetForm = () => setForm({ name: "", phone: "", email: "", address: "", district: "", subject: "", qualification: "", experience_years: 0, specialization: "", certification: "", bio: "", photo_url: "", preferred_area: "", expected_salary: "", is_available: true, is_active: true, sort_order: 0 });
+  const resetForm = () => setForm({ name: "", phone: "", email: "", address: "", district: "", subject: "", qualification: "", experience_years: 0, specialization: "", certification: "", bio: "", photo_url: "", preferred_area: "", expected_salary: "", is_available: true, is_active: true, is_verified: false, sort_order: 0 });
 
   return (
     <div className="space-y-4">
@@ -95,9 +95,10 @@ const TeachersTab = () => {
               </div>
               <div><Label>ছবি URL</Label><Input value={form.photo_url} onChange={e => setForm({ ...form, photo_url: e.target.value })} /></div>
               <div><Label>জীবনবৃত্তান্ত</Label><Textarea value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} rows={3} /></div>
-              <div className="flex gap-4">
+              <div className="flex gap-4 flex-wrap">
                 <label className="flex items-center gap-2 text-sm"><Switch checked={form.is_available} onCheckedChange={v => setForm({ ...form, is_available: v })} />উপলব্ধ</label>
                 <label className="flex items-center gap-2 text-sm"><Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} />সক্রিয়</label>
+                <label className="flex items-center gap-2 text-sm"><Switch checked={form.is_verified} onCheckedChange={v => setForm({ ...form, is_verified: v })} /><BadgeCheck size={16} className="text-blue-500" /> যাচাইকৃত</label>
               </div>
               <Button type="submit" disabled={saveMutation.isPending} className="w-full">সংরক্ষণ</Button>
             </form>
@@ -108,28 +109,31 @@ const TeachersTab = () => {
       <Card><CardContent className="p-0">
         <Table>
           <TableHeader><TableRow>
-            <TableHead>নাম</TableHead><TableHead>বিষয়</TableHead><TableHead>জেলা</TableHead><TableHead>অভিজ্ঞতা</TableHead><TableHead>স্ট্যাটাস</TableHead><TableHead className="text-right">অ্যাকশন</TableHead>
+            <TableHead>নাম</TableHead><TableHead>বিষয়</TableHead><TableHead>জেলা</TableHead><TableHead>অভিজ্ঞতা</TableHead><TableHead>স্ট্যাটাস</TableHead><TableHead>যাচাই</TableHead><TableHead className="text-right">অ্যাকশন</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {isLoading ? <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">লোড হচ্ছে...</TableCell></TableRow> :
-              filtered.length === 0 ? <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">কোনো শিক্ষক নেই</TableCell></TableRow> :
+             {isLoading ? <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">লোড হচ্ছে...</TableCell></TableRow> :
+              filtered.length === 0 ? <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">কোনো শিক্ষক নেই</TableCell></TableRow> :
               filtered.map(t => (
                 <TableRow key={t.id}>
                   <TableCell className="font-medium">{t.name}</TableCell>
                   <TableCell>{t.subject}</TableCell>
                   <TableCell>{t.district || "—"}</TableCell>
                   <TableCell>{t.experience_years} বছর</TableCell>
-                  <TableCell>
-                    <Badge variant={t.is_available ? "default" : "secondary"}>{t.is_available ? "উপলব্ধ" : "অনুপলব্ধ"}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {canEdit && <Button variant="ghost" size="icon" onClick={() => {
-                      setEditId(t.id);
-                      setForm({ name: t.name, phone: t.phone || "", email: t.email || "", address: t.address || "", district: t.district || "", subject: t.subject, qualification: t.qualification || "", experience_years: t.experience_years || 0, specialization: t.specialization || "", certification: t.certification || "", bio: t.bio || "", photo_url: t.photo_url || "", preferred_area: t.preferred_area || "", expected_salary: t.expected_salary || "", is_available: t.is_available ?? true, is_active: t.is_active ?? true, sort_order: t.sort_order || 0 });
-                      setOpen(true);
-                    }}><Edit size={16} /></Button>}
-                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(t.id)}><Trash2 size={16} className="text-destructive" /></Button>}
-                  </TableCell>
+                   <TableCell>
+                     <Badge variant={t.is_available ? "default" : "secondary"}>{t.is_available ? "উপলব্ধ" : "অনুপলব্ধ"}</Badge>
+                   </TableCell>
+                   <TableCell>
+                     {(t as any).is_verified ? <BadgeCheck size={18} className="text-blue-500" /> : <span className="text-muted-foreground text-xs">—</span>}
+                   </TableCell>
+                   <TableCell className="text-right">
+                     {canEdit && <Button variant="ghost" size="icon" onClick={() => {
+                       setEditId(t.id);
+                       setForm({ name: t.name, phone: t.phone || "", email: t.email || "", address: t.address || "", district: t.district || "", subject: t.subject, qualification: t.qualification || "", experience_years: t.experience_years || 0, specialization: t.specialization || "", certification: t.certification || "", bio: t.bio || "", photo_url: t.photo_url || "", preferred_area: t.preferred_area || "", expected_salary: t.expected_salary || "", is_available: t.is_available ?? true, is_active: t.is_active ?? true, is_verified: (t as any).is_verified ?? false, sort_order: t.sort_order || 0 });
+                       setOpen(true);
+                     }}><Edit size={16} /></Button>}
+                     {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(t.id)}><Trash2 size={16} className="text-destructive" /></Button>}
+                   </TableCell>
                 </TableRow>
               ))}
           </TableBody>
@@ -142,6 +146,7 @@ const TeachersTab = () => {
 /* ─── Applications Tab ─── */
 const ApplicationsTab = () => {
   const { canEdit, canDelete } = useSectionPermissions();
+  const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState("pending");
   const [detailApp, setDetailApp] = useState<any>(null);
 
@@ -161,12 +166,38 @@ const ApplicationsTab = () => {
       const { error } = await supabase.from("teacher_applications").update({ status, admin_note: note || null }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => toast.success("আপডেট হয়েছে"),
+    onSuccess: () => { toast.success("আপডেট হয়েছে"); queryClient.invalidateQueries({ queryKey: ["admin_teacher_apps"] }); },
+  });
+
+  const convertToTeacher = useMutation({
+    mutationFn: async (app: any) => {
+      // Insert into teachers table from application data
+      const { error: insertErr } = await supabase.from("teachers").insert([{
+        name: app.name, phone: app.phone, email: app.email || null,
+        address: app.address || null, district: app.district || null,
+        subject: app.subject, qualification: app.qualification || null,
+        experience_years: app.experience_years || 0,
+        specialization: app.specialization || null, certification: app.certification || null,
+        bio: app.bio || null, photo_url: app.photo_url || null,
+        preferred_area: app.preferred_area || null, expected_salary: app.expected_salary || null,
+        is_available: true, is_active: true,
+      }] as any);
+      if (insertErr) throw insertErr;
+      // Mark application as approved
+      const { error: updateErr } = await supabase.from("teacher_applications").update({ status: "approved" }).eq("id", app.id);
+      if (updateErr) throw updateErr;
+    },
+    onSuccess: () => {
+      toast.success("শিক্ষক হিসেবে যোগ করা হয়েছে!");
+      queryClient.invalidateQueries({ queryKey: ["admin_teacher_apps"] });
+      queryClient.invalidateQueries({ queryKey: ["admin_teachers"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("teacher_applications").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => toast.success("মুছে ফেলা হয়েছে"),
+    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); queryClient.invalidateQueries({ queryKey: ["admin_teacher_apps"] }); },
   });
 
   const statusColors: Record<string, string> = { pending: "bg-accent text-accent-foreground", approved: "bg-primary/10 text-primary", rejected: "bg-destructive/10 text-destructive" };
@@ -197,14 +228,14 @@ const ApplicationsTab = () => {
                   <TableCell>{a.phone}</TableCell>
                   <TableCell>{a.district || "—"}</TableCell>
                   <TableCell><span className={`text-xs px-2 py-0.5 rounded ${statusColors[a.status] || ""}`}>{statusLabels[a.status] || a.status}</span></TableCell>
-                  <TableCell className="text-right space-x-1">
-                    <Button variant="ghost" size="icon" onClick={() => setDetailApp(a)}><Eye size={16} /></Button>
-                    {canEdit && a.status === "pending" && <>
-                      <Button variant="ghost" size="icon" onClick={() => updateStatus.mutate({ id: a.id, status: "approved" })}><CheckCircle size={16} className="text-primary" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => updateStatus.mutate({ id: a.id, status: "rejected" })}><XCircle size={16} className="text-destructive" /></Button>
-                    </>}
-                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(a.id)}><Trash2 size={16} className="text-destructive" /></Button>}
-                  </TableCell>
+                   <TableCell className="text-right space-x-1">
+                     <Button variant="ghost" size="icon" onClick={() => setDetailApp(a)}><Eye size={16} /></Button>
+                     {canEdit && a.status === "pending" && <>
+                       <Button variant="ghost" size="icon" title="অনুমোদন ও শিক্ষক হিসেবে যোগ" onClick={() => convertToTeacher.mutate(a)}><UserPlus size={16} className="text-primary" /></Button>
+                       <Button variant="ghost" size="icon" onClick={() => updateStatus.mutate({ id: a.id, status: "rejected" })}><XCircle size={16} className="text-destructive" /></Button>
+                     </>}
+                     {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(a.id)}><Trash2 size={16} className="text-destructive" /></Button>}
+                   </TableCell>
                 </TableRow>
               ))}
           </TableBody>

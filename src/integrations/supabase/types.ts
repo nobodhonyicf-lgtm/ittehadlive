@@ -1470,6 +1470,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_available: boolean | null
+          is_verified: boolean | null
           name: string
           phone: string | null
           photo_url: string | null
@@ -1493,6 +1494,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_available?: boolean | null
+          is_verified?: boolean | null
           name: string
           phone?: string | null
           photo_url?: string | null
@@ -1516,6 +1518,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_available?: boolean | null
+          is_verified?: boolean | null
           name?: string
           phone?: string | null
           photo_url?: string | null
