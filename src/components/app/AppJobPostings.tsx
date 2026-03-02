@@ -49,16 +49,6 @@ const AppJobPostings = () => {
               >
                 <div className="p-2.5">
                   <h4 className="text-[11px] font-semibold line-clamp-2">{j.title}</h4>
-                  {branch && (
-                    <div className="flex items-center gap-1 mt-1">
-                      {branch.image_url ? (
-                        <img src={branch.image_url} alt="" className="w-3.5 h-3.5 rounded object-contain bg-muted" />
-                      ) : (
-                        <Building2 size={10} className="text-muted-foreground" />
-                      )}
-                      <span className="text-[9px] text-muted-foreground font-medium line-clamp-1">{branch.name}</span>
-                    </div>
-                  )}
                   <div className="flex flex-wrap gap-1 mt-1.5 text-[8px] text-muted-foreground">
                     {j.subject && <span className="bg-muted px-1.5 py-0.5 rounded-full">📚 {j.subject}</span>}
                   </div>
@@ -66,6 +56,16 @@ const AppJobPostings = () => {
                     <div className="flex items-center gap-1 mt-1.5 text-[9px] text-destructive">
                       <Clock size={9} />
                       <span>শেষ: {new Date(j.deadline).toLocaleDateString("bn-BD")}</span>
+                    </div>
+                  )}
+                  {branch && (
+                    <div className="mt-1.5 pt-1.5 border-t border-border flex items-center gap-1">
+                      {branch.image_url ? (
+                        <img src={branch.image_url} alt="" className="w-3.5 h-3.5 rounded object-contain bg-muted" />
+                      ) : (
+                        <Building2 size={10} className="text-primary" />
+                      )}
+                      <span className="text-[9px] text-primary font-semibold line-clamp-1">{branch.name}</span>
                     </div>
                   )}
                 </div>
