@@ -9,8 +9,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Video, Search } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
+import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
 const AdminVideos = () => {
   const { canEdit, canDelete } = useSectionPermissions();
@@ -18,6 +19,7 @@ const AdminVideos = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", youtube_url: "", description: "", sort_order: 0 });
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: videos, isLoading } = useQuery({
     queryKey: ["admin_videos"],
@@ -33,21 +35,24 @@ const AdminVideos = () => {
       if (editId) { const { error } = await supabase.from("videos").update(payload).eq("id", editId); if (error) throw error; }
       else { const { error } = await supabase.from("videos").insert([payload]); if (error) throw error; }
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin_videos"] }); qc.invalidateQueries({ queryKey: ["videos"] }); toast.success("সংরক্ষিত"); setOpen(false); },
+    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("videos").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin_videos"] }); toast.success("মুছে ফেলা হয়েছে"); },
+    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); },
   });
 
+  const filteredVideos = videos?.filter(v => !searchQuery || v.title.toLowerCase().includes(searchQuery.toLowerCase()));
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">ভিডিও ব্যবস্থাপনা</h1>
+    <AdminPageWrapper
+      title="ভিডিও ব্যবস্থাপনা"
+      icon={Video}
+      action={
         <Dialog open={open} onOpenChange={setOpen}>
-          {canEdit && <DialogTrigger asChild><Button onClick={() => { setEditId(null); setForm({ title: "", youtube_url: "", description: "", sort_order: 0 }); }}><Plus size={16} /> নতুন ভিডিও</Button></DialogTrigger>}
+          {canEdit && <DialogTrigger asChild><Button onClick={() => { setEditId(null); setForm({ title: "", youtube_url: "", description: "", sort_order: 0 }); }} className="gap-1.5"><Plus size={16} /> নতুন ভিডিও</Button></DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editId ? "সম্পাদনা" : "নতুন ভিডিও"}</DialogTitle></DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
@@ -55,30 +60,41 @@ const AdminVideos = () => {
               <div><Label>YouTube URL *</Label><Input value={form.youtube_url} onChange={(e) => setForm({ ...form, youtube_url: e.target.value })} required /></div>
               <div><Label>বিবরণ</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
               <div><Label>ক্রম</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })} /></div>
-              <Button type="submit" disabled={saveMutation.isPending} className="w-full">সংরক্ষণ</Button>
+              <Button type="submit" disabled={saveMutation.isPending} className="w-full">{saveMutation.isPending ? "সংরক্ষণ হচ্ছে..." : "সংরক্ষণ"}</Button>
             </form>
           </DialogContent>
         </Dialog>
+      }
+    >
+      <div className="relative">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input placeholder="ভিডিও খুঁজুন..." className="pl-9 bg-card" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
       </div>
-      <Card><CardContent className="p-0">
-        <Table>
-          <TableHeader><TableRow><TableHead>শিরোনাম</TableHead><TableHead>URL</TableHead><TableHead className="text-right">অ্যাকশন</TableHead></TableRow></TableHeader>
-          <TableBody>
-            {isLoading ? <TableRow><TableCell colSpan={3} className="text-center">লোড হচ্ছে...</TableCell></TableRow> :
-              videos?.map((v) => (
-                <TableRow key={v.id}>
-                  <TableCell>{v.title}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs truncate max-w-[200px]">{v.youtube_url}</TableCell>
-                  <TableCell className="text-right">
-                    {canEdit && <Button variant="ghost" size="icon" onClick={() => { setEditId(v.id); setForm({ title: v.title, youtube_url: v.youtube_url, description: v.description || "", sort_order: v.sort_order ?? 0 }); setOpen(true); }}><Edit size={16} /></Button>}
-                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(v.id)}><Trash2 size={16} /></Button>}
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </CardContent></Card>
-    </div>
+
+      <Card className="border border-border/50 overflow-hidden">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader><TableRow className="bg-muted/30"><TableHead>শিরোনাম</TableHead><TableHead>URL</TableHead><TableHead className="text-right">অ্যাকশন</TableHead></TableRow></TableHeader>
+            <TableBody>
+              {isLoading ? <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">লোড হচ্ছে...</TableCell></TableRow> :
+                filteredVideos?.length === 0 ? <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">কোনো ভিডিও পাওয়া যায়নি</TableCell></TableRow> :
+                filteredVideos?.map((v) => (
+                  <TableRow key={v.id} className="hover:bg-muted/20 transition-colors">
+                    <TableCell className="font-medium">{v.title}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs truncate max-w-[200px]">{v.youtube_url}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-0.5">
+                        {canEdit && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => { setEditId(v.id); setForm({ title: v.title, youtube_url: v.youtube_url, description: v.description || "", sort_order: v.sort_order ?? 0 }); setOpen(true); }}><Edit size={15} /></Button>}
+                        {canDelete && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteMutation.mutate(v.id)}><Trash2 size={15} /></Button>}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </AdminPageWrapper>
   );
 };
 
