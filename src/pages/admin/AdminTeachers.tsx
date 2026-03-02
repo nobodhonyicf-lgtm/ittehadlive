@@ -265,6 +265,34 @@ const ApplicationsTab = () => {
               </div>
               {detailApp.bio && <p><strong>জীবনবৃত্তান্ত:</strong> {detailApp.bio}</p>}
               {detailApp.cv_url && <a href={detailApp.cv_url} target="_blank" rel="noopener" className="text-primary underline">সিভি দেখুন</a>}
+
+              {/* Verification Documents */}
+              {((detailApp as any).nid_image_url || (detailApp as any).verification_video_url) && (
+                <div className="border-t pt-3 space-y-3">
+                  <h4 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    🛡️ পরিচয় যাচাই ডকুমেন্ট
+                  </h4>
+                  {(detailApp as any).nid_image_url && (
+                    <div>
+                      <p className="text-xs font-medium mb-1">ভোটার আইডি / জন্ম নিবন্ধন:</p>
+                      <a href={(detailApp as any).nid_image_url} target="_blank" rel="noopener">
+                        <img src={(detailApp as any).nid_image_url} alt="NID" className="max-w-full max-h-48 rounded-lg border object-contain cursor-pointer hover:opacity-80 transition" />
+                      </a>
+                    </div>
+                  )}
+                  {(detailApp as any).verification_video_url && (
+                    <div>
+                      <p className="text-xs font-medium mb-1">সেলফি ভিডিও:</p>
+                      <video
+                        src={(detailApp as any).verification_video_url}
+                        controls
+                        className="max-w-full max-h-48 rounded-lg border"
+                        preload="metadata"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
@@ -278,7 +306,16 @@ const JobPostingsTab = () => {
   const { canEdit, canDelete } = useSectionPermissions();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", description: "", subject: "", qualification_required: "", experience_required: "", salary_range: "", location: "", deadline: "", is_active: true });
+  const [form, setForm] = useState({ title: "", description: "", subject: "", qualification_required: "", experience_required: "", salary_range: "", location: "", deadline: "", is_active: true, branch_id: "" });
+
+  const { data: branches } = useQuery({
+    queryKey: ["admin_branches_list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("branches").select("id, name").order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: jobs, isLoading } = useQuery({
     queryKey: ["admin_job_postings"],
@@ -291,7 +328,7 @@ const JobPostingsTab = () => {
 
   const saveMutation = useMutation({
     mutationFn: async (d: typeof form) => {
-      const payload = { ...d, deadline: d.deadline || null, description: d.description || null, subject: d.subject || null, qualification_required: d.qualification_required || null, experience_required: d.experience_required || null, salary_range: d.salary_range || null, location: d.location || null };
+      const payload = { ...d, deadline: d.deadline || null, description: d.description || null, subject: d.subject || null, qualification_required: d.qualification_required || null, experience_required: d.experience_required || null, salary_range: d.salary_range || null, location: d.location || null, branch_id: d.branch_id || null };
       if (editId) { const { error } = await supabase.from("job_postings").update(payload).eq("id", editId); if (error) throw error; }
       else { const { error } = await supabase.from("job_postings").insert([payload]); if (error) throw error; }
     },
@@ -308,11 +345,20 @@ const JobPostingsTab = () => {
     <div className="space-y-4">
       <div className="flex justify-end">
         <Dialog open={open} onOpenChange={setOpen}>
-          {canEdit && <DialogTrigger asChild><Button size="sm" onClick={() => { setEditId(null); setForm({ title: "", description: "", subject: "", qualification_required: "", experience_required: "", salary_range: "", location: "", deadline: "", is_active: true }); }}><Plus size={16} className="mr-1" /> নতুন বিজ্ঞপ্তি</Button></DialogTrigger>}
+          {canEdit && <DialogTrigger asChild><Button size="sm" onClick={() => { setEditId(null); setForm({ title: "", description: "", subject: "", qualification_required: "", experience_required: "", salary_range: "", location: "", deadline: "", is_active: true, branch_id: "" }); }}><Plus size={16} className="mr-1" /> নতুন বিজ্ঞপ্তি</Button></DialogTrigger>}
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editId ? "সম্পাদনা" : "নতুন নিয়োগ বিজ্ঞপ্তি"}</DialogTitle></DialogHeader>
             <form onSubmit={e => { e.preventDefault(); saveMutation.mutate(form); }} className="space-y-4">
-              <div><Label>শিরোনাম *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>শিরোনাম *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required /></div>
+                <div>
+                  <Label>প্রতিষ্ঠান (ব্রাঞ্চ)</Label>
+                  <select className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background h-10" value={form.branch_id} onChange={e => setForm({ ...form, branch_id: e.target.value })}>
+                    <option value="">নির্বাচন করুন</option>
+                    {branches?.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                </div>
+              </div>
               <div><Label>বিবরণ</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>বিষয়</Label><Input value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} /></div>
@@ -353,7 +399,7 @@ const JobPostingsTab = () => {
               <div className="flex gap-1 shrink-0">
                 {canEdit && <Button variant="ghost" size="icon" onClick={() => {
                   setEditId(j.id);
-                  setForm({ title: j.title, description: j.description || "", subject: j.subject || "", qualification_required: j.qualification_required || "", experience_required: j.experience_required || "", salary_range: j.salary_range || "", location: j.location || "", deadline: j.deadline || "", is_active: j.is_active ?? true });
+                  setForm({ title: j.title, description: j.description || "", subject: j.subject || "", qualification_required: j.qualification_required || "", experience_required: j.experience_required || "", salary_range: j.salary_range || "", location: j.location || "", deadline: j.deadline || "", is_active: j.is_active ?? true, branch_id: j.branch_id || "" });
                   setOpen(true);
                 }}><Edit size={16} /></Button>}
                 {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(j.id)}><Trash2 size={16} className="text-destructive" /></Button>}
