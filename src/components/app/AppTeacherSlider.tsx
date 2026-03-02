@@ -41,33 +41,38 @@ const AppTeacherSlider = () => {
               <Link
                 key={t.id}
                 to={`/teachers?highlight=${t.id}`}
-                className="block w-36 shrink-0 bg-card border border-border rounded-xl overflow-hidden active:scale-95 transition-transform"
+                className="block w-32 shrink-0 bg-card border border-border rounded-xl overflow-hidden active:scale-95 transition-transform"
               >
-                <div className="p-2.5 text-center">
-                  {t.photo_url ? (
-                    <img src={t.photo_url} alt={t.name} className="w-12 h-12 rounded-full object-cover mx-auto ring-2 ring-muted" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-lg mx-auto">👨‍🏫</div>
-                  )}
-                  <h4 className="text-[11px] font-semibold mt-1.5 line-clamp-1 flex items-center justify-center gap-0.5">
+                <div className="relative">
+                  <div className="h-10 bg-gradient-to-br from-primary/15 to-primary/5" />
+                  <div className="absolute -bottom-4 left-1/2 -translate-x-1/2">
+                    {t.photo_url ? (
+                      <img src={t.photo_url} alt={t.name} className="w-8 h-8 rounded-full object-cover ring-2 ring-card" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-card ring-2 ring-card flex items-center justify-center text-sm">👨‍🏫</div>
+                    )}
+                  </div>
+                </div>
+                <div className="pt-6 pb-2.5 px-2 text-center">
+                  <h4 className="text-[10px] font-semibold line-clamp-1 flex items-center justify-center gap-0.5">
                     {t.name}
-                    {t.is_verified && <BadgeCheck size={11} className="text-blue-500 fill-blue-500 stroke-white shrink-0" />}
+                    {t.is_verified && <BadgeCheck size={10} className="text-blue-500 fill-blue-500 stroke-white shrink-0" />}
                   </h4>
-                  <p className="text-[9px] text-muted-foreground flex items-center justify-center gap-0.5">
-                    <BookOpen size={8} /> {t.subject}
+                  <p className="text-[8px] text-muted-foreground flex items-center justify-center gap-0.5">
+                    <BookOpen size={7} /> {t.subject}
                   </p>
                   {t.district && (
-                    <p className="text-[9px] text-muted-foreground flex items-center justify-center gap-0.5">
-                      <MapPin size={8} /> {t.district}
+                    <p className="text-[8px] text-muted-foreground flex items-center justify-center gap-0.5">
+                      <MapPin size={7} /> {t.district}
                     </p>
                   )}
-                  <div className="flex items-center justify-center gap-0.5 mt-1">
+                  <div className="flex items-center justify-center gap-0.5 mt-0.5">
                     {[1, 2, 3, 4, 5].map(i => (
-                      <Star key={i} size={8} className={i <= (t.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"} />
+                      <Star key={i} size={7} className={i <= (t.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"} />
                     ))}
                   </div>
                   {expBadge && (
-                    <span className={`inline-block text-[8px] px-1.5 py-0.5 rounded-full border mt-1 ${expBadge.color}`}>
+                    <span className={`inline-block text-[7px] px-1 py-0.5 rounded-full border mt-0.5 ${expBadge.color}`}>
                       {expBadge.label}
                     </span>
                   )}

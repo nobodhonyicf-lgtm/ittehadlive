@@ -43,9 +43,12 @@ const JobPostingsSlider = () => {
               <Link
                 key={j.id}
                 to={`/teachers?job=${j.id}`}
-                className="block w-56 shrink-0 bg-card border border-primary/20 rounded-lg overflow-hidden hover:border-primary/40 hover:shadow-md transition-all group"
+                className="block w-52 shrink-0 bg-card border border-primary/20 rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all group"
               >
-                <div className="p-3">
+                <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-3 py-1.5">
+                  <span className="text-[8px] font-medium text-primary uppercase tracking-wider">📢 নিয়োগ</span>
+                </div>
+                <div className="p-3 pt-2">
                   <h4 className="text-xs font-semibold line-clamp-2 group-hover:text-primary transition-colors">
                     {j.title}
                   </h4>
@@ -53,6 +56,11 @@ const JobPostingsSlider = () => {
                     {j.subject && <span className="bg-muted px-1.5 py-0.5 rounded-full">📚 {j.subject}</span>}
                     {j.location && <span className="bg-muted px-1.5 py-0.5 rounded-full">📍 {j.location}</span>}
                   </div>
+                  {j.salary_range && (
+                    <div className="mt-1.5 text-[10px] font-semibold text-primary">
+                      💰 {j.salary_range}
+                    </div>
+                  )}
                   {j.deadline && (
                     <div className="flex items-center gap-1 mt-2 text-[10px] text-destructive">
                       <Clock size={10} />
