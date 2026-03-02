@@ -1936,6 +1936,16 @@ export type Database = {
           website: string
         }[]
       }
+      get_quiz_leaderboard: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          full_name: string
+          levels_completed: number
+          total_score: number
+          user_id: string
+        }[]
+      }
       get_student_details_for_result: {
         Args: { p_student_id: string }
         Returns: {
