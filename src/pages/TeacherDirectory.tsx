@@ -325,7 +325,7 @@ const TeacherDirectory = () => {
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <BadgeCheck size={16} className="text-blue-500 shrink-0" />
+                                    <BadgeCheck size={14} className="text-blue-500 shrink-0 fill-blue-500 stroke-white" />
                                   </TooltipTrigger>
                                   <TooltipContent><p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p></TooltipContent>
                                 </Tooltip>
@@ -402,7 +402,7 @@ const TeacherDirectory = () => {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <BadgeCheck size={20} className="text-blue-500" />
+                              <BadgeCheck size={16} className="text-blue-500 fill-blue-500 stroke-white" />
                             </TooltipTrigger>
                             <TooltipContent><p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p></TooltipContent>
                           </Tooltip>
