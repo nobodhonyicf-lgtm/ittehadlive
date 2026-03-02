@@ -79,6 +79,7 @@ const Footer = () => {
 
         <div className="border-t border-primary-foreground/20 mt-8 pt-4 text-center text-sm opacity-60">
           {toBengali(settings?.copyright_text || "© ২০২৪ ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ। সর্বস্বত্ব সংরক্ষিত।")}
+          <span className="ml-2 opacity-50">v2.0</span>
         </div>
       </div>
     </footer>
