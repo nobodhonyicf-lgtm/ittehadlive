@@ -1,15 +1,17 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/SEOHead";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock } from "lucide-react";
+import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "@/components/ui/sonner";
 
 const PAGE_SIZE = 12;
 
@@ -381,12 +383,147 @@ const TeacherDirectory = () => {
                     <p className="mt-1 whitespace-pre-wrap text-muted-foreground">{selectedTeacher.bio}</p>
                   </div>
                 )}
+
+                {/* Reviews Section */}
+                <TeacherReviewSection teacherId={selectedTeacher.id} />
               </div>
             )}
           </DialogContent>
         </Dialog>
       </div>
     </Layout>
+  );
+};
+
+/* ─── Teacher Review Section Component ─── */
+const TeacherReviewSection = ({ teacherId }: { teacherId: string }) => {
+  const queryClient = useQueryClient();
+  const [showForm, setShowForm] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ reviewer_name: "", institution_name: "", rating: 5, comment: "" });
+
+  const { data: reviews } = useQuery({
+    queryKey: ["teacher_reviews", teacherId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("teacher_reviews")
+        .select("*")
+        .eq("teacher_id", teacherId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const submitReview = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("teacher_reviews").insert([{
+        teacher_id: teacherId,
+        reviewer_name: reviewForm.reviewer_name,
+        institution_name: reviewForm.institution_name || null,
+        rating: reviewForm.rating,
+        comment: reviewForm.comment || null,
+      }]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("রিভিউ সাবমিট হয়েছে! অনুমোদনের পর দেখানো হবে।");
+      setShowForm(false);
+      setReviewForm({ reviewer_name: "", institution_name: "", rating: 5, comment: "" });
+      queryClient.invalidateQueries({ queryKey: ["teacher_reviews", teacherId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const avgRating = reviews?.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : 0;
+
+  return (
+    <div className="border-t pt-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold flex items-center gap-1.5">
+          <MessageSquare size={14} className="text-primary" /> রিভিউ ও মূল্যায়ন
+          {reviews && reviews.length > 0 && (
+            <span className="text-[10px] text-muted-foreground font-normal ml-1">
+              ({reviews.length}টি · গড় {avgRating.toFixed(1)}⭐)
+            </span>
+          )}
+        </h3>
+        <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setShowForm(!showForm)}>
+          <Send size={12} /> রিভিউ দিন
+        </Button>
+      </div>
+
+      {/* Review Form */}
+      {showForm && (
+        <form
+          onSubmit={e => { e.preventDefault(); submitReview.mutate(); }}
+          className="bg-muted/50 rounded-lg p-3 space-y-2.5"
+        >
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              placeholder="আপনার নাম *"
+              value={reviewForm.reviewer_name}
+              onChange={e => setReviewForm({ ...reviewForm, reviewer_name: e.target.value })}
+              required
+              className="h-8 text-xs"
+            />
+            <Input
+              placeholder="প্রতিষ্ঠানের নাম"
+              value={reviewForm.institution_name}
+              onChange={e => setReviewForm({ ...reviewForm, institution_name: e.target.value })}
+              className="h-8 text-xs"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">রেটিং:</span>
+            {[1, 2, 3, 4, 5].map(i => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setReviewForm({ ...reviewForm, rating: i })}
+                className="focus:outline-none"
+              >
+                <Star size={18} className={i <= reviewForm.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"} />
+              </button>
+            ))}
+          </div>
+          <Textarea
+            placeholder="আপনার মতামত লিখুন..."
+            value={reviewForm.comment}
+            onChange={e => setReviewForm({ ...reviewForm, comment: e.target.value })}
+            rows={2}
+            className="text-xs"
+          />
+          <Button type="submit" size="sm" disabled={submitReview.isPending} className="w-full h-8 text-xs">
+            {submitReview.isPending ? "সাবমিট হচ্ছে..." : "রিভিউ সাবমিট করুন"}
+          </Button>
+        </form>
+      )}
+
+      {/* Existing Reviews */}
+      {reviews && reviews.length > 0 ? (
+        <div className="space-y-2">
+          {reviews.map(r => (
+            <div key={r.id} className="bg-muted/30 rounded-lg p-2.5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-medium">{r.reviewer_name}</span>
+                  {r.institution_name && <span className="text-[10px] text-muted-foreground ml-1">· {r.institution_name}</span>}
+                </div>
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <Star key={i} size={10} className={i <= r.rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"} />
+                  ))}
+                </div>
+              </div>
+              {r.comment && <p className="text-xs text-muted-foreground mt-1">{r.comment}</p>}
+              <p className="text-[10px] text-muted-foreground/60 mt-1">{new Date(r.created_at).toLocaleDateString("bn-BD")}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground text-center py-2">এখনো কোনো রিভিউ নেই</p>
+      )}
+    </div>
   );
 };
 
