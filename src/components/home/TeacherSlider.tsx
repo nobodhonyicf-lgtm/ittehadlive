@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { BadgeCheck, BookOpen, MapPin, Star, Briefcase } from "lucide-react";
+import { BadgeCheck, BookOpen, MapPin, Star, Briefcase, UserCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import SectionHeader from "./SectionHeader";
 import { toBengaliNumber } from "@/lib/bengali";
@@ -49,7 +49,7 @@ const TeacherSlider = () => {
                     {t.photo_url ? (
                       <img src={t.photo_url} alt={t.name} className="w-10 h-10 rounded-full object-cover ring-2 ring-card group-hover:ring-primary/30 transition-colors" />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-card ring-2 ring-card flex items-center justify-center text-base">👨‍🏫</div>
+                      <div className="w-10 h-10 rounded-full bg-card ring-2 ring-card flex items-center justify-center"><UserCircle size={20} className="text-primary" /></div>
                     )}
                   </div>
                 </div>

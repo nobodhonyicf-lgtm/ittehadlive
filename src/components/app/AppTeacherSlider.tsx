@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { BadgeCheck, BookOpen, MapPin, Star } from "lucide-react";
+import { BadgeCheck, BookOpen, MapPin, Star, Users, UserCircle } from "lucide-react";
 import { toBengaliNumber } from "@/lib/bengali";
 
 const getExperienceBadge = (years: number) => {
@@ -31,7 +31,7 @@ const AppTeacherSlider = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-bold flex items-center gap-1.5">👨‍🏫 শিক্ষক তথ্য</h3>
+        <h3 className="text-sm font-bold flex items-center gap-1.5"><Users size={15} className="text-pink-600" /> শিক্ষক তথ্য</h3>
         <Link to="/teachers" className="text-xs text-primary font-medium">সব দেখুন →</Link>
       </div>
       <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
@@ -50,7 +50,7 @@ const AppTeacherSlider = () => {
                     {t.photo_url ? (
                       <img src={t.photo_url} alt={t.name} className="w-8 h-8 rounded-full object-cover ring-2 ring-card" />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-card ring-2 ring-card flex items-center justify-center text-sm">👨‍🏫</div>
+                      <div className="w-8 h-8 rounded-full bg-card ring-2 ring-card flex items-center justify-center"><UserCircle size={18} className="text-primary" /></div>
                     )}
                   </div>
                 </div>

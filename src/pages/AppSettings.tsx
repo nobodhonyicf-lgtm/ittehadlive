@@ -1,4 +1,8 @@
-import { Bell, BellOff, Loader2, Moon, Sun, Settings, Type, Minus, Plus, MapPin, ChevronRight, Info, Shield, User, LogOut } from "lucide-react";
+import {
+  Bell, BellOff, Loader2, Moon, Sun, Settings, Type, Minus, Plus, MapPin, ChevronRight,
+  Info, Shield, User, LogOut, Trash2, RefreshCw, HardDrive, Share2, Star, MessageCircle,
+  Smartphone,
+} from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,6 +75,7 @@ const AppSettings = () => {
   const [isDark, setIsDark] = useState(false);
   const [fontSizeIndex, setFontSizeIndex] = useState(1);
   const [selectedLocation, setSelectedLocation] = useState("ঢাকা");
+  const [cacheSize, setCacheSize] = useState<string | null>(null);
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains("dark"));
@@ -81,6 +86,14 @@ const AppSettings = () => {
     }
     const savedLoc = localStorage.getItem("prayer-location");
     if (savedLoc) setSelectedLocation(savedLoc);
+
+    // Estimate cache size
+    if ("storage" in navigator && "estimate" in navigator.storage) {
+      navigator.storage.estimate().then((est) => {
+        const usedMB = ((est.usage || 0) / (1024 * 1024)).toFixed(1);
+        setCacheSize(`${usedMB} MB`);
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -115,6 +128,41 @@ const AppSettings = () => {
       await unsubscribe();
       toast.success("নোটিফিকেশন বন্ধ করা হয়েছে");
     }
+  };
+
+  const handleClearCache = async () => {
+    try {
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+      localStorage.clear();
+      sessionStorage.clear();
+      toast.success("ক্যাশ পরিষ্কার হয়েছে! পেজ রিলোড হচ্ছে...");
+      setTimeout(() => window.location.reload(), 1000);
+    } catch {
+      toast.error("ক্যাশ পরিষ্কার করা যায়নি");
+    }
+  };
+
+  const handleShareApp = () => {
+    const url = `${window.location.origin}/install`;
+    if (typeof navigator.share === "function") {
+      navigator.share({ title: "ইত্তেহাদ অ্যাপ", text: "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ অ্যাপ ইনস্টল করুন", url });
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success("লিংক কপি হয়েছে!");
+    }
+  };
+
+  const handleRefresh = () => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        regs.forEach((r) => r.update());
+      });
+    }
+    toast.success("আপডেট চেক করা হচ্ছে...");
+    setTimeout(() => window.location.reload(), 500);
   };
 
   return (
@@ -296,28 +344,101 @@ const AppSettings = () => {
           </div>
         )}
 
+        {/* Storage & Maintenance */}
+        <div>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">স্টোরেজ ও রক্ষণাবেক্ষণ</p>
+          <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+            {/* Cache info */}
+            <div className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                  <HardDrive size={18} className="text-amber-500" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">ক্যাশ ডেটা</p>
+                  <p className="text-[11px] text-muted-foreground">{cacheSize || "হিসাব হচ্ছে..."}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Clear cache */}
+            <button onClick={handleClearCache} className="flex items-center gap-3 p-4 w-full text-left active:bg-muted/50 transition-colors">
+              <div className="h-9 w-9 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <Trash2 size={18} className="text-red-500" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-sm">ক্যাশ পরিষ্কার করুন</p>
+                <p className="text-[11px] text-muted-foreground">অফলাইন ডেটা মুছে ফেলুন</p>
+              </div>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </button>
+
+            {/* Check for updates */}
+            <button onClick={handleRefresh} className="flex items-center gap-3 p-4 w-full text-left active:bg-muted/50 transition-colors">
+              <div className="h-9 w-9 rounded-xl bg-green-500/10 flex items-center justify-center">
+                <RefreshCw size={18} className="text-green-500" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-sm">আপডেট চেক করুন</p>
+                <p className="text-[11px] text-muted-foreground">সর্বশেষ ভার্সন ডাউনলোড করুন</p>
+              </div>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+
         {/* Links Section */}
         <div>
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">অন্যান্য</p>
           <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+            {/* Share app */}
+            <button onClick={handleShareApp} className="flex items-center justify-between p-4 w-full text-left active:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-pink-500/10 flex items-center justify-center">
+                  <Share2 size={18} className="text-pink-500" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">অ্যাপ শেয়ার করুন</p>
+                  <p className="text-[11px] text-muted-foreground">বন্ধুদের ইনস্টল লিংক পাঠান</p>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </button>
+
+            {/* Contact */}
             <Link to="/app-contact" className="flex items-center justify-between p-4 active:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                  <Info size={18} className="text-indigo-500" />
+                  <MessageCircle size={18} className="text-indigo-500" />
                 </div>
-                <p className="font-semibold text-sm">যোগাযোগ</p>
+                <p className="font-semibold text-sm">যোগাযোগ ও মতামত</p>
               </div>
               <ChevronRight size={16} className="text-muted-foreground" />
             </Link>
+
+            {/* About */}
             <Link to="/page/about" className="flex items-center justify-between p-4 active:bg-muted/50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-xl bg-teal-500/10 flex items-center justify-center">
-                  <Shield size={18} className="text-teal-500" />
+                  <Info size={18} className="text-teal-500" />
                 </div>
                 <p className="font-semibold text-sm">আমাদের সম্পর্কে</p>
               </div>
               <ChevronRight size={16} className="text-muted-foreground" />
             </Link>
+
+            {/* App version */}
+            <div className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-slate-500/10 flex items-center justify-center">
+                  <Smartphone size={18} className="text-slate-500" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">অ্যাপ ভার্সন</p>
+                  <p className="text-[11px] text-muted-foreground">v2.0.0</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

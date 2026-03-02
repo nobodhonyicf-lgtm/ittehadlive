@@ -1,4 +1,5 @@
 import { usePrayerTimes } from "@/hooks/useData";
+import { Clock } from "lucide-react";
 import { toBengali } from "@/lib/bengali";
 import { useState, useEffect } from "react";
 
@@ -60,7 +61,7 @@ const AppPrayerWidget = () => {
     <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 dark:from-emerald-800 dark:to-emerald-700 rounded-2xl p-4 text-white shadow-sm animate-fade-in transition-colors duration-300" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-bold flex items-center gap-2">
-          🕌 নামাজের সময়সূচি
+          <Clock size={15} /> নামাজের সময়সূচি
         </h2>
         {nextPrayer && (
           <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full animate-pulse">

@@ -1,9 +1,48 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { Clock, Building2 } from "lucide-react";
+import { Clock, Building2, Briefcase, BookOpen, MapPin, Banknote, Megaphone, Timer } from "lucide-react";
 import SectionHeader from "./SectionHeader";
 import { toBengali } from "@/lib/bengali";
+import { useState, useEffect } from "react";
+
+const useCountdown = (deadline: string | null) => {
+  const [remaining, setRemaining] = useState("");
+  const [isExpired, setIsExpired] = useState(false);
+
+  useEffect(() => {
+    if (!deadline) return;
+    const calc = () => {
+      const now = new Date().getTime();
+      const end = new Date(deadline + "T23:59:59").getTime();
+      const diff = end - now;
+      if (diff <= 0) { setIsExpired(true); setRemaining("সময় শেষ"); return; }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      if (days > 0) setRemaining(`${toBengali(days)} দিন ${toBengali(hours)} ঘণ্টা`);
+      else {
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        setRemaining(`${toBengali(hours)} ঘণ্টা ${toBengali(mins)} মিনিট`);
+      }
+      setIsExpired(false);
+    };
+    calc();
+    const timer = setInterval(calc, 60000);
+    return () => clearInterval(timer);
+  }, [deadline]);
+
+  return { remaining, isExpired };
+};
+
+const JobCountdown = ({ deadline }: { deadline: string }) => {
+  const { remaining, isExpired } = useCountdown(deadline);
+  return (
+    <div className={`flex items-center gap-1 mt-2 text-[10px] font-medium ${isExpired ? "text-muted-foreground line-through" : "text-destructive"}`}>
+      <Timer size={10} className={isExpired ? "" : "animate-pulse"} />
+      <span>{isExpired ? "সময় শেষ" : `বাকি: ${remaining}`}</span>
+    </div>
+  );
+};
 
 const JobPostingsSlider = () => {
   const { data: jobs } = useQuery({
@@ -33,15 +72,6 @@ const JobPostingsSlider = () => {
 
   const getBranch = (id: string | null) => branches?.find((b: any) => b.id === id);
 
-  const formatDateBn = (dateStr: string) => {
-    const d = new Date(dateStr);
-    const day = toBengali(d.getDate());
-    const months = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
-    const month = months[d.getMonth()];
-    const year = toBengali(d.getFullYear());
-    return `${day} ${month}, ${year}`;
-  };
-
   return (
     <div>
       <SectionHeader title="নিয়োগ বিজ্ঞপ্তি" linkUrl="/teachers" />
@@ -55,28 +85,32 @@ const JobPostingsSlider = () => {
                 to={`/teachers?job=${j.id}`}
                 className="block w-52 shrink-0 bg-card border border-primary/20 rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all group"
               >
-                <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-3 py-1.5">
-                  <span className="text-[8px] font-medium text-primary uppercase tracking-wider">📢 নিয়োগ</span>
+                <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-3 py-1.5 flex items-center gap-1">
+                  <Megaphone size={10} className="text-primary" />
+                  <span className="text-[8px] font-medium text-primary uppercase tracking-wider">নিয়োগ</span>
                 </div>
                 <div className="p-3 pt-2">
                   <h4 className="text-xs font-semibold line-clamp-2 group-hover:text-primary transition-colors">
                     {j.title}
                   </h4>
                   <div className="flex flex-wrap gap-1 mt-2 text-[9px] text-muted-foreground">
-                    {j.subject && <span className="bg-muted px-1.5 py-0.5 rounded-full">📚 {j.subject}</span>}
-                    {j.location && <span className="bg-muted px-1.5 py-0.5 rounded-full">📍 {j.location}</span>}
+                    {j.subject && (
+                      <span className="bg-muted px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                        <BookOpen size={8} /> {j.subject}
+                      </span>
+                    )}
+                    {j.location && (
+                      <span className="bg-muted px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                        <MapPin size={8} /> {j.location}
+                      </span>
+                    )}
                   </div>
                   {j.salary_range && (
-                    <div className="mt-1.5 text-[10px] font-semibold text-primary">
-                      💰 {j.salary_range}
+                    <div className="mt-1.5 text-[10px] font-semibold text-primary flex items-center gap-0.5">
+                      <Banknote size={10} /> {j.salary_range}
                     </div>
                   )}
-                  {j.deadline && (
-                    <div className="flex items-center gap-1 mt-2 text-[10px] text-destructive">
-                      <Clock size={10} />
-                      <span>শেষ: {formatDateBn(j.deadline)}</span>
-                    </div>
-                  )}
+                  {j.deadline && <JobCountdown deadline={j.deadline} />}
                   {branch && (
                     <div className="mt-3 pt-3 border-t border-border flex items-center gap-1.5">
                       {branch.image_url ? (
