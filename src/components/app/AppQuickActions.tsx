@@ -23,6 +23,7 @@ const AppQuickActions = () => {
     { icon: BookOpen, label: "প্রকাশনা", path: "/books", gradient: "from-purple-500 to-purple-600" },
     { icon: Bell, label: "নোটিশ", path: "/posts", gradient: "from-red-500 to-red-600" },
     { icon: FileText, label: "পরিচিতি", path: "/page/about", gradient: "from-teal-500 to-teal-600" },
+    { icon: GraduationCap, label: "শিক্ষক", path: "/teachers", gradient: "from-pink-500 to-pink-600" },
     { icon: Mail, label: "যোগাযোগ", path: "/app-contact", gradient: "from-indigo-500 to-indigo-600" },
     ...(user && hasAnyRole
       ? [{ icon: LayoutDashboard, label: "ড্যাশবোর্ড", path: "/admin", gradient: "from-slate-600 to-slate-700" }]

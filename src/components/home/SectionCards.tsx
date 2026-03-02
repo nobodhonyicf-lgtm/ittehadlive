@@ -21,6 +21,7 @@ const sections = [
     links: [
       { label: "সকল শাখা দেখুন", url: "/branches" },
       { label: "শিক্ষার্থী ডিরেক্টরি", url: "/students" },
+      { label: "শিক্ষক সার্ভিস সেন্টার", url: "/teachers" },
       { label: "নতুন শাখা আবেদন", url: "/contact" },
     ],
   },
