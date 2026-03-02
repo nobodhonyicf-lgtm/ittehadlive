@@ -9,6 +9,8 @@ import AppGallerySection from "./AppGallerySection";
 import AppVideoSection from "./AppVideoSection";
 import AppIslamicContent from "./AppIslamicContent";
 import AppIslamicNav from "./AppIslamicNav";
+import AppTeacherSlider from "./AppTeacherSlider";
+import AppJobPostings from "./AppJobPostings";
 
 const AppHome = () => {
   return (
@@ -32,6 +34,12 @@ const AppHome = () => {
         </div>
         <div className="animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
           <AppIslamicContent />
+        </div>
+        <div className="animate-fade-in" style={{ animationDelay: "0.32s", animationFillMode: "both" }}>
+          <AppTeacherSlider />
+        </div>
+        <div className="animate-fade-in" style={{ animationDelay: "0.34s", animationFillMode: "both" }}>
+          <AppJobPostings />
         </div>
         <div className="animate-fade-in" style={{ animationDelay: "0.35s", animationFillMode: "both" }}>
           <AppRecentPosts />
