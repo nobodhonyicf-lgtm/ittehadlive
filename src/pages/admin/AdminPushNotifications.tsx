@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
-import { Bell, Send, Users, Trash2 } from "lucide-react";
+import { Bell, Send, Users, Trash2, ImagePlus } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +25,7 @@ const AdminPushNotifications = () => {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
 
   const { data: subCount } = useQuery({
     queryKey: ["push_sub_count"],
@@ -59,6 +60,7 @@ const AdminPushNotifications = () => {
           title,
           body,
           link: url || null,
+          image_url: imageUrl || null,
           category: "push",
           target: "all",
           is_sent: false,
@@ -75,7 +77,7 @@ const AdminPushNotifications = () => {
         .maybeSingle();
 
       const { data, error } = await supabase.functions.invoke("send-push", {
-        body: { title, body, url, icon: iconSetting?.value || undefined, notificationId: notif.id },
+        body: { title, body, url, icon: iconSetting?.value || undefined, image: imageUrl || undefined, notificationId: notif.id },
       });
       if (error) throw error;
       return data;
@@ -85,6 +87,7 @@ const AdminPushNotifications = () => {
       setTitle("");
       setBody("");
       setUrl("");
+      setImageUrl("");
       qc.invalidateQueries({ queryKey: ["push_history"] });
     },
     onError: (err: any) => {
@@ -145,6 +148,16 @@ const AdminPushNotifications = () => {
             <Label>লিংক (ঐচ্ছিক)</Label>
             <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="/notices বা https://..." />
           </div>
+          <div>
+            <Label className="flex items-center gap-1"><ImagePlus size={14} /> ছবি URL (ঐচ্ছিক)</Label>
+            <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://example.com/image.jpg" />
+            <p className="text-[11px] text-muted-foreground mt-1">নোটিফিকেশনে বড় ছবি দেখাবে (Android/Chrome)</p>
+            {imageUrl && (
+              <div className="mt-2 rounded-lg overflow-hidden border max-w-xs">
+                <img src={imageUrl} alt="Preview" className="w-full h-auto max-h-32 object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
+              </div>
+            )}
+          </div>
           <Button
             onClick={() => sendMutation.mutate()}
             disabled={!title || !body || sendMutation.isPending}
@@ -162,10 +175,13 @@ const AdminPushNotifications = () => {
           <CardContent>
             <div className="space-y-3">
               {history.map((n) => (
-                <div key={n.id} className="p-3 bg-muted rounded flex justify-between items-start">
-                  <div>
+                <div key={n.id} className="p-3 bg-muted rounded flex justify-between items-start gap-3">
+                  <div className="flex-1 min-w-0">
                     <p className="font-semibold">{n.title}</p>
                     <p className="text-sm text-muted-foreground">{n.body}</p>
+                    {n.image_url && (
+                      <img src={n.image_url} alt="" className="mt-2 rounded-md max-w-[200px] h-auto max-h-20 object-cover" />
+                    )}
                   </div>
                   <div className="flex items-start gap-2 ml-4">
                     <div className="text-xs text-muted-foreground whitespace-nowrap text-right">

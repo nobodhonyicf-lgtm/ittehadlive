@@ -18,15 +18,14 @@ const useCountdown = (deadline: string | null) => {
       if (diff <= 0) { setIsExpired(true); setRemaining("সময় শেষ"); return; }
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      if (days > 0) setRemaining(`${toBengali(days)} দিন ${toBengali(hours)} ঘণ্টা`);
-      else {
-        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        setRemaining(`${toBengali(hours)} ঘণ্টা ${toBengali(mins)} মিনিট`);
-      }
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+      if (days > 0) setRemaining(`${toBengali(days)} দিন ${toBengali(hours)}:${toBengali(String(mins).padStart(2, '0'))}:${toBengali(String(secs).padStart(2, '0'))}`);
+      else setRemaining(`${toBengali(hours)}:${toBengali(String(mins).padStart(2, '0'))}:${toBengali(String(secs).padStart(2, '0'))}`);
       setIsExpired(false);
     };
     calc();
-    const timer = setInterval(calc, 60000);
+    const timer = setInterval(calc, 1000);
     return () => clearInterval(timer);
   }, [deadline]);
 
