@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2, Link2, Bell } from "lucide-react";
+import { Plus, Edit, Trash2, Link2, Bell, Newspaper, Search } from "lucide-react";
+import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCategories } from "@/hooks/useData";
 import { useEffect } from "react";
@@ -166,13 +167,17 @@ const AdminPosts = () => {
     return title.toLowerCase().replace(/[^a-z0-9\u0980-\u09FF]+/g, "-").replace(/^-|-$/g, "") || `post-${Date.now()}`;
   };
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredPosts = posts?.filter(p => !searchQuery || p.title.toLowerCase().includes(searchQuery.toLowerCase()));
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">পোস্ট ব্যবস্থাপনা</h1>
+    <AdminPageWrapper
+      title="পোস্ট ব্যবস্থাপনা"
+      icon={Newspaper}
+      action={
         <Dialog open={open} onOpenChange={setOpen}>
           {canEdit && <DialogTrigger asChild>
-            <Button onClick={openNew}><Plus size={16} /> নতুন পোস্ট</Button>
+            <Button onClick={openNew} className="gap-1.5"><Plus size={16} /> নতুন পোস্ট</Button>
           </DialogTrigger>}
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
@@ -318,36 +323,51 @@ const AdminPosts = () => {
             </form>
           </DialogContent>
         </Dialog>
+      }
+    >
+      {/* Search bar */}
+      <div className="relative">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="পোস্ট খুঁজুন..."
+          className="pl-9 bg-card"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
 
-      <Card>
+      <Card className="border border-border/50 overflow-hidden">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-muted/30">
                 <TableHead>শিরোনাম</TableHead>
-                <TableHead>লেখক</TableHead>
-                <TableHead>ক্যাটাগরি</TableHead>
+                <TableHead className="hidden md:table-cell">লেখক</TableHead>
+                <TableHead className="hidden md:table-cell">ক্যাটাগরি</TableHead>
                 <TableHead>স্ট্যাটাস</TableHead>
                 <TableHead className="text-right">অ্যাকশন</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={5} className="text-center">লোড হচ্ছে...</TableCell></TableRow>
-              ) : posts?.map((post) => (
-                <TableRow key={post.id}>
-                  <TableCell className="font-medium">{post.title}</TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{(post as any).author_name || "-"}</TableCell>
-                  <TableCell>{post.categories?.name || "-"}</TableCell>
+                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">লোড হচ্ছে...</TableCell></TableRow>
+              ) : filteredPosts?.length === 0 ? (
+                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">কোনো পোস্ট পাওয়া যায়নি</TableCell></TableRow>
+              ) : filteredPosts?.map((post) => (
+                <TableRow key={post.id} className="hover:bg-muted/20 transition-colors">
+                  <TableCell className="font-medium max-w-[200px] truncate">{post.title}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm hidden md:table-cell">{(post as any).author_name || "-"}</TableCell>
+                  <TableCell className="hidden md:table-cell">{post.categories?.name || "-"}</TableCell>
                   <TableCell>
-                    <span className={`text-xs px-2 py-0.5 rounded ${post.is_published ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${post.is_published ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                       {post.is_published ? "প্রকাশিত" : "ড্রাফট"}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    {canEdit && <Button variant="ghost" size="icon" onClick={() => openEdit(post)}><Edit size={16} /></Button>}
-                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(post.id)}><Trash2 size={16} /></Button>}
+                    <div className="flex items-center justify-end gap-0.5">
+                      {canEdit && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(post)}><Edit size={15} /></Button>}
+                      {canDelete && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteMutation.mutate(post.id)}><Trash2 size={15} /></Button>}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -355,7 +375,7 @@ const AdminPosts = () => {
           </Table>
         </CardContent>
       </Card>
-    </div>
+    </AdminPageWrapper>
   );
 };
 
