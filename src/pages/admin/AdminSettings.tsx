@@ -7,8 +7,22 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Settings, Palette, Image, Search, ShieldCheck, Smartphone } from "lucide-react";
+import { Settings, Palette, Image, Search, ShieldCheck, Smartphone, LayoutDashboard } from "lucide-react";
 import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
+
+const sectionToggleKeys = [
+  { key: "section_hero", label: "হিরো সেকশন", desc: "হোমপেজের শীর্ষ ব্যানার" },
+  { key: "section_notice_ticker", label: "নোটিশ টিকার", desc: "স্ক্রলিং নোটিশ বার" },
+  { key: "section_teacher_slider", label: "শিক্ষক তথ্য", desc: "শিক্ষক স্লাইডার সেকশন" },
+  { key: "section_job_postings", label: "নিয়োগ বিজ্ঞপ্তি", desc: "চাকরির বিজ্ঞপ্তি স্লাইডার" },
+  { key: "section_about", label: "পরিচিতি স্লাইডার", desc: "সম্পর্কে ও ছবি স্লাইডার" },
+  { key: "section_islamic_nav", label: "ইসলামী পাতা নেভিগেশন", desc: "কুরআন, হাদিস, দোয়া, মাসআলা" },
+  { key: "section_islamic_content", label: "ইসলামী কন্টেন্ট", desc: "দৈনিক ইসলামী কন্টেন্ট উইজেট" },
+  { key: "section_departments", label: "বিভাগসমূহ", desc: "বিভাগ কার্ড সেকশন" },
+  { key: "section_sidebar", label: "সাইডবার", desc: "লিডার, নোটিশ, নামাজ, পোল" },
+  { key: "section_recent_news", label: "সর্বশেষ খবর", desc: "সাম্প্রতিক পোস্ট সেকশন" },
+  { key: "section_videos", label: "ভিডিও গ্যালারী", desc: "ইউটিউব ভিডিও সেকশন" },
+];
 
 const AdminSettings = () => {
   const qc = useQueryClient();
@@ -29,7 +43,7 @@ const AdminSettings = () => {
       const { error } = await supabase.from("site_settings").update({ value }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => toast.success("সংরক্ষিত"),
+    onSuccess: () => { toast.success("সংরক্ষিত"); qc.invalidateQueries({ queryKey: ["admin_settings"] }); qc.invalidateQueries({ queryKey: ["site_settings"] }); },
   });
 
   const keyLabels: Record<string, string> = {
@@ -57,6 +71,7 @@ const AdminSettings = () => {
   const adKeys = ["photocard_ad_enabled", "photocard_ad_image"];
   const authKeys = ["otp_enabled", "two_fa_enabled", "google_login_enabled", "apple_login_enabled"];
   const appKeys = ["app_name", "app_logo_url", "app_icon_url", "app_banner_enabled", "vapid_public_key", "vapid_private_key"];
+  const allSectionKeys = sectionToggleKeys.map(s => s.key);
 
   const upsertMutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
@@ -64,7 +79,7 @@ const AdminSettings = () => {
       if (existing) { const { error } = await supabase.from("site_settings").update({ value }).eq("id", existing.id); if (error) throw error; }
       else { const { error } = await supabase.from("site_settings").insert({ key, value }); if (error) throw error; }
     },
-    onSuccess: () => toast.success("সংরক্ষিত"),
+    onSuccess: () => { toast.success("সংরক্ষিত"); qc.invalidateQueries({ queryKey: ["admin_settings"] }); qc.invalidateQueries({ queryKey: ["site_settings"] }); },
   });
 
   if (isLoading) return <div className="text-center py-8 text-muted-foreground">লোড হচ্ছে...</div>;
@@ -74,7 +89,7 @@ const AdminSettings = () => {
   const signatureSettings = settings?.filter(s => signatureKeys.includes(s.key));
   const seoSettings = settings?.filter(s => seoKeys.includes(s.key));
   const adSettings = settings?.filter(s => adKeys.includes(s.key));
-  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key) && !adKeys.includes(s.key) && !authKeys.includes(s.key) && !appKeys.includes(s.key));
+  const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key) && !adKeys.includes(s.key) && !authKeys.includes(s.key) && !appKeys.includes(s.key) && !allSectionKeys.includes(s.key));
 
   const renderSettingField = (s: any) => (
     <div key={s.id}>
@@ -99,6 +114,32 @@ const AdminSettings = () => {
 
   return (
     <AdminPageWrapper title="সাইট সেটিংস" icon={Settings}>
+      {/* Section Toggles */}
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><LayoutDashboard size={18} /> হোমপেজ সেকশন অন/অফ</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground mb-2">হোমপেজের প্রতিটি সেকশন এখান থেকে চালু বা বন্ধ করুন।</p>
+          {sectionToggleKeys.map(({ key, label, desc }) => {
+            const setting = settings?.find(s => s.key === key);
+            const currentVal = setting?.value ?? "true";
+            const isEnabled = currentVal !== "false";
+            const handleToggle = async (checked: boolean) => {
+              const newVal = checked ? "true" : "false";
+              upsertMutation.mutate({ key, value: newVal });
+            };
+            return (
+              <div key={key} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div>
+                  <Label className="font-semibold text-sm">{label}</Label>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{desc}</p>
+                </div>
+                <Switch checked={isEnabled} onCheckedChange={handleToggle} />
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader><CardTitle className="text-base flex items-center gap-2"><Smartphone size={18} /> মোবাইল অ্যাপ সেটিংস</CardTitle></CardHeader>
         <CardContent className="space-y-4">

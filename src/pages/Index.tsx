@@ -13,13 +13,17 @@ import JobPostingsSlider from "@/components/home/JobPostingsSlider";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppHome from "@/components/app/AppHome";
 import SEOHead from "@/components/SEOHead";
+import { useSiteSettings } from "@/hooks/useData";
 
 const Index = () => {
   const isApp = useIsApp();
+  const { data: settings } = useSiteSettings();
 
   if (isApp) {
     return <AppHome />;
   }
+
+  const isOn = (key: string) => settings?.[key] !== "false";
 
   return (
     <Layout fullWidth>
@@ -28,48 +32,66 @@ const Index = () => {
         description="ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ - প্রাইভেট মাদরাসাগুলোর একটি সমন্বিত সংগঠন। রেজাল্ট, শিক্ষার্থী ডিরেক্টরি, শাখা তথ্য, বুকশপ এবং আরো অনেক কিছু।"
         keywords="ইত্তেহাদ, মাদরাসা, প্রাইভেট মাদরাসা, ইসলামী শিক্ষা, রেজাল্ট, শিক্ষার্থী, বাংলাদেশ"
       />
-      <HeroSection />
-      <NoticeTicker />
+      {isOn("section_hero") && <HeroSection />}
+      {isOn("section_notice_ticker") && <NoticeTicker />}
       <div className="max-w-[1200px] mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-8">
-            {/* 1. পরিচিতি ও স্লাইডার */}
-            <div className="animate-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
-              <AboutSection />
-            </div>
-            {/* 2. ইসলামী পাতা নেভিগেশন */}
-            <div className="animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
-              <IslamicNav />
-            </div>
-            {/* 3. ইসলামী কন্টেন্ট */}
-            <div className="animate-fade-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
-              <IslamicContentWidget />
-            </div>
-            {/* 4. শিক্ষক স্লাইডার */}
-            <div className="animate-fade-in" style={{ animationDelay: "0.25s", animationFillMode: "both" }}>
-              <TeacherSlider />
-            </div>
-            {/* 5. নিয়োগ বিজ্ঞপ্তি */}
-            <div className="animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
-              <JobPostingsSlider />
-            </div>
+            {/* 1. শিক্ষক তথ্য - সবার আগে */}
+            {isOn("section_teacher_slider") && (
+              <div className="animate-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+                <TeacherSlider />
+              </div>
+            )}
+            {/* 2. নিয়োগ বিজ্ঞপ্তি */}
+            {isOn("section_job_postings") && (
+              <div className="animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
+                <JobPostingsSlider />
+              </div>
+            )}
+            {/* 3. পরিচিতি ও স্লাইডার */}
+            {isOn("section_about") && (
+              <div className="animate-fade-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
+                <AboutSection />
+              </div>
+            )}
+            {/* 4. ইসলামী পাতা নেভিগেশন */}
+            {isOn("section_islamic_nav") && (
+              <div className="animate-fade-in" style={{ animationDelay: "0.25s", animationFillMode: "both" }}>
+                <IslamicNav />
+              </div>
+            )}
+            {/* 5. ইসলামী কন্টেন্ট */}
+            {isOn("section_islamic_content") && (
+              <div className="animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
+                <IslamicContentWidget />
+              </div>
+            )}
             {/* 6. বিভাগসমূহ */}
-            <div className="animate-fade-in" style={{ animationDelay: "0.35s", animationFillMode: "both" }}>
-              <SectionCards />
+            {isOn("section_departments") && (
+              <div className="animate-fade-in" style={{ animationDelay: "0.35s", animationFillMode: "both" }}>
+                <SectionCards />
+              </div>
+            )}
+          </div>
+          {isOn("section_sidebar") && (
+            <div className="lg:col-span-1 animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
+              <Sidebar />
             </div>
-          </div>
-          <div className="lg:col-span-1 animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
-            <Sidebar />
-          </div>
+          )}
         </div>
         {/* 7. সর্বশেষ খবর - ফুল উইডথ */}
-        <div className="mt-8 animate-fade-in" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>
-          <RecentNews />
-        </div>
+        {isOn("section_recent_news") && (
+          <div className="mt-8 animate-fade-in" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>
+            <RecentNews />
+          </div>
+        )}
         {/* 8. ভিডিও গ্যালারী */}
-        <div className="mt-8 animate-fade-in" style={{ animationDelay: "0.45s", animationFillMode: "both" }}>
-          <VideoSection />
-        </div>
+        {isOn("section_videos") && (
+          <div className="mt-8 animate-fade-in" style={{ animationDelay: "0.45s", animationFillMode: "both" }}>
+            <VideoSection />
+          </div>
+        )}
       </div>
     </Layout>
   );

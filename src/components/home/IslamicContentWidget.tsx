@@ -70,7 +70,7 @@ const IslamicContentWidget = () => {
 
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden">
-      <SectionHeader title="☪ ইসলামী কন্টেন্ট" />
+      <SectionHeader title="📚 ইসলামী কন্টেন্ট" />
       <div className="p-4 space-y-4">
         <IftarCountdownWidget />
 
