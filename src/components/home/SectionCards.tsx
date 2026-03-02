@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
-import { Users, BookOpen, Briefcase, Megaphone, Mail, GraduationCap, Building2, Search, Globe, Feather, Heart } from "lucide-react";
+import { Users, BookOpen, Briefcase, Mail, GraduationCap, Building2, Globe, Feather, Heart } from "lucide-react";
 import SectionHeader from "./SectionHeader";
 
 const sections = [
   {
     title: "আমাদের সম্পর্কে",
     icon: Users,
-    color: "from-primary/10 to-primary/5",
+    accent: "border-l-primary",
     links: [
       { label: "পরিচিতি", url: "/page/about" },
       { label: "ইতিহাস ও প্রতিষ্ঠা", url: "/page/history" },
@@ -17,7 +17,7 @@ const sections = [
   {
     title: "শাখা সমূহ",
     icon: Building2,
-    color: "from-accent/10 to-accent/5",
+    accent: "border-l-orange-500",
     links: [
       { label: "সকল শাখা দেখুন", url: "/branches" },
       { label: "শিক্ষার্থী ডিরেক্টরি", url: "/students" },
@@ -28,7 +28,7 @@ const sections = [
   {
     title: "পরীক্ষা ও রেজাল্ট",
     icon: GraduationCap,
-    color: "from-primary/10 to-accent/5",
+    accent: "border-l-blue-500",
     links: [
       { label: "রেজাল্ট চেক করুন", url: "/result" },
       { label: "পরীক্ষার সূচি", url: "/posts" },
@@ -38,7 +38,7 @@ const sections = [
   {
     title: "নেতৃত্ব ও কমিটি",
     icon: Users,
-    color: "from-accent/10 to-primary/5",
+    accent: "border-l-cyan-600",
     links: [
       { label: "সভাপতি", url: "/page/committee" },
       { label: "সাধারণ সম্পাদক", url: "/page/committee" },
@@ -49,7 +49,7 @@ const sections = [
   {
     title: "কার্যক্রম",
     icon: Briefcase,
-    color: "from-primary/10 to-primary/5",
+    accent: "border-l-purple-500",
     links: [
       { label: "শিক্ষা উন্নয়ন কমিটি", url: "/page/education-committee" },
       { label: "সেমিনার ও কর্মশালা", url: "/page/seminars" },
@@ -59,7 +59,7 @@ const sections = [
   {
     title: "যোগাযোগ ও সহায়তা",
     icon: Mail,
-    color: "from-accent/10 to-accent/5",
+    accent: "border-l-pink-500",
     links: [
       { label: "যোগাযোগ তথ্য", url: "/contact" },
       { label: "পরামর্শ ও সহায়তা", url: "/page/support" },
@@ -69,7 +69,7 @@ const sections = [
   {
     title: "গবেষণা ও প্রকাশনা",
     icon: Feather,
-    color: "from-primary/10 to-accent/5",
+    accent: "border-l-indigo-500",
     links: [
       { label: "গবেষণা কার্যক্রম", url: "/page/research" },
       { label: "প্রকাশনা সমূহ", url: "/page/research" },
@@ -79,7 +79,7 @@ const sections = [
   {
     title: "আন্তর্জাতিক সম্পর্ক",
     icon: Globe,
-    color: "from-accent/10 to-primary/5",
+    accent: "border-l-teal-500",
     links: [
       { label: "আন্তর্জাতিক অংশীদার", url: "/page/international" },
       { label: "শিক্ষক বিনিময় কর্মসূচি", url: "/page/international" },
@@ -89,7 +89,7 @@ const sections = [
   {
     title: "সাংস্কৃতিক কার্যক্রম",
     icon: Heart,
-    color: "from-primary/10 to-primary/5",
+    accent: "border-l-rose-500",
     links: [
       { label: "ইসলামী সাংস্কৃতিক সপ্তাহ", url: "/page/cultural" },
       { label: "কুরআন তিলাওয়াত মাহফিল", url: "/page/cultural" },
@@ -104,22 +104,22 @@ const SectionCards = () => {
       <SectionHeader title="বিভাগসমূহ" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {sections.map((section) => (
-          <div key={section.title} className="bg-card border border-border rounded-lg hover:shadow-lg transition-all group overflow-hidden">
-            <div className={`px-4 py-3 bg-gradient-to-r ${section.color}`}>
-              <h3 className="flex items-center gap-2 text-primary text-lg font-semibold group-hover:text-accent transition-colors">
-                <section.icon size={20} />
+          <div key={section.title} className={`bg-card border border-border rounded-xl hover:shadow-md transition-all group overflow-hidden border-l-[3px] ${section.accent}`}>
+            <div className="px-4 py-3">
+              <h3 className="flex items-center gap-2 text-foreground text-sm font-bold group-hover:text-primary transition-colors">
+                <section.icon size={17} className="text-primary" />
                 {section.title}
               </h3>
             </div>
-            <div className="p-4">
-              <ul className="space-y-2">
+            <div className="px-4 pb-3">
+              <ul className="space-y-1.5">
                 {section.links.map((link, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-accent/60 shrink-0" />
+                  <li key={i}>
                     <Link
                       to={link.url}
-                      className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors"
+                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary hover:pl-1 transition-all py-0.5"
                     >
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary/30 group-hover:bg-primary/50 shrink-0 transition-colors" />
                       {link.label}
                     </Link>
                   </li>

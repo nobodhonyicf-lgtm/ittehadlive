@@ -32,34 +32,42 @@ const Index = () => {
       <NoticeTicker />
       <div className="max-w-[1200px] mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-8">
+            {/* 1. পরিচিতি ও স্লাইডার */}
             <div className="animate-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
               <AboutSection />
             </div>
-            <div className="animate-fade-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
-              <SectionCards />
-            </div>
-            <div className="animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
+            {/* 2. ইসলামী পাতা নেভিগেশন */}
+            <div className="animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
               <IslamicNav />
             </div>
-            <div className="animate-fade-in" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>
+            {/* 3. ইসলামী কন্টেন্ট */}
+            <div className="animate-fade-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
               <IslamicContentWidget />
             </div>
-            <div className="animate-fade-in" style={{ animationDelay: "0.45s", animationFillMode: "both" }}>
+            {/* 4. শিক্ষক স্লাইডার */}
+            <div className="animate-fade-in" style={{ animationDelay: "0.25s", animationFillMode: "both" }}>
               <TeacherSlider />
             </div>
-            <div className="animate-fade-in" style={{ animationDelay: "0.5s", animationFillMode: "both" }}>
+            {/* 5. নিয়োগ বিজ্ঞপ্তি */}
+            <div className="animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
               <JobPostingsSlider />
             </div>
+            {/* 6. বিভাগসমূহ */}
+            <div className="animate-fade-in" style={{ animationDelay: "0.35s", animationFillMode: "both" }}>
+              <SectionCards />
+            </div>
           </div>
-          <div className="lg:col-span-1 animate-fade-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
+          <div className="lg:col-span-1 animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
             <Sidebar />
           </div>
         </div>
-        <div className="mt-6 animate-fade-in" style={{ animationDelay: "0.5s", animationFillMode: "both" }}>
+        {/* 7. সর্বশেষ খবর - ফুল উইডথ */}
+        <div className="mt-8 animate-fade-in" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>
           <RecentNews />
         </div>
-        <div className="mt-6 animate-fade-in" style={{ animationDelay: "0.6s", animationFillMode: "both" }}>
+        {/* 8. ভিডিও গ্যালারী */}
+        <div className="mt-8 animate-fade-in" style={{ animationDelay: "0.45s", animationFillMode: "both" }}>
           <VideoSection />
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLeaderProfiles, useNotices, useActivePoll, usePollVotes, usePrayerTimes } from "@/hooks/useData";
-import { User, Bell, BarChart3, Clock } from "lucide-react";
+import { User, Bell, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -67,7 +67,7 @@ const PollSection = () => {
   );
 
   return (
-    <div className="bg-card border border-border rounded-lg overflow-hidden">
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
       <SectionHeader title="মতামত জরিপ" />
       <div className="px-4 pb-4">
         <p className="text-sm font-semibold mb-3">{poll.question}</p>
@@ -79,18 +79,18 @@ const PollSection = () => {
                 key={i}
                 onClick={() => handleVote(i)}
                 disabled={hasVoted || submitting}
-                className={`w-full text-left rounded border text-sm transition-all relative overflow-hidden
+                className={`w-full text-left rounded-lg border text-sm transition-all relative overflow-hidden
                   ${selectedOption === i ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}
                   ${hasVoted ? "cursor-default" : "cursor-pointer"}
                 `}
               >
                 {hasVoted && (
-                  <div className="absolute inset-y-0 left-0 bg-primary/10 transition-all" style={{ width: `${pct}%` }} />
+                  <div className="absolute inset-y-0 left-0 bg-primary/10 transition-all duration-500" style={{ width: `${pct}%` }} />
                 )}
-                <div className="relative px-3 py-2 flex justify-between items-center">
+                <div className="relative px-3 py-2.5 flex justify-between items-center">
                   <span>{option}</span>
                   {hasVoted && (
-                    <span className="text-xs text-muted-foreground font-medium">{toBengali(pct)}%</span>
+                    <span className="text-xs text-muted-foreground font-semibold">{toBengali(pct)}%</span>
                   )}
                 </div>
               </button>
@@ -110,44 +110,49 @@ const Sidebar = () => {
   const { data: notices } = useNotices();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Leader profiles */}
       {leaders?.map((leader) => (
-        <div key={leader.id} className="bg-card border border-border rounded-lg overflow-hidden">
+        <div key={leader.id} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
           <SectionHeader title={leader.title} linkUrl={`/leader/${leader.id}`} />
-          <div className="px-4 pb-4 text-center">
-            <div className="w-20 h-20 rounded-full bg-muted mx-auto mb-3 flex items-center justify-center overflow-hidden">
+          <div className="px-4 pb-5 text-center">
+            <div className="w-24 h-24 rounded-full mx-auto mb-3 overflow-hidden ring-2 ring-primary/15 ring-offset-2 ring-offset-background">
               {leader.image_url ? (
                 <img src={leader.image_url} alt={leader.name} className="w-full h-full object-cover" />
               ) : (
-                <User className="text-muted-foreground" size={32} />
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <User className="text-muted-foreground" size={32} />
+                </div>
               )}
             </div>
-            <h3 className="font-bold text-sm">{leader.name}</h3>
+            <h3 className="font-bold text-sm text-foreground">{leader.name}</h3>
             {leader.bio && (
-              <p className="text-xs text-muted-foreground mt-2 line-clamp-4 text-justify">{leader.bio}</p>
+              <p className="text-xs text-muted-foreground mt-2 line-clamp-4 text-justify leading-relaxed">{leader.bio}</p>
             )}
-            <Link to={`/leader/${leader.id}`} className="inline-block mt-3 text-primary hover:underline font-bold text-sm">
-              বিস্তারিত →
+            <Link to={`/leader/${leader.id}`} className="inline-flex items-center gap-1 mt-3 text-primary hover:text-primary/80 font-semibold text-sm transition-colors">
+              বিস্তারিত <ChevronRight size={14} />
             </Link>
           </div>
         </div>
       ))}
 
       {/* Notices */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
+      <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
         <SectionHeader title="নোটিশ" linkUrl="/posts" />
         <div className="divide-y divide-border">
-          {notices?.slice(0, 8).map((notice) => (
+          {notices?.slice(0, 8).map((notice, i) => (
             <Link
               key={notice.id}
               to={`/notice/${notice.id}`}
-              className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-muted/50 transition-colors group"
+              className="flex items-start gap-3 px-4 py-3 hover:bg-muted/50 transition-colors group"
             >
-              <span className="w-6 h-6 rounded-md bg-destructive/15 text-destructive flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
-                <Bell size={13} />
+              <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-destructive/15 to-destructive/5 text-destructive text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
+                {toBengali(i + 1)}
               </span>
-              <span className="text-sm line-clamp-2 group-hover:text-primary transition-colors">{notice.title}</span>
+              <div className="min-w-0 flex-1">
+                <span className="text-sm line-clamp-2 group-hover:text-primary transition-colors font-medium">{notice.title}</span>
+                <span className="text-[10px] text-muted-foreground block mt-0.5">{new Date(notice.created_at).toLocaleDateString("bn-BD")}</span>
+              </div>
             </Link>
           ))}
         </div>
@@ -219,27 +224,22 @@ const PrayerTimesSection = () => {
   };
 
   return (
-    <div className="bg-card border border-border rounded-lg overflow-hidden">
+    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
       {/* Mosque dome header */}
-      <div className="relative bg-gradient-to-b from-emerald-800 to-emerald-700 text-white overflow-hidden">
-        {/* Mosque silhouette SVG */}
+      <div className="relative bg-gradient-to-b from-primary to-primary/85 text-primary-foreground overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <svg viewBox="0 0 400 120" className="w-full h-full" preserveAspectRatio="xMidYMax slice">
-            {/* Central dome */}
             <ellipse cx="200" cy="80" rx="60" ry="50" fill="white" />
             <rect x="195" y="20" width="10" height="30" fill="white" />
             <ellipse cx="200" cy="20" rx="6" ry="8" fill="white" />
-            {/* Left minaret */}
             <rect x="80" y="30" width="12" height="70" fill="white" />
             <ellipse cx="86" cy="30" rx="8" ry="10" fill="white" />
             <rect x="83" y="15" width="6" height="18" fill="white" />
             <ellipse cx="86" cy="15" rx="4" ry="5" fill="white" />
-            {/* Right minaret */}
             <rect x="308" y="30" width="12" height="70" fill="white" />
             <ellipse cx="314" cy="30" rx="8" ry="10" fill="white" />
             <rect x="311" y="15" width="6" height="18" fill="white" />
             <ellipse cx="314" cy="15" rx="4" ry="5" fill="white" />
-            {/* Base */}
             <rect x="60" y="95" width="280" height="25" fill="white" />
           </svg>
         </div>
@@ -258,23 +258,23 @@ const PrayerTimesSection = () => {
           return (
             <div
               key={pt.id}
-              className={`flex items-center justify-between px-4 py-3 text-sm transition-all ${isNext ? "bg-emerald-50 dark:bg-emerald-950/30 border-l-[3px] border-l-emerald-500" : "border-l-[3px] border-l-transparent"}`}
+              className={`flex items-center justify-between px-4 py-3 text-sm transition-all ${isNext ? "bg-primary/5 border-l-[3px] border-l-primary" : "border-l-[3px] border-l-transparent"}`}
             >
               <div className="flex items-center gap-2">
-                {isNext && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-400" />}
-                <span className={`font-medium ${isNext ? "text-emerald-700 dark:text-emerald-400 font-bold" : ""}`}>{pt.name}</span>
+                {isNext && <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
+                <span className={`font-medium ${isNext ? "text-primary font-bold" : ""}`}>{pt.name}</span>
               </div>
               <div className="text-right">
-                <span className={`font-semibold text-[15px] ${isNext ? "text-emerald-700 dark:text-emerald-400" : "text-primary"}`}>{pt.time_text}</span>
+                <span className={`font-semibold text-[15px] ${isNext ? "text-primary" : "text-foreground"}`}>{pt.time_text}</span>
                 {countdown && (
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">⏳ আরও {countdown} বাকী</p>
+                  <p className="text-[10px] text-primary mt-0.5 font-medium">⏳ আরও {countdown} বাকী</p>
                 )}
               </div>
             </div>
           );
         })}
       </div>
-      <div className="bg-gradient-to-r from-emerald-800 to-emerald-700 text-white text-center py-2 text-xs font-medium tracking-wide">
+      <div className="bg-gradient-to-r from-primary to-primary/85 text-primary-foreground text-center py-2 text-xs font-medium tracking-wide">
         ☪ সময়মতো নামাজ আদায় করুন ☪
       </div>
     </div>
