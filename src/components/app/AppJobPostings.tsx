@@ -45,13 +45,21 @@ const AppJobPostings = () => {
               <Link
                 key={j.id}
                 to={`/teachers?job=${j.id}`}
-                className="block w-48 shrink-0 bg-card border border-primary/20 rounded-xl overflow-hidden active:scale-95 transition-transform"
+                className="block w-44 shrink-0 bg-card border border-primary/20 rounded-xl overflow-hidden active:scale-95 transition-transform"
               >
-                <div className="p-2.5">
+                <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-2.5 py-1">
+                  <span className="text-[7px] font-medium text-primary uppercase tracking-wider">📢 নিয়োগ</span>
+                </div>
+                <div className="p-2.5 pt-1.5">
                   <h4 className="text-[11px] font-semibold line-clamp-2">{j.title}</h4>
                   <div className="flex flex-wrap gap-1 mt-1.5 text-[8px] text-muted-foreground">
                     {j.subject && <span className="bg-muted px-1.5 py-0.5 rounded-full">📚 {j.subject}</span>}
                   </div>
+                  {j.salary_range && (
+                    <div className="mt-1 text-[9px] font-semibold text-primary">
+                      💰 {j.salary_range}
+                    </div>
+                  )}
                   {j.deadline && (
                     <div className="flex items-center gap-1 mt-1.5 text-[9px] text-destructive">
                       <Clock size={9} />

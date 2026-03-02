@@ -40,46 +40,41 @@ const TeacherSlider = () => {
               <Link
                 key={t.id}
                 to={`/teachers?highlight=${t.id}`}
-                className="block w-44 shrink-0 bg-card border border-border rounded-lg overflow-hidden hover:border-primary/30 hover:shadow-md transition-all group"
+                className="block w-40 shrink-0 bg-card border border-border rounded-xl overflow-hidden hover:border-primary/30 hover:shadow-lg transition-all group"
               >
-                <div className="p-3 text-center">
-                  {t.photo_url ? (
-                    <img
-                      src={t.photo_url}
-                      alt={t.name}
-                      className="w-14 h-14 rounded-full object-cover mx-auto ring-2 ring-muted group-hover:ring-primary/20 transition-colors"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-xl mx-auto">
-                      👨‍🏫
-                    </div>
-                  )}
-                  <h4 className="text-xs font-semibold mt-2 line-clamp-1 flex items-center justify-center gap-0.5">
-                    {t.name}
-                    {t.is_verified && (
-                      <BadgeCheck size={12} className="text-blue-500 fill-blue-500 stroke-white shrink-0" />
+                <div className="relative">
+                  <div className="h-12 bg-gradient-to-br from-primary/15 to-primary/5" />
+                  <div className="absolute -bottom-5 left-1/2 -translate-x-1/2">
+                    {t.photo_url ? (
+                      <img src={t.photo_url} alt={t.name} className="w-10 h-10 rounded-full object-cover ring-2 ring-card group-hover:ring-primary/30 transition-colors" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-card ring-2 ring-card flex items-center justify-center text-base">👨‍🏫</div>
                     )}
+                  </div>
+                </div>
+                <div className="pt-7 pb-3 px-2 text-center">
+                  <h4 className="text-[11px] font-semibold line-clamp-1 flex items-center justify-center gap-0.5">
+                    {t.name}
+                    {t.is_verified && <BadgeCheck size={11} className="text-blue-500 fill-blue-500 stroke-white shrink-0" />}
                   </h4>
-                  <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-0.5 mt-0.5">
-                    <BookOpen size={9} /> {t.subject}
+                  <p className="text-[9px] text-muted-foreground flex items-center justify-center gap-0.5 mt-0.5">
+                    <BookOpen size={8} /> {t.subject}
                   </p>
                   {t.district && (
-                    <p className="text-[10px] text-muted-foreground flex items-center justify-center gap-0.5">
-                      <MapPin size={9} /> {t.district}
+                    <p className="text-[9px] text-muted-foreground flex items-center justify-center gap-0.5">
+                      <MapPin size={8} /> {t.district}
                     </p>
                   )}
                   <div className="flex items-center justify-center gap-0.5 mt-1">
                     {[1, 2, 3, 4, 5].map(i => (
-                      <Star key={i} size={9} className={i <= (t.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"} />
+                      <Star key={i} size={8} className={i <= (t.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"} />
                     ))}
                   </div>
-                  <div className="flex items-center justify-center gap-1 mt-1.5">
-                    {expBadge && (
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full border ${expBadge.color}`}>
-                        {expBadge.label}
-                      </span>
-                    )}
-                  </div>
+                  {expBadge && (
+                    <span className={`inline-block text-[8px] px-1.5 py-0.5 rounded-full border mt-1 ${expBadge.color}`}>
+                      {expBadge.label}
+                    </span>
+                  )}
                 </div>
               </Link>
             );

@@ -235,6 +235,9 @@ const ApplicationsTab = () => {
                        <Button variant="ghost" size="icon" title="অনুমোদন ও শিক্ষক হিসেবে যোগ" onClick={() => convertToTeacher.mutate(a)}><UserPlus size={16} className="text-primary" /></Button>
                        <Button variant="ghost" size="icon" onClick={() => updateStatus.mutate({ id: a.id, status: "rejected" })}><XCircle size={16} className="text-destructive" /></Button>
                      </>}
+                     {canEdit && a.status === "approved" && (
+                       <Button variant="ghost" size="icon" title="শিক্ষক হিসেবে পুনরায় যোগ" onClick={() => convertToTeacher.mutate(a)}><UserPlus size={16} className="text-primary" /></Button>
+                     )}
                      {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(a.id)}><Trash2 size={16} className="text-destructive" /></Button>}
                    </TableCell>
                 </TableRow>
