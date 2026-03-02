@@ -1224,6 +1224,189 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          sort_order: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          sort_order?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      quiz_levels: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          required_score: number | null
+          sort_order: number | null
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          required_score?: number | null
+          sort_order?: number | null
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          required_score?: number | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_levels_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_questions: {
+        Row: {
+          correct_answer: number
+          created_at: string
+          explanation: string | null
+          id: string
+          is_active: boolean | null
+          level_id: string
+          options: Json
+          points: number | null
+          question: string
+          question_type: string
+          sort_order: number | null
+        }
+        Insert: {
+          correct_answer?: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          is_active?: boolean | null
+          level_id: string
+          options?: Json
+          points?: number | null
+          question: string
+          question_type?: string
+          sort_order?: number | null
+        }
+        Update: {
+          correct_answer?: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          is_active?: boolean | null
+          level_id?: string
+          options?: Json
+          points?: number | null
+          question?: string
+          question_type?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_user_progress: {
+        Row: {
+          attempts: number | null
+          best_score: number | null
+          completed_at: string | null
+          correct_answers: number | null
+          created_at: string
+          id: string
+          is_completed: boolean | null
+          level_id: string
+          score: number | null
+          total_questions: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number | null
+          best_score?: number | null
+          completed_at?: string | null
+          correct_answers?: number | null
+          created_at?: string
+          id?: string
+          is_completed?: boolean | null
+          level_id: string
+          score?: number | null
+          total_questions?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number | null
+          best_score?: number | null
+          completed_at?: string | null
+          correct_answers?: number | null
+          created_at?: string
+          id?: string
+          is_completed?: boolean | null
+          level_id?: string
+          score?: number | null
+          total_questions?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_user_progress_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       results: {
         Row: {
           created_at: string
