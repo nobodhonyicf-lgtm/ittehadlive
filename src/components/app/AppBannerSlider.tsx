@@ -14,7 +14,9 @@ const AppBannerSlider = () => {
     return () => clearInterval(timer);
   }, [sliders?.length]);
 
-  if (!sliders?.length) return null;
+  if (!sliders?.length) return (
+    <div className="w-[calc(100%-24px)] max-w-full aspect-[2/1] bg-muted rounded-2xl mx-auto mt-3 animate-pulse" />
+  );
 
   return (
     <div className="relative w-[calc(100%-24px)] max-w-full aspect-[2/1] overflow-hidden bg-muted dark:bg-muted/50 rounded-2xl mx-auto mt-3 shadow-lg transition-colors duration-300">
@@ -29,6 +31,10 @@ const AppBannerSlider = () => {
             src={slide.image_url}
             alt={slide.title}
             className="w-full h-full object-cover"
+            loading={i === 0 ? "eager" : "lazy"}
+            width={800}
+            height={400}
+            fetchPriority={i === 0 ? "high" : "auto"}
           />
           {slide.title && (
             <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 py-4">
