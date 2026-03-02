@@ -9,11 +9,114 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send, BadgeCheck, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 
 const PAGE_SIZE = 12;
+
+/* ─── Job Postings Section with Detail View ─── */
+const JobPostingsSection = ({ jobs }: { jobs: any[] }) => {
+  const [selectedJob, setSelectedJob] = useState<any>(null);
+
+  return (
+    <div className="mb-8">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-1 h-6 bg-primary rounded-full" />
+        <h2 className="text-lg font-bold">নিয়োগ বিজ্ঞপ্তি</h2>
+        <Badge variant="secondary" className="text-[10px]">{jobs.length}টি সক্রিয়</Badge>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        {jobs.map(j => (
+          <Card key={j.id} className="border-primary/20 hover:border-primary/40 transition-colors group">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">{j.title}</h3>
+                  {j.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{j.description}</p>}
+                </div>
+                {j.deadline && (
+                  <div className="shrink-0 text-right">
+                    <div className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock size={10} /> শেষ তারিখ</div>
+                    <div className="text-xs font-medium text-destructive">{new Date(j.deadline).toLocaleDateString("bn-BD")}</div>
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-3 text-[10px] text-muted-foreground">
+                {j.subject && <span className="bg-muted px-2 py-0.5 rounded-full">📚 {j.subject}</span>}
+                {j.location && <span className="bg-muted px-2 py-0.5 rounded-full">📍 {j.location}</span>}
+                {j.salary_range && <span className="bg-muted px-2 py-0.5 rounded-full">💰 {j.salary_range}</span>}
+              </div>
+              <div className="flex gap-2 mt-3">
+                <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => setSelectedJob(j)}>
+                  <Eye size={12} /> বিস্তারিত দেখুন
+                </Button>
+                <Link to="/teacher-apply">
+                  <Button size="sm" variant="outline" className="h-7 text-xs">আবেদন করুন →</Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Job Detail Dialog */}
+      <Dialog open={!!selectedJob} onOpenChange={o => !o && setSelectedJob(null)}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>নিয়োগ বিজ্ঞপ্তি বিস্তারিত</DialogTitle></DialogHeader>
+          {selectedJob && (
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold">{selectedJob.title}</h2>
+              {selectedJob.description && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedJob.description}</p>}
+              <div className="grid grid-cols-2 gap-3">
+                {selectedJob.subject && (
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <div className="text-[10px] text-muted-foreground">বিষয়</div>
+                    <div className="text-sm font-medium">📚 {selectedJob.subject}</div>
+                  </div>
+                )}
+                {selectedJob.qualification_required && (
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <div className="text-[10px] text-muted-foreground">শিক্ষাগত যোগ্যতা</div>
+                    <div className="text-sm font-medium">🎓 {selectedJob.qualification_required}</div>
+                  </div>
+                )}
+                {selectedJob.experience_required && (
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <div className="text-[10px] text-muted-foreground">অভিজ্ঞতা</div>
+                    <div className="text-sm font-medium">📋 {selectedJob.experience_required}</div>
+                  </div>
+                )}
+                {selectedJob.salary_range && (
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <div className="text-[10px] text-muted-foreground">বেতন</div>
+                    <div className="text-sm font-medium">💰 {selectedJob.salary_range}</div>
+                  </div>
+                )}
+                {selectedJob.location && (
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <div className="text-[10px] text-muted-foreground">অবস্থান</div>
+                    <div className="text-sm font-medium">📍 {selectedJob.location}</div>
+                  </div>
+                )}
+                {selectedJob.deadline && (
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <div className="text-[10px] text-muted-foreground">আবেদনের শেষ তারিখ</div>
+                    <div className="text-sm font-medium text-destructive">📅 {new Date(selectedJob.deadline).toLocaleDateString("bn-BD")}</div>
+                  </div>
+                )}
+              </div>
+              <Link to="/teacher-apply" className="block">
+                <Button className="w-full gap-2"><Briefcase size={16} /> এই পদে আবেদন করুন</Button>
+              </Link>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
 
 const TeacherDirectory = () => {
   const [search, setSearch] = useState("");
@@ -133,41 +236,7 @@ const TeacherDirectory = () => {
 
         {/* Active Job Postings */}
         {jobs && jobs.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-1 h-6 bg-primary rounded-full" />
-              <h2 className="text-lg font-bold">নিয়োগ বিজ্ঞপ্তি</h2>
-              <Badge variant="secondary" className="text-[10px]">{jobs.length}টি সক্রিয়</Badge>
-            </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              {jobs.map(j => (
-                <Card key={j.id} className="border-primary/20 hover:border-primary/40 transition-colors group">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">{j.title}</h3>
-                        {j.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{j.description}</p>}
-                      </div>
-                      {j.deadline && (
-                        <div className="shrink-0 text-right">
-                          <div className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock size={10} /> শেষ তারিখ</div>
-                          <div className="text-xs font-medium text-destructive">{new Date(j.deadline).toLocaleDateString("bn-BD")}</div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 mt-3 text-[10px] text-muted-foreground">
-                      {j.subject && <span className="bg-muted px-2 py-0.5 rounded-full">📚 {j.subject}</span>}
-                      {j.location && <span className="bg-muted px-2 py-0.5 rounded-full">📍 {j.location}</span>}
-                      {j.salary_range && <span className="bg-muted px-2 py-0.5 rounded-full">💰 {j.salary_range}</span>}
-                    </div>
-                    <Link to="/teacher-apply" className="mt-3 inline-block">
-                      <Button size="sm" variant="outline" className="h-7 text-xs">আবেদন করুন →</Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+          <JobPostingsSection jobs={jobs} />
         )}
 
         {/* Filters */}
@@ -250,7 +319,19 @@ const TeacherDirectory = () => {
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">{t.name}</h3>
+                          <h3 className="font-semibold text-sm group-hover:text-primary transition-colors flex items-center gap-1">
+                            {t.name}
+                            {(t as any).is_verified && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <BadgeCheck size={16} className="text-blue-500 shrink-0" />
+                                  </TooltipTrigger>
+                                  <TooltipContent><p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p></TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                          </h3>
                           <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                             <BookOpen size={11} className="shrink-0" /> {t.subject}
                           </p>
@@ -315,7 +396,19 @@ const TeacherDirectory = () => {
                     <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-3xl">👨‍🏫</div>
                   )}
                   <div>
-                    <h2 className="text-lg font-bold">{selectedTeacher.name}</h2>
+                    <h2 className="text-lg font-bold flex items-center gap-1">
+                      {selectedTeacher.name}
+                      {(selectedTeacher as any).is_verified && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <BadgeCheck size={20} className="text-blue-500" />
+                            </TooltipTrigger>
+                            <TooltipContent><p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p></TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </h2>
                     <p className="text-sm text-muted-foreground">{selectedTeacher.subject}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge
