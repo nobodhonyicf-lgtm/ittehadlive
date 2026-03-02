@@ -1416,6 +1416,47 @@ export type Database = {
         }
         Relationships: []
       }
+      teacher_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          institution_name: string | null
+          is_approved: boolean | null
+          rating: number
+          reviewer_name: string
+          teacher_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          institution_name?: string | null
+          is_approved?: boolean | null
+          rating: number
+          reviewer_name: string
+          teacher_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          institution_name?: string | null
+          is_approved?: boolean | null
+          rating?: number
+          reviewer_name?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_reviews_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teachers: {
         Row: {
           address: string | null

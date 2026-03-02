@@ -335,18 +335,95 @@ const JobPostingsTab = () => {
   );
 };
 
+/* ─── Reviews Tab ─── */
+const ReviewsTab = () => {
+  const { canEdit, canDelete } = useSectionPermissions();
+  const queryClient = useQueryClient();
+
+  const { data: reviews, isLoading } = useQuery({
+    queryKey: ["admin_teacher_reviews"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("teacher_reviews")
+        .select("*, teachers(name)")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: async ({ id, approved }: { id: string; approved: boolean }) => {
+      const { error } = await supabase.from("teacher_reviews").update({ is_approved: approved }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("আপডেট হয়েছে"); queryClient.invalidateQueries({ queryKey: ["admin_teacher_reviews"] }); },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("teacher_reviews").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); queryClient.invalidateQueries({ queryKey: ["admin_teacher_reviews"] }); },
+  });
+
+  return (
+    <div className="space-y-4">
+      <Card><CardContent className="p-0">
+        <Table>
+          <TableHeader><TableRow>
+            <TableHead>শিক্ষক</TableHead><TableHead>রিভিউয়ার</TableHead><TableHead>প্রতিষ্ঠান</TableHead><TableHead>রেটিং</TableHead><TableHead>মন্তব্য</TableHead><TableHead>স্ট্যাটাস</TableHead><TableHead className="text-right">অ্যাকশন</TableHead>
+          </TableRow></TableHeader>
+          <TableBody>
+            {isLoading ? <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">লোড হচ্ছে...</TableCell></TableRow> :
+              !reviews?.length ? <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">কোনো রিভিউ নেই</TableCell></TableRow> :
+              reviews.map(r => (
+                <TableRow key={r.id}>
+                  <TableCell className="font-medium text-sm">{(r as any).teachers?.name || "—"}</TableCell>
+                  <TableCell className="text-sm">{r.reviewer_name}</TableCell>
+                  <TableCell className="text-sm">{r.institution_name || "—"}</TableCell>
+                  <TableCell><span className="text-sm">{"⭐".repeat(r.rating)}</span></TableCell>
+                  <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{r.comment || "—"}</TableCell>
+                  <TableCell>
+                    <Badge variant={r.is_approved ? "default" : "secondary"}>{r.is_approved ? "অনুমোদিত" : "অপেক্ষমান"}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right space-x-1">
+                    {canEdit && !r.is_approved && (
+                      <Button variant="ghost" size="icon" onClick={() => approveMutation.mutate({ id: r.id, approved: true })}>
+                        <CheckCircle size={16} className="text-primary" />
+                      </Button>
+                    )}
+                    {canEdit && r.is_approved && (
+                      <Button variant="ghost" size="icon" onClick={() => approveMutation.mutate({ id: r.id, approved: false })}>
+                        <XCircle size={16} className="text-muted-foreground" />
+                      </Button>
+                    )}
+                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(r.id)}><Trash2 size={16} className="text-destructive" /></Button>}
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </CardContent></Card>
+    </div>
+  );
+};
+
 /* ─── Main Page ─── */
 const AdminTeachers = () => (
   <AdminPageWrapper title="শিক্ষক সার্ভিস সেন্টার" icon={GraduationCap}>
     <Tabs defaultValue="teachers">
-      <TabsList className="grid grid-cols-3 w-full max-w-md">
+      <TabsList className="grid grid-cols-4 w-full max-w-lg">
         <TabsTrigger value="teachers">👨‍🏫 শিক্ষক</TabsTrigger>
         <TabsTrigger value="applications">📋 আবেদন</TabsTrigger>
         <TabsTrigger value="jobs">📢 বিজ্ঞপ্তি</TabsTrigger>
+        <TabsTrigger value="reviews">⭐ রিভিউ</TabsTrigger>
       </TabsList>
       <TabsContent value="teachers" className="mt-4"><TeachersTab /></TabsContent>
       <TabsContent value="applications" className="mt-4"><ApplicationsTab /></TabsContent>
       <TabsContent value="jobs" className="mt-4"><JobPostingsTab /></TabsContent>
+      <TabsContent value="reviews" className="mt-4"><ReviewsTab /></TabsContent>
     </Tabs>
   </AdminPageWrapper>
 );
