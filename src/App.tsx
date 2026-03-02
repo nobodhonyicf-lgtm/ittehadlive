@@ -48,6 +48,8 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const TeacherDirectory = lazy(() => import("./pages/TeacherDirectory"));
 const TeacherApply = lazy(() => import("./pages/TeacherApply"));
+const Advertise = lazy(() => import("./pages/Advertise"));
+const InstitutionRegister = lazy(() => import("./pages/InstitutionRegister"));
 
 // Lazy Islamic pages
 const DuaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ default: m.DuaPage })));
@@ -123,6 +125,8 @@ const App = () => (
                 <Route path="/masala" element={<MasalaPage />} />
                 <Route path="/teachers" element={<TeacherDirectory />} />
                 <Route path="/teacher-apply" element={<TeacherApply />} />
+                <Route path="/advertise" element={<Advertise />} />
+                <Route path="/institution-register" element={<InstitutionRegister />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/reset-password" element={<ResetPassword />} />
                 <Route path="/admin/*" element={<AdminDashboard />} />
