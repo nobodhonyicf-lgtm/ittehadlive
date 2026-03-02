@@ -8,6 +8,8 @@ import IslamicNav from "@/components/home/IslamicNav";
 import RecentNews from "@/components/home/RecentNews";
 import VideoSection from "@/components/home/VideoSection";
 import Sidebar from "@/components/home/Sidebar";
+import TeacherSlider from "@/components/home/TeacherSlider";
+import JobPostingsSlider from "@/components/home/JobPostingsSlider";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppHome from "@/components/app/AppHome";
 import SEOHead from "@/components/SEOHead";
@@ -42,6 +44,12 @@ const Index = () => {
             </div>
             <div className="animate-fade-in" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>
               <IslamicContentWidget />
+            </div>
+            <div className="animate-fade-in" style={{ animationDelay: "0.45s", animationFillMode: "both" }}>
+              <TeacherSlider />
+            </div>
+            <div className="animate-fade-in" style={{ animationDelay: "0.5s", animationFillMode: "both" }}>
+              <JobPostingsSlider />
             </div>
           </div>
           <div className="lg:col-span-1 animate-fade-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>

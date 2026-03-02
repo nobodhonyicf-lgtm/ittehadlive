@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/SEOHead";
@@ -9,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
 import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send, BadgeCheck, Eye, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
@@ -26,7 +27,7 @@ const getExperienceBadge = (years: number) => {
 };
 
 /* ─── Job Postings Section with Detail View ─── */
-const JobPostingsSection = ({ jobs, branches }: { jobs: any[]; branches: any[] }) => {
+const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }: { jobs: any[]; branches: any[]; highlightJobId?: string | null; jobHighlightRef?: React.RefObject<HTMLDivElement> }) => {
   const [selectedJob, setSelectedJob] = useState<any>(null);
 
   const getBranch = (branchId: string | null) => branches?.find(b => b.id === branchId);
@@ -42,14 +43,14 @@ const JobPostingsSection = ({ jobs, branches }: { jobs: any[]; branches: any[] }
         {jobs.map(j => {
           const branch = getBranch(j.branch_id);
           return (
-            <Card key={j.id} className="border-primary/20 hover:border-primary/40 transition-colors group">
+            <Card key={j.id} ref={highlightJobId === j.id ? jobHighlightRef : undefined} className={`border-primary/20 hover:border-primary/40 transition-colors group ${highlightJobId === j.id ? "ring-2 ring-primary shadow-lg" : ""}`}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">{j.title}</h3>
                     {branch && (
-                      <HoverCard>
-                        <HoverCardTrigger asChild>
+                      <Popover>
+                        <PopoverTrigger asChild>
                           <div className="flex items-center gap-1.5 mt-1 cursor-pointer hover:text-primary transition-colors">
                             {branch.image_url ? (
                               <img src={branch.image_url} alt="" className="w-4 h-4 rounded object-contain bg-muted" />
@@ -58,8 +59,8 @@ const JobPostingsSection = ({ jobs, branches }: { jobs: any[]; branches: any[] }
                             )}
                             <span className="text-[11px] text-muted-foreground font-medium underline decoration-dotted">{branch.name}</span>
                           </div>
-                        </HoverCardTrigger>
-                        <HoverCardContent className="w-72 p-0" side="bottom" align="start">
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0" side="bottom" align="start">
                           <div className="p-3 space-y-2">
                             <div className="flex items-center gap-2">
                               {branch.image_url ? (
@@ -99,8 +100,8 @@ const JobPostingsSection = ({ jobs, branches }: { jobs: any[]; branches: any[] }
                               {branch.total_students > 0 && <span>👨‍🎓 {branch.total_students} জন ছাত্র</span>}
                             </div>
                           </div>
-                        </HoverCardContent>
-                      </HoverCard>
+                        </PopoverContent>
+                      </Popover>
                     )}
                     {j.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{j.description}</p>}
                   </div>
@@ -204,6 +205,10 @@ const JobPostingsSection = ({ jobs, branches }: { jobs: any[]; branches: any[] }
 };
 
 const TeacherDirectory = () => {
+  const [searchParams] = useSearchParams();
+  const highlightId = searchParams.get("highlight");
+  const jobId = searchParams.get("job");
+  
   const [search, setSearch] = useState("");
   const [districtFilter, setDistrictFilter] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("");
@@ -212,6 +217,8 @@ const TeacherDirectory = () => {
   const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const loaderRef = useRef<HTMLDivElement>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
+  const jobHighlightRef = useRef<HTMLDivElement>(null);
 
   const { data: teachers, isLoading } = useQuery({
     queryKey: ["public_teachers"],
@@ -272,6 +279,28 @@ const TeacherDirectory = () => {
   // Reset visible count when filters change
   useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, districtFilter, subjectFilter, availabilityFilter, experienceFilter]);
 
+  // Scroll to highlighted teacher
+  useEffect(() => {
+    if (highlightId && teachers?.length) {
+      const idx = filtered.findIndex(t => t.id === highlightId);
+      if (idx >= 0 && idx >= visibleCount) {
+        setVisibleCount(idx + PAGE_SIZE);
+      }
+      setTimeout(() => {
+        highlightRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+    }
+  }, [highlightId, teachers]);
+
+  // Scroll to highlighted job
+  useEffect(() => {
+    if (jobId && jobs?.length) {
+      setTimeout(() => {
+        jobHighlightRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+    }
+  }, [jobId, jobs]);
+
   const renderStars = (rating: number | null) => {
     const r = rating || 0;
     return (
@@ -330,7 +359,7 @@ const TeacherDirectory = () => {
 
         {/* Active Job Postings */}
         {jobs && jobs.length > 0 && (
-          <JobPostingsSection jobs={jobs} branches={branches || []} />
+          <JobPostingsSection jobs={jobs} branches={branches || []} highlightJobId={jobId} jobHighlightRef={jobHighlightRef as React.RefObject<HTMLDivElement>} />
         )}
 
         {/* Filters */}
@@ -401,7 +430,8 @@ const TeacherDirectory = () => {
                 return (
                   <Card
                     key={t.id}
-                    className="group hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer overflow-hidden"
+                    ref={highlightId === t.id ? highlightRef as React.RefObject<HTMLDivElement> : undefined}
+                    className={`group hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer overflow-hidden ${highlightId === t.id ? "ring-2 ring-primary shadow-lg" : ""}`}
                     onClick={() => setSelectedTeacher(t)}
                   >
                     <CardContent className="p-0">
@@ -418,14 +448,16 @@ const TeacherDirectory = () => {
                             <h3 className="font-semibold text-sm group-hover:text-primary transition-colors flex items-center gap-1">
                               {t.name}
                               {(t as any).is_verified && (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <button type="button" onClick={e => e.stopPropagation()} className="inline-flex">
                                       <BadgeCheck size={14} className="text-blue-500 shrink-0 fill-blue-500 stroke-white" />
-                                    </TooltipTrigger>
-                                    <TooltipContent><p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p></TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
+                                    </button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto max-w-[250px] p-2" side="top">
+                                    <p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p>
+                                  </PopoverContent>
+                                </Popover>
                               )}
                             </h3>
                             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
@@ -503,14 +535,16 @@ const TeacherDirectory = () => {
                       <h2 className="text-lg font-bold flex items-center gap-1">
                         {selectedTeacher.name}
                         {(selectedTeacher as any).is_verified && (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button type="button" className="inline-flex">
                                 <BadgeCheck size={16} className="text-blue-500 fill-blue-500 stroke-white" />
-                              </TooltipTrigger>
-                              <TooltipContent><p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p></TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto max-w-[250px] p-2" side="top">
+                              <p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p>
+                            </PopoverContent>
+                          </Popover>
                         )}
                       </h2>
                       <p className="text-sm text-muted-foreground">{selectedTeacher.subject}</p>
