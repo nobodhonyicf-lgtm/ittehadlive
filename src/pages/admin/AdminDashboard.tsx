@@ -7,10 +7,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   LayoutDashboard, FileText, Bell, Image, Settings, Menu as MenuIcon,
   Video, Users, Mail, Tag, LogOut, ChevronLeft, Newspaper, Building2,
-  GraduationCap, BookOpen, ClipboardList, BarChart3, Clock, Package, MessageCircle, MessageSquare, X, ChevronDown, User, Camera
+  GraduationCap, BookOpen, ClipboardList, BarChart3, Clock, Package, MessageCircle, MessageSquare, X, ChevronDown, User, Camera,
+  ChevronRight, Eye, TrendingUp, ShoppingCart, Globe
 } from "lucide-react";
 import AdminPosts from "./AdminPosts";
 import AdminPages from "./AdminPages";
@@ -42,6 +44,7 @@ import AdminSMS from "./AdminSMS";
 import AdminCustomers from "./AdminCustomers";
 import AdminPushNotifications from "./AdminPushNotifications";
 import AdminIslamicContent from "./AdminIslamicContent";
+
 interface NavItem {
   label: string;
   icon: any;
@@ -137,6 +140,101 @@ const navCategories: NavCategory[] = [
   },
 ];
 
+/* ─── Dashboard Home with Stats ─── */
+const DashboardHome = () => {
+  const { data: stats } = useQuery({
+    queryKey: ["admin_dashboard_stats"],
+    queryFn: async () => {
+      const [posts, students, branches, orders, notices, contacts, pageViews] = await Promise.all([
+        supabase.from("posts").select("id", { count: "exact", head: true }),
+        supabase.from("students").select("id", { count: "exact", head: true }),
+        supabase.from("branches").select("id", { count: "exact", head: true }),
+        supabase.from("book_orders").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("notices").select("id", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("contact_submissions").select("id", { count: "exact", head: true }).eq("is_read", false),
+        supabase.from("page_views").select("id", { count: "exact", head: true }),
+      ]);
+      return {
+        posts: posts.count || 0,
+        students: students.count || 0,
+        branches: branches.count || 0,
+        pendingOrders: orders.count || 0,
+        activeNotices: notices.count || 0,
+        unreadContacts: contacts.count || 0,
+        totalViews: pageViews.count || 0,
+      };
+    },
+  });
+
+  const statCards = [
+    { label: "মোট পোস্ট", value: stats?.posts ?? "...", icon: Newspaper, color: "from-primary/20 to-primary/5 text-primary", link: "/admin/posts" },
+    { label: "মোট শিক্ষার্থী", value: stats?.students ?? "...", icon: GraduationCap, color: "from-blue-500/20 to-blue-500/5 text-blue-600", link: "/admin/students" },
+    { label: "শাখা সমূহ", value: stats?.branches ?? "...", icon: Building2, color: "from-emerald-500/20 to-emerald-500/5 text-emerald-600", link: "/admin/branches" },
+    { label: "পেন্ডিং অর্ডার", value: stats?.pendingOrders ?? "...", icon: ShoppingCart, color: "from-orange-500/20 to-orange-500/5 text-orange-600", link: "/admin/book-orders" },
+    { label: "সক্রিয় নোটিশ", value: stats?.activeNotices ?? "...", icon: Bell, color: "from-violet-500/20 to-violet-500/5 text-violet-600", link: "/admin/notices" },
+    { label: "অপঠিত বার্তা", value: stats?.unreadContacts ?? "...", icon: Mail, color: "from-rose-500/20 to-rose-500/5 text-rose-600", link: "/admin/contacts" },
+    { label: "মোট পেজ ভিউ", value: stats?.totalViews ?? "...", icon: Eye, color: "from-cyan-500/20 to-cyan-500/5 text-cyan-600", link: "/admin/analytics" },
+    { label: "সাইটে যান", value: "→", icon: Globe, color: "from-teal-500/20 to-teal-500/5 text-teal-600", link: "/" },
+  ];
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500">
+      {/* Welcome banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary/70 p-6 md:p-8 text-primary-foreground">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary-foreground/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-primary-foreground/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+        <div className="relative z-10">
+          <h1 className="text-xl md:text-2xl font-bold mb-1">আসসালামু আলাইকুম! 👋</h1>
+          <p className="text-primary-foreground/80 text-sm md:text-base">অ্যাডমিন প্যানেলে স্বাগতম। নিচে আপনার সাইটের সারসংক্ষেপ দেখুন।</p>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        {statCards.map((card, i) => (
+          <Link key={card.label} to={card.link}>
+            <Card className={`group relative overflow-hidden border-0 bg-gradient-to-br ${card.color} hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 cursor-pointer`}
+              style={{ animationDelay: `${i * 60}ms` }}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-xs font-medium opacity-70 mb-1">{card.label}</p>
+                    <p className="text-2xl md:text-3xl font-bold">{card.value}</p>
+                  </div>
+                  <card.icon size={24} className="opacity-40 group-hover:opacity-60 transition-opacity" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+
+      {/* Quick actions */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: "নতুন পোস্ট", icon: Newspaper, path: "/admin/posts" },
+          { label: "নোটিশ যোগ", icon: Bell, path: "/admin/notices" },
+          { label: "ছবি আপলোড", icon: Image, path: "/admin/gallery" },
+          { label: "সেটিংস", icon: Settings, path: "/admin/settings" },
+        ].map((action) => (
+          <Link key={action.label} to={action.path}>
+            <Card className="border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-300 cursor-pointer group">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                  <action.icon size={18} />
+                </div>
+                <span className="text-sm font-medium">{action.label}</span>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Main Dashboard Layout ─── */
 const AdminDashboard = () => {
   const { user, isAdmin, hasAnyRole, loading, signOut } = useAuth();
   const { hasPermission } = usePermissions();
@@ -150,7 +248,6 @@ const AdminDashboard = () => {
   const profileRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch profile - shared query key with user profile page
   const { data: profile } = useQuery({
     queryKey: ["user_profile", user?.id],
     queryFn: async () => {
@@ -165,7 +262,6 @@ const AdminDashboard = () => {
     enabled: !!user?.id,
   });
 
-  // Close profile dropdown on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
@@ -194,7 +290,6 @@ const AdminDashboard = () => {
     if (isMobile === true) setSidebarOpen(false);
   }, [isMobile]);
 
-  // Auto-open category that contains current path
   useEffect(() => {
     const newOpen: Record<string, boolean> = {};
     navCategories.forEach((cat) => {
@@ -220,6 +315,13 @@ const AdminDashboard = () => {
     }
   }, [user, isAdmin, hasAnyRole, loading, navigate]);
 
+  // Current page title for breadcrumb
+  const currentPageTitle = (() => {
+    const allItems = navCategories.flatMap(c => c.items);
+    const found = allItems.find(i => i.path === location.pathname);
+    return found?.label || "";
+  })();
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -235,110 +337,146 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-muted/30 flex">
+      {/* Mobile overlay */}
       {isMobile && sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
       )}
 
+      {/* ─── Enhanced Sidebar ─── */}
       <aside
         className={`
-          ${isMobile ? "fixed inset-y-0 left-0 z-50" : "relative"}
-          ${sidebarOpen ? "w-60" : isMobile ? "w-0 overflow-hidden" : "w-16"}
-          bg-card border-r border-border transition-all shrink-0 flex flex-col
+          ${isMobile ? "fixed inset-y-0 left-0 z-50" : "sticky top-0 h-screen"}
+          ${sidebarOpen ? "w-64" : isMobile ? "w-0 overflow-hidden" : "w-[68px]"}
+          bg-card border-r border-border/50 transition-all duration-300 shrink-0 flex flex-col shadow-sm
         `}
       >
-        <div className="p-4 border-b border-border flex items-center justify-between">
-          {sidebarOpen && <span className="font-bold text-primary text-sm">অ্যাডমিন প্যানেল</span>}
-          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            {isMobile && sidebarOpen ? <X size={18} /> : <ChevronLeft className={`transition-transform ${!sidebarOpen ? "rotate-180" : ""}`} size={18} />}
+        {/* Sidebar Header */}
+        <div className="h-14 border-b border-border/50 flex items-center px-3 gap-2">
+          {sidebarOpen && (
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground font-bold text-sm shrink-0">
+                ই
+              </div>
+              <span className="font-bold text-primary text-sm truncate">অ্যাডমিন প্যানেল</span>
+            </div>
+          )}
+          <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            {isMobile && sidebarOpen ? <X size={16} /> : <ChevronLeft className={`transition-transform duration-300 ${!sidebarOpen ? "rotate-180" : ""}`} size={16} />}
           </Button>
         </div>
-        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
+
+        {/* Nav Items */}
+        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto scrollbar-thin">
           {filteredCategories.map((cat) => (
-            <div key={cat.label}>
+            <div key={cat.label} className="mb-1">
               {sidebarOpen ? (
                 <button
                   onClick={() => toggleCategory(cat.label)}
-                  className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
+                  className="flex items-center justify-between w-full px-3 py-2 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-widest hover:text-foreground transition-colors rounded-md"
                 >
                   <span className="flex items-center gap-2">
-                    <cat.icon size={14} />
+                    <cat.icon size={13} />
                     {cat.label}
                   </span>
-                  <ChevronDown size={14} className={`transition-transform ${openCategories[cat.label] ? "rotate-180" : ""}`} />
+                  <ChevronDown size={12} className={`transition-transform duration-200 ${openCategories[cat.label] ? "" : "-rotate-90"}`} />
                 </button>
               ) : (
-                <div className="border-b border-border my-1" />
+                <div className="border-b border-border/30 my-1.5 mx-2" />
               )}
-              {(sidebarOpen ? openCategories[cat.label] !== false : true) && cat.items.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={handleNavClick}
-                  className={`flex items-center gap-3 px-3 py-2 rounded text-sm transition-colors
-                    ${sidebarOpen ? "ml-2" : ""}
-                    ${location.pathname === item.path
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted"
-                    }`}
-                >
-                  <item.icon size={18} />
-                  {sidebarOpen && item.label}
-                </Link>
-              ))}
+              <div className={`space-y-0.5 ${sidebarOpen && openCategories[cat.label] === false ? "hidden" : ""}`}>
+                {cat.items.map((item) => {
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={handleNavClick}
+                      title={!sidebarOpen ? item.label : undefined}
+                      className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 relative
+                        ${sidebarOpen ? "ml-1" : "justify-center"}
+                        ${isActive
+                          ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        }`}
+                    >
+                      <item.icon size={17} className={isActive ? "" : "group-hover:scale-110 transition-transform"} />
+                      {sidebarOpen && <span className="truncate">{item.label}</span>}
+                      {isActive && sidebarOpen && (
+                        <ChevronRight size={14} className="ml-auto opacity-60" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </nav>
-        <div className="p-2 border-t border-border">
-          <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={signOut}>
-            <LogOut size={16} />
-            {sidebarOpen && "লগআউট"}
-          </Button>
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="w-full justify-start gap-2 mt-1">
-              <ChevronLeft size={16} />
+
+        {/* Sidebar Footer */}
+        <div className="p-2 border-t border-border/50 space-y-0.5">
+          <Link to="/" onClick={handleNavClick}>
+            <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-muted-foreground hover:text-foreground">
+              <Globe size={16} />
               {sidebarOpen && "সাইটে ফিরুন"}
             </Button>
           </Link>
+          <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={signOut}>
+            <LogOut size={16} />
+            {sidebarOpen && "লগআউট"}
+          </Button>
         </div>
       </aside>
 
-      <main className="flex-1 min-w-0 overflow-y-auto">
-        {/* Top bar with mobile menu + profile */}
-        <div className="sticky top-0 z-30 bg-card border-b border-border px-4 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      {/* ─── Main Area ─── */}
+      <main className="flex-1 min-w-0 flex flex-col">
+        {/* Enhanced Top Bar */}
+        <div className="sticky top-0 z-30 bg-card/80 backdrop-blur-lg border-b border-border/50 px-4 h-14 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             {isMobile && (
-              <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
-                <MenuIcon size={20} />
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => setSidebarOpen(true)}>
+                <MenuIcon size={18} />
               </Button>
             )}
-            {isMobile && <span className="font-bold text-primary text-sm">অ্যাডমিন প্যানেল</span>}
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-1.5 text-sm min-w-0">
+              <Link to="/admin" className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
+                <LayoutDashboard size={15} />
+              </Link>
+              {currentPageTitle && location.pathname !== "/admin" && (
+                <>
+                  <ChevronRight size={13} className="text-muted-foreground/50 shrink-0" />
+                  <span className="font-medium text-foreground truncate">{currentPageTitle}</span>
+                </>
+              )}
+            </div>
           </div>
+
           {/* Profile dropdown */}
-          <div className="relative" ref={profileRef}>
-            <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <Avatar className="h-8 w-8">
+          <div className="relative shrink-0" ref={profileRef}>
+            <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity rounded-full p-1 pr-2 hover:bg-accent">
+              <Avatar className="h-8 w-8 ring-2 ring-primary/10">
                 {profile?.avatar_url ? (
                   <AvatarImage src={profile.avatar_url} alt="Profile" />
                 ) : null}
-                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                   {profile?.full_name?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || <User size={14} />}
                 </AvatarFallback>
               </Avatar>
               <span className="hidden md:block text-sm font-medium text-foreground max-w-[120px] truncate">
                 {profile?.full_name || user?.email?.split("@")[0]}
               </span>
-              <ChevronDown size={14} className="text-muted-foreground hidden md:block" />
+              <ChevronDown size={13} className="text-muted-foreground hidden md:block" />
             </button>
             {profileOpen && (
-              <div className="absolute right-0 top-full mt-1 w-64 bg-card border border-border rounded-lg shadow-lg p-3 z-50">
-                <div className="flex items-center gap-3 mb-3">
+              <div className="absolute right-0 top-full mt-2 w-72 bg-card border border-border/50 rounded-xl shadow-xl p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border/50">
                   <div className="relative group">
-                    <Avatar className="h-14 w-14">
+                    <Avatar className="h-14 w-14 ring-2 ring-primary/20">
                       {profile?.avatar_url ? (
                         <AvatarImage src={profile.avatar_url} alt="Profile" />
                       ) : null}
-                      <AvatarFallback className="bg-primary/10 text-primary">
+                      <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
                         {profile?.full_name?.charAt(0) || <User size={20} />}
                       </AvatarFallback>
                     </Avatar>
@@ -353,32 +491,31 @@ const AdminDashboard = () => {
                   <div className="min-w-0">
                     <p className="font-semibold text-sm text-foreground truncate">{profile?.full_name || "নাম নেই"}</p>
                     <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                    <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                      {isAdmin ? "অ্যাডমিন" : "সম্পাদক"}
+                    </span>
                   </div>
                 </div>
-                <div className="border-t border-border pt-2 space-y-1">
-                  <Link to="/profile" onClick={() => setProfileOpen(false)} className="flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-muted transition-colors text-foreground">
-                    <User size={14} /> প্রোফাইল দেখুন
+                <div className="space-y-0.5">
+                  <Link to="/profile" onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg hover:bg-accent transition-colors text-foreground">
+                    <User size={15} /> প্রোফাইল দেখুন
                   </Link>
-                  <button onClick={() => { setProfileOpen(false); signOut(); }} className="flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-destructive/10 transition-colors text-destructive w-full text-left">
-                    <LogOut size={14} /> লগআউট
+                  <Link to="/admin/settings" onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg hover:bg-accent transition-colors text-foreground">
+                    <Settings size={15} /> সেটিংস
+                  </Link>
+                  <button onClick={() => { setProfileOpen(false); signOut(); }} className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg hover:bg-destructive/10 transition-colors text-destructive w-full text-left">
+                    <LogOut size={15} /> লগআউট
                   </button>
                 </div>
               </div>
             )}
           </div>
         </div>
-        <div className="p-4 md:p-6">
+
+        {/* Content */}
+        <div className="flex-1 p-4 md:p-6">
           <Routes>
-            <Route
-              index
-              element={
-                <div className="text-center py-12">
-                  <LayoutDashboard className="mx-auto text-primary mb-4" size={48} />
-                  <h1 className="text-2xl font-bold">স্বাগতম, অ্যাডমিন প্যানেলে!</h1>
-                  <p className="text-muted-foreground mt-2">বাম পাশের মেনু থেকে পছন্দের অপশন বেছে নিন।</p>
-                </div>
-              }
-            />
+            <Route index element={<DashboardHome />} />
             <Route path="posts" element={<AdminPosts />} />
             <Route path="photo-card" element={<AdminPhotoCard />} />
             <Route path="analytics" element={<AdminAnalytics />} />
