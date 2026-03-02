@@ -54,9 +54,9 @@ const MasalaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ defaul
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: true,
       refetchOnReconnect: true,
-      staleTime: 1000 * 60 * 5,
+      staleTime: 1000 * 30,
       retry: 2,
     },
   },
