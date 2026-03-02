@@ -1591,8 +1591,10 @@ export type Database = {
           created_at: string
           district: string | null
           email: string | null
+          exam_result: string | null
           expected_salary: string | null
           experience_years: number | null
+          grade_obtained: string | null
           id: string
           is_active: boolean | null
           is_available: boolean | null
@@ -1601,6 +1603,7 @@ export type Database = {
           phone: string | null
           photo_url: string | null
           preferred_area: string | null
+          previous_institution: string | null
           qualification: string | null
           rating: number | null
           sort_order: number | null
@@ -1615,8 +1618,10 @@ export type Database = {
           created_at?: string
           district?: string | null
           email?: string | null
+          exam_result?: string | null
           expected_salary?: string | null
           experience_years?: number | null
+          grade_obtained?: string | null
           id?: string
           is_active?: boolean | null
           is_available?: boolean | null
@@ -1625,6 +1630,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           preferred_area?: string | null
+          previous_institution?: string | null
           qualification?: string | null
           rating?: number | null
           sort_order?: number | null
@@ -1639,8 +1645,10 @@ export type Database = {
           created_at?: string
           district?: string | null
           email?: string | null
+          exam_result?: string | null
           expected_salary?: string | null
           experience_years?: number | null
+          grade_obtained?: string | null
           id?: string
           is_active?: boolean | null
           is_available?: boolean | null
@@ -1649,6 +1657,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           preferred_area?: string | null
+          previous_institution?: string | null
           qualification?: string | null
           rating?: number | null
           sort_order?: number | null

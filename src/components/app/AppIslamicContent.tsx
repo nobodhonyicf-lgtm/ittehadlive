@@ -69,7 +69,7 @@ const AppIslamicContent = () => {
 
   return (
     <div className="animate-fade-in space-y-3" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
-      <h2 className="text-sm font-bold flex items-center gap-2">☪ ইসলামী কন্টেন্ট</h2>
+      <h2 className="text-sm font-bold flex items-center gap-2">📚 ইসলামী কন্টেন্ট</h2>
 
       <AppIftarCountdown />
 

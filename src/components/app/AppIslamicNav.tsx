@@ -10,7 +10,7 @@ const islamicLinks = [
 const AppIslamicNav = () => {
   return (
     <div className="animate-fade-in" style={{ animationDelay: "150ms", animationFillMode: "both" }}>
-      <h2 className="text-sm font-bold mb-2.5 flex items-center gap-2">☪ ইসলামী পাতা</h2>
+      <h2 className="text-sm font-bold mb-2.5 flex items-center gap-2">📚 ইসলামী পাতা</h2>
       <div className="grid grid-cols-4 gap-2">
         {islamicLinks.map(link => (
           <Link

@@ -595,7 +595,27 @@ const TeacherDirectory = () => {
                         <div><div className="text-[10px] text-muted-foreground">বিশেষ দক্ষতা</div><span className="text-xs font-medium">{selectedTeacher.specialization}</span></div>
                       </div>
                     )}
+                    {(selectedTeacher as any).exam_result && (
+                      <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg text-sm">
+                        <GraduationCap size={14} className="text-primary shrink-0" />
+                        <div><div className="text-[10px] text-muted-foreground">পরীক্ষার ফলাফল</div><span className="text-xs font-medium">{(selectedTeacher as any).exam_result}</span></div>
+                      </div>
+                    )}
+                    {(selectedTeacher as any).grade_obtained && (
+                      <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg text-sm">
+                        <Award size={14} className="text-primary shrink-0" />
+                        <div><div className="text-[10px] text-muted-foreground">গ্রেড</div><span className="text-xs font-medium">{(selectedTeacher as any).grade_obtained}</span></div>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Previous Institution */}
+                  {(selectedTeacher as any).previous_institution && (
+                    <div className="text-sm bg-muted/50 rounded-lg p-3">
+                      <strong className="text-xs">পূর্ববর্তী প্রতিষ্ঠান:</strong>
+                      <p className="mt-1 text-muted-foreground">{(selectedTeacher as any).previous_institution}</p>
+                    </div>
+                  )}
 
                   {/* Contact */}
                   {(selectedTeacher.phone || selectedTeacher.email) && (
