@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Clock, Building2 } from "lucide-react";
 import SectionHeader from "./SectionHeader";
+import { toBengali } from "@/lib/bengali";
 
 const JobPostingsSlider = () => {
   const { data: jobs } = useQuery({
@@ -31,6 +32,15 @@ const JobPostingsSlider = () => {
   if (!jobs?.length) return null;
 
   const getBranch = (id: string | null) => branches?.find((b: any) => b.id === id);
+
+  const formatDateBn = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const day = toBengali(d.getDate());
+    const months = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+    const month = months[d.getMonth()];
+    const year = toBengali(d.getFullYear());
+    return `${day} ${month}, ${year}`;
+  };
 
   return (
     <div>
@@ -64,11 +74,11 @@ const JobPostingsSlider = () => {
                   {j.deadline && (
                     <div className="flex items-center gap-1 mt-2 text-[10px] text-destructive">
                       <Clock size={10} />
-                      <span>শেষ: {new Date(j.deadline).toLocaleDateString("bn-BD")}</span>
+                      <span>শেষ: {formatDateBn(j.deadline)}</span>
                     </div>
                   )}
                   {branch && (
-                    <div className="mt-2 pt-2 border-t border-border flex items-center gap-1.5">
+                    <div className="mt-3 pt-3 border-t border-border flex items-center gap-1.5">
                       {branch.image_url ? (
                         <img src={branch.image_url} alt="" className="w-4 h-4 rounded object-contain bg-muted" />
                       ) : (

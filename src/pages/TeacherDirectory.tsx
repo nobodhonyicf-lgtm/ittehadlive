@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toBengali, toBengaliNumber } from "@/lib/bengali";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
@@ -37,7 +38,7 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
       <div className="flex items-center gap-2 mb-4">
         <div className="w-1 h-6 bg-primary rounded-full" />
         <h2 className="text-lg font-bold">নিয়োগ বিজ্ঞপ্তি</h2>
-        <Badge variant="secondary" className="text-[10px]">{jobs.length}টি সক্রিয়</Badge>
+        <Badge variant="secondary" className="text-[10px]">{toBengaliNumber(jobs.length)}টি সক্রিয়</Badge>
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         {jobs.map(j => {
@@ -111,8 +112,8 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
                             {branch.email && <span className="flex items-center gap-1"><Mail size={10} /> {branch.email}</span>}
                           </div>
                           <div className="flex gap-3 text-[10px]">
-                            {branch.total_teachers > 0 && <span>👨‍🏫 {branch.total_teachers} জন শিক্ষক</span>}
-                            {branch.total_students > 0 && <span>👨‍🎓 {branch.total_students} জন ছাত্র</span>}
+                            {branch.total_teachers > 0 && <span>👨‍🏫 {toBengaliNumber(branch.total_teachers)} জন শিক্ষক</span>}
+                            {branch.total_students > 0 && <span>👨‍🎓 {toBengaliNumber(branch.total_students)} জন ছাত্র</span>}
                           </div>
                         </div>
                       </PopoverContent>
@@ -310,7 +311,7 @@ const TeacherDirectory = () => {
         {[1, 2, 3, 4, 5].map(i => (
           <Star key={i} size={12} className={i <= r ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"} />
         ))}
-        {r > 0 && <span className="text-[10px] text-muted-foreground ml-1">({r.toFixed(1)})</span>}
+        {r > 0 && <span className="text-[10px] text-muted-foreground ml-1">({toBengaliNumber(r.toFixed(1))})</span>}
       </div>
     );
   };
@@ -336,17 +337,17 @@ const TeacherDirectory = () => {
             {/* Stats */}
             <div className="flex justify-center gap-6 mt-5">
               <div className="text-center">
-                <div className="text-xl font-bold text-primary">{totalTeachers}</div>
+                <div className="text-xl font-bold text-primary">{toBengaliNumber(totalTeachers)}</div>
                 <div className="text-[10px] text-muted-foreground">মোট শিক্ষক</div>
               </div>
               <div className="w-px bg-border" />
               <div className="text-center">
-                <div className="text-xl font-bold text-primary">{availableTeachers}</div>
+                <div className="text-xl font-bold text-primary">{toBengaliNumber(availableTeachers)}</div>
                 <div className="text-[10px] text-muted-foreground">উপলব্ধ</div>
               </div>
               <div className="w-px bg-border" />
               <div className="text-center">
-                <div className="text-xl font-bold text-primary">{districts.length}</div>
+                <div className="text-xl font-bold text-primary">{toBengaliNumber(districts.length)}</div>
                 <div className="text-[10px] text-muted-foreground">জেলা</div>
               </div>
             </div>
@@ -370,7 +371,7 @@ const TeacherDirectory = () => {
             <Filter size={14} className="text-primary" />
             <span className="text-sm font-medium">শিক্ষক খুঁজুন</span>
             {filtered.length !== (teachers?.length || 0) && (
-              <Badge variant="outline" className="text-[10px] ml-auto">{filtered.length} জন পাওয়া গেছে</Badge>
+              <Badge variant="outline" className="text-[10px] ml-auto">{toBengaliNumber(filtered.length)} জন পাওয়া গেছে</Badge>
             )}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -490,7 +491,7 @@ const TeacherDirectory = () => {
                         </div>
                         {t.experience_years > 0 && (
                           <span className="text-[10px] text-muted-foreground">
-                            {t.experience_years} বছর
+                            {toBengaliNumber(t.experience_years)} বছর
                           </span>
                         )}
                       </div>
@@ -512,7 +513,7 @@ const TeacherDirectory = () => {
 
             {!hasMore && filtered.length > PAGE_SIZE && (
               <p className="text-center text-xs text-muted-foreground py-6">
-                মোট {filtered.length} জন শিক্ষক দেখানো হয়েছে
+                মোট {toBengaliNumber(filtered.length)} জন শিক্ষক দেখানো হয়েছে
               </p>
             )}
           </>
@@ -578,7 +579,7 @@ const TeacherDirectory = () => {
                     {selectedTeacher.experience_years > 0 && (
                       <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg text-sm">
                         <Briefcase size={14} className="text-primary shrink-0" />
-                        <div><div className="text-[10px] text-muted-foreground">অভিজ্ঞতা</div><span className="text-xs font-medium">{selectedTeacher.experience_years} বছর</span></div>
+                        <div><div className="text-[10px] text-muted-foreground">অভিজ্ঞতা</div><span className="text-xs font-medium">{toBengaliNumber(selectedTeacher.experience_years)} বছর</span></div>
                       </div>
                     )}
                     {selectedTeacher.district && (
@@ -702,7 +703,7 @@ const TeacherReviewSection = ({ teacherId }: { teacherId: string }) => {
           <MessageSquare size={14} className="text-primary" /> রিভিউ ও মূল্যায়ন
           {reviews && reviews.length > 0 && (
             <span className="text-[10px] text-muted-foreground font-normal ml-1">
-              ({reviews.length}টি · গড় {avgRating.toFixed(1)}⭐)
+              ({toBengaliNumber(reviews.length)}টি · গড় {toBengaliNumber(avgRating.toFixed(1))}⭐)
             </span>
           )}
         </h3>

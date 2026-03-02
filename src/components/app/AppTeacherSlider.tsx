@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { BadgeCheck, BookOpen, MapPin, Star } from "lucide-react";
+import { toBengaliNumber } from "@/lib/bengali";
 
 const getExperienceBadge = (years: number) => {
   if (years >= 10) return { label: "সিনিয়র", color: "bg-amber-500/10 text-amber-700 border-amber-200" };
@@ -70,6 +71,7 @@ const AppTeacherSlider = () => {
                     {[1, 2, 3, 4, 5].map(i => (
                       <Star key={i} size={7} className={i <= (t.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"} />
                     ))}
+                    {(t.rating || 0) > 0 && <span className="text-[6px] text-muted-foreground ml-0.5">({toBengaliNumber(Number(t.rating).toFixed(1))})</span>}
                   </div>
                   {expBadge && (
                     <span className={`inline-block text-[7px] px-1 py-0.5 rounded-full border mt-0.5 ${expBadge.color}`}>
