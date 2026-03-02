@@ -11,8 +11,9 @@ const islamicLinks = [
 const IslamicNav = () => {
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden">
-      <div className="bg-gradient-to-r from-emerald-800 to-teal-700 px-4 py-3">
-        <h2 className="text-white font-bold text-sm">☪ ইসলামী পাতাসমূহ</h2>
+      <div className="flex items-center gap-2 px-4 py-3">
+        <div className="w-1 h-6 rounded-full bg-gradient-to-b from-emerald-600 to-teal-500" />
+        <h2 className="font-bold text-sm text-foreground">☪ ইসলামী পাতাসমূহ</h2>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3">
         {islamicLinks.map(link => (

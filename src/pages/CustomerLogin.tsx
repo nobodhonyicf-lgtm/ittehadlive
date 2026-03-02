@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import { LogIn, Mail, Lock } from "lucide-react";
 
 const CustomerLogin = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl") || searchParams.get("redirect") || "/profile";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,7 +49,7 @@ const CustomerLogin = () => {
       toast.error("লগইন ব্যর্থ: " + error.message);
     } else {
       toast.success("সফলভাবে লগইন হয়েছে");
-      navigate("/profile");
+      navigate(returnUrl);
     }
   };
 
@@ -79,7 +81,7 @@ const CustomerLogin = () => {
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
-            redirectTo: `${window.location.origin}/profile`,
+            redirectTo: `${window.location.origin}${returnUrl}`,
             skipBrowserRedirect: true,
           },
         });
