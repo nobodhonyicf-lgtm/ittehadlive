@@ -1,5 +1,5 @@
 import { useNotices } from "@/hooks/useData";
-import { Bell } from "lucide-react";
+import { Bell, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const NoticeTicker = () => {
@@ -8,23 +8,32 @@ const NoticeTicker = () => {
   if (!notices?.length) return null;
 
   return (
-    <div className="bg-accent text-accent-foreground flex items-center overflow-hidden">
-      <div className="bg-destructive text-destructive-foreground px-4 py-2 font-bold flex items-center gap-2 shrink-0 z-10">
-        <Bell size={16} />
-        নোটিশ
-      </div>
-      <div className="overflow-hidden flex-1 py-2">
-        <div className="animate-ticker whitespace-nowrap flex gap-8">
-          {notices.map((notice) => (
-            <Link
-              key={notice.id}
-              to={`/notice/${notice.id}`}
-              className="hover:underline inline-block"
-            >
-              ● {notice.title}
-            </Link>
-          ))}
+    <div className="bg-card border-b border-border">
+      <div className="max-w-[1200px] mx-auto flex items-center overflow-hidden">
+        <div className="bg-destructive text-destructive-foreground px-4 py-2.5 font-bold flex items-center gap-2 shrink-0 z-10 text-sm">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+          </span>
+          নোটিশ
         </div>
+        <div className="overflow-hidden flex-1 py-2.5 px-3">
+          <div className="animate-ticker whitespace-nowrap flex gap-10 text-sm">
+            {notices.map((notice) => (
+              <Link
+                key={notice.id}
+                to={`/notice/${notice.id}`}
+                className="hover:text-primary transition-colors inline-flex items-center gap-1.5 text-foreground"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />
+                {notice.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+        <Link to="/posts" className="hidden sm:flex items-center gap-0.5 text-xs text-primary font-medium px-3 py-2.5 hover:bg-muted/50 transition-colors shrink-0">
+          সব দেখুন <ChevronRight size={12} />
+        </Link>
       </div>
     </div>
   );

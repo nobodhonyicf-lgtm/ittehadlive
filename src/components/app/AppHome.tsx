@@ -16,38 +16,38 @@ const AppHome = () => {
   return (
     <AppLayout>
       <AppBannerSlider />
-      <div className="px-4 py-4 space-y-5">
+      <div className="px-4 py-4 space-y-4">
         <div className="animate-fade-in" style={{ animationDelay: "0.05s", animationFillMode: "both" }}>
           <AppQuickActions />
         </div>
         <div className="animate-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+          <AppNoticeSection />
+        </div>
+        <div className="animate-fade-in" style={{ animationDelay: "0.12s", animationFillMode: "both" }}>
           <AppIslamicNav />
         </div>
         <div className="animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
-          <AppPollWidget />
-        </div>
-        <div className="animate-fade-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
-          <AppNoticeSection />
-        </div>
-        <div className="animate-fade-in" style={{ animationDelay: "0.25s", animationFillMode: "both" }}>
           <AppPrayerWidget />
         </div>
-        <div className="animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
+        <div className="animate-fade-in" style={{ animationDelay: "0.18s", animationFillMode: "both" }}>
           <AppIslamicContent />
         </div>
-        <div className="animate-fade-in" style={{ animationDelay: "0.32s", animationFillMode: "both" }}>
+        <div className="animate-fade-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
+          <AppPollWidget />
+        </div>
+        <div className="animate-fade-in" style={{ animationDelay: "0.22s", animationFillMode: "both" }}>
           <AppTeacherSlider />
         </div>
-        <div className="animate-fade-in" style={{ animationDelay: "0.34s", animationFillMode: "both" }}>
+        <div className="animate-fade-in" style={{ animationDelay: "0.24s", animationFillMode: "both" }}>
           <AppJobPostings />
         </div>
-        <div className="animate-fade-in" style={{ animationDelay: "0.35s", animationFillMode: "both" }}>
+        <div className="animate-fade-in" style={{ animationDelay: "0.26s", animationFillMode: "both" }}>
           <AppRecentPosts />
         </div>
-        <div className="animate-fade-in" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>
+        <div className="animate-fade-in" style={{ animationDelay: "0.28s", animationFillMode: "both" }}>
           <AppGallerySection />
         </div>
-        <div className="animate-fade-in" style={{ animationDelay: "0.45s", animationFillMode: "both" }}>
+        <div className="animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
           <AppVideoSection />
         </div>
       </div>
