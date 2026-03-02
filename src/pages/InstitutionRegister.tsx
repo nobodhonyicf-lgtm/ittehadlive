@@ -83,7 +83,7 @@ const InstitutionRegister = () => {
           <Building2 size={48} className="mx-auto text-muted-foreground/40 mb-4" />
           <h1 className="text-xl font-bold mb-2">প্রতিষ্ঠান নিবন্ধনের জন্য লগইন করুন</h1>
           <p className="text-sm text-muted-foreground mb-4">প্রতিষ্ঠান নিবন্ধন করতে আপনাকে প্রথমে লগইন/রেজিস্টার করতে হবে</p>
-          <Link to="/login"><Button className="gap-2">লগইন করুন</Button></Link>
+          <Link to="/login?returnUrl=/institution-register"><Button className="gap-2">লগইন করুন</Button></Link>
         </div>
       </Layout>
     );

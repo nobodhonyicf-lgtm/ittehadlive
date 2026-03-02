@@ -11,7 +11,7 @@ const LiveDot = () => (
       {[1, 2, 3, 4].map((i) => (
         <span
           key={i}
-          className="w-[3px] rounded-full bg-white"
+          className="w-[3px] rounded-full bg-primary"
           style={{
             animation: `liveWave 1s ease-in-out ${i * 0.15}s infinite`,
           }}
@@ -132,19 +132,23 @@ const RecentNews = () => {
 
       {/* Right sidebar with scroll */}
       <div className="flex flex-col">
-        <div className="flex items-center justify-between bg-gradient-to-r from-primary to-primary/80 rounded-t-md">
-          <h2 className="flex items-center text-white px-4 py-2.5 text-[15px] font-bold tracking-wide">
-            <LiveDot />
-            সর্বশেষ নিবন্ধ
-          </h2>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-7 rounded-full bg-gradient-to-b from-primary to-primary/50" />
+            <h2 className="flex items-center text-[16px] font-bold text-foreground tracking-wide">
+              <LiveDot />
+              সর্বশেষ নিবন্ধ
+            </h2>
+          </div>
+          <div className="flex-1 mx-3 h-px bg-gradient-to-r from-primary/30 via-border to-transparent" />
           <Link
             to="/posts"
-            className="flex items-center gap-0.5 text-[13px] font-bold text-white bg-black/20 hover:bg-black/30 px-3 py-2.5 transition-colors"
+            className="flex items-center gap-0.5 text-[12px] font-semibold text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-full transition-colors border border-primary/15"
           >
             আরও ›
           </Link>
         </div>
-        <ScrollArea className="h-[480px] bg-card border border-t-0 border-border rounded-b-md">
+        <ScrollArea className="h-[480px] bg-card border border-border rounded-lg">
           <div className="divide-y divide-border">
             {sidePosts.map((post) => (
               <Link
