@@ -1,19 +1,47 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, LogIn, Upload, Video, ShieldCheck, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 
+/* ─── Simple Math CAPTCHA ─── */
+const useCaptcha = () => {
+  const [captcha, setCaptcha] = useState(() => generateCaptcha());
+  const [answer, setAnswer] = useState("");
+
+  function generateCaptcha() {
+    const a = Math.floor(Math.random() * 20) + 1;
+    const b = Math.floor(Math.random() * 20) + 1;
+    return { a, b, question: `${a} + ${b} = ?`, correct: a + b };
+  }
+
+  const refresh = useCallback(() => {
+    setCaptcha(generateCaptcha());
+    setAnswer("");
+  }, []);
+
+  const isValid = parseInt(answer) === captcha.correct;
+
+  return { question: captcha.question, answer, setAnswer, isValid, refresh };
+};
+
 const TeacherApply = () => {
+  const { user, loading: authLoading } = useAuth();
   const [submitted, setSubmitted] = useState(false);
+  const [nidFile, setNidFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const captcha = useCaptcha();
+
   const [form, setForm] = useState({
     name: "", phone: "", email: "", address: "", district: "", subject: "",
     qualification: "", experience_years: 0, specialization: "", certification: "",
@@ -21,22 +49,78 @@ const TeacherApply = () => {
     reference_name: "", reference_phone: "",
   });
 
+  const uploadFile = async (file: File, folder: string) => {
+    const ext = file.name.split(".").pop();
+    const path = `${folder}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("uploads").upload(path, file);
+    if (error) throw new Error("ফাইল আপলোড ব্যর্থ: " + error.message);
+    const { data } = supabase.storage.from("uploads").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
   const submitMutation = useMutation({
     mutationFn: async (data: typeof form) => {
-      const payload = {
-        ...data,
-        email: data.email || null, address: data.address || null, district: data.district || null,
-        qualification: data.qualification || null, specialization: data.specialization || null,
-        certification: data.certification || null, bio: data.bio || null, photo_url: data.photo_url || null,
-        preferred_area: data.preferred_area || null, expected_salary: data.expected_salary || null,
-        reference_name: data.reference_name || null, reference_phone: data.reference_phone || null,
-      };
-      const { error } = await supabase.from("teacher_applications").insert([payload]);
-      if (error) throw error;
+      if (!user) throw new Error("লগইন করুন");
+      if (!captcha.isValid) throw new Error("ক্যাপচার উত্তর ভুল হয়েছে");
+      if (!nidFile) throw new Error("ভোটার আইডি / জন্ম নিবন্ধনের ছবি দিন");
+      if (!videoFile) throw new Error("সেলফি ভিডিও আপলোড করুন");
+
+      // Validate video size (max 50MB)
+      if (videoFile.size > 50 * 1024 * 1024) throw new Error("ভিডিও ৫০MB এর মধ্যে হতে হবে");
+      if (nidFile.size > 10 * 1024 * 1024) throw new Error("NID ছবি ১০MB এর মধ্যে হতে হবে");
+
+      setUploading(true);
+
+      try {
+        const [nidUrl, videoUrl] = await Promise.all([
+          uploadFile(nidFile, "teacher-nid"),
+          uploadFile(videoFile, "teacher-video"),
+        ]);
+
+        const payload = {
+          ...data,
+          user_id: user.id,
+          nid_image_url: nidUrl,
+          verification_video_url: videoUrl,
+          email: data.email || null, address: data.address || null, district: data.district || null,
+          qualification: data.qualification || null, specialization: data.specialization || null,
+          certification: data.certification || null, bio: data.bio || null, photo_url: data.photo_url || null,
+          preferred_area: data.preferred_area || null, expected_salary: data.expected_salary || null,
+          reference_name: data.reference_name || null, reference_phone: data.reference_phone || null,
+        };
+        const { error } = await supabase.from("teacher_applications").insert([payload as any]);
+        if (error) throw error;
+      } finally {
+        setUploading(false);
+      }
     },
     onSuccess: () => { setSubmitted(true); toast.success("আবেদন সফলভাবে জমা হয়েছে"); },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  // Not logged in
+  if (!authLoading && !user) {
+    return (
+      <Layout>
+        <SEOHead title="শিক্ষক আবেদন - লগইন প্রয়োজন" />
+        <div className="container mx-auto px-4 py-16 text-center max-w-md">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <LogIn className="text-primary" size={32} />
+          </div>
+          <h1 className="text-xl font-bold mb-2">লগইন প্রয়োজন</h1>
+          <p className="text-muted-foreground mb-6 text-sm">শিক্ষক হিসেবে আবেদন করতে প্রথমে আপনার একাউন্টে লগইন করুন। একাউন্ট না থাকলে নিবন্ধন করুন।</p>
+          <div className="flex gap-3 justify-center">
+            <Link to="/login?redirect=/teacher-apply">
+              <Button className="gap-2"><LogIn size={16} /> লগইন করুন</Button>
+            </Link>
+            <Link to="/register?redirect=/teacher-apply">
+              <Button variant="outline">নিবন্ধন করুন</Button>
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (submitted) {
     return (
@@ -47,7 +131,7 @@ const TeacherApply = () => {
             <CheckCircle className="text-primary" size={32} />
           </div>
           <h1 className="text-xl font-bold mb-2">আবেদন সফলভাবে জমা হয়েছে!</h1>
-          <p className="text-muted-foreground mb-6">আপনার আবেদন পর্যালোচনা করা হবে। অনুমোদনের পর আপনাকে জানানো হবে।</p>
+          <p className="text-muted-foreground mb-6">আপনার আবেদন ও ভেরিফিকেশন ডকুমেন্ট পর্যালোচনা করা হবে। অনুমোদনের পর আপনাকে জানানো হবে।</p>
           <Link to="/teachers"><Button variant="outline">শিক্ষক তালিকা দেখুন</Button></Link>
         </div>
       </Layout>
@@ -63,9 +147,24 @@ const TeacherApply = () => {
           <p className="text-muted-foreground text-sm mt-1">নিচের ফর্মটি পূরণ করে শিক্ষক হিসেবে আবেদন করুন</p>
         </div>
 
+        {/* Verification Notice */}
+        <Card className="mb-4 border-amber-200 bg-amber-50/50">
+          <CardContent className="p-4 flex items-start gap-3">
+            <ShieldCheck size={20} className="text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-amber-800">পরিচয় যাচাই বাধ্যতামূলক</p>
+              <p className="text-amber-700 text-xs mt-1">
+                স্ক্যাম ও প্রতারণা রোধে আপনাকে ভোটার আইডি/জন্ম নিবন্ধনের ছবি এবং একটি সংক্ষিপ্ত সেলফি ভিডিও আপলোড করতে হবে।
+                এটি শুধুমাত্র আপনার অস্তিত্ব যাচাইয়ের জন্য এবং ব্লু ব্যাজের সাথে সম্পর্কিত নয়।
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardContent className="pt-6">
             <form onSubmit={e => { e.preventDefault(); if (!form.name || !form.phone || !form.subject) { toast.error("নাম, ফোন ও বিষয় আবশ্যক"); return; } submitMutation.mutate(form); }} className="space-y-4">
+              {/* Basic Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><Label>নাম *</Label><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
                 <div><Label>ফোন *</Label><Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} required /></div>
@@ -93,6 +192,7 @@ const TeacherApply = () => {
               <div><Label>ছবি URL</Label><Input value={form.photo_url} onChange={e => setForm({ ...form, photo_url: e.target.value })} placeholder="আপনার ছবির লিংক দিন" /></div>
               <div><Label>জীবনবৃত্তান্ত / নিজের সম্পর্কে</Label><Textarea value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} rows={3} /></div>
 
+              {/* Reference */}
               <div className="border-t pt-4">
                 <h3 className="font-semibold text-sm mb-3">রেফারেন্স তথ্য</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -101,8 +201,70 @@ const TeacherApply = () => {
                 </div>
               </div>
 
-              <Button type="submit" disabled={submitMutation.isPending} className="w-full">
-                {submitMutation.isPending ? "জমা হচ্ছে..." : "আবেদন জমা দিন"}
+              {/* Verification Documents */}
+              <div className="border-t pt-4 space-y-4">
+                <h3 className="font-semibold text-sm flex items-center gap-2">
+                  <ShieldCheck size={16} className="text-primary" /> পরিচয় যাচাই (বাধ্যতামূলক)
+                </h3>
+
+                {/* NID Upload */}
+                <div>
+                  <Label className="flex items-center gap-1.5 mb-1.5">
+                    <Upload size={14} /> ভোটার আইডি / জন্ম নিবন্ধনের ছবি *
+                  </Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={e => setNidFile(e.target.files?.[0] || null)}
+                    className="text-xs"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">সর্বোচ্চ ১০MB · JPG, PNG</p>
+                  {nidFile && <p className="text-[10px] text-green-600 mt-0.5">✓ {nidFile.name} নির্বাচিত</p>}
+                </div>
+
+                {/* Selfie Video Upload */}
+                <div>
+                  <Label className="flex items-center gap-1.5 mb-1.5">
+                    <Video size={14} /> সেলফি ভিডিও *
+                  </Label>
+                  <Input
+                    type="file"
+                    accept="video/*"
+                    onChange={e => setVideoFile(e.target.files?.[0] || null)}
+                    className="text-xs"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    ১০-১৫ সেকেন্ডের ভিডিওতে আপনার নাম ও বিষয় বলুন · সর্বোচ্চ ৫০MB
+                  </p>
+                  {videoFile && <p className="text-[10px] text-green-600 mt-0.5">✓ {videoFile.name} নির্বাচিত</p>}
+                </div>
+              </div>
+
+              {/* CAPTCHA */}
+              <div className="border-t pt-4">
+                <Label className="flex items-center gap-1.5 mb-2">
+                  <AlertTriangle size={14} /> নিরাপত্তা যাচাই *
+                </Label>
+                <div className="flex items-center gap-3">
+                  <div className="bg-muted px-4 py-2 rounded-lg font-mono text-lg font-bold select-none">
+                    {captcha.question}
+                  </div>
+                  <Input
+                    type="number"
+                    placeholder="উত্তর"
+                    value={captcha.answer}
+                    onChange={e => captcha.setAnswer(e.target.value)}
+                    className="w-24 h-10"
+                    required
+                  />
+                  <Button type="button" variant="ghost" size="sm" onClick={captcha.refresh} className="text-xs">
+                    নতুন প্রশ্ন
+                  </Button>
+                </div>
+              </div>
+
+              <Button type="submit" disabled={submitMutation.isPending || uploading} className="w-full">
+                {uploading ? "ফাইল আপলোড হচ্ছে..." : submitMutation.isPending ? "জমা হচ্ছে..." : "আবেদন জমা দিন"}
               </Button>
             </form>
           </CardContent>

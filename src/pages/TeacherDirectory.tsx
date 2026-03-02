@@ -10,15 +10,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send, BadgeCheck, Eye } from "lucide-react";
+import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send, BadgeCheck, Eye, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 
 const PAGE_SIZE = 12;
 
+/* ─── Experience Badge Helper ─── */
+const getExperienceBadge = (years: number) => {
+  if (years >= 10) return { label: "সিনিয়র", color: "bg-amber-500/10 text-amber-700 border-amber-200" };
+  if (years >= 5) return { label: "অভিজ্ঞ", color: "bg-blue-500/10 text-blue-700 border-blue-200" };
+  if (years >= 2) return { label: "মধ্যম", color: "bg-green-500/10 text-green-700 border-green-200" };
+  return null;
+};
+
 /* ─── Job Postings Section with Detail View ─── */
-const JobPostingsSection = ({ jobs }: { jobs: any[] }) => {
+const JobPostingsSection = ({ jobs, branches }: { jobs: any[]; branches: any[] }) => {
   const [selectedJob, setSelectedJob] = useState<any>(null);
+
+  const getBranch = (branchId: string | null) => branches?.find(b => b.id === branchId);
 
   return (
     <div className="mb-8">
@@ -28,90 +38,119 @@ const JobPostingsSection = ({ jobs }: { jobs: any[] }) => {
         <Badge variant="secondary" className="text-[10px]">{jobs.length}টি সক্রিয়</Badge>
       </div>
       <div className="grid gap-3 md:grid-cols-2">
-        {jobs.map(j => (
-          <Card key={j.id} className="border-primary/20 hover:border-primary/40 transition-colors group">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">{j.title}</h3>
-                  {j.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{j.description}</p>}
-                </div>
-                {j.deadline && (
-                  <div className="shrink-0 text-right">
-                    <div className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock size={10} /> শেষ তারিখ</div>
-                    <div className="text-xs font-medium text-destructive">{new Date(j.deadline).toLocaleDateString("bn-BD")}</div>
+        {jobs.map(j => {
+          const branch = getBranch(j.branch_id);
+          return (
+            <Card key={j.id} className="border-primary/20 hover:border-primary/40 transition-colors group">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm group-hover:text-primary transition-colors">{j.title}</h3>
+                    {branch && (
+                      <div className="flex items-center gap-1.5 mt-1">
+                        {branch.image_url ? (
+                          <img src={branch.image_url} alt="" className="w-4 h-4 rounded object-contain bg-muted" />
+                        ) : (
+                          <Building2 size={12} className="text-muted-foreground" />
+                        )}
+                        <span className="text-[11px] text-muted-foreground font-medium">{branch.name}</span>
+                      </div>
+                    )}
+                    {j.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{j.description}</p>}
                   </div>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-1.5 mt-3 text-[10px] text-muted-foreground">
-                {j.subject && <span className="bg-muted px-2 py-0.5 rounded-full">📚 {j.subject}</span>}
-                {j.location && <span className="bg-muted px-2 py-0.5 rounded-full">📍 {j.location}</span>}
-                {j.salary_range && <span className="bg-muted px-2 py-0.5 rounded-full">💰 {j.salary_range}</span>}
-              </div>
-              <div className="flex gap-2 mt-3">
-                <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => setSelectedJob(j)}>
-                  <Eye size={12} /> বিস্তারিত দেখুন
-                </Button>
-                <Link to="/teacher-apply">
-                  <Button size="sm" variant="outline" className="h-7 text-xs">আবেদন করুন →</Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                  {j.deadline && (
+                    <div className="shrink-0 text-right">
+                      <div className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock size={10} /> শেষ তারিখ</div>
+                      <div className="text-xs font-medium text-destructive">{new Date(j.deadline).toLocaleDateString("bn-BD")}</div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5 mt-3 text-[10px] text-muted-foreground">
+                  {j.subject && <span className="bg-muted px-2 py-0.5 rounded-full">📚 {j.subject}</span>}
+                  {j.location && <span className="bg-muted px-2 py-0.5 rounded-full">📍 {j.location}</span>}
+                  {j.salary_range && <span className="bg-muted px-2 py-0.5 rounded-full">💰 {j.salary_range}</span>}
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => setSelectedJob(j)}>
+                    <Eye size={12} /> বিস্তারিত দেখুন
+                  </Button>
+                  <Link to="/teacher-apply">
+                    <Button size="sm" variant="outline" className="h-7 text-xs">আবেদন করুন →</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Job Detail Dialog */}
       <Dialog open={!!selectedJob} onOpenChange={o => !o && setSelectedJob(null)}>
         <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader><DialogTitle>নিয়োগ বিজ্ঞপ্তি বিস্তারিত</DialogTitle></DialogHeader>
-          {selectedJob && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-bold">{selectedJob.title}</h2>
-              {selectedJob.description && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedJob.description}</p>}
-              <div className="grid grid-cols-2 gap-3">
-                {selectedJob.subject && (
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <div className="text-[10px] text-muted-foreground">বিষয়</div>
-                    <div className="text-sm font-medium">📚 {selectedJob.subject}</div>
+          {selectedJob && (() => {
+            const branch = getBranch(selectedJob.branch_id);
+            return (
+              <div className="space-y-4">
+                <h2 className="text-lg font-bold">{selectedJob.title}</h2>
+                {branch && (
+                  <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
+                    {branch.image_url ? (
+                      <img src={branch.image_url} alt="" className="w-8 h-8 rounded object-contain bg-white" />
+                    ) : (
+                      <Building2 size={20} className="text-primary" />
+                    )}
+                    <div>
+                      <div className="text-[10px] text-muted-foreground">প্রতিষ্ঠান</div>
+                      <div className="text-sm font-medium">{branch.name}</div>
+                    </div>
                   </div>
                 )}
-                {selectedJob.qualification_required && (
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <div className="text-[10px] text-muted-foreground">শিক্ষাগত যোগ্যতা</div>
-                    <div className="text-sm font-medium">🎓 {selectedJob.qualification_required}</div>
-                  </div>
-                )}
-                {selectedJob.experience_required && (
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <div className="text-[10px] text-muted-foreground">অভিজ্ঞতা</div>
-                    <div className="text-sm font-medium">📋 {selectedJob.experience_required}</div>
-                  </div>
-                )}
-                {selectedJob.salary_range && (
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <div className="text-[10px] text-muted-foreground">বেতন</div>
-                    <div className="text-sm font-medium">💰 {selectedJob.salary_range}</div>
-                  </div>
-                )}
-                {selectedJob.location && (
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <div className="text-[10px] text-muted-foreground">অবস্থান</div>
-                    <div className="text-sm font-medium">📍 {selectedJob.location}</div>
-                  </div>
-                )}
-                {selectedJob.deadline && (
-                  <div className="bg-muted/50 rounded-lg p-3">
-                    <div className="text-[10px] text-muted-foreground">আবেদনের শেষ তারিখ</div>
-                    <div className="text-sm font-medium text-destructive">📅 {new Date(selectedJob.deadline).toLocaleDateString("bn-BD")}</div>
-                  </div>
-                )}
+                {selectedJob.description && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedJob.description}</p>}
+                <div className="grid grid-cols-2 gap-3">
+                  {selectedJob.subject && (
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <div className="text-[10px] text-muted-foreground">বিষয়</div>
+                      <div className="text-sm font-medium">📚 {selectedJob.subject}</div>
+                    </div>
+                  )}
+                  {selectedJob.qualification_required && (
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <div className="text-[10px] text-muted-foreground">শিক্ষাগত যোগ্যতা</div>
+                      <div className="text-sm font-medium">🎓 {selectedJob.qualification_required}</div>
+                    </div>
+                  )}
+                  {selectedJob.experience_required && (
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <div className="text-[10px] text-muted-foreground">অভিজ্ঞতা</div>
+                      <div className="text-sm font-medium">📋 {selectedJob.experience_required}</div>
+                    </div>
+                  )}
+                  {selectedJob.salary_range && (
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <div className="text-[10px] text-muted-foreground">বেতন</div>
+                      <div className="text-sm font-medium">💰 {selectedJob.salary_range}</div>
+                    </div>
+                  )}
+                  {selectedJob.location && (
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <div className="text-[10px] text-muted-foreground">অবস্থান</div>
+                      <div className="text-sm font-medium">📍 {selectedJob.location}</div>
+                    </div>
+                  )}
+                  {selectedJob.deadline && (
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <div className="text-[10px] text-muted-foreground">আবেদনের শেষ তারিখ</div>
+                      <div className="text-sm font-medium text-destructive">📅 {new Date(selectedJob.deadline).toLocaleDateString("bn-BD")}</div>
+                    </div>
+                  )}
+                </div>
+                <Link to="/teacher-apply" className="block">
+                  <Button className="w-full gap-2"><Briefcase size={16} /> এই পদে আবেদন করুন</Button>
+                </Link>
               </div>
-              <Link to="/teacher-apply" className="block">
-                <Button className="w-full gap-2"><Briefcase size={16} /> এই পদে আবেদন করুন</Button>
-              </Link>
-            </div>
-          )}
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>
@@ -141,6 +180,15 @@ const TeacherDirectory = () => {
     queryKey: ["public_job_postings"],
     queryFn: async () => {
       const { data, error } = await supabase.from("job_postings").select("*").eq("is_active", true).order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: branches } = useQuery({
+    queryKey: ["public_branches_for_jobs"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_branches_public");
       if (error) throw error;
       return data;
     },
@@ -236,7 +284,7 @@ const TeacherDirectory = () => {
 
         {/* Active Job Postings */}
         {jobs && jobs.length > 0 && (
-          <JobPostingsSection jobs={jobs} />
+          <JobPostingsSection jobs={jobs} branches={branches || []} />
         )}
 
         {/* Filters */}
@@ -302,66 +350,74 @@ const TeacherDirectory = () => {
         ) : (
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {visibleTeachers.map(t => (
-                <Card
-                  key={t.id}
-                  className="group hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer overflow-hidden"
-                  onClick={() => setSelectedTeacher(t)}
-                >
-                  <CardContent className="p-0">
-                    <div className="p-4">
-                      <div className="flex items-start gap-3">
-                        {t.photo_url ? (
-                          <img src={t.photo_url} alt={t.name} className="w-16 h-16 rounded-xl object-cover shrink-0 ring-2 ring-muted group-hover:ring-primary/20 transition-colors" />
-                        ) : (
-                          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-primary text-2xl shrink-0">
-                            👨‍🏫
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm group-hover:text-primary transition-colors flex items-center gap-1">
-                            {t.name}
-                            {(t as any).is_verified && (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <BadgeCheck size={14} className="text-blue-500 shrink-0 fill-blue-500 stroke-white" />
-                                  </TooltipTrigger>
-                                  <TooltipContent><p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p></TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            )}
-                          </h3>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                            <BookOpen size={11} className="shrink-0" /> {t.subject}
-                          </p>
-                          {t.district && (
-                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                              <MapPin size={11} className="shrink-0" /> {t.district}
-                            </p>
+              {visibleTeachers.map(t => {
+                const expBadge = getExperienceBadge(t.experience_years || 0);
+                return (
+                  <Card
+                    key={t.id}
+                    className="group hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer overflow-hidden"
+                    onClick={() => setSelectedTeacher(t)}
+                  >
+                    <CardContent className="p-0">
+                      <div className="p-4">
+                        <div className="flex items-start gap-3">
+                          {t.photo_url ? (
+                            <img src={t.photo_url} alt={t.name} className="w-16 h-16 rounded-xl object-cover shrink-0 ring-2 ring-muted group-hover:ring-primary/20 transition-colors" />
+                          ) : (
+                            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-primary text-2xl shrink-0">
+                              👨‍🏫
+                            </div>
                           )}
-                          {renderStars(t.rating)}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm group-hover:text-primary transition-colors flex items-center gap-1">
+                              {t.name}
+                              {(t as any).is_verified && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <BadgeCheck size={14} className="text-blue-500 shrink-0 fill-blue-500 stroke-white" />
+                                    </TooltipTrigger>
+                                    <TooltipContent><p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p></TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                            </h3>
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                              <BookOpen size={11} className="shrink-0" /> {t.subject}
+                            </p>
+                            {t.district && (
+                              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                <MapPin size={11} className="shrink-0" /> {t.district}
+                              </p>
+                            )}
+                            {renderStars(t.rating)}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="px-4 pb-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant={t.is_available ? "default" : "secondary"}
-                          className={`text-[10px] ${t.is_available ? "bg-green-500/10 text-green-700 border-green-200" : ""}`}
-                        >
-                          {t.is_available ? "✓ উপলব্ধ" : "অনুপলব্ধ"}
-                        </Badge>
+                      <div className="px-4 pb-3 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <Badge
+                            variant={t.is_available ? "default" : "secondary"}
+                            className={`text-[10px] ${t.is_available ? "bg-green-500/10 text-green-700 border-green-200" : ""}`}
+                          >
+                            {t.is_available ? "✓ উপলব্ধ" : "অনুপলব্ধ"}
+                          </Badge>
+                          {expBadge && (
+                            <Badge variant="outline" className={`text-[10px] ${expBadge.color}`}>
+                              <Briefcase size={9} className="mr-0.5" /> {expBadge.label}
+                            </Badge>
+                          )}
+                        </div>
+                        {t.experience_years > 0 && (
+                          <span className="text-[10px] text-muted-foreground">
+                            {t.experience_years} বছর
+                          </span>
+                        )}
                       </div>
-                      {t.experience_years > 0 && (
-                        <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                          {t.experience_years} বছর অভিজ্ঞতা
-                        </span>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
 
             {/* Infinite Scroll Loader */}
@@ -386,101 +442,109 @@ const TeacherDirectory = () => {
         <Dialog open={!!selectedTeacher} onOpenChange={o => !o && setSelectedTeacher(null)}>
           <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
             <DialogHeader><DialogTitle>শিক্ষক প্রোফাইল</DialogTitle></DialogHeader>
-            {selectedTeacher && (
-              <div className="space-y-5">
-                {/* Profile header */}
-                <div className="flex items-center gap-4">
-                  {selectedTeacher.photo_url ? (
-                    <img src={selectedTeacher.photo_url} alt="" className="w-20 h-20 rounded-xl object-cover ring-2 ring-primary/10" />
-                  ) : (
-                    <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-3xl">👨‍🏫</div>
-                  )}
-                  <div>
-                    <h2 className="text-lg font-bold flex items-center gap-1">
-                      {selectedTeacher.name}
-                      {(selectedTeacher as any).is_verified && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <BadgeCheck size={16} className="text-blue-500 fill-blue-500 stroke-white" />
-                            </TooltipTrigger>
-                            <TooltipContent><p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p></TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                    </h2>
-                    <p className="text-sm text-muted-foreground">{selectedTeacher.subject}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge
-                        variant={selectedTeacher.is_available ? "default" : "secondary"}
-                        className={selectedTeacher.is_available ? "bg-green-500/10 text-green-700 border-green-200" : ""}
-                      >
-                        {selectedTeacher.is_available ? "✓ উপলব্ধ" : "অনুপলব্ধ"}
-                      </Badge>
-                      {renderStars(selectedTeacher.rating)}
+            {selectedTeacher && (() => {
+              const expBadge = getExperienceBadge(selectedTeacher.experience_years || 0);
+              return (
+                <div className="space-y-5">
+                  {/* Profile header */}
+                  <div className="flex items-center gap-4">
+                    {selectedTeacher.photo_url ? (
+                      <img src={selectedTeacher.photo_url} alt="" className="w-20 h-20 rounded-xl object-cover ring-2 ring-primary/10" />
+                    ) : (
+                      <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-3xl">👨‍🏫</div>
+                    )}
+                    <div>
+                      <h2 className="text-lg font-bold flex items-center gap-1">
+                        {selectedTeacher.name}
+                        {(selectedTeacher as any).is_verified && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <BadgeCheck size={16} className="text-blue-500 fill-blue-500 stroke-white" />
+                              </TooltipTrigger>
+                              <TooltipContent><p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p></TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                      </h2>
+                      <p className="text-sm text-muted-foreground">{selectedTeacher.subject}</p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <Badge
+                          variant={selectedTeacher.is_available ? "default" : "secondary"}
+                          className={selectedTeacher.is_available ? "bg-green-500/10 text-green-700 border-green-200" : ""}
+                        >
+                          {selectedTeacher.is_available ? "✓ উপলব্ধ" : "অনুপলব্ধ"}
+                        </Badge>
+                        {expBadge && (
+                          <Badge variant="outline" className={`text-[10px] ${expBadge.color}`}>
+                            <Briefcase size={9} className="mr-0.5" /> {expBadge.label}
+                          </Badge>
+                        )}
+                        {renderStars(selectedTeacher.rating)}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Info grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  {selectedTeacher.qualification && (
-                    <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg text-sm">
-                      <Award size={14} className="text-primary shrink-0" />
-                      <div><div className="text-[10px] text-muted-foreground">যোগ্যতা</div><span className="text-xs font-medium">{selectedTeacher.qualification}</span></div>
-                    </div>
-                  )}
-                  {selectedTeacher.experience_years > 0 && (
-                    <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg text-sm">
-                      <Briefcase size={14} className="text-primary shrink-0" />
-                      <div><div className="text-[10px] text-muted-foreground">অভিজ্ঞতা</div><span className="text-xs font-medium">{selectedTeacher.experience_years} বছর</span></div>
-                    </div>
-                  )}
-                  {selectedTeacher.district && (
-                    <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg text-sm">
-                      <MapPin size={14} className="text-primary shrink-0" />
-                      <div><div className="text-[10px] text-muted-foreground">জেলা</div><span className="text-xs font-medium">{selectedTeacher.district}</span></div>
-                    </div>
-                  )}
-                  {selectedTeacher.specialization && (
-                    <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg text-sm">
-                      <BookOpen size={14} className="text-primary shrink-0" />
-                      <div><div className="text-[10px] text-muted-foreground">বিশেষ দক্ষতা</div><span className="text-xs font-medium">{selectedTeacher.specialization}</span></div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Contact */}
-                {(selectedTeacher.phone || selectedTeacher.email) && (
-                  <div className="border-t pt-3 space-y-2">
-                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">যোগাযোগ</h3>
-                    {selectedTeacher.phone && (
-                      <a href={`tel:${selectedTeacher.phone}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
-                        <Phone size={14} /> {selectedTeacher.phone}
-                      </a>
+                  {/* Info grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {selectedTeacher.qualification && (
+                      <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg text-sm">
+                        <Award size={14} className="text-primary shrink-0" />
+                        <div><div className="text-[10px] text-muted-foreground">যোগ্যতা</div><span className="text-xs font-medium">{selectedTeacher.qualification}</span></div>
+                      </div>
                     )}
-                    {selectedTeacher.email && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Mail size={14} /> {selectedTeacher.email}
+                    {selectedTeacher.experience_years > 0 && (
+                      <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg text-sm">
+                        <Briefcase size={14} className="text-primary shrink-0" />
+                        <div><div className="text-[10px] text-muted-foreground">অভিজ্ঞতা</div><span className="text-xs font-medium">{selectedTeacher.experience_years} বছর</span></div>
+                      </div>
+                    )}
+                    {selectedTeacher.district && (
+                      <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg text-sm">
+                        <MapPin size={14} className="text-primary shrink-0" />
+                        <div><div className="text-[10px] text-muted-foreground">জেলা</div><span className="text-xs font-medium">{selectedTeacher.district}</span></div>
+                      </div>
+                    )}
+                    {selectedTeacher.specialization && (
+                      <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg text-sm">
+                        <BookOpen size={14} className="text-primary shrink-0" />
+                        <div><div className="text-[10px] text-muted-foreground">বিশেষ দক্ষতা</div><span className="text-xs font-medium">{selectedTeacher.specialization}</span></div>
                       </div>
                     )}
                   </div>
-                )}
 
-                {selectedTeacher.certification && <p className="text-sm bg-muted/50 rounded-lg p-3"><strong className="text-xs">সার্টিফিকেশন:</strong><br />{selectedTeacher.certification}</p>}
-                {selectedTeacher.preferred_area && <p className="text-sm bg-muted/50 rounded-lg p-3"><strong className="text-xs">পছন্দের এলাকা:</strong><br />{selectedTeacher.preferred_area}</p>}
-                {selectedTeacher.expected_salary && <p className="text-sm bg-muted/50 rounded-lg p-3"><strong className="text-xs">প্রত্যাশিত বেতন:</strong><br />{selectedTeacher.expected_salary}</p>}
-                {selectedTeacher.bio && (
-                  <div className="text-sm bg-muted/50 rounded-lg p-3">
-                    <strong className="text-xs">জীবনবৃত্তান্ত:</strong>
-                    <p className="mt-1 whitespace-pre-wrap text-muted-foreground">{selectedTeacher.bio}</p>
-                  </div>
-                )}
+                  {/* Contact */}
+                  {(selectedTeacher.phone || selectedTeacher.email) && (
+                    <div className="border-t pt-3 space-y-2">
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">যোগাযোগ</h3>
+                      {selectedTeacher.phone && (
+                        <a href={`tel:${selectedTeacher.phone}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
+                          <Phone size={14} /> {selectedTeacher.phone}
+                        </a>
+                      )}
+                      {selectedTeacher.email && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Mail size={14} /> {selectedTeacher.email}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-                {/* Reviews Section */}
-                <TeacherReviewSection teacherId={selectedTeacher.id} />
-              </div>
-            )}
+                  {selectedTeacher.certification && <p className="text-sm bg-muted/50 rounded-lg p-3"><strong className="text-xs">সার্টিফিকেশন:</strong><br />{selectedTeacher.certification}</p>}
+                  {selectedTeacher.preferred_area && <p className="text-sm bg-muted/50 rounded-lg p-3"><strong className="text-xs">পছন্দের এলাকা:</strong><br />{selectedTeacher.preferred_area}</p>}
+                  {selectedTeacher.expected_salary && <p className="text-sm bg-muted/50 rounded-lg p-3"><strong className="text-xs">প্রত্যাশিত বেতন:</strong><br />{selectedTeacher.expected_salary}</p>}
+                  {selectedTeacher.bio && (
+                    <div className="text-sm bg-muted/50 rounded-lg p-3">
+                      <strong className="text-xs">জীবনবৃত্তান্ত:</strong>
+                      <p className="mt-1 whitespace-pre-wrap text-muted-foreground">{selectedTeacher.bio}</p>
+                    </div>
+                  )}
+
+                  {/* Reviews Section */}
+                  <TeacherReviewSection teacherId={selectedTeacher.id} />
+                </div>
+              );
+            })()}
           </DialogContent>
         </Dialog>
       </div>
@@ -515,7 +579,6 @@ const TeacherReviewSection = ({ teacherId }: { teacherId: string }) => {
 
   const submitReview = useMutation({
     mutationFn: async () => {
-      // Rate limiting check
       const lastTime = getLastReviewTime();
       const now = Date.now();
       if (now - lastTime < REVIEW_COOLDOWN_MS) {
@@ -523,7 +586,6 @@ const TeacherReviewSection = ({ teacherId }: { teacherId: string }) => {
         throw new Error(`অনুগ্রহ করে ${remainingMin} মিনিট পর আবার চেষ্টা করুন।`);
       }
 
-      // Validate inputs
       const name = reviewForm.reviewer_name.trim();
       if (!name || name.length < 3) throw new Error("নাম কমপক্ষে ৩ অক্ষর হতে হবে।");
       if (name.length > 100) throw new Error("নাম ১০০ অক্ষরের মধ্যে হতে হবে।");
@@ -538,7 +600,6 @@ const TeacherReviewSection = ({ teacherId }: { teacherId: string }) => {
       }]);
       if (error) throw error;
 
-      // Set cooldown timestamp
       localStorage.setItem("last_teacher_review_time", now.toString());
     },
     onSuccess: () => {
@@ -568,7 +629,6 @@ const TeacherReviewSection = ({ teacherId }: { teacherId: string }) => {
         </Button>
       </div>
 
-      {/* Review Form */}
       {showForm && (
         <form
           onSubmit={e => { e.preventDefault(); submitReview.mutate(); }}
@@ -615,7 +675,6 @@ const TeacherReviewSection = ({ teacherId }: { teacherId: string }) => {
         </form>
       )}
 
-      {/* Existing Reviews */}
       {reviews && reviews.length > 0 ? (
         <div className="space-y-2">
           {reviews.map(r => (
