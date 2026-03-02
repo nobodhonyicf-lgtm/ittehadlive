@@ -39,13 +39,14 @@ const TeacherApply = () => {
   const [submitted, setSubmitted] = useState(false);
   const [nidFile, setNidFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const captcha = useCaptcha();
 
   const [form, setForm] = useState({
     name: "", phone: "", email: "", address: "", district: "", subject: "",
     qualification: "", experience_years: 0, specialization: "", certification: "",
-    bio: "", photo_url: "", preferred_area: "", expected_salary: "",
+    bio: "", preferred_area: "", expected_salary: "",
     reference_name: "", reference_phone: "",
   });
 
@@ -68,23 +69,31 @@ const TeacherApply = () => {
       // Validate video size (max 50MB)
       if (videoFile.size > 50 * 1024 * 1024) throw new Error("ভিডিও ৫০MB এর মধ্যে হতে হবে");
       if (nidFile.size > 10 * 1024 * 1024) throw new Error("NID ছবি ১০MB এর মধ্যে হতে হবে");
+      if (photoFile && photoFile.size > 5 * 1024 * 1024) throw new Error("প্রোফাইল ছবি ৫MB এর মধ্যে হতে হবে");
 
       setUploading(true);
 
       try {
-        const [nidUrl, videoUrl] = await Promise.all([
+        const uploads: Promise<string>[] = [
           uploadFile(nidFile, "teacher-nid"),
           uploadFile(videoFile, "teacher-video"),
-        ]);
+        ];
+        if (photoFile) uploads.push(uploadFile(photoFile, "teacher-photos"));
+
+        const results = await Promise.all(uploads);
+        const nidUrl = results[0];
+        const videoUrl = results[1];
+        const photoUrl = photoFile ? results[2] : null;
 
         const payload = {
           ...data,
           user_id: user.id,
           nid_image_url: nidUrl,
           verification_video_url: videoUrl,
+          photo_url: photoUrl,
           email: data.email || null, address: data.address || null, district: data.district || null,
           qualification: data.qualification || null, specialization: data.specialization || null,
-          certification: data.certification || null, bio: data.bio || null, photo_url: data.photo_url || null,
+          certification: data.certification || null, bio: data.bio || null,
           preferred_area: data.preferred_area || null, expected_salary: data.expected_salary || null,
           reference_name: data.reference_name || null, reference_phone: data.reference_phone || null,
         };
@@ -189,7 +198,18 @@ const TeacherApply = () => {
                 <div><Label>পছন্দের এলাকা</Label><Input value={form.preferred_area} onChange={e => setForm({ ...form, preferred_area: e.target.value })} /></div>
                 <div><Label>প্রত্যাশিত বেতন</Label><Input value={form.expected_salary} onChange={e => setForm({ ...form, expected_salary: e.target.value })} /></div>
               </div>
-              <div><Label>ছবি URL</Label><Input value={form.photo_url} onChange={e => setForm({ ...form, photo_url: e.target.value })} placeholder="আপনার ছবির লিংক দিন" /></div>
+              {/* Profile Photo Upload */}
+              <div>
+                <Label className="flex items-center gap-1.5 mb-1.5">📷 প্রোফাইল ছবি</Label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setPhotoFile(e.target.files?.[0] || null)}
+                  className="text-xs"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">সর্বোচ্চ ৫MB · JPG, PNG (ঐচ্ছিক)</p>
+                {photoFile && <p className="text-[10px] text-green-600 mt-0.5">✓ {photoFile.name} নির্বাচিত</p>}
+              </div>
               <div><Label>জীবনবৃত্তান্ত / নিজের সম্পর্কে</Label><Textarea value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} rows={3} /></div>
 
               {/* Reference */}
