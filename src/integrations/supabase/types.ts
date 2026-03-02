@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_pricing: {
+        Row: {
+          created_at: string
+          description: string | null
+          dimensions: string | null
+          id: string
+          is_active: boolean | null
+          price_monthly: number | null
+          price_yearly: number | null
+          slot_key: string
+          slot_name: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          dimensions?: string | null
+          id?: string
+          is_active?: boolean | null
+          price_monthly?: number | null
+          price_yearly?: number | null
+          slot_key: string
+          slot_name: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          dimensions?: string | null
+          id?: string
+          is_active?: boolean | null
+          price_monthly?: number | null
+          price_yearly?: number | null
+          slot_key?: string
+          slot_name?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       admin_permissions: {
         Row: {
           can_delete: boolean
@@ -569,6 +608,84 @@ export type Database = {
           is_active?: boolean | null
           sort_order?: number | null
           title?: string
+        }
+        Relationships: []
+      }
+      institutions: {
+        Row: {
+          address: string | null
+          admin_note: string | null
+          approval_letter_url: string | null
+          classes: string | null
+          created_at: string
+          departments: string | null
+          description: string | null
+          district: string | null
+          email: string | null
+          id: string
+          logo_url: string | null
+          muhtamim_name: string | null
+          muhtamim_photo_url: string | null
+          name: string
+          phone: string
+          registration_cert_url: string | null
+          status: string
+          subscription_plan: string | null
+          total_students: number | null
+          total_teachers: number | null
+          updated_at: string
+          user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          admin_note?: string | null
+          approval_letter_url?: string | null
+          classes?: string | null
+          created_at?: string
+          departments?: string | null
+          description?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          muhtamim_name?: string | null
+          muhtamim_photo_url?: string | null
+          name: string
+          phone: string
+          registration_cert_url?: string | null
+          status?: string
+          subscription_plan?: string | null
+          total_students?: number | null
+          total_teachers?: number | null
+          updated_at?: string
+          user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          admin_note?: string | null
+          approval_letter_url?: string | null
+          classes?: string | null
+          created_at?: string
+          departments?: string | null
+          description?: string | null
+          district?: string | null
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          muhtamim_name?: string | null
+          muhtamim_photo_url?: string | null
+          name?: string
+          phone?: string
+          registration_cert_url?: string | null
+          status?: string
+          subscription_plan?: string | null
+          total_students?: number | null
+          total_teachers?: number | null
+          updated_at?: string
+          user_id?: string | null
+          website?: string | null
         }
         Relationships: []
       }

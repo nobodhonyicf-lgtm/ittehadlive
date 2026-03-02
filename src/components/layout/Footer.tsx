@@ -120,9 +120,10 @@ const Footer = () => {
                 {[
                   { href: "/students", label: "শিক্ষার্থী ডিরেক্টরি" },
                   { href: "/teachers", label: "শিক্ষক সার্ভিস সেন্টার" },
+                  { href: "/institution-register", label: "প্রতিষ্ঠান নিবন্ধন" },
+                  { href: "/advertise", label: "বিজ্ঞাপন দিন" },
                   { href: "/contact", label: "যোগাযোগ" },
                   { href: "/quran", label: "কুরআন পাঠ" },
-                  { href: "/hadith", label: "হাদিস সংকলন" },
                 ].map((link) => (
                   <li key={link.href}>
                     <Link

@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toBengali, toBengaliNumber } from "@/lib/bengali";
+import { generateTeacherCV } from "@/lib/teacherCV";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
@@ -13,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send, BadgeCheck, Eye, Building2 } from "lucide-react";
+import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send, BadgeCheck, Eye, Building2, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 
@@ -602,7 +603,7 @@ const TeacherDirectory = () => {
                       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">যোগাযোগ</h3>
                       {selectedTeacher.phone && (
                         <a href={`tel:${selectedTeacher.phone}`} className="flex items-center gap-2 text-sm text-primary hover:underline">
-                          <Phone size={14} /> {selectedTeacher.phone}
+                          <Phone size={14} /> {toBengali(selectedTeacher.phone)}
                         </a>
                       )}
                       {selectedTeacher.email && (
@@ -622,6 +623,11 @@ const TeacherDirectory = () => {
                       <p className="mt-1 whitespace-pre-wrap text-muted-foreground">{selectedTeacher.bio}</p>
                     </div>
                   )}
+
+                  {/* CV Download */}
+                  <Button variant="outline" className="w-full gap-2" onClick={() => generateTeacherCV(selectedTeacher)}>
+                    <Download size={14} /> সিভি ডাউনলোড করুন (PDF)
+                  </Button>
 
                   {/* Reviews Section */}
                   <TeacherReviewSection teacherId={selectedTeacher.id} />
