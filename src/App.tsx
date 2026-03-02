@@ -50,6 +50,9 @@ const TeacherDirectory = lazy(() => import("./pages/TeacherDirectory"));
 const TeacherApply = lazy(() => import("./pages/TeacherApply"));
 const Advertise = lazy(() => import("./pages/Advertise"));
 const InstitutionRegister = lazy(() => import("./pages/InstitutionRegister"));
+const QuizHome = lazy(() => import("./pages/QuizHome"));
+const QuizLevels = lazy(() => import("./pages/QuizLevels"));
+const QuizPlay = lazy(() => import("./pages/QuizPlay"));
 
 // Lazy Islamic pages
 const DuaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ default: m.DuaPage })));
@@ -127,6 +130,9 @@ const App = () => (
                 <Route path="/teacher-apply" element={<TeacherApply />} />
                 <Route path="/advertise" element={<Advertise />} />
                 <Route path="/institution-register" element={<InstitutionRegister />} />
+                <Route path="/quiz" element={<QuizHome />} />
+                <Route path="/quiz/:slug" element={<QuizLevels />} />
+                <Route path="/quiz/:slug/play/:levelId" element={<QuizPlay />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/reset-password" element={<ResetPassword />} />
                 <Route path="/admin/*" element={<AdminDashboard />} />
