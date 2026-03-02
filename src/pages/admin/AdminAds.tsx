@@ -9,14 +9,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Megaphone, Search } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
+import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
 const AdminAds = () => {
   const { canEdit, canDelete } = useSectionPermissions();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState({ title: "", image_url: "", link: "", position: "header", is_active: true, sort_order: 0 });
 
   const { data: ads, isLoading } = useQuery({
@@ -28,6 +30,8 @@ const AdminAds = () => {
     },
   });
 
+  const filtered = ads?.filter(a => a.title.toLowerCase().includes(search.toLowerCase())) || [];
+
   const saveMutation = useMutation({
     mutationFn: async (data: typeof form) => {
       if (editId) {
@@ -38,27 +42,23 @@ const AdminAds = () => {
         if (error) throw error;
       }
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin_ads"] });
-      qc.invalidateQueries({ queryKey: ["ads"] });
-      toast.success("সংরক্ষিত");
-      setOpen(false); setEditId(null);
-    },
+    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); setEditId(null); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("ads").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin_ads"] }); toast.success("মুছে ফেলা হয়েছে"); },
+    onSuccess: () => toast.success("মুছে ফেলা হয়েছে"),
   });
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">বিজ্ঞাপন ব্যবস্থাপনা</h1>
+    <AdminPageWrapper
+      title="বিজ্ঞাপন ব্যবস্থাপনা"
+      icon={Megaphone}
+      action={
         <Dialog open={open} onOpenChange={setOpen}>
           {canEdit && <DialogTrigger asChild>
-            <Button onClick={() => { setEditId(null); setForm({ title: "", image_url: "", link: "", position: "header", is_active: true, sort_order: 0 }); }}><Plus size={16} /> নতুন বিজ্ঞাপন</Button>
+            <Button size="sm" onClick={() => { setEditId(null); setForm({ title: "", image_url: "", link: "", position: "header", is_active: true, sort_order: 0 }); }}><Plus size={16} className="mr-1" /> নতুন বিজ্ঞাপন</Button>
           </DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editId ? "সম্পাদনা" : "নতুন বিজ্ঞাপন"}</DialogTitle></DialogHeader>
@@ -77,27 +77,33 @@ const AdminAds = () => {
             </form>
           </DialogContent>
         </Dialog>
+      }
+    >
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+        <Input placeholder="বিজ্ঞাপন খুঁজুন..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 max-w-sm" />
       </div>
       <Card><CardContent className="p-0">
         <Table>
           <TableHeader><TableRow><TableHead>শিরোনাম</TableHead><TableHead>পজিশন</TableHead><TableHead>স্ট্যাটাস</TableHead><TableHead className="text-right">অ্যাকশন</TableHead></TableRow></TableHeader>
           <TableBody>
-            {isLoading ? <TableRow><TableCell colSpan={4} className="text-center">লোড হচ্ছে...</TableCell></TableRow> :
-              ads?.map((ad) => (
+            {isLoading ? <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">লোড হচ্ছে...</TableCell></TableRow> :
+              filtered.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">কোনো বিজ্ঞাপন নেই</TableCell></TableRow> :
+              filtered.map((ad) => (
                 <TableRow key={ad.id}>
-                  <TableCell>{ad.title}</TableCell>
-                  <TableCell>{ad.position}</TableCell>
+                  <TableCell className="font-medium">{ad.title}</TableCell>
+                  <TableCell><span className="text-xs bg-muted px-2 py-0.5 rounded">{ad.position}</span></TableCell>
                   <TableCell><span className={`text-xs px-2 py-0.5 rounded ${ad.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{ad.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}</span></TableCell>
                   <TableCell className="text-right">
                     {canEdit && <Button variant="ghost" size="icon" onClick={() => { setEditId(ad.id); setForm({ title: ad.title, image_url: ad.image_url, link: ad.link || "", position: ad.position, is_active: ad.is_active ?? true, sort_order: ad.sort_order ?? 0 }); setOpen(true); }}><Edit size={16} /></Button>}
-                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(ad.id)}><Trash2 size={16} /></Button>}
+                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(ad.id)}><Trash2 size={16} className="text-destructive" /></Button>}
                   </TableCell>
                 </TableRow>
               ))}
           </TableBody>
         </Table>
       </CardContent></Card>
-    </div>
+    </AdminPageWrapper>
   );
 };
 

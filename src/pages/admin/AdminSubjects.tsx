@@ -8,8 +8,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Edit, Trash2, BookOpen } from "lucide-react";
+import { Plus, Edit, Trash2, BookOpen, Search } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
+import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
 const AdminSubjects = () => {
   const { canEdit, canDelete } = useSectionPermissions();
@@ -17,6 +18,7 @@ const AdminSubjects = () => {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState({ name: "", code: "", full_marks: 100, pass_marks: 33, class_name: "", sort_order: 0 });
 
   const resetForm = () => { setForm({ name: "", code: "", full_marks: 100, pass_marks: 33, class_name: "", sort_order: 0 }); setEditing(null); };
@@ -30,13 +32,8 @@ const AdminSubjects = () => {
   const handleSave = async () => {
     if (!form.name) return toast.error("নাম দিন");
     const payload = { ...form, full_marks: Number(form.full_marks), pass_marks: Number(form.pass_marks), sort_order: Number(form.sort_order), class_name: form.class_name || null };
-    if (editing) {
-      const { error } = await supabase.from("subjects").update(payload).eq("id", editing.id);
-      if (error) return toast.error(error.message);
-    } else {
-      const { error } = await supabase.from("subjects").insert(payload);
-      if (error) return toast.error(error.message);
-    }
+    if (editing) { const { error } = await supabase.from("subjects").update(payload).eq("id", editing.id); if (error) return toast.error(error.message); }
+    else { const { error } = await supabase.from("subjects").insert(payload); if (error) return toast.error(error.message); }
     qc.invalidateQueries({ queryKey: ["all_subjects"] });
     setOpen(false); resetForm();
     toast.success("সংরক্ষিত");
@@ -49,12 +46,15 @@ const AdminSubjects = () => {
     toast.success("মুছে ফেলা হয়েছে");
   };
 
+  const filtered = subjects?.filter(s => s.name.toLowerCase().includes(search.toLowerCase())) || [];
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-primary flex items-center gap-2"><BookOpen size={22} /> বিষয় ব্যবস্থাপনা</h2>
+    <AdminPageWrapper
+      title="বিষয় ব্যবস্থাপনা"
+      icon={BookOpen}
+      action={
         <Dialog open={open} onOpenChange={v => { setOpen(v); if (!v) resetForm(); }}>
-          {canEdit && <DialogTrigger asChild><Button className="gap-2"><Plus size={16} /> নতুন বিষয়</Button></DialogTrigger>}
+          {canEdit && <DialogTrigger asChild><Button size="sm" className="gap-2"><Plus size={16} /> নতুন বিষয়</Button></DialogTrigger>}
           <DialogContent>
             <DialogHeader><DialogTitle>{editing ? "সম্পাদনা" : "নতুন বিষয়"}</DialogTitle></DialogHeader>
             <div className="space-y-3">
@@ -72,10 +72,14 @@ const AdminSubjects = () => {
             </div>
           </DialogContent>
         </Dialog>
+      }
+    >
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+        <Input placeholder="বিষয় খুঁজুন..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
       </div>
-
       <div className="space-y-2">
-        {subjects?.map(s => (
+        {filtered.map(s => (
           <Card key={s.id}>
             <CardContent className="p-3 flex items-center justify-between">
               <div>
@@ -90,7 +94,7 @@ const AdminSubjects = () => {
           </Card>
         ))}
       </div>
-    </div>
+    </AdminPageWrapper>
   );
 };
 
