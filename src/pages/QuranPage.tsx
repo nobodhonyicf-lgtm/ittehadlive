@@ -2,7 +2,7 @@ import Layout from "@/components/layout/Layout";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Volume2, VolumeX, ChevronLeft, ChevronRight, AlignLeft, Plus, Minus, ChevronDown, Play, Pause, Square, BookOpen, Menu, X, Share2, Bookmark, BookMarked } from "lucide-react";
+import { Volume2, VolumeX, ChevronLeft, ChevronRight, AlignLeft, Plus, Minus, ChevronDown, Play, Pause, Square, BookOpen, Menu, X, Share2, Bookmark, BookMarked, Search } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { toast } from "@/components/ui/sonner";
 
@@ -367,7 +367,7 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
     <>
       <div className="p-4 border-b border-border bg-gradient-to-b from-emerald-50 to-white dark:from-emerald-950/30 dark:to-card">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-lg">📖</span>
+          <BookOpen size={20} className="text-emerald-700 dark:text-emerald-400" />
           <div>
             <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">সূচিপত্র</p>
             {currentSurah && <p className="text-[11px] text-muted-foreground">{getBnName(currentSurah)}</p>}
@@ -446,7 +446,7 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
             <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setShowSidebar(false)} />
             <aside className="fixed left-0 top-0 bottom-0 w-80 bg-card z-50 lg:hidden overflow-y-auto shadow-2xl">
               <div className="flex items-center justify-between p-3 border-b border-border bg-emerald-50 dark:bg-emerald-950/20">
-                <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">📖 সূচিপত্র</p>
+                <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5"><BookOpen size={16} /> সূচিপত্র</p>
                 <button onClick={() => setShowSidebar(false)} className="p-1.5 hover:bg-muted rounded-lg"><X size={18} /></button>
               </div>
               {renderSidebarContent()}
@@ -469,7 +469,7 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                   backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
                 }} />
                 <div className="relative p-8 pb-10 text-center">
-                  <h1 className="text-3xl font-bold mb-2">📖 পবিত্র কুরআন</h1>
+                  <h1 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2"><BookOpen size={28} /> পবিত্র কুরআন</h1>
                   <p className="text-base opacity-80">আরবি মূল ও বাংলা অনুবাদ — শব্দে শব্দে অর্থ — অডিও তেলাওয়াত — তাফসিরসহ</p>
                 </div>
               </div>
@@ -483,7 +483,7 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                     onChange={e => setSearchQuery(e.target.value)}
                     className="w-full border border-border rounded-xl px-5 py-3.5 bg-card text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 pl-12"
                   />
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-lg">🔍</span>
+                  <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
                 {surahLoading ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -544,7 +544,7 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                   onClick={() => setShowTafsirDropdown(!showTafsirDropdown)}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-full border transition-colors text-sm ${selectedTafsir > 0 ? "bg-amber-50 border-amber-300 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400" : "border-border hover:bg-muted"}`}
                 >
-                  📖 তাফসীর
+                  <BookOpen size={16} /> তাফসীর
                 </button>
                 <button
                   onClick={playSurahAudio}
@@ -810,7 +810,7 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                         {/* Word by word */}
                         {showWordByWord && (
                           <div className="px-6 pb-4 border-t border-blue-200 dark:border-blue-900/30 pt-4">
-                            <p className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-3">📖 শব্দে শব্দে অনুবাদ</p>
+                            <p className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-1.5"><BookOpen size={16} /> শব্দে শব্দে অনুবাদ</p>
                             {wordDataLoading ? (
                               <div className="h-12 bg-muted rounded animate-pulse" />
                             ) : words ? (
@@ -834,8 +834,8 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
                         {/* Tafsir */}
                         {selectedTafsir > 0 && (
                           <div className="mx-6 mb-4 bg-amber-50/50 dark:bg-amber-950/20 rounded-xl px-5 py-4 border border-amber-200 dark:border-amber-800/30">
-                            <p className="text-sm font-semibold text-amber-700 dark:text-amber-500 mb-2">
-                              📚 তাফসীরঃ
+                            <p className="text-sm font-semibold text-amber-700 dark:text-amber-500 mb-2 flex items-center gap-1.5">
+                              <BookOpen size={16} /> তাফসীরঃ
                             </p>
                             {tafsirLoading ? (
                               <div className="h-10 bg-muted rounded animate-pulse" />

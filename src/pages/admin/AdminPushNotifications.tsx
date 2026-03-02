@@ -169,7 +169,7 @@ const AdminPushNotifications = () => {
                   </div>
                   <div className="flex items-start gap-2 ml-4">
                     <div className="text-xs text-muted-foreground whitespace-nowrap text-right">
-                      {n.is_sent ? "✅ পাঠানো" : "⏳ অপেক্ষমাণ"}
+                      {n.is_sent ? "পাঠানো হয়েছে" : "অপেক্ষমাণ"}
                       <br />
                       {new Date(n.created_at).toLocaleDateString("bn-BD")}
                     </div>

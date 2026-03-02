@@ -2,7 +2,7 @@ import Layout from "@/components/layout/Layout";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Search, Plus, Minus, Loader2, Copy, Share2, Check, BookOpen, Menu, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Plus, Minus, Loader2, Copy, Share2, Check, BookOpen, Menu, X, BookMarked } from "lucide-react";
 import { translateSectionName } from "@/lib/hadithSectionsBn";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
@@ -28,12 +28,12 @@ const getBengaliGrade = (grade: string) => {
 };
 
 const HADITH_BOOKS = [
-  { id: "ben-bukhari", arabicId: "ara-bukhari", engId: "eng-bukhari", name: "সহীহ বুখারী", icon: "📗", totalHadith: 7563, color: "from-emerald-700 to-green-600" },
-  { id: "ben-muslim", arabicId: "ara-muslim", engId: "eng-muslim", name: "সহীহ মুসলিম", icon: "📘", totalHadith: 7563, color: "from-sky-700 to-blue-600" },
-  { id: "ben-abudawud", arabicId: "ara-abudawud", engId: "eng-abudawud", name: "সুনানে আবু দাউদ", icon: "📙", totalHadith: 5274, color: "from-amber-700 to-orange-600" },
-  { id: "ben-tirmidhi", arabicId: "ara-tirmidhi", engId: "eng-tirmidhi", name: "জামে আত-তিরমিযী", icon: "📕", totalHadith: 3956, color: "from-rose-700 to-red-600" },
-  { id: "ben-nasai", arabicId: "ara-nasai", engId: "eng-nasai", name: "সুনানে আন-নাসাঈ", icon: "📓", totalHadith: 5758, color: "from-purple-700 to-violet-600" },
-  { id: "ben-ibnmajah", arabicId: "ara-ibnmajah", engId: "eng-ibnmajah", name: "সুনানে ইবনে মাজাহ", icon: "📔", totalHadith: 4341, color: "from-indigo-700 to-blue-600" },
+  { id: "ben-bukhari", arabicId: "ara-bukhari", engId: "eng-bukhari", name: "সহীহ বুখারী", totalHadith: 7563, color: "from-emerald-700 to-green-600" },
+  { id: "ben-muslim", arabicId: "ara-muslim", engId: "eng-muslim", name: "সহীহ মুসলিম", totalHadith: 7563, color: "from-sky-700 to-blue-600" },
+  { id: "ben-abudawud", arabicId: "ara-abudawud", engId: "eng-abudawud", name: "সুনানে আবু দাউদ", totalHadith: 5274, color: "from-amber-700 to-orange-600" },
+  { id: "ben-tirmidhi", arabicId: "ara-tirmidhi", engId: "eng-tirmidhi", name: "জামে আত-তিরমিযী", totalHadith: 3956, color: "from-rose-700 to-red-600" },
+  { id: "ben-nasai", arabicId: "ara-nasai", engId: "eng-nasai", name: "সুনানে আন-নাসাঈ", totalHadith: 5758, color: "from-purple-700 to-violet-600" },
+  { id: "ben-ibnmajah", arabicId: "ara-ibnmajah", engId: "eng-ibnmajah", name: "সুনানে ইবনে মাজাহ", totalHadith: 4341, color: "from-indigo-700 to-blue-600" },
 ];
 
 interface HadithItem {
@@ -135,14 +135,14 @@ const HadithContent = () => {
   const copyHadith = useCallback(async (hadith: HadithItem) => {
     const arabicText = arabicHadiths[hadith.hadithnumber] || "";
     const grade = hadith.grades?.[0]?.grade ? getBengaliGrade(hadith.grades[0].grade) : "";
-    const text = [arabicText ? `${arabicText}\n` : "", hadith.text, "", `📖 ${selectedBook?.name} — হাদিস নং ${toBengaliNum(hadith.hadithnumber)}`, grade ? `মান: ${grade}` : ""].filter(Boolean).join("\n");
+    const text = [arabicText ? `${arabicText}\n` : "", hadith.text, "", `${selectedBook?.name} — হাদিস নং ${toBengaliNum(hadith.hadithnumber)}`, grade ? `মান: ${grade}` : ""].filter(Boolean).join("\n");
     try { await navigator.clipboard.writeText(text); setCopiedId(hadith.hadithnumber); setTimeout(() => setCopiedId(null), 2000); } catch {}
   }, [arabicHadiths, selectedBook]);
 
   const shareHadith = useCallback(async (hadith: HadithItem) => {
     const arabicText = arabicHadiths[hadith.hadithnumber] || "";
     const grade = hadith.grades?.[0]?.grade ? getBengaliGrade(hadith.grades[0].grade) : "";
-    const text = [arabicText ? `${arabicText}\n` : "", hadith.text, "", `📖 ${selectedBook?.name} — হাদিস নং ${toBengaliNum(hadith.hadithnumber)}`, grade ? `মান: ${grade}` : ""].filter(Boolean).join("\n");
+    const text = [arabicText ? `${arabicText}\n` : "", hadith.text, "", `${selectedBook?.name} — হাদিস নং ${toBengaliNum(hadith.hadithnumber)}`, grade ? `মান: ${grade}` : ""].filter(Boolean).join("\n");
     if (navigator.share) { try { await navigator.share({ title: `${selectedBook?.name} — হাদিস ${toBengaliNum(hadith.hadithnumber)}`, text }); } catch {} }
     else copyHadith(hadith);
   }, [arabicHadiths, selectedBook, copyHadith]);
@@ -170,7 +170,7 @@ const HadithContent = () => {
         {view === "hadiths" && Object.keys(sections).length > 0 && (
           <aside className="hidden lg:block w-72 flex-shrink-0 border-r border-border bg-card sticky top-0 h-screen overflow-y-auto">
             <div className="p-4 border-b border-border bg-gradient-to-b from-sky-50 to-white dark:from-sky-950/30 dark:to-card">
-              <p className="text-sm font-bold text-sky-800 dark:text-sky-300 mb-1">📖 অধ্যায় সূচি</p>
+              <p className="text-sm font-bold text-sky-800 dark:text-sky-300 mb-1 flex items-center gap-1.5"><BookMarked size={16} /> অধ্যায় সূচি</p>
               <p className="text-xs text-muted-foreground mb-3">{selectedBook?.name}</p>
               <input
                 type="text"
@@ -208,7 +208,7 @@ const HadithContent = () => {
             <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setShowSidebar(false)} />
             <aside className="fixed left-0 top-0 bottom-0 w-80 bg-card z-50 lg:hidden overflow-y-auto shadow-2xl">
               <div className="p-4 border-b border-border bg-sky-50 dark:bg-sky-950/20 flex items-center justify-between">
-                <p className="text-sm font-bold text-sky-800 dark:text-sky-300">📖 অধ্যায় সূচি</p>
+                <p className="text-sm font-bold text-sky-800 dark:text-sky-300 flex items-center gap-1.5"><BookMarked size={16} /> অধ্যায় সূচি</p>
                 <button onClick={() => setShowSidebar(false)} className="p-1.5 hover:bg-muted rounded-lg"><X size={18} /></button>
               </div>
               <div>
@@ -247,7 +247,7 @@ const HadithContent = () => {
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
             }} />
             <div className="relative p-8 pb-10 text-center">
-              <h1 className="text-3xl font-bold mb-2">📿 হাদীসের কিতাব সমূহ</h1>
+              <h1 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2"><BookMarked size={28} /> হাদীসের কিতাব সমূহ</h1>
               <p className="text-base opacity-80">
                 {view === "books" ? "সহীহ হাদিস গ্রন্থসমূহ — আরবি ও বাংলা" :
                   view === "sections" ? `${selectedBook?.name} — অধ্যায়সমূহ` :
@@ -448,7 +448,7 @@ const HadithContent = () => {
                       {/* Reference */}
                       <div className="flex items-center justify-between px-6 pb-4 flex-wrap gap-1">
                         <p className="text-xs text-muted-foreground italic">
-                          📖 {selectedBook?.name} — বই {toBengaliNum(hadith.reference?.book || 0)}, হাদিস {toBengaliNum(hadith.reference?.hadith || 0)}
+                          {selectedBook?.name} — বই {toBengaliNum(hadith.reference?.book || 0)}, হাদিস {toBengaliNum(hadith.reference?.hadith || 0)}
                         </p>
                         {hadith.grades?.[0]?.name && (
                           <p className="text-[11px] text-muted-foreground">গ্রেডকারী: {hadith.grades[0].name}</p>

@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send, BadgeCheck, Eye, Building2, Download } from "lucide-react";
+import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send, BadgeCheck, Eye, Building2, Download, DollarSign, FileText, CalendarDays, UserCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 
@@ -60,9 +60,9 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
                   )}
                 </div>
                 <div className="flex flex-wrap gap-1.5 mt-3 text-[10px] text-muted-foreground">
-                  {j.subject && <span className="bg-muted px-2 py-0.5 rounded-full">📚 {j.subject}</span>}
-                  {j.location && <span className="bg-muted px-2 py-0.5 rounded-full">📍 {j.location}</span>}
-                  {j.salary_range && <span className="bg-muted px-2 py-0.5 rounded-full">💰 {j.salary_range}</span>}
+                  {j.subject && <span className="bg-muted px-2 py-0.5 rounded-full flex items-center gap-1"><BookOpen size={10} /> {j.subject}</span>}
+                  {j.location && <span className="bg-muted px-2 py-0.5 rounded-full flex items-center gap-1"><MapPin size={10} /> {j.location}</span>}
+                  {j.salary_range && <span className="bg-muted px-2 py-0.5 rounded-full flex items-center gap-1"><DollarSign size={10} /> {j.salary_range}</span>}
                 </div>
                 {branch && (
                   <div className="mt-3 pt-3 border-t border-border">
@@ -100,7 +100,7 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
                               {branch.head_photo_url ? (
                                 <img src={branch.head_photo_url} alt="" className="w-7 h-7 rounded-full object-cover" />
                               ) : (
-                                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs">👤</div>
+                                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center"><UserCircle size={14} className="text-primary" /></div>
                               )}
                               <div>
                                 <div className="text-[10px] text-muted-foreground">প্রধান</div>
@@ -113,8 +113,8 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
                             {branch.email && <span className="flex items-center gap-1"><Mail size={10} /> {branch.email}</span>}
                           </div>
                           <div className="flex gap-3 text-[10px]">
-                            {branch.total_teachers > 0 && <span>👨‍🏫 {toBengaliNumber(branch.total_teachers)} জন শিক্ষক</span>}
-                            {branch.total_students > 0 && <span>👨‍🎓 {toBengaliNumber(branch.total_students)} জন ছাত্র</span>}
+                            {branch.total_teachers > 0 && <span className="flex items-center gap-1"><GraduationCap size={10} /> {toBengaliNumber(branch.total_teachers)} জন শিক্ষক</span>}
+                            {branch.total_students > 0 && <span className="flex items-center gap-1"><Users size={10} /> {toBengaliNumber(branch.total_students)} জন ছাত্র</span>}
                           </div>
                         </div>
                       </PopoverContent>
@@ -162,37 +162,37 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
                   {selectedJob.subject && (
                     <div className="bg-muted/50 rounded-lg p-3">
                       <div className="text-[10px] text-muted-foreground">বিষয়</div>
-                      <div className="text-sm font-medium">📚 {selectedJob.subject}</div>
+                      <div className="text-sm font-medium flex items-center gap-1"><BookOpen size={14} /> {selectedJob.subject}</div>
                     </div>
                   )}
                   {selectedJob.qualification_required && (
                     <div className="bg-muted/50 rounded-lg p-3">
                       <div className="text-[10px] text-muted-foreground">শিক্ষাগত যোগ্যতা</div>
-                      <div className="text-sm font-medium">🎓 {selectedJob.qualification_required}</div>
+                      <div className="text-sm font-medium flex items-center gap-1"><GraduationCap size={14} /> {selectedJob.qualification_required}</div>
                     </div>
                   )}
                   {selectedJob.experience_required && (
                     <div className="bg-muted/50 rounded-lg p-3">
                       <div className="text-[10px] text-muted-foreground">অভিজ্ঞতা</div>
-                      <div className="text-sm font-medium">📋 {selectedJob.experience_required}</div>
+                      <div className="text-sm font-medium flex items-center gap-1"><FileText size={14} /> {selectedJob.experience_required}</div>
                     </div>
                   )}
                   {selectedJob.salary_range && (
                     <div className="bg-muted/50 rounded-lg p-3">
                       <div className="text-[10px] text-muted-foreground">বেতন</div>
-                      <div className="text-sm font-medium">💰 {selectedJob.salary_range}</div>
+                      <div className="text-sm font-medium flex items-center gap-1"><DollarSign size={14} /> {selectedJob.salary_range}</div>
                     </div>
                   )}
                   {selectedJob.location && (
                     <div className="bg-muted/50 rounded-lg p-3">
                       <div className="text-[10px] text-muted-foreground">অবস্থান</div>
-                      <div className="text-sm font-medium">📍 {selectedJob.location}</div>
+                      <div className="text-sm font-medium flex items-center gap-1"><MapPin size={14} /> {selectedJob.location}</div>
                     </div>
                   )}
                   {selectedJob.deadline && (
                     <div className="bg-muted/50 rounded-lg p-3">
                       <div className="text-[10px] text-muted-foreground">আবেদনের শেষ তারিখ</div>
-                      <div className="text-sm font-medium text-destructive">📅 {new Date(selectedJob.deadline).toLocaleDateString("bn-BD")}</div>
+                      <div className="text-sm font-medium text-destructive flex items-center gap-1"><CalendarDays size={14} /> {new Date(selectedJob.deadline).toLocaleDateString("bn-BD")}</div>
                     </div>
                   )}
                 </div>
@@ -444,8 +444,8 @@ const TeacherDirectory = () => {
                           {t.photo_url ? (
                             <img src={t.photo_url} alt={t.name} className="w-16 h-16 rounded-xl object-cover shrink-0 ring-2 ring-muted group-hover:ring-primary/20 transition-colors" />
                           ) : (
-                            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-primary text-2xl shrink-0">
-                              👨‍🏫
+                            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-primary shrink-0">
+                              <UserCircle size={32} />
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
@@ -533,7 +533,7 @@ const TeacherDirectory = () => {
                     {selectedTeacher.photo_url ? (
                       <img src={selectedTeacher.photo_url} alt="" className="w-20 h-20 rounded-xl object-cover ring-2 ring-primary/10" />
                     ) : (
-                      <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-3xl">👨‍🏫</div>
+                      <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center"><UserCircle size={40} className="text-primary" /></div>
                     )}
                     <div>
                       <h2 className="text-lg font-bold flex items-center gap-1">
@@ -737,7 +737,7 @@ const TeacherReviewSection = ({ teacherId }: { teacherId: string }) => {
           <MessageSquare size={14} className="text-primary" /> রিভিউ ও মূল্যায়ন
           {reviews && reviews.length > 0 && (
             <span className="text-[10px] text-muted-foreground font-normal ml-1">
-              ({toBengaliNumber(reviews.length)}টি · গড় {toBengaliNumber(avgRating.toFixed(1))}⭐)
+              ({toBengaliNumber(reviews.length)}টি · গড় {toBengaliNumber(avgRating.toFixed(1))})
             </span>
           )}
         </h3>

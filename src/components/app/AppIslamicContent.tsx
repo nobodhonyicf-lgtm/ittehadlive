@@ -5,10 +5,10 @@ import AppIftarCountdown from "./AppIftarCountdown";
 import { Link } from "react-router-dom";
 
 const categoryConfig = {
-  quran: { label: "কুরআন", icon: BookOpen, bg: "from-emerald-800 to-teal-700", pattern: "🕌", link: "/quran" },
-  hadith: { label: "হাদিস", icon: Quote, bg: "from-sky-800 to-blue-700", pattern: "📿", link: "/hadith" },
-  dua: { label: "দোয়া", icon: HandHelping, bg: "from-indigo-800 to-purple-700", pattern: "🤲", link: "/dua" },
-  masala: { label: "মাসআলা", icon: BookOpen, bg: "from-rose-800 to-red-700", pattern: "📖", link: "/masala" },
+  quran: { label: "কুরআন", icon: BookOpen, bg: "from-emerald-800 to-teal-700", link: "/quran" },
+  hadith: { label: "হাদিস", icon: Quote, bg: "from-sky-800 to-blue-700", link: "/hadith" },
+  dua: { label: "দোয়া", icon: HandHelping, bg: "from-indigo-800 to-purple-700", link: "/dua" },
+  masala: { label: "মাসআলা", icon: BookOpen, bg: "from-rose-800 to-red-700", link: "/masala" },
 } as const;
 
 const getDailyContent = (items: any[]) => {
@@ -35,11 +35,11 @@ const ContentModal = ({ item, onClose }: { item: any; onClose: () => void }) => 
           <p className="text-sm text-muted-foreground italic border-t border-border pt-3">উচ্চারণ: {item.transliteration}</p>
         )}
         {item.meaning && (
-          <p className="text-sm text-foreground leading-relaxed border-t border-border pt-3">📝 অর্থ: {item.meaning}</p>
+          <p className="text-sm text-foreground leading-relaxed border-t border-border pt-3">অর্থ: {item.meaning}</p>
         )}
         {item.question && (
           <div className="border-t border-border pt-3">
-            <p className="text-sm font-semibold mb-1">❓ প্রশ্ন: {item.question}</p>
+            <p className="text-sm font-semibold mb-1">প্রশ্ন: {item.question}</p>
             <p className="text-sm text-foreground leading-relaxed">{item.content}</p>
           </div>
         )}
@@ -69,7 +69,7 @@ const AppIslamicContent = () => {
 
   return (
     <div className="animate-fade-in space-y-3" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
-      <h2 className="text-sm font-bold flex items-center gap-2">📚 ইসলামী কন্টেন্ট</h2>
+      <h2 className="text-sm font-bold flex items-center gap-2"><BookOpen size={16} className="text-emerald-600" /> ইসলামী কন্টেন্ট</h2>
 
       <AppIftarCountdown />
 
@@ -84,7 +84,7 @@ const AppIslamicContent = () => {
               <div className="absolute inset-0 opacity-[0.04]" style={{
                 backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.1) 8px, rgba(255,255,255,0.1) 16px)`,
               }} />
-              <div className="absolute top-1 right-1.5 opacity-10 text-2xl">{config.pattern}</div>
+              <div className="absolute top-1 right-1.5 opacity-10"><Icon size={24} /></div>
 
               <div className="flex items-center gap-1.5 mb-1.5 border-b border-white/15 pb-1.5">
                 <Icon size={12} className="shrink-0" />
@@ -111,7 +111,7 @@ const AppIslamicContent = () => {
                     )}
                   </div>
                   {item.meaning && (
-                    <p className="text-[9px] opacity-70 mt-1 leading-relaxed line-clamp-2">📝 {item.meaning}</p>
+                    <p className="text-[9px] opacity-70 mt-1 leading-relaxed line-clamp-2">{item.meaning}</p>
                   )}
                   {item.source && (
                     <p className="text-[9px] opacity-60 mt-1 text-right italic">— {item.source}</p>
