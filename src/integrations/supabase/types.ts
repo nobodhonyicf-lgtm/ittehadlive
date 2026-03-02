@@ -1355,6 +1355,7 @@ export type Database = {
           experience_years: number | null
           id: string
           name: string
+          nid_image_url: string | null
           phone: string
           photo_url: string | null
           preferred_area: string | null
@@ -1365,6 +1366,8 @@ export type Database = {
           status: string
           subject: string
           updated_at: string
+          user_id: string | null
+          verification_video_url: string | null
         }
         Insert: {
           address?: string | null
@@ -1379,6 +1382,7 @@ export type Database = {
           experience_years?: number | null
           id?: string
           name: string
+          nid_image_url?: string | null
           phone: string
           photo_url?: string | null
           preferred_area?: string | null
@@ -1389,6 +1393,8 @@ export type Database = {
           status?: string
           subject: string
           updated_at?: string
+          user_id?: string | null
+          verification_video_url?: string | null
         }
         Update: {
           address?: string | null
@@ -1403,6 +1409,7 @@ export type Database = {
           experience_years?: number | null
           id?: string
           name?: string
+          nid_image_url?: string | null
           phone?: string
           photo_url?: string | null
           preferred_area?: string | null
@@ -1413,6 +1420,8 @@ export type Database = {
           status?: string
           subject?: string
           updated_at?: string
+          user_id?: string | null
+          verification_video_url?: string | null
         }
         Relationships: []
       }
