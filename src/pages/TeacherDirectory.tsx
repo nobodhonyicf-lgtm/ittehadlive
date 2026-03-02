@@ -625,7 +625,15 @@ const TeacherDirectory = () => {
                   )}
 
                   {/* CV Download */}
-                  <Button variant="outline" className="w-full gap-2" onClick={() => generateTeacherCV(selectedTeacher)}>
+                  <Button variant="outline" className="w-full gap-2" onClick={async () => {
+                    toast.info("সিভি তৈরি হচ্ছে...");
+                    try {
+                      await generateTeacherCV(selectedTeacher);
+                      toast.success("সিভি ডাউনলোড হয়েছে!");
+                    } catch {
+                      toast.error("সিভি তৈরিতে সমস্যা হয়েছে");
+                    }
+                  }}>
                     <Download size={14} /> সিভি ডাউনলোড করুন (PDF)
                   </Button>
 
