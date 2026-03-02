@@ -140,7 +140,7 @@ const navCategories: NavCategory[] = [
   },
 ];
 
-/* ─── Dashboard Home with Stats ─── */
+/* ─── Dashboard Home with Stats, Chart & Activity ─── */
 const DashboardHome = () => {
   const { data: stats } = useQuery({
     queryKey: ["admin_dashboard_stats"],
@@ -166,6 +166,73 @@ const DashboardHome = () => {
     },
   });
 
+  // Recent posts
+  const { data: recentPosts } = useQuery({
+    queryKey: ["admin_recent_posts"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("posts").select("id, title, slug, created_at, is_published").order("created_at", { ascending: false }).limit(5);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Recent notices
+  const { data: recentNotices } = useQuery({
+    queryKey: ["admin_recent_notices"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("notices").select("id, title, created_at, is_active").order("created_at", { ascending: false }).limit(5);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Page views for chart (last 7 days)
+  const { data: viewsChart } = useQuery({
+    queryKey: ["admin_views_chart"],
+    queryFn: async () => {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+      const { data, error } = await supabase
+        .from("page_views")
+        .select("created_at")
+        .gte("created_at", sevenDaysAgo.toISOString());
+      if (error) throw error;
+
+      // Group by date
+      const counts: Record<string, number> = {};
+      for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        const key = d.toLocaleDateString("bn-BD", { day: "numeric", month: "short" });
+        counts[key] = 0;
+      }
+      data?.forEach((v) => {
+        const key = new Date(v.created_at).toLocaleDateString("bn-BD", { day: "numeric", month: "short" });
+        if (key in counts) counts[key]++;
+      });
+      return Object.entries(counts).map(([date, views]) => ({ date, views }));
+    },
+  });
+
+  // Recent orders
+  const { data: recentOrders } = useQuery({
+    queryKey: ["admin_recent_orders"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("book_orders").select("id, order_number, customer_name, status, total_amount, created_at").order("created_at", { ascending: false }).limit(5);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const timeAgo = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins} মিনিট আগে`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} ঘণ্টা আগে`;
+    return `${Math.floor(hrs / 24)} দিন আগে`;
+  };
+
   const statCards = [
     { label: "মোট পোস্ট", value: stats?.posts ?? "...", icon: Newspaper, color: "from-primary/20 to-primary/5 text-primary", link: "/admin/posts" },
     { label: "মোট শিক্ষার্থী", value: stats?.students ?? "...", icon: GraduationCap, color: "from-blue-500/20 to-blue-500/5 text-blue-600", link: "/admin/students" },
@@ -176,6 +243,8 @@ const DashboardHome = () => {
     { label: "মোট পেজ ভিউ", value: stats?.totalViews ?? "...", icon: Eye, color: "from-cyan-500/20 to-cyan-500/5 text-cyan-600", link: "/admin/analytics" },
     { label: "সাইটে যান", value: "→", icon: Globe, color: "from-teal-500/20 to-teal-500/5 text-teal-600", link: "/" },
   ];
+
+  const maxViews = Math.max(...(viewsChart?.map(d => d.views) || [1]), 1);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -208,6 +277,116 @@ const DashboardHome = () => {
             </Card>
           </Link>
         ))}
+      </div>
+
+      {/* Chart & Recent Activity Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Page Views Chart */}
+        <Card className="border border-border/50">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-sm flex items-center gap-2">
+                <TrendingUp size={16} className="text-primary" /> সাপ্তাহিক পেজ ভিউ
+              </h3>
+              <Link to="/admin/analytics" className="text-xs text-primary hover:underline">বিস্তারিত →</Link>
+            </div>
+            <div className="flex items-end gap-1.5 h-36">
+              {viewsChart?.map((d, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <span className="text-[10px] text-muted-foreground font-medium">{d.views}</span>
+                  <div
+                    className="w-full rounded-t-md bg-gradient-to-t from-primary to-primary/60 transition-all duration-500 min-h-[4px]"
+                    style={{ height: `${Math.max((d.views / maxViews) * 100, 4)}%` }}
+                  />
+                  <span className="text-[9px] text-muted-foreground truncate w-full text-center">{d.date}</span>
+                </div>
+              ))}
+              {!viewsChart && (
+                <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">লোড হচ্ছে...</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Activity */}
+        <Card className="border border-border/50">
+          <CardContent className="p-5">
+            <h3 className="font-semibold text-sm flex items-center gap-2 mb-4">
+              <Clock size={16} className="text-primary" /> সাম্প্রতিক কার্যক্রম
+            </h3>
+            <div className="space-y-3 max-h-36 overflow-y-auto">
+              {recentPosts?.map((p) => (
+                <div key={p.id} className="flex items-start gap-2.5 group">
+                  <div className="mt-1 w-2 h-2 rounded-full bg-primary shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <Link to={`/admin/posts`} className="text-sm font-medium text-foreground hover:text-primary truncate block transition-colors">
+                      {p.title}
+                    </Link>
+                    <p className="text-[11px] text-muted-foreground">{timeAgo(p.created_at)}</p>
+                  </div>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${p.is_published ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                    {p.is_published ? "প্রকাশিত" : "ড্রাফট"}
+                  </span>
+                </div>
+              ))}
+              {!recentPosts?.length && <p className="text-sm text-muted-foreground text-center py-4">কোনো পোস্ট নেই</p>}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Notices & Orders */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Recent Notices */}
+        <Card className="border border-border/50">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-sm flex items-center gap-2">
+                <Bell size={16} className="text-violet-500" /> সাম্প্রতিক নোটিশ
+              </h3>
+              <Link to="/admin/notices" className="text-xs text-primary hover:underline">সব দেখুন →</Link>
+            </div>
+            <div className="space-y-2.5">
+              {recentNotices?.map((n) => (
+                <div key={n.id} className="flex items-center gap-2.5 py-1.5 border-b border-border/30 last:border-0">
+                  <Bell size={13} className={n.is_active ? "text-violet-500" : "text-muted-foreground"} />
+                  <span className="text-sm truncate flex-1">{n.title}</span>
+                  <span className="text-[10px] text-muted-foreground shrink-0">{timeAgo(n.created_at)}</span>
+                </div>
+              ))}
+              {!recentNotices?.length && <p className="text-sm text-muted-foreground text-center py-3">কোনো নোটিশ নেই</p>}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Orders */}
+        <Card className="border border-border/50">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-sm flex items-center gap-2">
+                <ShoppingCart size={16} className="text-orange-500" /> সাম্প্রতিক অর্ডার
+              </h3>
+              <Link to="/admin/book-orders" className="text-xs text-primary hover:underline">সব দেখুন →</Link>
+            </div>
+            <div className="space-y-2.5">
+              {recentOrders?.map((o) => (
+                <div key={o.id} className="flex items-center gap-2.5 py-1.5 border-b border-border/30 last:border-0">
+                  <Package size={13} className="text-orange-500" />
+                  <div className="min-w-0 flex-1">
+                    <span className="text-sm font-medium truncate block">{o.customer_name}</span>
+                    <span className="text-[10px] text-muted-foreground">#{o.order_number}</span>
+                  </div>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${
+                    o.status === "pending" ? "bg-orange-100 text-orange-600" :
+                    o.status === "completed" ? "bg-emerald-100 text-emerald-600" :
+                    "bg-muted text-muted-foreground"
+                  }`}>{o.status === "pending" ? "পেন্ডিং" : o.status === "completed" ? "সম্পন্ন" : o.status}</span>
+                </div>
+              ))}
+              {!recentOrders?.length && <p className="text-sm text-muted-foreground text-center py-3">কোনো অর্ডার নেই</p>}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Quick actions */}
