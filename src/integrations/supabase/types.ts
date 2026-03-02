@@ -623,6 +623,65 @@ export type Database = {
         }
         Relationships: []
       }
+      job_postings: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          deadline: string | null
+          description: string | null
+          experience_required: string | null
+          id: string
+          is_active: boolean | null
+          location: string | null
+          qualification_required: string | null
+          salary_range: string | null
+          sort_order: number | null
+          subject: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          experience_required?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          qualification_required?: string | null
+          salary_range?: string | null
+          sort_order?: number | null
+          subject?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          experience_required?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          qualification_required?: string | null
+          salary_range?: string | null
+          sort_order?: number | null
+          subject?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_postings_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leader_profiles: {
         Row: {
           bio: string | null
@@ -1279,6 +1338,153 @@ export type Database = {
           name?: string
           pass_marks?: number
           sort_order?: number | null
+        }
+        Relationships: []
+      }
+      teacher_applications: {
+        Row: {
+          address: string | null
+          admin_note: string | null
+          bio: string | null
+          certification: string | null
+          created_at: string
+          cv_url: string | null
+          district: string | null
+          email: string | null
+          expected_salary: string | null
+          experience_years: number | null
+          id: string
+          name: string
+          phone: string
+          photo_url: string | null
+          preferred_area: string | null
+          qualification: string | null
+          reference_name: string | null
+          reference_phone: string | null
+          specialization: string | null
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          admin_note?: string | null
+          bio?: string | null
+          certification?: string | null
+          created_at?: string
+          cv_url?: string | null
+          district?: string | null
+          email?: string | null
+          expected_salary?: string | null
+          experience_years?: number | null
+          id?: string
+          name: string
+          phone: string
+          photo_url?: string | null
+          preferred_area?: string | null
+          qualification?: string | null
+          reference_name?: string | null
+          reference_phone?: string | null
+          specialization?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          admin_note?: string | null
+          bio?: string | null
+          certification?: string | null
+          created_at?: string
+          cv_url?: string | null
+          district?: string | null
+          email?: string | null
+          expected_salary?: string | null
+          experience_years?: number | null
+          id?: string
+          name?: string
+          phone?: string
+          photo_url?: string | null
+          preferred_area?: string | null
+          qualification?: string | null
+          reference_name?: string | null
+          reference_phone?: string | null
+          specialization?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      teachers: {
+        Row: {
+          address: string | null
+          bio: string | null
+          certification: string | null
+          created_at: string
+          district: string | null
+          email: string | null
+          expected_salary: string | null
+          experience_years: number | null
+          id: string
+          is_active: boolean | null
+          is_available: boolean | null
+          name: string
+          phone: string | null
+          photo_url: string | null
+          preferred_area: string | null
+          qualification: string | null
+          rating: number | null
+          sort_order: number | null
+          specialization: string | null
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          bio?: string | null
+          certification?: string | null
+          created_at?: string
+          district?: string | null
+          email?: string | null
+          expected_salary?: string | null
+          experience_years?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_available?: boolean | null
+          name: string
+          phone?: string | null
+          photo_url?: string | null
+          preferred_area?: string | null
+          qualification?: string | null
+          rating?: number | null
+          sort_order?: number | null
+          specialization?: string | null
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          bio?: string | null
+          certification?: string | null
+          created_at?: string
+          district?: string | null
+          email?: string | null
+          expected_salary?: string | null
+          experience_years?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_available?: boolean | null
+          name?: string
+          phone?: string | null
+          photo_url?: string | null
+          preferred_area?: string | null
+          qualification?: string | null
+          rating?: number | null
+          sort_order?: number | null
+          specialization?: string | null
+          subject?: string
+          updated_at?: string
         }
         Relationships: []
       }

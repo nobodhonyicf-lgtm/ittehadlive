@@ -44,6 +44,7 @@ import AdminSMS from "./AdminSMS";
 import AdminCustomers from "./AdminCustomers";
 import AdminPushNotifications from "./AdminPushNotifications";
 import AdminIslamicContent from "./AdminIslamicContent";
+import AdminTeachers from "./AdminTeachers";
 
 interface NavItem {
   label: string;
@@ -87,6 +88,7 @@ const navCategories: NavCategory[] = [
       { label: "পরীক্ষা", icon: ClipboardList, path: "/admin/exams", section: "exams" },
       { label: "বিষয়", icon: BookOpen, path: "/admin/subjects", section: "subjects" },
       { label: "রেজাল্ট", icon: GraduationCap, path: "/admin/results", section: "results" },
+      { label: "শিক্ষক সার্ভিস", icon: GraduationCap, path: "/admin/teachers", section: "teachers" },
     ],
   },
   {
@@ -725,6 +727,7 @@ const AdminDashboard = () => {
             <Route path="settings" element={<AdminSettings />} />
             <Route path="push-notifications" element={<AdminPushNotifications />} />
             <Route path="islamic-content" element={<AdminIslamicContent />} />
+            <Route path="teachers" element={<AdminTeachers />} />
           </Routes>
         </div>
       </main>
