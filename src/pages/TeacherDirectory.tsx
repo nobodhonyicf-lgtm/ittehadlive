@@ -396,6 +396,12 @@ const TeacherDirectory = () => {
 };
 
 /* ─── Teacher Review Section Component ─── */
+const REVIEW_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes between reviews
+
+const getLastReviewTime = (): number => {
+  try { return parseInt(localStorage.getItem("last_teacher_review_time") || "0", 10); } catch { return 0; }
+};
+
 const TeacherReviewSection = ({ teacherId }: { teacherId: string }) => {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
@@ -416,14 +422,31 @@ const TeacherReviewSection = ({ teacherId }: { teacherId: string }) => {
 
   const submitReview = useMutation({
     mutationFn: async () => {
+      // Rate limiting check
+      const lastTime = getLastReviewTime();
+      const now = Date.now();
+      if (now - lastTime < REVIEW_COOLDOWN_MS) {
+        const remainingMin = Math.ceil((REVIEW_COOLDOWN_MS - (now - lastTime)) / 60000);
+        throw new Error(`অনুগ্রহ করে ${remainingMin} মিনিট পর আবার চেষ্টা করুন।`);
+      }
+
+      // Validate inputs
+      const name = reviewForm.reviewer_name.trim();
+      if (!name || name.length < 3) throw new Error("নাম কমপক্ষে ৩ অক্ষর হতে হবে।");
+      if (name.length > 100) throw new Error("নাম ১০০ অক্ষরের মধ্যে হতে হবে।");
+      if (reviewForm.comment && reviewForm.comment.length > 500) throw new Error("মন্তব্য ৫০০ অক্ষরের মধ্যে হতে হবে।");
+
       const { error } = await supabase.from("teacher_reviews").insert([{
         teacher_id: teacherId,
-        reviewer_name: reviewForm.reviewer_name,
-        institution_name: reviewForm.institution_name || null,
+        reviewer_name: name,
+        institution_name: reviewForm.institution_name.trim() || null,
         rating: reviewForm.rating,
-        comment: reviewForm.comment || null,
+        comment: reviewForm.comment.trim() || null,
       }]);
       if (error) throw error;
+
+      // Set cooldown timestamp
+      localStorage.setItem("last_teacher_review_time", now.toString());
     },
     onSuccess: () => {
       toast.success("রিভিউ সাবমিট হয়েছে! অনুমোদনের পর দেখানো হবে।");
