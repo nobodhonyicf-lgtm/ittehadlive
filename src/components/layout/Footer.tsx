@@ -63,7 +63,7 @@ const Footer = () => {
               {/* Social icons */}
               <div className="flex items-center gap-2 pt-2">
                 <a
-                  href={settings?.facebook_url || "https://www.facebook.com/aborawabdarpul"}
+                  href={settings?.facebook_url || "https://www.facebook.com/ittehadbd"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2.5 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-all duration-300 hover:scale-110"
@@ -72,7 +72,7 @@ const Footer = () => {
                   <Facebook size={18} />
                 </a>
                 <a
-                  href={settings?.youtube_url || "#"}
+                  href={settings?.youtube_url || "https://www.youtube.com/@ittehadbd"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2.5 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-all duration-300 hover:scale-110"
@@ -184,7 +184,7 @@ const Footer = () => {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    window.open(settings?.facebook_url || "https://www.facebook.com/aborawabdarpul", "_blank");
+                    window.open(settings?.facebook_url || "https://www.facebook.com/ittehadbd", "_blank");
                   }}
                   className="flex gap-1.5"
                 >
