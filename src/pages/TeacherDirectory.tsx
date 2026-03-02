@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send, BadgeCheck, Eye, Building2, Download, DollarSign, FileText, CalendarDays, UserCircle } from "lucide-react";
+import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send, BadgeCheck, Eye, Building2, Download, DollarSign, FileText, CalendarDays, UserCircle, Share2, Bookmark, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 
@@ -128,6 +128,18 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
                   <Link to="/teacher-apply">
                     <Button size="sm" variant="outline" className="h-7 text-xs">আবেদন করুন →</Button>
                   </Link>
+                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 ml-auto" onClick={(e) => {
+                    e.preventDefault();
+                    const url = `${window.location.origin}/teachers?job=${j.id}`;
+                    if (typeof navigator.share === "function") {
+                      navigator.share({ title: j.title, text: `নিয়োগ বিজ্ঞপ্তি: ${j.title}`, url });
+                    } else {
+                      navigator.clipboard.writeText(url);
+                      toast.success("লিংক কপি হয়েছে!");
+                    }
+                  }}>
+                    <Share2 size={13} />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -490,11 +502,34 @@ const TeacherDirectory = () => {
                             </Badge>
                           )}
                         </div>
-                        {t.experience_years > 0 && (
-                          <span className="text-[10px] text-muted-foreground">
-                            {toBengaliNumber(t.experience_years)} বছর
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1">
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={(e) => {
+                            e.stopPropagation();
+                            const saved = JSON.parse(localStorage.getItem("saved_teachers") || "[]");
+                            const exists = saved.includes(t.id);
+                            if (exists) {
+                              localStorage.setItem("saved_teachers", JSON.stringify(saved.filter((id: string) => id !== t.id)));
+                              toast.success("সেভ তালিকা থেকে সরানো হয়েছে");
+                            } else {
+                              localStorage.setItem("saved_teachers", JSON.stringify([...saved, t.id]));
+                              toast.success("সেভ করা হয়েছে!");
+                            }
+                          }}>
+                            <Bookmark size={13} className={JSON.parse(localStorage.getItem("saved_teachers") || "[]").includes(t.id) ? "fill-primary text-primary" : ""} />
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={(e) => {
+                            e.stopPropagation();
+                            const url = `${window.location.origin}/teachers?highlight=${t.id}`;
+                            if (typeof navigator.share === "function") {
+                              navigator.share({ title: t.name, text: `শিক্ষক: ${t.name} - ${t.subject}`, url });
+                            } else {
+                              navigator.clipboard.writeText(url);
+                              toast.success("লিংক কপি হয়েছে!");
+                            }
+                          }}>
+                            <Share2 size={13} />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

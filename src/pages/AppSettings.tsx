@@ -1,7 +1,8 @@
 import {
   Bell, BellOff, Loader2, Moon, Sun, Settings, Type, Minus, Plus, MapPin, ChevronRight,
   Info, Shield, User, LogOut, Trash2, RefreshCw, HardDrive, Share2, Star, MessageCircle,
-  Smartphone,
+  Smartphone, BookOpen, GraduationCap, Bookmark, Globe, Heart, FileText, ShoppingBag,
+  BookMarked, Languages, Palette,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useQuery } from "@tanstack/react-query";
@@ -387,6 +388,61 @@ const AppSettings = () => {
           </div>
         </div>
 
+        {/* Quick Links Section */}
+        <div>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">দ্রুত লিংক</p>
+          <div className="bg-card rounded-2xl border border-border overflow-hidden divide-y divide-border">
+            <Link to="/teachers" className="flex items-center justify-between p-4 active:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                  <GraduationCap size={18} className="text-orange-500" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">শিক্ষক ডিরেক্টরি</p>
+                  <p className="text-[11px] text-muted-foreground">যোগ্য শিক্ষক খুঁজুন</p>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </Link>
+            <Link to="/books" className="flex items-center justify-between p-4 active:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                  <ShoppingBag size={18} className="text-cyan-500" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">বইয়ের দোকান</p>
+                  <p className="text-[11px] text-muted-foreground">ইসলামী বই কিনুন</p>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </Link>
+            <Link to="/hadith" className="flex items-center justify-between p-4 active:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-emerald-600/10 flex items-center justify-center">
+                  <BookMarked size={18} className="text-emerald-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">হাদিস শরীফ</p>
+                  <p className="text-[11px] text-muted-foreground">হাদিস পড়ুন ও শিখুন</p>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </Link>
+            <Link to="/result-check" className="flex items-center justify-between p-4 active:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                  <FileText size={18} className="text-violet-500" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">পরীক্ষার ফলাফল</p>
+                  <p className="text-[11px] text-muted-foreground">ফলাফল দেখুন</p>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </Link>
+          </div>
+        </div>
+
         {/* Links Section */}
         <div>
           <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">অন্যান্য</p>
@@ -400,6 +456,22 @@ const AppSettings = () => {
                 <div>
                   <p className="font-semibold text-sm">অ্যাপ শেয়ার করুন</p>
                   <p className="text-[11px] text-muted-foreground">বন্ধুদের ইনস্টল লিংক পাঠান</p>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </button>
+
+            <button onClick={() => {
+              const stars = 5;
+              toast.success("ধন্যবাদ! আপনার রেটিং গ্রহণ করা হয়েছে");
+            }} className="flex items-center justify-between p-4 w-full text-left active:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                  <Star size={18} className="text-yellow-500" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">অ্যাপ রেটিং দিন</p>
+                  <p className="text-[11px] text-muted-foreground">আমাদের ৫ স্টার দিন</p>
                 </div>
               </div>
               <ChevronRight size={16} className="text-muted-foreground" />
@@ -427,6 +499,17 @@ const AppSettings = () => {
               <ChevronRight size={16} className="text-muted-foreground" />
             </Link>
 
+            {/* Privacy */}
+            <Link to="/page/privacy" className="flex items-center justify-between p-4 active:bg-muted/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-gray-500/10 flex items-center justify-center">
+                  <Shield size={18} className="text-gray-500" />
+                </div>
+                <p className="font-semibold text-sm">গোপনীয়তা নীতি</p>
+              </div>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </Link>
+
             {/* App version */}
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center gap-3">
@@ -435,7 +518,7 @@ const AppSettings = () => {
                 </div>
                 <div>
                   <p className="font-semibold text-sm">অ্যাপ ভার্সন</p>
-                  <p className="text-[11px] text-muted-foreground">v2.0.0</p>
+                  <p className="text-[11px] text-muted-foreground">v2.1.0</p>
                 </div>
               </div>
             </div>

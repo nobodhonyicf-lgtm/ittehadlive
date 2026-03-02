@@ -1,12 +1,12 @@
-import { Home, BookOpen, Bell, Settings, BookMarked } from "lucide-react";
+import { Home, BookOpen, Bell, Settings, BookMarked, GraduationCap } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const navItems = [
   { icon: Home, label: "হোম", path: "/" },
   { icon: BookOpen, label: "কুরআন", path: "/quran" },
+  { icon: GraduationCap, label: "শিক্ষক", path: "/teachers" },
   { icon: Bell, label: "নোটিশ", path: "/notifications" },
-  { icon: BookMarked, label: "হাদিস", path: "/hadith" },
-  { icon: Settings, label: "সেটিংস", path: "/app-settings" },
+  { icon: Settings, label: "আরও", path: "/app-settings" },
 ];
 
 const AppBottomNav = () => {
