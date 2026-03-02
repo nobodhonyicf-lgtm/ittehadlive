@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useMenuItems, useSiteSettings } from "@/hooks/useData";
-import { Menu, X, GraduationCap, Phone, Mail, BookOpen, LogIn, User, LayoutDashboard } from "lucide-react";
+import { Menu, X, GraduationCap, Phone, Mail, BookOpen, LogIn, User, LayoutDashboard, Users } from "lucide-react";
 import LocationPicker from "@/components/LocationPicker";
 import { useState, useEffect } from "react";
 import { toBengali } from "@/lib/bengali";
@@ -64,6 +64,9 @@ const Header = () => {
             </Link>
             <Link to="/books" className="hidden md:flex items-center gap-1 hover:text-primary transition-colors">
               <BookOpen size={13} /> প্রকাশনা
+            </Link>
+            <Link to="/teachers" className="hidden md:flex items-center gap-1 hover:text-primary transition-colors">
+              <Users size={13} /> শিক্ষক
             </Link>
             {user && hasAnyRole && (
               <Link to="/admin" className="hidden md:flex items-center gap-1 hover:text-primary transition-colors">
@@ -136,6 +139,11 @@ const Header = () => {
             <li className="md:hidden">
               <Link to="/books" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
                 প্রকাশনা
+              </Link>
+            </li>
+            <li className="md:hidden">
+              <Link to="/teachers" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+                শিক্ষক সার্ভিস
               </Link>
             </li>
           </ul>
