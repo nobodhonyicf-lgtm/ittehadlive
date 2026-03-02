@@ -19,6 +19,7 @@ import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 /* ─── Teachers Tab ─── */
 const TeachersTab = () => {
   const { canEdit, canDelete } = useSectionPermissions();
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -46,13 +47,13 @@ const TeachersTab = () => {
       if (editId) { const { error } = await supabase.from("teachers").update(payload).eq("id", editId); if (error) throw error; }
       else { const { error } = await supabase.from("teachers").insert([payload]); if (error) throw error; }
     },
-    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); setEditId(null); },
+    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); setEditId(null); queryClient.invalidateQueries({ queryKey: ["admin_teachers"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("teachers").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => toast.success("মুছে ফেলা হয়েছে"),
+    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); queryClient.invalidateQueries({ queryKey: ["admin_teachers"] }); },
   });
 
   const resetForm = () => setForm({ name: "", phone: "", email: "", address: "", district: "", subject: "", qualification: "", experience_years: 0, specialization: "", certification: "", bio: "", photo_url: "", preferred_area: "", expected_salary: "", is_available: true, is_active: true, is_verified: false, sort_order: 0 });
@@ -304,6 +305,7 @@ const ApplicationsTab = () => {
 /* ─── Job Postings Tab ─── */
 const JobPostingsTab = () => {
   const { canEdit, canDelete } = useSectionPermissions();
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", description: "", subject: "", qualification_required: "", experience_required: "", salary_range: "", location: "", deadline: "", is_active: true, branch_id: "" });
@@ -332,13 +334,13 @@ const JobPostingsTab = () => {
       if (editId) { const { error } = await supabase.from("job_postings").update(payload).eq("id", editId); if (error) throw error; }
       else { const { error } = await supabase.from("job_postings").insert([payload]); if (error) throw error; }
     },
-    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); setEditId(null); },
+    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); setEditId(null); queryClient.invalidateQueries({ queryKey: ["admin_job_postings"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from("job_postings").delete().eq("id", id); if (error) throw error; },
-    onSuccess: () => toast.success("মুছে ফেলা হয়েছে"),
+    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); queryClient.invalidateQueries({ queryKey: ["admin_job_postings"] }); },
   });
 
   return (
