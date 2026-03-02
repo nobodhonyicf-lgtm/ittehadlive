@@ -8,8 +8,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Tag, Search } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
+import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
 const AdminCategories = () => {
   const { canEdit, canDelete } = useSectionPermissions();
@@ -17,6 +18,7 @@ const AdminCategories = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", slug: "", parent_id: "" });
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ["admin_categories"],
@@ -41,12 +43,7 @@ const AdminCategories = () => {
         if (error) throw error;
       }
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin_categories"] });
-      qc.invalidateQueries({ queryKey: ["categories"] });
-      toast.success("সংরক্ষিত");
-      setOpen(false);
-    },
+    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -55,7 +52,7 @@ const AdminCategories = () => {
       const { error } = await supabase.from("categories").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin_categories"] }); toast.success("মুছে ফেলা হয়েছে"); },
+    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); },
   });
 
   const getParentName = (parentId: string | null) => {
@@ -63,13 +60,16 @@ const AdminCategories = () => {
     return categories?.find(c => c.id === parentId)?.name || "—";
   };
 
+  const filteredCategories = categories?.filter(c => !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">ক্যাটাগরি ব্যবস্থাপনা</h1>
+    <AdminPageWrapper
+      title="ক্যাটাগরি ব্যবস্থাপনা"
+      icon={Tag}
+      action={
         <Dialog open={open} onOpenChange={setOpen}>
           {canEdit && <DialogTrigger asChild>
-            <Button onClick={() => { setEditId(null); setForm({ name: "", slug: "", parent_id: "" }); }}>
+            <Button onClick={() => { setEditId(null); setForm({ name: "", slug: "", parent_id: "" }); }} className="gap-1.5">
               <Plus size={16} /> নতুন
             </Button>
           </DialogTrigger>}
@@ -89,38 +89,49 @@ const AdminCategories = () => {
                   {parentCategories?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
-              <Button type="submit" disabled={saveMutation.isPending} className="w-full">সংরক্ষণ</Button>
+              <Button type="submit" disabled={saveMutation.isPending} className="w-full">{saveMutation.isPending ? "সংরক্ষণ হচ্ছে..." : "সংরক্ষণ"}</Button>
             </form>
           </DialogContent>
         </Dialog>
+      }
+    >
+      <div className="relative">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input placeholder="ক্যাটাগরি খুঁজুন..." className="pl-9 bg-card" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
       </div>
-      <Card><CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>নাম</TableHead>
-              <TableHead>প্যারেন্ট</TableHead>
-              <TableHead>স্লাগ</TableHead>
-              <TableHead className="text-right">অ্যাকশন</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? <TableRow><TableCell colSpan={4} className="text-center">লোড হচ্ছে...</TableCell></TableRow> :
-              categories?.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="font-medium">{c.name}</TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{getParentName((c as any).parent_id)}</TableCell>
-                  <TableCell className="text-muted-foreground">{c.slug}</TableCell>
-                  <TableCell className="text-right">
-                    {canEdit && <Button variant="ghost" size="icon" onClick={() => { setEditId(c.id); setForm({ name: c.name, slug: c.slug, parent_id: (c as any).parent_id || "" }); setOpen(true); }}><Edit size={16} /></Button>}
-                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(c.id)}><Trash2 size={16} /></Button>}
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </CardContent></Card>
-    </div>
+
+      <Card className="border border-border/50 overflow-hidden">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/30">
+                <TableHead>নাম</TableHead>
+                <TableHead>প্যারেন্ট</TableHead>
+                <TableHead>স্লাগ</TableHead>
+                <TableHead className="text-right">অ্যাকশন</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">লোড হচ্ছে...</TableCell></TableRow> :
+                filteredCategories?.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">কোনো ক্যাটাগরি পাওয়া যায়নি</TableCell></TableRow> :
+                filteredCategories?.map((c) => (
+                  <TableRow key={c.id} className="hover:bg-muted/20 transition-colors">
+                    <TableCell className="font-medium">{c.name}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{getParentName((c as any).parent_id)}</TableCell>
+                    <TableCell className="text-muted-foreground">{c.slug}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-0.5">
+                        {canEdit && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => { setEditId(c.id); setForm({ name: c.name, slug: c.slug, parent_id: (c as any).parent_id || "" }); setOpen(true); }}><Edit size={15} /></Button>}
+                        {canDelete && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteMutation.mutate(c.id)}><Trash2 size={15} /></Button>}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </AdminPageWrapper>
   );
 };
 
