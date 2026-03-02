@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Clock, Building2 } from "lucide-react";
+import { toBengali } from "@/lib/bengali";
 
 const AppJobPostings = () => {
   const { data: jobs } = useQuery({
@@ -30,6 +31,15 @@ const AppJobPostings = () => {
   if (!jobs?.length) return null;
 
   const getBranch = (id: string | null) => branches?.find((b: any) => b.id === id);
+
+  const formatDateBn = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const day = toBengali(d.getDate());
+    const months = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+    const month = months[d.getMonth()];
+    const year = toBengali(d.getFullYear());
+    return `${day} ${month}, ${year}`;
+  };
 
   return (
     <div>
@@ -63,7 +73,7 @@ const AppJobPostings = () => {
                   {j.deadline && (
                     <div className="flex items-center gap-1 mt-1.5 text-[9px] text-destructive">
                       <Clock size={9} />
-                      <span>শেষ: {new Date(j.deadline).toLocaleDateString("bn-BD")}</span>
+                      <span>শেষ: {formatDateBn(j.deadline)}</span>
                     </div>
                   )}
                   {branch && (

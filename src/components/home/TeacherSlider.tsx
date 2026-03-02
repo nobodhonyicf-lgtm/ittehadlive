@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { BadgeCheck, BookOpen, MapPin, Star, Briefcase } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import SectionHeader from "./SectionHeader";
+import { toBengaliNumber } from "@/lib/bengali";
 
 const getExperienceBadge = (years: number) => {
   if (years >= 10) return { label: "সিনিয়র", color: "bg-amber-500/10 text-amber-700 border-amber-200" };
@@ -69,6 +70,7 @@ const TeacherSlider = () => {
                     {[1, 2, 3, 4, 5].map(i => (
                       <Star key={i} size={8} className={i <= (t.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"} />
                     ))}
+                    {(t.rating || 0) > 0 && <span className="text-[7px] text-muted-foreground ml-0.5">({toBengaliNumber(Number(t.rating).toFixed(1))})</span>}
                   </div>
                   {expBadge && (
                     <span className={`inline-block text-[8px] px-1.5 py-0.5 rounded-full border mt-1 ${expBadge.color}`}>
