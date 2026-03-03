@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SEOHead from "@/components/SEOHead";
 import Layout from "@/components/layout/Layout";
 import AppLayout from "@/components/app/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -132,6 +133,7 @@ const ResultCheck = () => {
 
   return (
     <Wrapper>
+      <SEOHead title="রেজাল্ট চেক করুন" description="ইত্তেহাদুল মাদারিসের পরীক্ষার ফলাফল — রোল ও রেজিস্ট্রেশন নম্বর দিয়ে রেজাল্ট দেখুন।" keywords="রেজাল্ট, পরীক্ষা, মাদরাসা, ফলাফল" />
       <div className={`max-w-4xl mx-auto px-4 ${isApp ? 'py-4' : 'py-8'}`}>
         <div className="text-center mb-6 print:hidden">
           {isApp ? (

@@ -31,7 +31,7 @@ const AppTeacherSlider = () => {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-bold flex items-center gap-1.5"><Users size={15} className="text-pink-600" /> শিক্ষক তথ্য</h3>
+        <h3 className="text-sm font-bold flex items-center gap-1.5"><Users size={15} className="text-pink-600" /> আপনার মাদরাসার জন্য শিক্ষক খুঁজুন</h3>
         <Link to="/teachers" className="text-xs text-primary font-medium">সব দেখুন →</Link>
       </div>
       <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">

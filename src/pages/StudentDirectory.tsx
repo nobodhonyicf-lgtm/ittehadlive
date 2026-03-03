@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "@/components/layout/Layout";
+import SEOHead from "@/components/SEOHead";
 import { toBengali } from "@/lib/bengali";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -32,6 +33,7 @@ const StudentDirectory = () => {
 
   return (
     <Layout>
+      <SEOHead title="শিক্ষার্থী ডিরেক্টরি" description="ইত্তেহাদুল মাদারিসের শিক্ষার্থী অনুসন্ধান — শাখা ও ক্লাস অনুযায়ী শিক্ষার্থীর তথ্য দেখুন।" keywords="শিক্ষার্থী, ডিরেক্টরি, মাদরাসা, ছাত্র" />
       <div className="px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary flex items-center justify-center gap-3">

@@ -1,4 +1,5 @@
 import Layout from "@/components/layout/Layout";
+import SEOHead from "@/components/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { useBranches } from "@/hooks/useBoardData";
 import { Building2, MapPin, Users, GraduationCap, ChevronRight } from "lucide-react";
@@ -13,6 +14,7 @@ const BranchList = () => {
 
   return (
     <Layout>
+      <SEOHead title="শাখা সমূহ" description="ইত্তেহাদুল মাদারিসের সকল শাখা প্রতিষ্ঠান — ঠিকানা, শিক্ষক ও শিক্ষার্থী সংখ্যাসহ বিস্তারিত তথ্য।" keywords="শাখা, মাদরাসা, প্রতিষ্ঠান, বাংলাদেশ" />
       <div className="px-4 py-8 max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 dark:bg-primary/20 mb-3">

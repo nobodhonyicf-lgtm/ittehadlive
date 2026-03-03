@@ -1,4 +1,5 @@
 import Layout from "@/components/layout/Layout";
+import SEOHead from "@/components/SEOHead";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -79,6 +80,7 @@ const Contact = () => {
 
   return (
     <Layout>
+      <SEOHead title="যোগাযোগ" description="ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ-এর সাথে যোগাযোগ করুন — ফোন, ইমেইল অথবা মেসেজ পাঠান।" keywords="যোগাযোগ, ইত্তেহাদ, মাদরাসা, বাংলাদেশ" />
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className={`grid grid-cols-1 ${isApp ? '' : 'lg:grid-cols-3'} gap-6`}>
           <div className={isApp ? '' : 'lg:col-span-2'}>

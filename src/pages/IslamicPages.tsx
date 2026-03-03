@@ -1,4 +1,5 @@
 import Layout from "@/components/layout/Layout";
+import SEOHead from "@/components/SEOHead";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useIslamicContents, useSiteSettings } from "@/hooks/useData";
@@ -426,6 +427,7 @@ const makeIslamicPage = (
     }
     return (
       <Layout>
+        <SEOHead title={title} description={description} keywords={`${title}, ইসলাম, ইসলামী, ${category}, বাংলা`} />
         <IslamicListContent category={category} title={title} emoji={emoji} gradientClass={gradientClass} description={description} />
       </Layout>
     );
