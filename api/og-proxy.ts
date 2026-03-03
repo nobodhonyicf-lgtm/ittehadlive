@@ -12,6 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const type = (req.query.type as string) || 'post';
   const slug = req.query.slug as string;
   const id = req.query.id as string;
+  const category = req.query.category as string;
 
   // Build redirect URL
   let redirectUrl = '/';
@@ -22,6 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   else if (type === 'notice' && id) redirectUrl = `/notice/${id}`;
   else if (type === 'book' && slug) redirectUrl = `/book/${slug}`;
   else if (type === 'branch' && id) redirectUrl = `/branch/${id}`;
+  else if (type === 'islamic' && id) redirectUrl = `/${category || 'hadith'}?highlight=${id}`;
 
   if (!isCrawler) {
     return res.redirect(302, redirectUrl);
@@ -31,6 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const params = new URLSearchParams({ type });
     if (slug) params.set('slug', slug);
     if (id) params.set('id', id);
+    if (category) params.set('category', category);
 
     const ogUrl = `https://laasotunayiivssffhnu.supabase.co/functions/v1/og-meta?${params}`;
     const response = await fetch(ogUrl, { headers: { 'User-Agent': userAgent } });
