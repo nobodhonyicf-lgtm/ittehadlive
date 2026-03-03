@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { usePage } from "@/hooks/useData";
 import Sidebar from "@/components/home/Sidebar";
-import { User } from "lucide-react";
+import { User, Building, Star, Award, Users } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useIsApp } from "@/hooks/useIsApp";
@@ -13,23 +13,23 @@ const committeePages = ["committee", "advisors", "governing_body", "executive", 
 
 const TIER_CONFIG: Record<string, { label: string; emoji: string; gradient: string; border: string; photoSize: string; shadow: string }> = {
   governing_body: {
-    label: "🏛️ প্রতিষ্ঠাতা গভর্নিং বডি",
-    emoji: "⭐",
+    label: "প্রতিষ্ঠাতা গভর্নিং বডি",
+    emoji: "",
     gradient: "bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/40 dark:to-yellow-950/30",
     border: "border-2 border-amber-400/60 shadow-amber-200/40",
     photoSize: "w-28 h-28",
     shadow: "shadow-xl",
   },
   executive: {
-    label: "🎖️ নির্বাহী কমিটি",
-    emoji: "🎖️",
+    label: "নির্বাহী কমিটি",
+    emoji: "",
     gradient: "bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20",
     border: "border-2 border-primary/30",
     photoSize: "w-22 h-22",
     shadow: "shadow-md",
   },
   working: {
-    label: "👥 কার্যকরি সদস্য",
+    label: "কার্যকরি সদস্য",
     emoji: "",
     gradient: "bg-muted/30",
     border: "border border-border",
@@ -37,15 +37,15 @@ const TIER_CONFIG: Record<string, { label: string; emoji: string; gradient: stri
     shadow: "shadow-sm",
   },
   committee: {
-    label: "🏛️ কমিটি",
-    emoji: "⭐",
+    label: "কমিটি",
+    emoji: "",
     gradient: "bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/40 dark:to-yellow-950/30",
     border: "border-2 border-amber-400/60",
     photoSize: "w-24 h-24",
     shadow: "shadow-lg",
   },
   advisors: {
-    label: "📋 উপদেষ্টামণ্ডলী",
+    label: "উপদেষ্টামণ্ডলী",
     emoji: "",
     gradient: "bg-muted/30",
     border: "border border-border",
@@ -142,7 +142,7 @@ const PageView = () => {
                       <>
                         {groupedMembers.governing_body.length > 0 && (
                           <div>
-                            <h2 className="text-lg font-bold text-center mb-4 text-primary">🏛️ প্রতিষ্ঠাতা গভর্নিং বডি</h2>
+                            <h2 className="text-lg font-bold text-center mb-4 text-primary flex items-center justify-center gap-2"><Building size={18} /> প্রতিষ্ঠাতা গভর্নিং বডি</h2>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                               {groupedMembers.governing_body.map((m: any) => <MemberCard key={m.id} m={m} tier="governing_body" />)}
                             </div>

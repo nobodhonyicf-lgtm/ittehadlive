@@ -79,7 +79,7 @@ const QuizHome = () => {
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
             <Lock className="text-primary" size={36} />
           </div>
-          <h1 className="text-2xl font-bold mb-3">কুইজ গেমে স্বাগতম! 🎮</h1>
+          <h1 className="text-2xl font-bold mb-3">কুইজ গেমে স্বাগতম!</h1>
           <p className="text-muted-foreground mb-6">
             কুইজ খেলতে ও আপনার স্কোর সেভ করতে লগইন করুন
           </p>
@@ -123,7 +123,7 @@ const QuizHome = () => {
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-3">
             <Gamepad2 size={18} /> কুইজ গেম
           </div>
-          <h1 className="text-3xl font-bold mb-2">শিখুন, খেলুন, জিতুন! 🏆</h1>
+          <h1 className="text-3xl font-bold mb-2">শিখুন, খেলুন, জিতুন!</h1>
           <p className="text-muted-foreground text-sm">সাধারণ জ্ঞান, ইসলামী জ্ঞান ও ইংরেজি শিখুন</p>
         </div>
 
@@ -148,8 +148,8 @@ const QuizHome = () => {
         {/* Tabs */}
         <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="categories">🎮 ক্যাটাগরি</TabsTrigger>
-            <TabsTrigger value="leaderboard">🏆 লিডারবোর্ড</TabsTrigger>
+            <TabsTrigger value="categories"><Gamepad2 size={14} className="mr-1" /> ক্যাটাগরি</TabsTrigger>
+            <TabsTrigger value="leaderboard"><Trophy size={14} className="mr-1" /> লিডারবোর্ড</TabsTrigger>
           </TabsList>
 
           <TabsContent value="categories">

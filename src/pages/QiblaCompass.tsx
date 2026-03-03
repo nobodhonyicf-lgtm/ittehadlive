@@ -3,9 +3,8 @@ import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, LocateFixed, Compass } from "lucide-react";
+import { Loader2, LocateFixed, Compass, Smartphone, MapPin } from "lucide-react";
 
-// Kaaba coordinates
 const KAABA_LAT = 21.4225;
 const KAABA_LNG = 39.8262;
 
@@ -21,15 +20,22 @@ function calculateQiblaDirection(lat: number, lng: number): number {
   return (qibla + 360) % 360;
 }
 
+const KaabaIcon = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="6" width="16" height="14" rx="1" fill="#1a1a1a" stroke="#d4af37" strokeWidth="1.5" />
+    <rect x="9" y="12" width="6" height="8" rx="0.5" fill="#d4af37" />
+    <line x1="4" y1="10" x2="20" y2="10" stroke="#d4af37" strokeWidth="1" />
+    <path d="M12 2L8 6H16L12 2Z" fill="#1a1a1a" stroke="#d4af37" strokeWidth="1" />
+  </svg>
+);
+
 const QiblaCompass = () => {
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [heading, setHeading] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
-  const compassRef = useRef<HTMLDivElement>(null);
 
-  // Get location
   useEffect(() => {
     if (!navigator.geolocation) {
       setError("লোকেশন সাপোর্ট করে না");
@@ -49,14 +55,11 @@ const QiblaCompass = () => {
     );
   }, []);
 
-  // Device orientation for compass
   useEffect(() => {
     const handleOrientation = (e: DeviceOrientationEvent) => {
-      // For iOS
       if ((e as any).webkitCompassHeading !== undefined) {
         setHeading((e as any).webkitCompassHeading);
       } else if (e.alpha !== null) {
-        // Android - alpha is relative to north
         setHeading(360 - e.alpha);
       }
     };
@@ -79,10 +82,7 @@ const QiblaCompass = () => {
     };
 
     requestPermission();
-
-    return () => {
-      window.removeEventListener("deviceorientation", handleOrientation, true);
-    };
+    return () => window.removeEventListener("deviceorientation", handleOrientation, true);
   }, []);
 
   const requestOrientationPermission = async () => {
@@ -104,7 +104,10 @@ const QiblaCompass = () => {
   };
 
   const qiblaAngle = position ? calculateQiblaDirection(position.lat, position.lng) : 0;
-  const needleRotation = heading !== null ? qiblaAngle - heading : qiblaAngle;
+  const compassRotation = heading !== null ? -heading : 0;
+  const SIZE = 280;
+  const CENTER = SIZE / 2;
+  const RADIUS = SIZE / 2 - 20;
 
   if (loading) {
     return (
@@ -124,9 +127,7 @@ const QiblaCompass = () => {
         <h1 className="text-2xl font-bold mb-2 flex items-center justify-center gap-2">
           <Compass className="text-primary" /> কিবলা কম্পাস
         </h1>
-        <p className="text-sm text-muted-foreground mb-6">
-          কাবা শরীফের দিক নির্ণয় করুন
-        </p>
+        <p className="text-sm text-muted-foreground mb-6">কাবা শরীফের দিক নির্ণয় করুন</p>
 
         {error && (
           <Card className="mb-6 border-destructive/30">
@@ -150,53 +151,102 @@ const QiblaCompass = () => {
 
         {position && (
           <>
-            {/* Compass */}
-            <div className="relative w-72 h-72 mx-auto mb-8" ref={compassRef}>
-              {/* Compass background */}
-              <div
-                className="w-full h-full rounded-full border-4 border-muted shadow-xl relative transition-transform duration-100"
-                style={{ transform: heading !== null ? `rotate(${-heading}deg)` : "none" }}
-              >
-                {/* Cardinal directions */}
-                <span className="absolute top-3 left-1/2 -translate-x-1/2 text-xs font-bold text-muted-foreground">N</span>
-                <span className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs font-bold text-muted-foreground">S</span>
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">W</span>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">E</span>
+            <div className="relative mx-auto mb-8" style={{ width: SIZE, height: SIZE }}>
+              <svg width={SIZE} height={SIZE} className="transition-transform duration-200" style={{ transform: `rotate(${compassRotation}deg)` }}>
+                {/* Outer ring */}
+                <circle cx={CENTER} cy={CENTER} r={RADIUS + 10} fill="none" stroke="hsl(var(--border))" strokeWidth="2" />
+                <circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none" stroke="hsl(var(--muted-foreground))" strokeWidth="0.5" opacity="0.3" />
 
                 {/* Degree marks */}
-                {Array.from({ length: 36 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute w-0.5 bg-muted-foreground/30"
-                    style={{
-                      height: i % 3 === 0 ? "12px" : "6px",
-                      top: "0",
-                      left: "50%",
-                      transformOrigin: "bottom center",
-                      transform: `translateX(-50%) rotate(${i * 10}deg) translateY(0px)`,
-                    }}
-                  />
-                ))}
+                {Array.from({ length: 72 }).map((_, i) => {
+                  const angle = (i * 5 * Math.PI) / 180;
+                  const isMajor = i % 6 === 0; // every 30°
+                  const isMinor = i % 2 === 0;
+                  const len = isMajor ? 14 : isMinor ? 8 : 4;
+                  const r1 = RADIUS + 8;
+                  const r2 = r1 - len;
+                  return (
+                    <line
+                      key={i}
+                      x1={CENTER + r1 * Math.sin(angle)}
+                      y1={CENTER - r1 * Math.cos(angle)}
+                      x2={CENTER + r2 * Math.sin(angle)}
+                      y2={CENTER - r2 * Math.cos(angle)}
+                      stroke="hsl(var(--muted-foreground))"
+                      strokeWidth={isMajor ? 2 : 1}
+                      opacity={isMajor ? 0.6 : 0.25}
+                    />
+                  );
+                })}
+
+                {/* Cardinal directions */}
+                {[
+                  { label: "N", angle: 0, color: "hsl(var(--destructive))" },
+                  { label: "E", angle: 90, color: "hsl(var(--muted-foreground))" },
+                  { label: "S", angle: 180, color: "hsl(var(--muted-foreground))" },
+                  { label: "W", angle: 270, color: "hsl(var(--muted-foreground))" },
+                ].map(({ label, angle, color }) => {
+                  const rad = (angle * Math.PI) / 180;
+                  const r = RADIUS - 14;
+                  return (
+                    <text
+                      key={label}
+                      x={CENTER + r * Math.sin(rad)}
+                      y={CENTER - r * Math.cos(rad) + 5}
+                      textAnchor="middle"
+                      fill={color}
+                      fontSize="13"
+                      fontWeight="bold"
+                    >
+                      {label}
+                    </text>
+                  );
+                })}
 
                 {/* Qibla needle */}
-                <div
-                  className="absolute inset-0 flex items-center justify-center"
-                  style={{ transform: `rotate(${qiblaAngle}deg)` }}
-                >
-                  <div className="flex flex-col items-center -mt-24">
-                    <span className="text-2xl">🕋</span>
-                    <div className="w-1 h-16 bg-gradient-to-b from-green-500 to-green-700 rounded-full" />
-                  </div>
-                </div>
-              </div>
+                <g transform={`rotate(${qiblaAngle}, ${CENTER}, ${CENTER})`}>
+                  {/* Needle line */}
+                  <line
+                    x1={CENTER}
+                    y1={CENTER}
+                    x2={CENTER}
+                    y2={CENTER - RADIUS + 30}
+                    stroke="#16a34a"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                  {/* Arrow head */}
+                  <polygon
+                    points={`${CENTER},${CENTER - RADIUS + 18} ${CENTER - 8},${CENTER - RADIUS + 36} ${CENTER + 8},${CENTER - RADIUS + 36}`}
+                    fill="#16a34a"
+                  />
+                  {/* Kaaba icon position */}
+                  <foreignObject x={CENTER - 14} y={CENTER - RADIUS - 2} width="28" height="28">
+                    <KaabaIcon />
+                  </foreignObject>
+                </g>
+
+                {/* Opposite end (tail) */}
+                <g transform={`rotate(${qiblaAngle}, ${CENTER}, ${CENTER})`}>
+                  <line
+                    x1={CENTER}
+                    y1={CENTER}
+                    x2={CENTER}
+                    y2={CENTER + RADIUS - 40}
+                    stroke="hsl(var(--muted-foreground))"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    opacity="0.3"
+                  />
+                </g>
+              </svg>
 
               {/* Center dot */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-4 h-4 rounded-full bg-primary shadow-lg" />
+                <div className="w-4 h-4 rounded-full bg-primary shadow-lg border-2 border-background" />
               </div>
             </div>
 
-            {/* Info */}
             <Card className="mb-4">
               <CardContent className="py-4 grid grid-cols-2 gap-4 text-center">
                 <div>
@@ -211,13 +261,13 @@ const QiblaCompass = () => {
             </Card>
 
             {heading === null && (
-              <p className="text-xs text-muted-foreground bg-amber-500/10 text-amber-700 rounded-lg p-3">
-                📱 সেরা ফলাফলের জন্য মোবাইল ফোন ব্যবহার করুন। কম্পাস ক্যালিব্রেট করতে ফোনটি ৮-আকৃতিতে ঘোরান।
+              <p className="text-xs text-muted-foreground bg-amber-500/10 text-amber-700 rounded-lg p-3 flex items-center gap-2">
+                <Smartphone size={14} className="shrink-0" /> সেরা ফলাফলের জন্য মোবাইল ফোন ব্যবহার করুন। কম্পাস ক্যালিব্রেট করতে ফোনটি ৮-আকৃতিতে ঘোরান।
               </p>
             )}
 
-            <p className="text-xs text-muted-foreground mt-4">
-              📍 অবস্থান: {position.lat.toFixed(4)}°, {position.lng.toFixed(4)}°
+            <p className="text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1">
+              <MapPin size={12} /> অবস্থান: {position.lat.toFixed(4)}°, {position.lng.toFixed(4)}°
             </p>
           </>
         )}

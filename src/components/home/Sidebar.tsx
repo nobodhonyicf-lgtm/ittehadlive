@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLeaderProfiles, useNotices, useActivePoll, usePollVotes, usePrayerTimes } from "@/hooks/useData";
-import { User, Bell, ChevronRight, Clock } from "lucide-react";
+import { User, Bell, ChevronRight, Clock, Sunrise, Sun, CloudSun, Sunset, Moon, Coffee, Timer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -188,9 +188,10 @@ const normalizePrayerMinutes = (prayerTimes: { time_text: string }[]): number[] 
   return result;
 };
 
-const prayerEmoji: Record<string, string> = {
-  "ফজর": "🌅", "যোহর": "☀️", "আসর": "🌤️", "মাগরিব": "🌇", "ইশা": "🌙",
-  "সূর্যোদয়": "🌞", "সেহরি": "🍽️", "ইফতার": "🕐",
+// Prayer icons mapped to Lucide-compatible labels
+const prayerIconMap: Record<string, string> = {
+  "ফজর": "fajr", "যোহর": "dhuhr", "আসর": "asr", "মাগরিব": "maghrib", "ইশা": "isha",
+  "সূর্যোদয়": "sunrise", "সেহরি": "sehri", "ইফতার": "iftar",
 };
 
 const PrayerTimesSection = () => {
@@ -249,14 +250,18 @@ const PrayerTimesSection = () => {
         {prayerTimes.map((pt, i) => {
           const isNext = i === nextPrayerIndex;
           const countdown = isNext ? getCountdown(i) : null;
-          const emoji = prayerEmoji[pt.name] || "🕐";
+          const iconKey = prayerIconMap[pt.name] || "default";
+          const PrayerIcon = {
+            fajr: Sunrise, dhuhr: Sun, asr: CloudSun, maghrib: Sunset, isha: Moon,
+            sunrise: Sunrise, sehri: Coffee, iftar: Timer,
+          }[iconKey] || Clock;
           return (
             <div
               key={pt.id}
               className={`flex items-center justify-between px-4 py-3 text-sm transition-all ${isNext ? "bg-primary/5" : ""}`}
             >
               <div className="flex items-center gap-2.5">
-                <span className="text-base">{emoji}</span>
+                <PrayerIcon size={16} className={isNext ? "text-primary" : "text-muted-foreground"} />
                 <span className={`font-medium ${isNext ? "text-primary font-bold" : ""}`}>{pt.name}</span>
                 {isNext && <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
               </div>

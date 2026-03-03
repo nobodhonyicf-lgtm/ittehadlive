@@ -3,7 +3,7 @@ import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Navigation, Loader2, LocateFixed } from "lucide-react";
+import { MapPin, Navigation, Loader2, LocateFixed, Landmark, BookOpen, List } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -16,26 +16,25 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-const mosqueIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/2642/2642442.png",
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-});
+// Create SVG-based icons to avoid external URL issues
+const createSvgIcon = (color: string, symbol: string) => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
+    <path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 24 16 24s16-12 16-24C32 7.16 24.84 0 16 0z" fill="${color}"/>
+    <circle cx="16" cy="14" r="10" fill="white" opacity="0.3"/>
+    <text x="16" y="19" text-anchor="middle" font-size="14" fill="white" font-weight="bold">${symbol}</text>
+  </svg>`;
+  return new L.DivIcon({
+    html: svg,
+    iconSize: [32, 40],
+    iconAnchor: [16, 40],
+    popupAnchor: [0, -40],
+    className: "",
+  });
+};
 
-const madrasaIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/3976/3976631.png",
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-});
-
-const userIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-  iconSize: [36, 36],
-  iconAnchor: [18, 36],
-  popupAnchor: [0, -36],
-});
+const mosqueIcon = createSvgIcon("#16a34a", "M");
+const madrasaIcon = createSvgIcon("#2563eb", "D");
+const userIcon = createSvgIcon("#dc2626", "●");
 
 type Place = {
   id: number;
@@ -64,7 +63,6 @@ const NearbyMap = () => {
   const fetchNearby = async (lat: number, lng: number) => {
     setLoading(true);
     try {
-      // Overpass API for mosques and madrasas
       const query = `
         [out:json][timeout:10];
         (
@@ -152,16 +150,15 @@ const NearbyMap = () => {
           </Button>
         </div>
 
-        {/* Filter */}
         <div className="flex gap-2 mb-4">
           <Button size="sm" variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>
             সব ({places.length})
           </Button>
-          <Button size="sm" variant={filter === "mosque" ? "default" : "outline"} onClick={() => setFilter("mosque")}>
-            🕌 মসজিদ ({mosqueCount})
+          <Button size="sm" variant={filter === "mosque" ? "default" : "outline"} onClick={() => setFilter("mosque")} className="gap-1">
+            <Landmark size={14} /> মসজিদ ({mosqueCount})
           </Button>
-          <Button size="sm" variant={filter === "madrasa" ? "default" : "outline"} onClick={() => setFilter("madrasa")}>
-            📚 মাদ্রাসা ({madrasaCount})
+          <Button size="sm" variant={filter === "madrasa" ? "default" : "outline"} onClick={() => setFilter("madrasa")} className="gap-1">
+            <BookOpen size={14} /> মাদ্রাসা ({madrasaCount})
           </Button>
         </div>
 
@@ -188,14 +185,16 @@ const NearbyMap = () => {
               />
               <RecenterMap lat={position.lat} lng={position.lng} />
               <Marker position={[position.lat, position.lng]} icon={userIcon}>
-                <Popup>📍 আপনার অবস্থান</Popup>
+                <Popup>
+                  <div className="text-sm font-medium">আপনার অবস্থান</div>
+                </Popup>
               </Marker>
               {filtered.map((p) => (
                 <Marker key={p.id} position={[p.lat, p.lon]} icon={p.type === "mosque" ? mosqueIcon : madrasaIcon}>
                   <Popup>
                     <div className="text-sm">
                       <p className="font-bold">{p.name}</p>
-                      <p className="text-xs text-gray-500">{p.type === "mosque" ? "🕌 মসজিদ" : "📚 মাদ্রাসা"}</p>
+                      <p className="text-xs text-gray-500">{p.type === "mosque" ? "মসজিদ" : "মাদ্রাসা"}</p>
                       {p.address && <p className="text-xs mt-1">{p.address}</p>}
                       <a
                         href={`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}`}
@@ -214,16 +213,17 @@ const NearbyMap = () => {
           </div>
         )}
 
-        {/* List view */}
         {position && filtered.length > 0 && (
           <div className="mt-4 space-y-2">
-            <h3 className="font-semibold text-sm">📋 তালিকা</h3>
+            <h3 className="font-semibold text-sm flex items-center gap-1.5"><List size={14} /> তালিকা</h3>
             {filtered.map((p) => {
               const dist = getDistanceKm(position.lat, position.lng, p.lat, p.lon);
               return (
                 <Card key={p.id} className="cursor-pointer hover:shadow-sm" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}`, "_blank")}>
                   <CardContent className="flex items-center gap-3 py-3">
-                    <span className="text-2xl">{p.type === "mosque" ? "🕌" : "📚"}</span>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${p.type === "mosque" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
+                      {p.type === "mosque" ? <Landmark size={18} /> : <BookOpen size={18} />}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm truncate">{p.name}</p>
                       {p.address && <p className="text-xs text-muted-foreground truncate">{p.address}</p>}
