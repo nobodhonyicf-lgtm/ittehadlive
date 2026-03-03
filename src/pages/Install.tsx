@@ -148,14 +148,15 @@ const Install = () => {
               </Card>
             )}
 
-            {/* Share button */}
-            {typeof navigator.share === "function" && (
+            {/* Install button */}
+            {deferredPrompt && (
               <Button
                 variant="outline"
                 className="w-full gap-2"
-                onClick={() => navigator.share({ title: "ইত্তেহাদ অ্যাপ", text: "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ অ্যাপ ডাউনলোড করুন", url: `${window.location.origin}/install` })}
+                onClick={handleInstall}
+                disabled={downloading}
               >
-                <Share size={14} /> অন্যদের সাথে শেয়ার করুন
+                <Download size={14} /> ডাউনলোড করুন
               </Button>
             )}
 
