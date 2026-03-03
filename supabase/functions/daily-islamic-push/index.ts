@@ -28,11 +28,48 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Check which content types are enabled for push
+    const { data: typeSettings } = await supabase
+      .from('site_settings')
+      .select('key, value')
+      .in('key', [
+        'push_type_quran_enabled',
+        'push_type_hadith_enabled',
+        'push_type_dua_enabled',
+        'push_type_masala_enabled',
+      ]);
+
+    const typeMap: Record<string, boolean> = {
+      quran: true,
+      hadith: true,
+      dua: true,
+      masala: true,
+    };
+
+    // If settings exist, use them; otherwise default to all enabled
+    if (typeSettings && typeSettings.length > 0) {
+      for (const ts of typeSettings) {
+        const cat = ts.key.replace('push_type_', '').replace('_enabled', '');
+        typeMap[cat] = ts.value !== 'false';
+      }
+    }
+
+    const enabledCategories = Object.entries(typeMap)
+      .filter(([_, enabled]) => enabled)
+      .map(([cat]) => cat);
+
+    if (enabledCategories.length === 0) {
+      return new Response(JSON.stringify({ message: 'All push content types are disabled' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Get all active islamic contents
     const { data: contents } = await supabase
       .from('islamic_contents')
       .select('*')
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .in('category', enabledCategories);
 
     if (!contents || contents.length === 0) {
       return new Response(JSON.stringify({ message: 'No islamic contents found' }), {
@@ -40,7 +77,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    const categories = ['quran', 'hadith', 'dua', 'masala'];
     const categoryLabels: Record<string, string> = {
       quran: '📖 আজকের আয়াত',
       hadith: '📜 আজকের হাদিস',
@@ -49,7 +85,7 @@ Deno.serve(async (req) => {
     };
 
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-    const todayCategory = categories[dayOfYear % 4];
+    const todayCategory = enabledCategories[dayOfYear % enabledCategories.length];
 
     const categoryItems = contents.filter((c: any) => c.category === todayCategory);
     if (categoryItems.length === 0) {
@@ -63,7 +99,9 @@ Deno.serve(async (req) => {
     const body = todayCategory === 'masala' && todayItem.question
       ? todayItem.question
       : todayItem.title;
-    const url = `/${todayCategory}`;
+
+    // Deep link to specific content item
+    const url = `/${todayCategory}?highlight=${todayItem.id}`;
 
     // Delete old daily islamic notifications
     await supabase

@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Navigation, Loader2, LocateFixed, Landmark, BookOpen, List } from "lucide-react";
+import { MapPin, Navigation, Loader2, LocateFixed, Landmark, BookOpen, List, AlertCircle } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -16,7 +16,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-// Create SVG-based icons to avoid external URL issues
 const createSvgIcon = (color: string, symbol: string) => {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
     <path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 24 16 24s16-12 16-24C32 7.16 24.84 0 16 0z" fill="${color}"/>
@@ -32,8 +31,8 @@ const createSvgIcon = (color: string, symbol: string) => {
   });
 };
 
-const mosqueIcon = createSvgIcon("#16a34a", "M");
-const madrasaIcon = createSvgIcon("#2563eb", "D");
+const mosqueIcon = createSvgIcon("#16a34a", "🕌");
+const madrasaIcon = createSvgIcon("#2563eb", "📖");
 const userIcon = createSvgIcon("#dc2626", "●");
 
 type Place = {
@@ -53,58 +52,117 @@ function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
+function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(1);
+}
+
 const NearbyMap = () => {
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState<"all" | "mosque" | "madrasa">("all");
+  const [retryCount, setRetryCount] = useState(0);
 
-  const fetchNearby = async (lat: number, lng: number) => {
+  const fetchNearby = useCallback(async (lat: number, lng: number, attempt = 0) => {
     setLoading(true);
+    setError("");
+    
+    // Use multiple Overpass API endpoints for reliability
+    const endpoints = [
+      "https://overpass-api.de/api/interpreter",
+      "https://overpass.kumi.systems/api/interpreter",
+    ];
+    
+    const query = `
+      [out:json][timeout:25];
+      (
+        node["amenity"="place_of_worship"]["religion"="muslim"](around:5000,${lat},${lng});
+        way["amenity"="place_of_worship"]["religion"="muslim"](around:5000,${lat},${lng});
+        node["amenity"="place_of_worship"]["name"~"মসজিদ|Mosque|mosque|জামে|Jame|masjid|Masjid",i](around:5000,${lat},${lng});
+        way["amenity"="place_of_worship"]["name"~"মসজিদ|Mosque|mosque|জামে|Jame|masjid|Masjid",i](around:5000,${lat},${lng});
+        node["amenity"="school"]["school:type"="madrasa"](around:5000,${lat},${lng});
+        node["amenity"="school"]["name"~"মাদ্রাসা|মাদরাসা|Madrasa|madrasa|দারুল|মক্তব|Maktab|হাফিজিয়া|Hafizia|কওমী|Qawmi|ইসলামী|Islami",i](around:5000,${lat},${lng});
+        way["amenity"="school"]["name"~"মাদ্রাসা|মাদরাসা|Madrasa|madrasa|দারুল|মক্তব|Maktab|হাফিজিয়া|Hafizia|কওমী|Qawmi|ইসলামী|Islami",i](around:5000,${lat},${lng});
+        node["building"="mosque"](around:5000,${lat},${lng});
+        way["building"="mosque"](around:5000,${lat},${lng});
+      );
+      out center body;
+    `;
+    
+    const endpoint = endpoints[attempt % endpoints.length];
+    
     try {
-      const query = `
-        [out:json][timeout:10];
-        (
-          node["amenity"="place_of_worship"]["religion"="muslim"](around:3000,${lat},${lng});
-          way["amenity"="place_of_worship"]["religion"="muslim"](around:3000,${lat},${lng});
-          node["amenity"="school"]["school:type"="madrasa"](around:3000,${lat},${lng});
-          node["amenity"="school"]["name"~"মাদ্রাসা|মাদরাসা|Madrasa|madrasa|দারুল",i](around:3000,${lat},${lng});
-          way["amenity"="school"]["name"~"মাদ্রাসা|মাদরাসা|Madrasa|madrasa|দারুল",i](around:3000,${lat},${lng});
-        );
-        out center body;
-      `;
-      const res = await fetch("https://overpass-api.de/api/interpreter", {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      
+      const res = await fetch(endpoint, {
         method: "POST",
         body: `data=${encodeURIComponent(query)}`,
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
+      
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      
       const data = await res.json();
-      const results: Place[] = (data.elements || []).map((el: any) => {
+      const seen = new Set<string>();
+      const results: Place[] = [];
+      
+      for (const el of (data.elements || [])) {
         const elLat = el.lat || el.center?.lat;
         const elLon = el.lon || el.center?.lon;
+        if (!elLat || !elLon) continue;
+        
         const tags = el.tags || {};
+        const coordKey = `${elLat.toFixed(5)},${elLon.toFixed(5)}`;
+        if (seen.has(coordKey)) continue;
+        seen.add(coordKey);
+        
         const isMadrasa =
           tags["school:type"] === "madrasa" ||
-          /মাদ্রাসা|মাদরাসা|madrasa|দারুল/i.test(tags.name || "");
-        return {
+          /মাদ্রাসা|মাদরাসা|madrasa|দারুল|মক্তব|maktab|হাফিজিয়া|hafizia|কওমী|qawmi/i.test(tags.name || "");
+        
+        results.push({
           id: el.id,
           lat: elLat,
           lon: elLon,
-          name: tags.name || (isMadrasa ? "মাদ্রাসা" : "মসজিদ"),
+          name: tags.name || tags["name:bn"] || (isMadrasa ? "মাদ্রাসা" : "মসজিদ"),
           type: isMadrasa ? "madrasa" : "mosque",
-          address: tags["addr:full"] || tags["addr:street"] || "",
-        };
-      }).filter((p: Place) => p.lat && p.lon);
+          address: tags["addr:full"] || tags["addr:street"] || tags["addr:city"] || "",
+        });
+      }
+      
+      // Sort by distance
+      results.sort((a, b) => {
+        const dA = parseFloat(getDistanceKm(lat, lng, a.lat, a.lon));
+        const dB = parseFloat(getDistanceKm(lat, lng, b.lat, b.lon));
+        return dA - dB;
+      });
+      
       setPlaces(results);
-    } catch {
-      setError("তথ্য লোড করতে সমস্যা হয়েছে");
+      if (results.length === 0) {
+        setError("এই এলাকায় কোনো মসজিদ বা মাদ্রাসা পাওয়া যায়নি। ৫ কি.মি. এর মধ্যে অনুসন্ধান করা হয়েছে।");
+      }
+    } catch (err) {
+      console.error("Overpass error:", err);
+      // Retry with alternate endpoint
+      if (attempt < 2) {
+        setRetryCount(attempt + 1);
+        return fetchNearby(lat, lng, attempt + 1);
+      }
+      setError("তথ্য লোড করতে সমস্যা হয়েছে। ইন্টারনেট সংযোগ চেক করুন এবং আবার চেষ্টা করুন।");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const getLocation = () => {
+  const getLocation = useCallback(() => {
     setError("");
     setLoading(true);
     if (!navigator.geolocation) {
@@ -118,17 +176,18 @@ const NearbyMap = () => {
         setPosition(coords);
         fetchNearby(coords.lat, coords.lng);
       },
-      () => {
-        setError("লোকেশন অনুমতি দিন");
+      (err) => {
+        console.error("Geolocation error:", err);
+        setError("লোকেশন অনুমতি দিন। ব্রাউজার সেটিংস থেকে লোকেশন অ্যাক্সেস চালু করুন।");
         setLoading(false);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
     );
-  };
+  }, [fetchNearby]);
 
   useEffect(() => {
     getLocation();
-  }, []);
+  }, [getLocation]);
 
   const filtered = filter === "all" ? places : places.filter((p) => p.type === filter);
   const mosqueCount = places.filter((p) => p.type === "mosque").length;
@@ -143,7 +202,7 @@ const NearbyMap = () => {
             <h1 className="text-xl font-bold flex items-center gap-2">
               <MapPin className="text-primary" size={22} /> আশেপাশের মসজিদ ও মাদ্রাসা
             </h1>
-            <p className="text-xs text-muted-foreground mt-1">৩ কি.মি. এর মধ্যে</p>
+            <p className="text-xs text-muted-foreground mt-1">৫ কি.মি. এর মধ্যে</p>
           </div>
           <Button variant="outline" size="sm" onClick={getLocation} disabled={loading} className="gap-1">
             <LocateFixed size={14} /> রিফ্রেশ
@@ -162,7 +221,12 @@ const NearbyMap = () => {
           </Button>
         </div>
 
-        {error && <p className="text-destructive text-center mb-4">{error}</p>}
+        {error && (
+          <div className="flex items-start gap-2 text-destructive bg-destructive/10 rounded-lg p-3 mb-4">
+            <AlertCircle size={16} className="mt-0.5 shrink-0" />
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
 
         {loading && !position && (
           <div className="flex flex-col items-center justify-center py-20">
@@ -172,54 +236,65 @@ const NearbyMap = () => {
         )}
 
         {position && (
-          <div className="rounded-xl overflow-hidden border shadow-lg" style={{ height: "60vh" }}>
-            <MapContainer
-              center={[position.lat, position.lng]}
-              zoom={15}
-              style={{ height: "100%", width: "100%" }}
-              scrollWheelZoom
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org">OSM</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <RecenterMap lat={position.lat} lng={position.lng} />
-              <Marker position={[position.lat, position.lng]} icon={userIcon}>
-                <Popup>
-                  <div className="text-sm font-medium">আপনার অবস্থান</div>
-                </Popup>
-              </Marker>
-              {filtered.map((p) => (
-                <Marker key={p.id} position={[p.lat, p.lon]} icon={p.type === "mosque" ? mosqueIcon : madrasaIcon}>
+          <>
+            {loading && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                <Loader2 className="animate-spin" size={14} />
+                <span>মসজিদ ও মাদ্রাসা খোঁজা হচ্ছে...</span>
+              </div>
+            )}
+            <div className="rounded-xl overflow-hidden border shadow-lg" style={{ height: "60vh" }}>
+              <MapContainer
+                center={[position.lat, position.lng]}
+                zoom={15}
+                style={{ height: "100%", width: "100%" }}
+                scrollWheelZoom
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org">OSM</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <RecenterMap lat={position.lat} lng={position.lng} />
+                <Marker position={[position.lat, position.lng]} icon={userIcon}>
                   <Popup>
-                    <div className="text-sm">
-                      <p className="font-bold">{p.name}</p>
-                      <p className="text-xs text-gray-500">{p.type === "mosque" ? "মসজিদ" : "মাদ্রাসা"}</p>
-                      {p.address && <p className="text-xs mt-1">{p.address}</p>}
-                      <a
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 text-xs underline mt-1 block"
-                      >
-                        <Navigation size={10} className="inline mr-1" />
-                        দিকনির্দেশনা
-                      </a>
-                    </div>
+                    <div className="text-sm font-medium">আপনার অবস্থান</div>
                   </Popup>
                 </Marker>
-              ))}
-            </MapContainer>
-          </div>
+                {filtered.map((p) => (
+                  <Marker key={`${p.id}-${p.lat}`} position={[p.lat, p.lon]} icon={p.type === "mosque" ? mosqueIcon : madrasaIcon}>
+                    <Popup>
+                      <div className="text-sm">
+                        <p className="font-bold">{p.name}</p>
+                        <p className="text-xs text-gray-500">{p.type === "mosque" ? "🕌 মসজিদ" : "📖 মাদ্রাসা"}</p>
+                        {p.address && <p className="text-xs mt-1">{p.address}</p>}
+                        <p className="text-xs text-gray-400 mt-1">
+                          দূরত্ব: {getDistanceKm(position.lat, position.lng, p.lat, p.lon)} কি.মি.
+                        </p>
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 text-xs underline mt-1 block"
+                        >
+                          <Navigation size={10} className="inline mr-1" />
+                          দিকনির্দেশনা
+                        </a>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            </div>
+          </>
         )}
 
         {position && filtered.length > 0 && (
           <div className="mt-4 space-y-2">
-            <h3 className="font-semibold text-sm flex items-center gap-1.5"><List size={14} /> তালিকা</h3>
+            <h3 className="font-semibold text-sm flex items-center gap-1.5"><List size={14} /> তালিকা ({filtered.length})</h3>
             {filtered.map((p) => {
               const dist = getDistanceKm(position.lat, position.lng, p.lat, p.lon);
               return (
-                <Card key={p.id} className="cursor-pointer hover:shadow-sm" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}`, "_blank")}>
+                <Card key={`list-${p.id}`} className="cursor-pointer hover:shadow-sm" onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}`, "_blank")}>
                   <CardContent className="flex items-center gap-3 py-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${p.type === "mosque" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
                       {p.type === "mosque" ? <Landmark size={18} /> : <BookOpen size={18} />}
@@ -239,13 +314,5 @@ const NearbyMap = () => {
     </Layout>
   );
 };
-
-function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
-  return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(1);
-}
 
 export default NearbyMap;

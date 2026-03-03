@@ -26,6 +26,13 @@ const sectionToggleKeys = [
   { key: "auto_islamic_push_enabled", label: "দৈনিক ইসলামী পুশ নোটিফিকেশন", desc: "প্রতিদিন অটোমেটিক আয়াত/হাদিস/দোয়া/মাসআলা পুশ পাঠায়" },
 ];
 
+const pushTypeToggleKeys = [
+  { key: "push_type_quran_enabled", label: "📖 আয়াত (কুরআন)", desc: "কুরআনের আয়াত পুশ নোটিফিকেশনে পাঠান" },
+  { key: "push_type_hadith_enabled", label: "📜 হাদিস", desc: "হাদিস পুশ নোটিফিকেশনে পাঠান" },
+  { key: "push_type_dua_enabled", label: "🤲 দোয়া", desc: "দোয়া পুশ নোটিফিকেশনে পাঠান" },
+  { key: "push_type_masala_enabled", label: "⚖️ মাসআলা", desc: "মাসআলা পুশ নোটিফিকেশনে পাঠান" },
+];
+
 const AdminSettings = () => {
   const qc = useQueryClient();
 
@@ -73,7 +80,7 @@ const AdminSettings = () => {
   const adKeys = ["photocard_ad_enabled", "photocard_ad_image"];
   const authKeys = ["otp_enabled", "two_fa_enabled", "google_login_enabled", "apple_login_enabled"];
   const appKeys = ["app_name", "app_logo_url", "app_icon_url", "app_banner_enabled", "vapid_public_key", "vapid_private_key"];
-  const allSectionKeys = sectionToggleKeys.map(s => s.key);
+  const allSectionKeys = [...sectionToggleKeys.map(s => s.key), ...pushTypeToggleKeys.map(s => s.key)];
 
   const upsertMutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
@@ -122,6 +129,32 @@ const AdminSettings = () => {
         <CardContent className="space-y-3">
           <p className="text-xs text-muted-foreground mb-2">হোমপেজের প্রতিটি সেকশন এখান থেকে চালু বা বন্ধ করুন।</p>
           {sectionToggleKeys.map(({ key, label, desc }) => {
+            const setting = settings?.find(s => s.key === key);
+            const currentVal = setting?.value ?? "true";
+            const isEnabled = currentVal !== "false";
+            const handleToggle = async (checked: boolean) => {
+              const newVal = checked ? "true" : "false";
+              upsertMutation.mutate({ key, value: newVal });
+            };
+            return (
+              <div key={key} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div>
+                  <Label className="font-semibold text-sm">{label}</Label>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{desc}</p>
+                </div>
+                <Switch checked={isEnabled} onCheckedChange={handleToggle} />
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      {/* Push Content Type Toggles */}
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2">📬 পুশ নোটিফিকেশন কন্টেন্ট টাইপ</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground mb-2">কোন ধরনের ইসলামী কন্টেন্ট দৈনিক পুশ নোটিফিকেশন হিসেবে পাঠাবেন তা নির্বাচন করুন।</p>
+          {pushTypeToggleKeys.map(({ key, label, desc }) => {
             const setting = settings?.find(s => s.key === key);
             const currentVal = setting?.value ?? "true";
             const isEnabled = currentVal !== "false";

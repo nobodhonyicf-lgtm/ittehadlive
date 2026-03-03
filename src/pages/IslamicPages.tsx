@@ -2,7 +2,8 @@ import Layout from "@/components/layout/Layout";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useIslamicContents, useSiteSettings } from "@/hooks/useData";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Search, ChevronRight, X, Plus, Minus, BookOpen, HelpCircle, Filter, HandHelping, Scale, PenLine, CheckCircle, Languages } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { SeasonalIslamicCards } from "@/components/home/SeasonalIslamicCards";
@@ -96,6 +97,7 @@ const IslamicListContent = ({
 }) => {
   const { data: allContents } = useIslamicContents();
   const { data: siteSettings } = useSiteSettings();
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<ContentItem | null>(null);
   const [activeSubcat, setActiveSubcat] = useState<string>("all");
@@ -104,6 +106,15 @@ const IslamicListContent = ({
   const showSeasonal = siteSettings?.["section_seasonal_islamic"] !== "false";
 
   const items = (allContents as ContentItem[] | undefined)?.filter(c => c.category === category) || [];
+
+  // Auto-open highlighted content from push notification deep link
+  useEffect(() => {
+    const highlightId = searchParams.get("highlight");
+    if (highlightId && items.length > 0 && !selected) {
+      const item = items.find(i => i.id === highlightId);
+      if (item) setSelected(item);
+    }
+  }, [searchParams, items, selected]);
 
   const subcategories = useMemo(() => {
     const cats = new Set<string>();
@@ -241,6 +252,7 @@ const AppIslamicListContent = ({
 }) => {
   const { data: allContents } = useIslamicContents();
   const { data: siteSettings } = useSiteSettings();
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<ContentItem | null>(null);
   const [activeSubcat, setActiveSubcat] = useState<string>("all");
@@ -249,6 +261,15 @@ const AppIslamicListContent = ({
   const showSeasonal = siteSettings?.["section_seasonal_islamic"] !== "false";
 
   const items = (allContents as ContentItem[] | undefined)?.filter(c => c.category === category) || [];
+
+  // Auto-open highlighted content from push notification deep link
+  useEffect(() => {
+    const highlightId = searchParams.get("highlight");
+    if (highlightId && items.length > 0 && !selected) {
+      const item = items.find(i => i.id === highlightId);
+      if (item) setSelected(item);
+    }
+  }, [searchParams, items, selected]);
 
   const subcategories = useMemo(() => {
     const cats = new Set<string>();
