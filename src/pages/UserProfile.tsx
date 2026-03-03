@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/useAuth"; // refreshed
 import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
 import { toBengali } from "@/lib/bengali";
-import { User, Package, MessageSquare, LogOut, Save, Send, Search, Link as LinkIcon, Trash2, Mail, Phone, MapPin, ChevronRight } from "lucide-react";
+import { User, Package, MessageSquare, LogOut, Save, Send, Search, Link as LinkIcon, Trash2, Mail, Phone, MapPin, ChevronRight, Briefcase, Copy } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
@@ -40,6 +40,9 @@ const UserProfile = () => {
   const [trackOrderNum, setTrackOrderNum] = useState("");
   const [trackedOrder, setTrackedOrder] = useState<any>(null);
   const [tracking, setTracking] = useState(false);
+  const [trackJobCode, setTrackJobCode] = useState("");
+  const [trackedJobApp, setTrackedJobApp] = useState<any>(null);
+  const [trackingJob, setTrackingJob] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
   const [showAvatarInput, setShowAvatarInput] = useState(false);
 
@@ -147,6 +150,23 @@ const UserProfile = () => {
     setTracking(false);
     if (data) setTrackedOrder(data);
     else { setTrackedOrder(null); toast.error("এই অর্ডার নম্বরে কোনো অর্ডার পাওয়া যায়নি"); }
+  };
+
+  const trackJobApplication = async () => {
+    if (!trackJobCode.trim()) return;
+    setTrackingJob(true);
+    const { data } = await supabase.from("job_applications").select("*, job_postings(title)").eq("tracking_code", trackJobCode.trim().toUpperCase()).maybeSingle();
+    setTrackingJob(false);
+    if (data) setTrackedJobApp(data);
+    else { setTrackedJobApp(null); toast.error("এই ট্র্যাকিং কোডে কোনো আবেদন পাওয়া যায়নি"); }
+  };
+
+  const jobStatusMap: Record<string, { label: string; color: string }> = {
+    pending: { label: "অপেক্ষমান", color: "bg-yellow-100 text-yellow-800" },
+    reviewing: { label: "পর্যালোচনায়", color: "bg-blue-100 text-blue-800" },
+    shortlisted: { label: "শর্টলিস্ট", color: "bg-purple-100 text-purple-800" },
+    approved: { label: "অনুমোদিত", color: "bg-green-100 text-green-800" },
+    rejected: { label: "প্রত্যাখ্যাত", color: "bg-red-100 text-red-800" },
   };
 
   const handleSignOut = async () => {
@@ -289,26 +309,61 @@ const UserProfile = () => {
 
         {/* Track Tab */}
         <TabsContent value="track">
-          <Card className={isApp ? "border-0 shadow-sm" : ""}>
-            <CardHeader><CardTitle className="text-lg">অর্ডার ট্র্যাক করুন</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Input placeholder="অর্ডার নম্বর দিন" value={trackOrderNum} onChange={(e) => setTrackOrderNum(e.target.value)} onKeyDown={(e) => e.key === "Enter" && trackOrder()} />
-                <Button onClick={trackOrder} disabled={tracking}><Search size={16} className="mr-1" /> খুঁজুন</Button>
-              </div>
-              {trackedOrder && (
-                <div className="border rounded-lg p-4 space-y-2 bg-muted/30">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold">{trackedOrder.order_number}</span>
-                    <Badge className={statusMap[trackedOrder.status]?.color}>{statusMap[trackedOrder.status]?.label}</Badge>
-                  </div>
-                  <p className="text-sm">ক্রেতা: {trackedOrder.customer_name}</p>
-                  <p className="text-sm">মোট: ৳{toBengali(trackedOrder.total_amount)}</p>
-                  <p className="text-sm text-muted-foreground">তারিখ: {new Date(trackedOrder.created_at).toLocaleDateString("bn-BD")}</p>
+          <div className="space-y-4">
+            {/* Order Tracking */}
+            <Card className={isApp ? "border-0 shadow-sm" : ""}>
+              <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Package size={18} /> অর্ডার ট্র্যাক করুন</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input placeholder="অর্ডার নম্বর দিন" value={trackOrderNum} onChange={(e) => setTrackOrderNum(e.target.value)} onKeyDown={(e) => e.key === "Enter" && trackOrder()} />
+                  <Button onClick={trackOrder} disabled={tracking}><Search size={16} className="mr-1" /> খুঁজুন</Button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                {trackedOrder && (
+                  <div className="border rounded-lg p-4 space-y-2 bg-muted/30">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold">{trackedOrder.order_number}</span>
+                      <Badge className={statusMap[trackedOrder.status]?.color}>{statusMap[trackedOrder.status]?.label}</Badge>
+                    </div>
+                    <p className="text-sm">ক্রেতা: {trackedOrder.customer_name}</p>
+                    <p className="text-sm">মোট: ৳{toBengali(trackedOrder.total_amount)}</p>
+                    <p className="text-sm text-muted-foreground">তারিখ: {new Date(trackedOrder.created_at).toLocaleDateString("bn-BD")}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Job Application Tracking */}
+            <Card className={isApp ? "border-0 shadow-sm" : ""}>
+              <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Briefcase size={18} /> নিয়োগ আবেদন ট্র্যাক করুন</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input placeholder="ট্র্যাকিং কোড দিন (যেমন: JA-2603-abc123)" value={trackJobCode} onChange={(e) => setTrackJobCode(e.target.value)} onKeyDown={(e) => e.key === "Enter" && trackJobApplication()} />
+                  <Button onClick={trackJobApplication} disabled={trackingJob}><Search size={16} className="mr-1" /> খুঁজুন</Button>
+                </div>
+                {trackedJobApp && (
+                  <div className="border rounded-lg p-4 space-y-3 bg-muted/30">
+                    <div className="flex justify-between items-center">
+                      <span className="font-mono font-bold text-primary">{trackedJobApp.tracking_code}</span>
+                      <Badge className={jobStatusMap[trackedJobApp.status]?.color}>{jobStatusMap[trackedJobApp.status]?.label}</Badge>
+                    </div>
+                    <p className="text-sm font-semibold">{(trackedJobApp as any).job_postings?.title || "নিয়োগ বিজ্ঞপ্তি"}</p>
+                    <div className="grid grid-cols-2 gap-1 text-sm text-muted-foreground">
+                      <p>আবেদনকারী: {trackedJobApp.applicant_name}</p>
+                      <p>ফোন: {trackedJobApp.phone}</p>
+                      <p>বিষয়: {trackedJobApp.subject || "—"}</p>
+                      <p>তারিখ: {new Date(trackedJobApp.created_at).toLocaleDateString("bn-BD")}</p>
+                    </div>
+                    {trackedJobApp.admin_note && (
+                      <div className="bg-primary/5 border-l-2 border-primary p-2 rounded text-sm">
+                        <span className="text-xs font-medium text-primary">প্রশাসনের নোট:</span>
+                        <p className="mt-1">{trackedJobApp.admin_note}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Inbox Tab */}

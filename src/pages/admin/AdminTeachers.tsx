@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2, GraduationCap, Search, Eye, CheckCircle, XCircle, Clock, BadgeCheck, UserPlus, BookOpen, MapPin, DollarSign, CalendarDays, Star, ClipboardList, Megaphone } from "lucide-react";
+import { Plus, Edit, Trash2, GraduationCap, Search, Eye, CheckCircle, XCircle, Clock, BadgeCheck, UserPlus, BookOpen, MapPin, DollarSign, CalendarDays, Star, ClipboardList, Megaphone, Briefcase } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
@@ -496,19 +496,145 @@ const ReviewsTab = () => {
   );
 };
 
+/* ─── Job Applications Tab ─── */
+const JobApplicationsTab = () => {
+  const { canEdit, canDelete } = useSectionPermissions();
+  const queryClient = useQueryClient();
+  const [statusFilter, setStatusFilter] = useState("pending");
+  const [detailApp, setDetailApp] = useState<any>(null);
+
+  const { data: apps, isLoading } = useQuery({
+    queryKey: ["admin_job_applications", statusFilter],
+    queryFn: async () => {
+      let q = supabase.from("job_applications").select("*, job_postings(title, branch_id)").order("created_at", { ascending: false });
+      if (statusFilter !== "all") q = q.eq("status", statusFilter);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const updateStatus = useMutation({
+    mutationFn: async ({ id, status, note }: { id: string; status: string; note?: string }) => {
+      const { error } = await supabase.from("job_applications").update({ status, admin_note: note || null } as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("আপডেট হয়েছে"); queryClient.invalidateQueries({ queryKey: ["admin_job_applications"] }); },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => { const { error } = await supabase.from("job_applications").delete().eq("id", id); if (error) throw error; },
+    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); queryClient.invalidateQueries({ queryKey: ["admin_job_applications"] }); },
+  });
+
+  const statusColors: Record<string, string> = { pending: "bg-accent text-accent-foreground", reviewing: "bg-blue-100 text-blue-800", shortlisted: "bg-primary/10 text-primary", approved: "bg-green-100 text-green-800", rejected: "bg-destructive/10 text-destructive" };
+  const statusLabels: Record<string, string> = { pending: "অপেক্ষমান", reviewing: "পর্যালোচনা", shortlisted: "শর্টলিস্ট", approved: "অনুমোদিত", rejected: "প্রত্যাখ্যাত" };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2 flex-wrap">
+        {["all", "pending", "reviewing", "shortlisted", "approved", "rejected"].map(s => (
+          <Button key={s} variant={statusFilter === s ? "default" : "outline"} size="sm" onClick={() => setStatusFilter(s)}>
+            {s === "all" ? "সকল" : statusLabels[s]}
+          </Button>
+        ))}
+      </div>
+
+      <Card><CardContent className="p-0">
+        <Table>
+          <TableHeader><TableRow>
+            <TableHead>ট্র্যাকিং</TableHead><TableHead>নাম</TableHead><TableHead>পদ</TableHead><TableHead>ফোন</TableHead><TableHead>স্ট্যাটাস</TableHead><TableHead className="text-right">অ্যাকশন</TableHead>
+          </TableRow></TableHeader>
+          <TableBody>
+            {isLoading ? <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">লোড হচ্ছে...</TableCell></TableRow> :
+              !apps?.length ? <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">কোনো আবেদন নেই</TableCell></TableRow> :
+              apps.map((a: any) => (
+                <TableRow key={a.id}>
+                  <TableCell className="font-mono text-xs">{a.tracking_code}</TableCell>
+                  <TableCell className="font-medium">{a.applicant_name}</TableCell>
+                  <TableCell className="text-xs">{a.job_postings?.title || "—"}</TableCell>
+                  <TableCell className="text-xs">{a.phone}</TableCell>
+                  <TableCell><span className={`text-xs px-2 py-0.5 rounded ${statusColors[a.status] || ""}`}>{statusLabels[a.status] || a.status}</span></TableCell>
+                  <TableCell className="text-right space-x-1">
+                    <Button variant="ghost" size="icon" onClick={() => setDetailApp(a)}><Eye size={16} /></Button>
+                    {canEdit && a.status === "pending" && <>
+                      <Button variant="ghost" size="icon" title="শর্টলিস্ট" onClick={() => updateStatus.mutate({ id: a.id, status: "shortlisted" })}><CheckCircle size={16} className="text-primary" /></Button>
+                      <Button variant="ghost" size="icon" title="প্রত্যাখ্যান" onClick={() => updateStatus.mutate({ id: a.id, status: "rejected" })}><XCircle size={16} className="text-destructive" /></Button>
+                    </>}
+                    {canEdit && a.status === "reviewing" && <>
+                      <Button variant="ghost" size="icon" title="শর্টলিস্ট" onClick={() => updateStatus.mutate({ id: a.id, status: "shortlisted" })}><CheckCircle size={16} className="text-primary" /></Button>
+                    </>}
+                    {canEdit && a.status === "shortlisted" && (
+                      <Button variant="ghost" size="icon" title="অনুমোদন" onClick={() => updateStatus.mutate({ id: a.id, status: "approved" })}><CheckCircle size={16} className="text-green-600" /></Button>
+                    )}
+                    {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(a.id)}><Trash2 size={16} className="text-destructive" /></Button>}
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </CardContent></Card>
+
+      <Dialog open={!!detailApp} onOpenChange={o => !o && setDetailApp(null)}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>আবেদনের বিস্তারিত</DialogTitle></DialogHeader>
+          {detailApp && (
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
+                <span className="text-xs text-muted-foreground">ট্র্যাকিং:</span>
+                <span className="font-mono font-bold text-primary">{detailApp.tracking_code}</span>
+              </div>
+              {detailApp.photo_url && <img src={detailApp.photo_url} alt="" className="w-20 h-20 rounded-full object-cover" />}
+              <div className="grid grid-cols-2 gap-2">
+                <p><strong>নাম:</strong> {detailApp.applicant_name}</p>
+                <p><strong>পদ:</strong> {detailApp.job_postings?.title || "—"}</p>
+                <p><strong>ফোন:</strong> {detailApp.phone}</p>
+                <p><strong>ইমেইল:</strong> {detailApp.email || "—"}</p>
+                <p><strong>জেলা:</strong> {detailApp.district || "—"}</p>
+                <p><strong>ঠিকানা:</strong> {detailApp.address || "—"}</p>
+                <p><strong>বিষয়:</strong> {detailApp.subject || "—"}</p>
+                <p><strong>যোগ্যতা:</strong> {detailApp.qualification || "—"}</p>
+                <p><strong>অভিজ্ঞতা:</strong> {detailApp.experience_years} বছর</p>
+                <p><strong>প্রত্যাশিত বেতন:</strong> {detailApp.expected_salary || "—"}</p>
+              </div>
+              {detailApp.bio && <p><strong>পরিচিতি:</strong> {detailApp.bio}</p>}
+              {detailApp.cv_url && <a href={detailApp.cv_url} target="_blank" rel="noopener" className="text-primary underline">সিভি দেখুন</a>}
+              {canEdit && (
+                <div className="border-t pt-3 space-y-2">
+                  <Label>স্ট্যাটাস পরিবর্তন:</Label>
+                  <div className="flex gap-2 flex-wrap">
+                    {["pending", "reviewing", "shortlisted", "approved", "rejected"].map(s => (
+                      <Button key={s} size="sm" variant={detailApp.status === s ? "default" : "outline"} onClick={() => {
+                        updateStatus.mutate({ id: detailApp.id, status: s });
+                        setDetailApp({ ...detailApp, status: s });
+                      }}>{statusLabels[s]}</Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
 /* ─── Main Page ─── */
 const AdminTeachers = () => (
   <AdminPageWrapper title="শিক্ষক সার্ভিস সেন্টার" icon={GraduationCap}>
     <Tabs defaultValue="teachers">
-      <TabsList className="grid grid-cols-4 w-full max-w-lg">
-        <TabsTrigger value="teachers" className="gap-1"><GraduationCap size={14} /> শিক্ষক</TabsTrigger>
-        <TabsTrigger value="applications" className="gap-1"><ClipboardList size={14} /> আবেদন</TabsTrigger>
-        <TabsTrigger value="jobs" className="gap-1"><Megaphone size={14} /> বিজ্ঞপ্তি</TabsTrigger>
-        <TabsTrigger value="reviews" className="gap-1"><Star size={14} /> রিভিউ</TabsTrigger>
+      <TabsList className="grid grid-cols-5 w-full max-w-2xl">
+        <TabsTrigger value="teachers" className="gap-1 text-xs"><GraduationCap size={14} /> শিক্ষক</TabsTrigger>
+        <TabsTrigger value="applications" className="gap-1 text-xs"><ClipboardList size={14} /> আবেদন</TabsTrigger>
+        <TabsTrigger value="jobs" className="gap-1 text-xs"><Megaphone size={14} /> বিজ্ঞপ্তি</TabsTrigger>
+        <TabsTrigger value="job-apps" className="gap-1 text-xs"><Briefcase size={14} /> নিয়োগ আবেদন</TabsTrigger>
+        <TabsTrigger value="reviews" className="gap-1 text-xs"><Star size={14} /> রিভিউ</TabsTrigger>
       </TabsList>
       <TabsContent value="teachers" className="mt-4"><TeachersTab /></TabsContent>
       <TabsContent value="applications" className="mt-4"><ApplicationsTab /></TabsContent>
       <TabsContent value="jobs" className="mt-4"><JobPostingsTab /></TabsContent>
+      <TabsContent value="job-apps" className="mt-4"><JobApplicationsTab /></TabsContent>
       <TabsContent value="reviews" className="mt-4"><ReviewsTab /></TabsContent>
     </Tabs>
   </AdminPageWrapper>
