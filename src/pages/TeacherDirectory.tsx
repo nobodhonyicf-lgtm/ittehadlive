@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { Search, MapPin, BookOpen, Award, Phone, Mail, Star, Filter, ChevronDown, GraduationCap, Users, Briefcase, Clock, MessageSquare, Send, BadgeCheck, Eye, Building2, Download, DollarSign, FileText, CalendarDays, UserCircle, Share2, Bookmark, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -464,16 +465,16 @@ const TeacherDirectory = () => {
                             <h3 className="font-semibold text-sm group-hover:text-primary transition-colors flex items-center gap-1">
                               {t.name}
                               {(t as any).is_verified && (
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <button type="button" onClick={e => e.stopPropagation()} className="inline-flex">
-                                      <BadgeCheck size={14} className="text-blue-500 shrink-0 fill-blue-500 stroke-white" />
-                                    </button>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto max-w-[250px] p-2" side="top">
-                                    <p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p>
-                                  </PopoverContent>
-                                </Popover>
+                                <TooltipProvider delayDuration={0}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="inline-flex"><BadgeCheck size={14} className="text-blue-500 shrink-0 fill-blue-500 stroke-white" /></span>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="bg-[#1c1e21] text-white text-[11px] border-0 shadow-lg px-2.5 py-1.5 rounded-lg max-w-[220px]">
+                                      <p>এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               )}
                             </h3>
                             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
@@ -519,11 +520,11 @@ const TeacherDirectory = () => {
                           </Button>
                           <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={(e) => {
                             e.stopPropagation();
-                            const url = `${window.location.origin}/teachers?highlight=${t.id}`;
+                            const shareUrl = `${window.location.origin}/share/teacher/${t.id}`;
                             if (typeof navigator.share === "function") {
-                              navigator.share({ title: t.name, text: `শিক্ষক: ${t.name} - ${t.subject}`, url });
+                              navigator.share({ title: t.name, text: `শিক্ষক: ${t.name} - ${t.subject}`, url: shareUrl });
                             } else {
-                              navigator.clipboard.writeText(url);
+                              navigator.clipboard.writeText(shareUrl);
                               toast.success("লিংক কপি হয়েছে!");
                             }
                           }}>
@@ -574,16 +575,16 @@ const TeacherDirectory = () => {
                       <h2 className="text-lg font-bold flex items-center gap-1">
                         {selectedTeacher.name}
                         {(selectedTeacher as any).is_verified && (
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <button type="button" className="inline-flex">
-                                <BadgeCheck size={16} className="text-blue-500 fill-blue-500 stroke-white" />
-                              </button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto max-w-[250px] p-2" side="top">
-                              <p className="text-xs">এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p>
-                            </PopoverContent>
-                          </Popover>
+                          <TooltipProvider delayDuration={0}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="inline-flex"><BadgeCheck size={16} className="text-blue-500 fill-blue-500 stroke-white" /></span>
+                              </TooltipTrigger>
+                              <TooltipContent className="bg-[#1c1e21] text-white text-[11px] border-0 shadow-lg px-2.5 py-1.5 rounded-lg max-w-[220px]">
+                                <p>এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         )}
                       </h2>
                       <p className="text-sm text-muted-foreground">{selectedTeacher.subject}</p>

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { BadgeCheck, BookOpen, MapPin, Star, Briefcase, UserCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import SectionHeader from "./SectionHeader";
 import { toBengaliNumber } from "@/lib/bengali";
 
@@ -56,7 +57,18 @@ const TeacherSlider = () => {
                 <div className="pt-7 pb-3 px-2 text-center">
                   <h4 className="text-[11px] font-semibold line-clamp-1 flex items-center justify-center gap-0.5">
                     {t.name}
-                    {t.is_verified && <BadgeCheck size={11} className="text-blue-500 fill-blue-500 stroke-white shrink-0" />}
+                    {t.is_verified && (
+                      <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex"><BadgeCheck size={11} className="text-blue-500 fill-blue-500 stroke-white shrink-0" /></span>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-[#1c1e21] text-white text-[10px] border-0 shadow-lg px-2 py-1 rounded-md">
+                            যাচাইকৃত শিক্ষক
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
                   </h4>
                   <p className="text-[9px] text-muted-foreground flex items-center justify-center gap-0.5 mt-0.5">
                     <BookOpen size={8} /> {t.subject}
