@@ -8,6 +8,10 @@ import {
   Mail,
   FileText,
   LayoutDashboard,
+  HelpCircle,
+  Compass,
+  Calculator,
+  MapPin,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -17,12 +21,14 @@ const AppQuickActions = () => {
   const actions = [
     { icon: GraduationCap, label: "রেজাল্ট", path: "/result", bg: "bg-blue-500" },
     { icon: Users, label: "কমিটি", path: "/page/committee", bg: "bg-primary" },
-    { icon: Users, label: "উপদেষ্টা", path: "/page/advisors", bg: "bg-cyan-600" },
     { icon: Building2, label: "শাখা", path: "/branches", bg: "bg-orange-500" },
     { icon: BookOpen, label: "প্রকাশনা", path: "/books", bg: "bg-purple-600" },
     { icon: Bell, label: "নোটিশ", path: "/posts", bg: "bg-destructive" },
-    { icon: FileText, label: "পরিচিতি", path: "/page/about", bg: "bg-teal-600" },
     { icon: GraduationCap, label: "শিক্ষক", path: "/teachers", bg: "bg-pink-600" },
+    { icon: HelpCircle, label: "কুইজ", path: "/quiz", bg: "bg-emerald-600" },
+    { icon: Compass, label: "কিবলা", path: "/qibla", bg: "bg-teal-600" },
+    { icon: Calculator, label: "যাকাত", path: "/zakat", bg: "bg-amber-600" },
+    { icon: MapPin, label: "ম্যাপ", path: "/nearby-map", bg: "bg-sky-600" },
     { icon: Mail, label: "যোগাযোগ", path: "/app-contact", bg: "bg-indigo-600" },
     ...(user && hasAnyRole
       ? [{ icon: LayoutDashboard, label: "ড্যাশবোর্ড", path: "/admin", bg: "bg-slate-600" }]

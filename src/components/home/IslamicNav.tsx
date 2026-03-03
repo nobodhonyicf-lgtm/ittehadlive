@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Quote, HandHelping, Scale, Calculator } from "lucide-react";
+import { BookOpen, Quote, HandHelping, Scale, Calculator, HelpCircle, Compass, MapPin } from "lucide-react";
 
 const islamicLinks = [
   { icon: BookOpen, label: "কুরআন", sub: "আরবি ও বাংলা অনুবাদ", path: "/quran", bg: "from-emerald-700 to-teal-600" },
@@ -7,6 +7,9 @@ const islamicLinks = [
   { icon: HandHelping, label: "দোয়া", sub: "বিষয়ভিত্তিক দোয়া", path: "/dua", bg: "from-indigo-700 to-purple-600" },
   { icon: Scale, label: "মাসআলা", sub: "ইসলামী ফিকহ", path: "/masala", bg: "from-rose-700 to-red-600" },
   { icon: Calculator, label: "যাকাত", sub: "যাকাত হিসাব করুন", path: "/zakat", bg: "from-amber-700 to-yellow-600" },
+  { icon: HelpCircle, label: "কুইজ", sub: "জ্ঞান যাচাই করুন", path: "/quiz", bg: "from-violet-700 to-purple-600" },
+  { icon: Compass, label: "কিবলা", sub: "কিবলার দিক", path: "/qibla", bg: "from-cyan-700 to-teal-500" },
+  { icon: MapPin, label: "নিকটস্থ", sub: "মসজিদ ও মাদরাসা", path: "/nearby-map", bg: "from-green-700 to-lime-600" },
 ];
 
 const IslamicNav = () => {

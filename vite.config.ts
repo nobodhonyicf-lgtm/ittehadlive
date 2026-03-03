@@ -24,16 +24,19 @@ export default defineConfig(({ mode }) => ({
         navigateFallbackDenylist: [/^\/~oauth/],
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
         offlineGoogleAnalytics: false,
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
             handler: "NetworkFirst",
             options: {
               cacheName: "supabase-api-cache",
-              networkTimeoutSeconds: 5,
+              networkTimeoutSeconds: 3,
               expiration: {
                 maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24, // 1 day fallback
+                maxAgeSeconds: 60 * 5, // 5 minutes fallback only
               },
             },
           },
