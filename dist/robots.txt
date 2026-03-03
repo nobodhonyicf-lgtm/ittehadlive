@@ -14,3 +14,6 @@ User-agent: *
 Allow: /
 
 Sitemap: https://laasotunayiivssffhnu.supabase.co/functions/v1/sitemap?origin=https://ittehad.bd
+
+# IndexNow key verification
+# https://ittehad.bd/ittehad-indexnow-key-2024.txt
