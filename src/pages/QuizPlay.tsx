@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { playCorrectSound, playWrongSound, playSuccessSound, playFailSound } from "@/lib/quizSounds";
 
 type Question = {
   id: string;
@@ -29,6 +30,14 @@ type Question = {
   correct_answer: number;
   explanation: string | null;
   points: number;
+};
+
+type WrongAnswer = {
+  question: string;
+  selectedIdx: number;
+  correctIdx: number;
+  options: string[];
+  explanation: string | null;
 };
 
 const QuizPlay = () => {
@@ -44,6 +53,7 @@ const QuizPlay = () => {
   const [finished, setFinished] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15);
   const [streak, setStreak] = useState(0);
+  const [wrongAnswers, setWrongAnswers] = useState<WrongAnswer[]>([]);
 
   const { data: level } = useQuery({
     queryKey: ["quiz_level", levelId],
@@ -85,10 +95,22 @@ const QuizPlay = () => {
       setTimeLeft((t) => {
         if (t <= 1) {
           clearInterval(timer);
-          // Time's up - auto answer wrong
           setIsAnswered(true);
           setSelectedAnswer(-1);
           setStreak(0);
+          playWrongSound();
+          if (currentQ) {
+            setWrongAnswers((prev) => [
+              ...prev,
+              {
+                question: currentQ.question,
+                selectedIdx: -1,
+                correctIdx: currentQ.correct_answer,
+                options: currentQ.options,
+                explanation: currentQ.explanation,
+              },
+            ]);
+          }
           return 0;
         }
         return t - 1;
@@ -107,9 +129,21 @@ const QuizPlay = () => {
         setScore((s) => s + currentQ.points + bonus);
         setCorrectCount((c) => c + 1);
         setStreak((s) => s + 1);
+        playCorrectSound();
         if (bonus > 0) toast.success(`🔥 স্ট্রিক বোনাস +${bonus}!`);
       } else {
         setStreak(0);
+        playWrongSound();
+        setWrongAnswers((prev) => [
+          ...prev,
+          {
+            question: currentQ.question,
+            selectedIdx: idx,
+            correctIdx: currentQ.correct_answer,
+            options: currentQ.options,
+            explanation: currentQ.explanation,
+          },
+        ]);
       }
     },
     [isAnswered, currentQ, streak]
@@ -118,6 +152,12 @@ const QuizPlay = () => {
   const handleNext = async () => {
     if (currentIdx + 1 >= totalQ) {
       setFinished(true);
+      // Play result sound
+      if (correctCount >= Math.ceil(totalQ * 0.6)) {
+        setTimeout(() => playSuccessSound(), 300);
+      } else {
+        setTimeout(() => playFailSound(), 300);
+      }
       // Save progress
       if (user && levelId) {
         const { data: existing } = await supabase
@@ -161,6 +201,7 @@ const QuizPlay = () => {
     setCorrectCount(0);
     setFinished(false);
     setStreak(0);
+    setWrongAnswers([]);
   };
 
   const stars = totalQ > 0 ? Math.min(3, Math.floor((correctCount / totalQ) * 3 + 0.5)) : 0;
@@ -228,6 +269,41 @@ const QuizPlay = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Wrong Answers Review */}
+          {wrongAnswers.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+                <XCircle size={18} className="text-destructive" />
+                ভুল উত্তরগুলো ({wrongAnswers.length}টি)
+              </h2>
+              <div className="space-y-3">
+                {wrongAnswers.map((wa, i) => (
+                  <Card key={i} className="border-destructive/20">
+                    <CardContent className="py-4">
+                      <p className="font-semibold text-sm mb-2">{i + 1}. {wa.question}</p>
+                      <div className="space-y-1.5 text-sm">
+                        <div className="flex items-start gap-2 p-2 rounded bg-destructive/10 text-destructive">
+                          <XCircle size={16} className="mt-0.5 shrink-0" />
+                          <span>আপনার উত্তর: {wa.selectedIdx >= 0 ? wa.options[wa.selectedIdx] : "সময় শেষ"}</span>
+                        </div>
+                        <div className="flex items-start gap-2 p-2 rounded bg-green-500/10 text-green-700 dark:text-green-400">
+                          <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
+                          <span>সঠিক উত্তর: {wa.options[wa.correctIdx]}</span>
+                        </div>
+                        {wa.explanation && (
+                          <div className="flex items-start gap-2 p-2 rounded bg-blue-500/10 text-blue-700 dark:text-blue-400 mt-1">
+                            <Lightbulb size={14} className="mt-0.5 shrink-0" />
+                            <span className="text-xs">{wa.explanation}</span>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-3">
             <Button variant="outline" className="flex-1 gap-1" onClick={handleRetry}>
