@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { Clock, Building2, Briefcase, BookOpen, MapPin, Banknote, Megaphone, Timer } from "lucide-react";
+import { Clock, Building2, Briefcase, BookOpen, MapPin, Banknote, Megaphone, Timer, Phone, Mail, GraduationCap, Users, UserCircle } from "lucide-react";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { toBengaliNumber } from "@/lib/bengali";
 import SectionHeader from "./SectionHeader";
 import { toBengali } from "@/lib/bengali";
 import { useState, useEffect } from "react";
@@ -81,7 +83,7 @@ const JobPostingsSlider = () => {
             return (
               <Link
                 key={j.id}
-                to={`/teachers?job=${j.id}`}
+                to={`/job-apply/${j.id}`}
                 className="block w-52 shrink-0 bg-card border border-primary/20 rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all group"
               >
                 <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-3 py-1.5 flex items-center gap-1">
@@ -111,13 +113,47 @@ const JobPostingsSlider = () => {
                   )}
                   {j.deadline && <JobCountdown deadline={j.deadline} />}
                   {branch && (
-                    <div className="mt-3 pt-3 border-t border-border flex items-center gap-1.5">
-                      {branch.image_url ? (
-                        <img src={branch.image_url} alt="" className="w-4 h-4 rounded object-contain bg-muted" />
-                      ) : (
-                        <Building2 size={11} className="text-primary" />
-                      )}
-                      <span className="text-[10px] text-primary font-semibold line-clamp-1">{branch.name}</span>
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <HoverCard openDelay={200}>
+                        <HoverCardTrigger asChild>
+                          <div className="flex items-center gap-1.5 cursor-pointer" onClick={(e) => e.preventDefault()}>
+                            {branch.image_url ? (
+                              <img src={branch.image_url} alt="" className="w-4 h-4 rounded object-contain bg-muted" />
+                            ) : (
+                              <Building2 size={11} className="text-primary" />
+                            )}
+                            <span className="text-[10px] text-primary font-semibold line-clamp-1">{branch.name}</span>
+                          </div>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-64 p-3 space-y-2" side="top">
+                          <div className="flex items-center gap-2">
+                            {branch.image_url ? (
+                              <img src={branch.image_url} alt="" className="w-8 h-8 rounded-lg object-contain bg-muted border" />
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center"><Building2 size={16} className="text-primary" /></div>
+                            )}
+                            <div>
+                              <h4 className="text-xs font-semibold">{branch.name}</h4>
+                              {branch.code && <p className="text-[9px] text-muted-foreground">কোড: {branch.code}</p>}
+                            </div>
+                          </div>
+                          {branch.address && <p className="text-[10px] text-muted-foreground flex items-start gap-1"><MapPin size={9} className="shrink-0 mt-0.5" /> {branch.address}</p>}
+                          {branch.head_name && (
+                            <div className="flex items-center gap-2 bg-muted/50 rounded-md p-1.5">
+                              {branch.head_photo_url ? <img src={branch.head_photo_url} alt="" className="w-5 h-5 rounded-full object-cover" /> : <UserCircle size={12} className="text-primary" />}
+                              <div><div className="text-[8px] text-muted-foreground">প্রধান</div><div className="text-[10px] font-medium">{branch.head_name}</div></div>
+                            </div>
+                          )}
+                          <div className="flex gap-3 text-[9px] text-muted-foreground">
+                            {branch.phone && <span className="flex items-center gap-0.5"><Phone size={8} /> {branch.phone}</span>}
+                            {branch.email && <span className="flex items-center gap-0.5"><Mail size={8} /> {branch.email}</span>}
+                          </div>
+                          <div className="flex gap-3 text-[9px]">
+                            {branch.total_teachers > 0 && <span className="flex items-center gap-0.5"><GraduationCap size={8} /> {toBengaliNumber(branch.total_teachers)} শিক্ষক</span>}
+                            {branch.total_students > 0 && <span className="flex items-center gap-0.5"><Users size={8} /> {toBengaliNumber(branch.total_students)} ছাত্র</span>}
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
                     </div>
                   )}
                 </div>

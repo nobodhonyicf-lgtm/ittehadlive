@@ -130,6 +130,26 @@ const Header = () => {
                 মাসআলা
               </Link>
             </li>
+            <li>
+              <Link to="/quiz" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+                কুইজ
+              </Link>
+            </li>
+            <li>
+              <Link to="/qibla" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+                কিবলা
+              </Link>
+            </li>
+            <li>
+              <Link to="/zakat" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+                যাকাত
+              </Link>
+            </li>
+            <li>
+              <Link to="/nearby-map" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+                ম্যাপ
+              </Link>
+            </li>
             {/* Mobile-only links */}
             <li className="md:hidden">
               <Link to="/result" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>

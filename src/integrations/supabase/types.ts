@@ -740,6 +740,83 @@ export type Database = {
         }
         Relationships: []
       }
+      job_applications: {
+        Row: {
+          address: string | null
+          admin_note: string | null
+          applicant_name: string
+          bio: string | null
+          created_at: string
+          cv_url: string | null
+          district: string | null
+          email: string | null
+          expected_salary: string | null
+          experience_years: number | null
+          id: string
+          job_id: string
+          phone: string
+          photo_url: string | null
+          qualification: string | null
+          status: string
+          subject: string | null
+          tracking_code: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          admin_note?: string | null
+          applicant_name: string
+          bio?: string | null
+          created_at?: string
+          cv_url?: string | null
+          district?: string | null
+          email?: string | null
+          expected_salary?: string | null
+          experience_years?: number | null
+          id?: string
+          job_id: string
+          phone: string
+          photo_url?: string | null
+          qualification?: string | null
+          status?: string
+          subject?: string | null
+          tracking_code: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          admin_note?: string | null
+          applicant_name?: string
+          bio?: string | null
+          created_at?: string
+          cv_url?: string | null
+          district?: string | null
+          email?: string | null
+          expected_salary?: string | null
+          experience_years?: number | null
+          id?: string
+          job_id?: string
+          phone?: string
+          photo_url?: string | null
+          qualification?: string | null
+          status?: string
+          subject?: string | null
+          tracking_code?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_postings: {
         Row: {
           branch_id: string | null

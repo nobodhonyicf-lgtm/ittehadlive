@@ -125,7 +125,7 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
                   <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => setSelectedJob(j)}>
                     <Eye size={12} /> বিস্তারিত দেখুন
                   </Button>
-                  <Link to="/teacher-apply">
+                  <Link to={`/job-apply/${j.id}`}>
                     <Button size="sm" variant="outline" className="h-7 text-xs">আবেদন করুন →</Button>
                   </Link>
                   <Button size="sm" variant="ghost" className="h-7 w-7 p-0 ml-auto" onClick={(e) => {
@@ -208,7 +208,7 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
                     </div>
                   )}
                 </div>
-                <Link to="/teacher-apply" className="block">
+                <Link to={`/job-apply/${selectedJob.id}`} className="block">
                   <Button className="w-full gap-2"><Briefcase size={16} /> এই পদে আবেদন করুন</Button>
                 </Link>
               </div>
