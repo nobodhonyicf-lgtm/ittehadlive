@@ -16,52 +16,22 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Use origin from request or fallback to published URL
     const url = new URL(req.url);
     const origin = url.searchParams.get("origin");
     const siteUrl = origin || "https://ittehad.bd";
 
-    // Fetch all published posts
-    const { data: posts } = await supabase
-      .from("posts")
-      .select("slug, updated_at, created_at")
-      .eq("is_published", true)
-      .order("created_at", { ascending: false });
-
-    // Fetch all pages
-    const { data: pages } = await supabase
-      .from("pages")
-      .select("slug, updated_at")
-      .order("created_at", { ascending: false });
-
-    // Fetch all active notices
-    const { data: notices } = await supabase
-      .from("notices")
-      .select("id, updated_at, created_at")
-      .eq("is_active", true)
-      .order("created_at", { ascending: false });
-
-    // Fetch active branches
-    const { data: branches } = await supabase
-      .from("branches")
-      .select("id, created_at")
-      .eq("is_active", true);
-
-    // Fetch leader profiles
-    const { data: leaders } = await supabase
-      .from("leader_profiles")
-      .select("id, created_at");
-
-    // Fetch active books
-    const { data: books } = await supabase
-      .from("books")
-      .select("slug, updated_at")
-      .eq("is_active", true);
-
-    // Fetch categories
-    const { data: categories } = await supabase
-      .from("categories")
-      .select("slug, created_at");
+    // Fetch all data in parallel
+    const [postsRes, pagesRes, noticesRes, branchesRes, leadersRes, booksRes, categoriesRes, teachersRes, jobsRes] = await Promise.all([
+      supabase.from("posts").select("slug, updated_at, created_at").eq("is_published", true).order("created_at", { ascending: false }),
+      supabase.from("pages").select("slug, updated_at").order("created_at", { ascending: false }),
+      supabase.from("notices").select("id, updated_at, created_at").eq("is_active", true).order("created_at", { ascending: false }),
+      supabase.from("branches").select("id, created_at").eq("is_active", true),
+      supabase.from("leader_profiles").select("id, created_at"),
+      supabase.from("books").select("slug, updated_at").eq("is_active", true),
+      supabase.from("categories").select("slug, created_at"),
+      supabase.from("teachers").select("id, created_at, updated_at").eq("is_active", true).order("created_at", { ascending: false }),
+      supabase.from("job_postings").select("id, created_at, updated_at").eq("is_active", true).order("created_at", { ascending: false }),
+    ]);
 
     let urls = '';
 
@@ -69,89 +39,57 @@ serve(async (req) => {
     const staticPages = [
       { loc: '/', priority: '1.0', changefreq: 'daily' },
       { loc: '/posts', priority: '0.9', changefreq: 'daily' },
+      { loc: '/teachers', priority: '0.9', changefreq: 'daily' },
       { loc: '/students', priority: '0.7', changefreq: 'weekly' },
       { loc: '/result', priority: '0.8', changefreq: 'weekly' },
       { loc: '/branches', priority: '0.7', changefreq: 'monthly' },
       { loc: '/books', priority: '0.6', changefreq: 'weekly' },
       { loc: '/contact', priority: '0.5', changefreq: 'monthly' },
+      { loc: '/quran', priority: '0.6', changefreq: 'monthly' },
+      { loc: '/hadith', priority: '0.6', changefreq: 'monthly' },
+      { loc: '/dua', priority: '0.6', changefreq: 'monthly' },
+      { loc: '/masala', priority: '0.6', changefreq: 'monthly' },
     ];
 
     for (const page of staticPages) {
-      urls += `
-  <url>
-    <loc>${siteUrl}${page.loc}</loc>
-    <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
-  </url>`;
+      urls += `\n  <url>\n    <loc>${siteUrl}${page.loc}</loc>\n    <changefreq>${page.changefreq}</changefreq>\n    <priority>${page.priority}</priority>\n  </url>`;
     }
 
-    // Posts
-    for (const post of posts || []) {
-      urls += `
-  <url>
-    <loc>${siteUrl}/post/${post.slug}</loc>
-    <lastmod>${new Date(post.updated_at || post.created_at).toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
+    for (const post of postsRes.data || []) {
+      urls += `\n  <url>\n    <loc>${siteUrl}/post/${post.slug}</loc>\n    <lastmod>${new Date(post.updated_at || post.created_at).toISOString()}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`;
     }
 
-    // Pages
-    for (const page of pages || []) {
-      urls += `
-  <url>
-    <loc>${siteUrl}/page/${page.slug}</loc>
-    <lastmod>${new Date(page.updated_at).toISOString()}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>`;
+    for (const page of pagesRes.data || []) {
+      urls += `\n  <url>\n    <loc>${siteUrl}/page/${page.slug}</loc>\n    <lastmod>${new Date(page.updated_at).toISOString()}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`;
     }
 
-    // Notices
-    for (const notice of notices || []) {
-      urls += `
-  <url>
-    <loc>${siteUrl}/notice/${notice.id}</loc>
-    <lastmod>${new Date(notice.updated_at || notice.created_at).toISOString()}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>`;
+    for (const notice of noticesRes.data || []) {
+      urls += `\n  <url>\n    <loc>${siteUrl}/notice/${notice.id}</loc>\n    <lastmod>${new Date(notice.updated_at || notice.created_at).toISOString()}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>`;
     }
 
-    // Branches
-    for (const branch of branches || []) {
-      urls += `
-  <url>
-    <loc>${siteUrl}/branch/${branch.id}</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>`;
+    for (const branch of branchesRes.data || []) {
+      urls += `\n  <url>\n    <loc>${siteUrl}/branch/${branch.id}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>`;
     }
 
-    // Leaders
-    for (const leader of leaders || []) {
-      urls += `
-  <url>
-    <loc>${siteUrl}/leader/${leader.id}</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>`;
+    for (const leader of leadersRes.data || []) {
+      urls += `\n  <url>\n    <loc>${siteUrl}/leader/${leader.id}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.4</priority>\n  </url>`;
     }
 
-    // Books
-    for (const book of books || []) {
-      urls += `
-  <url>
-    <loc>${siteUrl}/book/${book.slug}</loc>
-    <lastmod>${new Date(book.updated_at).toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>`;
+    for (const book of booksRes.data || []) {
+      urls += `\n  <url>\n    <loc>${siteUrl}/book/${book.slug}</loc>\n    <lastmod>${new Date(book.updated_at).toISOString()}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>`;
     }
 
-    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}
-</urlset>`;
+    // Teachers
+    for (const t of teachersRes.data || []) {
+      urls += `\n  <url>\n    <loc>${siteUrl}/teachers?highlight=${t.id}</loc>\n    <lastmod>${new Date(t.updated_at || t.created_at).toISOString()}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`;
+    }
+
+    // Job postings
+    for (const j of jobsRes.data || []) {
+      urls += `\n  <url>\n    <loc>${siteUrl}/job-apply/${j.id}</loc>\n    <lastmod>${new Date(j.updated_at || j.created_at).toISOString()}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`;
+    }
+
+    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}\n</urlset>`;
 
     return new Response(sitemap, {
       headers: {

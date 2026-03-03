@@ -1,6 +1,12 @@
 {
   "rewrites": [
-    { "source": "/share/post/:slug", "destination": "/api/og-proxy?slug=:slug" },
+    { "source": "/share/post/:slug", "destination": "/api/og-proxy?type=post&slug=:slug" },
+    { "source": "/share/teacher/:id", "destination": "/api/og-proxy?type=teacher&id=:id" },
+    { "source": "/share/job/:id", "destination": "/api/og-proxy?type=job&id=:id" },
+    { "source": "/share/page/:slug", "destination": "/api/og-proxy?type=page&slug=:slug" },
+    { "source": "/share/notice/:id", "destination": "/api/og-proxy?type=notice&id=:id" },
+    { "source": "/share/book/:slug", "destination": "/api/og-proxy?type=book&slug=:slug" },
+    { "source": "/share/branch/:id", "destination": "/api/og-proxy?type=branch&id=:id" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "redirects": [
