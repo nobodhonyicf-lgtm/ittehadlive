@@ -1,7 +1,8 @@
-import { useIslamicContents } from "@/hooks/useData";
+import { useIslamicContents, useSiteSettings } from "@/hooks/useData";
 import { BookOpen, Quote, HandHelping, X, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import AppIftarCountdown from "./AppIftarCountdown";
+import { SeasonalIslamicCards } from "@/components/home/SeasonalIslamicCards";
 import { Link } from "react-router-dom";
 
 const categoryConfig = {
@@ -53,7 +54,9 @@ const ContentModal = ({ item, onClose }: { item: any; onClose: () => void }) => 
 
 const AppIslamicContent = () => {
   const { data: contents } = useIslamicContents();
+  const { data: siteSettings } = useSiteSettings();
   const [selected, setSelected] = useState<any | null>(null);
+  const showSeasonal = siteSettings?.["section_seasonal_islamic"] !== "false";
 
   const grouped = useMemo(() => {
     if (!contents?.length) return null;
@@ -72,6 +75,7 @@ const AppIslamicContent = () => {
       <h2 className="text-sm font-bold flex items-center gap-2"><BookOpen size={16} className="text-emerald-600" /> ইসলামী কন্টেন্ট</h2>
 
       <AppIftarCountdown />
+      {showSeasonal && contents && <SeasonalIslamicCards contents={contents as any} isApp />}
 
       <div className="grid grid-cols-2 gap-2.5">
         {(Object.keys(categoryConfig) as Array<keyof typeof categoryConfig>).map((key) => {

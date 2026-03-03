@@ -699,6 +699,7 @@ export type Database = {
           meaning: string | null
           question: string | null
           reference: string | null
+          seasonal_tag: string | null
           sort_order: number | null
           source: string | null
           subcategory: string | null
@@ -715,6 +716,7 @@ export type Database = {
           meaning?: string | null
           question?: string | null
           reference?: string | null
+          seasonal_tag?: string | null
           sort_order?: number | null
           source?: string | null
           subcategory?: string | null
@@ -731,6 +733,7 @@ export type Database = {
           meaning?: string | null
           question?: string | null
           reference?: string | null
+          seasonal_tag?: string | null
           sort_order?: number | null
           source?: string | null
           subcategory?: string | null

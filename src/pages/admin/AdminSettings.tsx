@@ -22,6 +22,8 @@ const sectionToggleKeys = [
   { key: "section_sidebar", label: "সাইডবার", desc: "লিডার, নোটিশ, নামাজ, পোল" },
   { key: "section_recent_news", label: "সর্বশেষ খবর", desc: "সাম্প্রতিক পোস্ট সেকশন" },
   { key: "section_videos", label: "ভিডিও গ্যালারী", desc: "ইউটিউব ভিডিও সেকশন" },
+  { key: "section_seasonal_islamic", label: "সিজনাল ইসলামী কন্টেন্ট", desc: "রমাদান/কুরবানী ইত্যাদি মাসভিত্তিক বিশেষ কার্ড" },
+  { key: "auto_islamic_push_enabled", label: "দৈনিক ইসলামী পুশ নোটিফিকেশন", desc: "প্রতিদিন অটোমেটিক আয়াত/হাদিস/দোয়া/মাসআলা পুশ পাঠায়" },
 ];
 
 const AdminSettings = () => {

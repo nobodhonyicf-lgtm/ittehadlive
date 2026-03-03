@@ -19,7 +19,18 @@ const categories = [
   { key: "masala", label: "মাসআলা", icon: Scale },
 ] as const;
 
-const emptyForm = { title: "", content: "", source: "", subcategory: "", transliteration: "", meaning: "", reference: "", question: "" };
+const seasonalOptions = [
+  { value: "", label: "সাধারণ (কোনো সিজন নয়)" },
+  { value: "ramadan", label: "রমাদান" },
+  { value: "shawwal", label: "শাওয়াল (ঈদুল ফিতর)" },
+  { value: "dhul_hijjah", label: "জিলহজ্জ (কুরবানী)" },
+  { value: "muharram", label: "মুহাররম" },
+  { value: "rabi_ul_awal", label: "রবিউল আউয়াল (মিলাদুন্নবী)" },
+  { value: "rajab", label: "রজব" },
+  { value: "shaban", label: "শাবান (শবে বরাত)" },
+];
+
+const emptyForm = { title: "", content: "", source: "", subcategory: "", transliteration: "", meaning: "", reference: "", question: "", seasonal_tag: "" };
 
 const AdminIslamicContent = () => {
   const { toast } = useToast();
@@ -43,7 +54,7 @@ const AdminIslamicContent = () => {
 
   const startEdit = (item: any) => {
     setEditId(item.id);
-    setForm({ title: item.title || "", content: item.content || "", source: item.source || "", subcategory: item.subcategory || "", transliteration: item.transliteration || "", meaning: item.meaning || "", reference: item.reference || "", question: item.question || "" });
+    setForm({ title: item.title || "", content: item.content || "", source: item.source || "", subcategory: item.subcategory || "", transliteration: item.transliteration || "", meaning: item.meaning || "", reference: item.reference || "", question: item.question || "", seasonal_tag: (item as any).seasonal_tag || "" });
   };
 
   const cancelEdit = () => { setEditId(null); setForm(emptyForm); };
@@ -54,7 +65,8 @@ const AdminIslamicContent = () => {
     const { error } = await supabase.from("islamic_contents").update({
       title: form.title, content: form.content, source: form.source || null, subcategory: form.subcategory || null,
       transliteration: form.transliteration || null, meaning: form.meaning || null, reference: form.reference || null, question: form.question || null,
-    }).eq("id", editId);
+      seasonal_tag: form.seasonal_tag || null,
+    } as any).eq("id", editId);
     if (error) toast({ title: "ত্রুটি", description: error.message, variant: "destructive" });
     else { toast({ title: "সফল", description: "আপডেট হয়েছে" }); cancelEdit(); }
     setSaving(false);
@@ -68,7 +80,8 @@ const AdminIslamicContent = () => {
       subcategory: form.subcategory.trim() || null, transliteration: form.transliteration.trim() || null,
       meaning: form.meaning.trim() || null, reference: form.reference.trim() || null, question: form.question.trim() || null,
       sort_order: getByCategory(category).length,
-    });
+      seasonal_tag: form.seasonal_tag.trim() || null,
+    } as any);
     if (error) toast({ title: "ত্রুটি", description: error.message, variant: "destructive" });
     else { toast({ title: "সফল", description: "যুক্ত হয়েছে" }); setAdding(null); setForm(emptyForm); }
     setSaving(false);
@@ -99,6 +112,17 @@ const AdminIslamicContent = () => {
         <div><Label>সূত্র</Label><Input value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value }))} /></div>
         <div><Label>রেফারেন্স</Label><Input value={form.reference} onChange={e => setForm(f => ({ ...f, reference: e.target.value }))} /></div>
       </div>
+      <div>
+        <Label>সিজনাল ট্যাগ</Label>
+        <select
+          value={form.seasonal_tag}
+          onChange={e => setForm(f => ({ ...f, seasonal_tag: e.target.value }))}
+          className="w-full border border-border rounded-md px-3 py-2 bg-background text-sm"
+        >
+          {seasonalOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+        <p className="text-[10px] text-muted-foreground mt-1">সিজনাল কন্টেন্ট নির্দিষ্ট মাসে বিশেষভাবে হাইলাইট হবে</p>
+      </div>
     </div>
   );
 
@@ -127,7 +151,8 @@ const AdminIslamicContent = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold text-sm">{item.title}</h3>
-                          {item.subcategory && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">{item.subcategory}</span>}
+                        {item.subcategory && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">{item.subcategory}</span>}
+                          {(item as any).seasonal_tag && <span className="text-[10px] bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2 py-0.5 rounded-full">{seasonalOptions.find(o => o.value === (item as any).seasonal_tag)?.label || (item as any).seasonal_tag}</span>}
                         </div>
                         {item.question && <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1"><HelpCircle size={12} /> {item.question}</p>}
                         <p className="text-sm mt-1 whitespace-pre-wrap" dir="auto">{item.content}</p>
