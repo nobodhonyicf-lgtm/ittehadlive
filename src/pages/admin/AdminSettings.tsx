@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Settings, Palette, Image, Search, ShieldCheck, Smartphone, LayoutDashboard } from "lucide-react";
+import { Settings, Palette, Image, Search, ShieldCheck, Smartphone, LayoutDashboard, PenLine } from "lucide-react";
 import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
 const sectionToggleKeys = [
@@ -165,7 +165,7 @@ const AdminSettings = () => {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">✍️ স্বাক্ষর সেটিংস</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><PenLine size={18} /> স্বাক্ষর সেটিংস</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           {signatureSettings?.map((s) => (
             <div key={s.id}>

@@ -1,13 +1,66 @@
 import { Link } from "react-router-dom";
 import { useMenuItems, useSiteSettings } from "@/hooks/useData";
-import { Menu, X, GraduationCap, Phone, Mail, BookOpen, LogIn, User, LayoutDashboard, Users } from "lucide-react";
+import { Menu, X, GraduationCap, Phone, BookOpen, LogIn, User, LayoutDashboard, Users, ChevronDown } from "lucide-react";
 import LocationPicker from "@/components/LocationPicker";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toBengali } from "@/lib/bengali";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+
+const islamicDropdown = [
+  { label: "কুরআন", path: "/quran" },
+  { label: "হাদিস", path: "/hadith" },
+  { label: "দোয়া", path: "/dua" },
+  { label: "মাসআলা", path: "/masala" },
+];
+
+const toolsDropdown = [
+  { label: "কুইজ", path: "/quiz" },
+  { label: "কিবলা", path: "/qibla" },
+  { label: "যাকাত", path: "/zakat" },
+  { label: "ম্যাপ", path: "/nearby-map" },
+];
+
+const DropdownMenu = ({ label, items, onNavigate }: { label: string; items: { label: string; path: string }[]; onNavigate?: () => void }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <li ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1 px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md"
+      >
+        {label} <ChevronDown size={12} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <ul className="md:absolute md:top-full md:left-0 md:mt-1 md:bg-primary md:rounded-lg md:shadow-xl md:min-w-[140px] md:border md:border-primary-foreground/10 md:z-50 md:py-1">
+          {items.map((item) => (
+            <li key={item.path}>
+              <Link
+                to={item.path}
+                className="block px-4 py-2 hover:bg-primary-foreground/10 transition-colors text-sm whitespace-nowrap"
+                onClick={() => { setOpen(false); onNavigate?.(); }}
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+};
 
 const Header = () => {
   const { data: menuItems } = useMenuItems();
@@ -33,10 +86,8 @@ const Header = () => {
 
   return (
     <header className={`w-full sticky top-0 z-50 transition-all duration-300 ${scrolled ? "shadow-lg" : "shadow-sm"}`}>
-      {/* Single unified header bar */}
       <div className="bg-card border-b border-border">
         <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Left: Logo + Name */}
           <Link to="/" className="flex items-center gap-3 min-w-0">
             {settings?.logo_url && (
               <img src={settings.logo_url} alt="Logo" className="h-10 md:h-12 object-contain shrink-0" />
@@ -51,7 +102,6 @@ const Header = () => {
             </div>
           </Link>
 
-          {/* Right: Utilities */}
           <div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0">
             {settings?.contact_phone && (
               <span className="hidden lg:flex items-center gap-1">
@@ -87,7 +137,6 @@ const Header = () => {
                 <LogIn size={13} /> লগইন
               </Link>
             )}
-            {/* Mobile menu toggle */}
             <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-1.5 rounded-lg hover:bg-muted transition-colors" aria-label="Toggle menu">
               {mobileOpen ? <X size={20} className="text-foreground" /> : <Menu size={20} className="text-foreground" />}
             </button>
@@ -95,7 +144,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Navigation bar */}
       <nav className="bg-primary text-primary-foreground">
         <div className="max-w-[1200px] mx-auto px-4">
           <ul className={`${mobileOpen ? "block py-2" : "hidden"} md:flex md:items-center md:justify-center`}>
@@ -110,46 +158,8 @@ const Header = () => {
                 </Link>
               </li>
             ))}
-            <li>
-              <Link to="/quran" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
-                কুরআন
-              </Link>
-            </li>
-            <li>
-              <Link to="/hadith" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
-                হাদিস
-              </Link>
-            </li>
-            <li>
-              <Link to="/dua" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
-                দোয়া
-              </Link>
-            </li>
-            <li>
-              <Link to="/masala" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
-                মাসআলা
-              </Link>
-            </li>
-            <li>
-              <Link to="/quiz" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
-                কুইজ
-              </Link>
-            </li>
-            <li>
-              <Link to="/qibla" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
-                কিবলা
-              </Link>
-            </li>
-            <li>
-              <Link to="/zakat" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
-                যাকাত
-              </Link>
-            </li>
-            <li>
-              <Link to="/nearby-map" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
-                ম্যাপ
-              </Link>
-            </li>
+            <DropdownMenu label="ইসলামী" items={islamicDropdown} onNavigate={() => setMobileOpen(false)} />
+            <DropdownMenu label="টুলস" items={toolsDropdown} onNavigate={() => setMobileOpen(false)} />
             {/* Mobile-only links */}
             <li className="md:hidden">
               <Link to="/result" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>

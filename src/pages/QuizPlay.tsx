@@ -17,6 +17,7 @@ import {
   RotateCcw,
   ChevronRight,
   Zap,
+  Lightbulb,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -338,7 +339,7 @@ const QuizPlay = () => {
             {currentQ?.explanation && (
               <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800">
                 <CardContent className="py-3 text-sm">
-                  <p className="font-semibold text-blue-700 dark:text-blue-300 mb-1">💡 ব্যাখ্যা:</p>
+                  <p className="font-semibold text-blue-700 dark:text-blue-300 mb-1 flex items-center gap-1"><Lightbulb size={14} /> ব্যাখ্যা:</p>
                   <p className="text-blue-600 dark:text-blue-400">{currentQ.explanation}</p>
                 </CardContent>
               </Card>

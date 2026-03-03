@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2, Users, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Search, Building, Award } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
@@ -86,9 +86,9 @@ const AdminCommittee = () => {
     >
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex gap-2 flex-wrap">
-          <Button variant={pageFilter === "governing_body" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("governing_body")}>🏛️ গভর্নিং বডি</Button>
-          <Button variant={pageFilter === "executive" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("executive")}>🎖️ নির্বাহী কমিটি</Button>
-          <Button variant={pageFilter === "working" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("working")}>👥 কার্যকরি সদস্য</Button>
+          <Button variant={pageFilter === "governing_body" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("governing_body")} className="gap-1"><Building size={14} /> গভর্নিং বডি</Button>
+          <Button variant={pageFilter === "executive" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("executive")} className="gap-1"><Award size={14} /> নির্বাহী কমিটি</Button>
+          <Button variant={pageFilter === "working" ? "default" : "outline"} size="sm" onClick={() => setPageFilter("working")} className="gap-1"><Users size={14} /> কার্যকরি সদস্য</Button>
         </div>
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
