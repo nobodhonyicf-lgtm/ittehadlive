@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +20,15 @@ function calculateQiblaDirection(lat: number, lng: number): number {
   return (qibla + 360) % 360;
 }
 
+// Smooth angle interpolation to avoid jerky jumps
+function lerpAngle(from: number, to: number, t: number): number {
+  let diff = to - from;
+  // Normalize to [-180, 180]
+  while (diff > 180) diff -= 360;
+  while (diff < -180) diff += 360;
+  return from + diff * t;
+}
+
 const KaabaIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="4" y="6" width="16" height="14" rx="1" fill="#1a1a1a" stroke="#d4af37" strokeWidth="1.5" />
@@ -31,10 +40,22 @@ const KaabaIcon = () => (
 
 const QiblaCompass = () => {
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
-  const [heading, setHeading] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
+
+  // Use refs for smooth animation
+  const rawHeadingRef = useRef<number | null>(null);
+  const smoothHeadingRef = useRef<number>(0);
+  const displayHeadingRef = useRef<number | null>(null);
+  const rafRef = useRef<number>(0);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const headingTextRef = useRef<HTMLParagraphElement>(null);
+  const [headingReady, setHeadingReady] = useState(false);
+
+  // Low-pass filter for raw heading
+  const headingBufferRef = useRef<number[]>([]);
+  const BUFFER_SIZE = 8;
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -55,15 +76,33 @@ const QiblaCompass = () => {
     );
   }, []);
 
-  useEffect(() => {
-    const handleOrientation = (e: DeviceOrientationEvent) => {
-      if ((e as any).webkitCompassHeading !== undefined) {
-        setHeading((e as any).webkitCompassHeading);
-      } else if (e.alpha !== null) {
-        setHeading(360 - e.alpha);
+  const handleOrientation = useCallback((e: DeviceOrientationEvent) => {
+    let heading: number | null = null;
+    if ((e as any).webkitCompassHeading !== undefined) {
+      heading = (e as any).webkitCompassHeading;
+    } else if (e.alpha !== null) {
+      heading = 360 - e.alpha;
+    }
+    if (heading !== null) {
+      // Add to buffer for smoothing
+      const buf = headingBufferRef.current;
+      buf.push(heading);
+      if (buf.length > BUFFER_SIZE) buf.shift();
+      
+      // Circular mean for smooth averaging
+      let sinSum = 0, cosSum = 0;
+      for (const h of buf) {
+        sinSum += Math.sin((h * Math.PI) / 180);
+        cosSum += Math.cos((h * Math.PI) / 180);
       }
-    };
+      const avgHeading = ((Math.atan2(sinSum, cosSum) * 180) / Math.PI + 360) % 360;
+      rawHeadingRef.current = avgHeading;
+      
+      if (!headingReady) setHeadingReady(true);
+    }
+  }, [headingReady]);
 
+  useEffect(() => {
     const requestPermission = async () => {
       if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
         try {
@@ -83,6 +122,31 @@ const QiblaCompass = () => {
 
     requestPermission();
     return () => window.removeEventListener("deviceorientation", handleOrientation, true);
+  }, [handleOrientation]);
+
+  // Smooth animation loop using requestAnimationFrame
+  useEffect(() => {
+    const animate = () => {
+      if (rawHeadingRef.current !== null) {
+        const target = rawHeadingRef.current;
+        const current = smoothHeadingRef.current;
+        // Smooth interpolation factor (lower = smoother but more lag)
+        const smoothed = lerpAngle(current, target, 0.08);
+        smoothHeadingRef.current = ((smoothed % 360) + 360) % 360;
+        displayHeadingRef.current = smoothHeadingRef.current;
+
+        // Directly update DOM for performance (no React re-render)
+        if (svgRef.current) {
+          svgRef.current.style.transform = `rotate(${-smoothHeadingRef.current}deg)`;
+        }
+        if (headingTextRef.current) {
+          headingTextRef.current.textContent = `${Math.round(smoothHeadingRef.current)}°`;
+        }
+      }
+      rafRef.current = requestAnimationFrame(animate);
+    };
+    rafRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
   const requestOrientationPermission = async () => {
@@ -91,20 +155,13 @@ const QiblaCompass = () => {
         const perm = await (DeviceOrientationEvent as any).requestPermission();
         if (perm === "granted") {
           setPermissionDenied(false);
-          window.addEventListener("deviceorientation", (e: DeviceOrientationEvent) => {
-            if ((e as any).webkitCompassHeading !== undefined) {
-              setHeading((e as any).webkitCompassHeading);
-            } else if (e.alpha !== null) {
-              setHeading(360 - e.alpha);
-            }
-          }, true);
+          window.addEventListener("deviceorientation", handleOrientation, true);
         }
       } catch { /* ignore */ }
     }
   };
 
   const qiblaAngle = position ? calculateQiblaDirection(position.lat, position.lng) : 0;
-  const compassRotation = heading !== null ? -heading : 0;
   const SIZE = 280;
   const CENTER = SIZE / 2;
   const RADIUS = SIZE / 2 - 20;
@@ -152,7 +209,12 @@ const QiblaCompass = () => {
         {position && (
           <>
             <div className="relative mx-auto mb-8" style={{ width: SIZE, height: SIZE }}>
-              <svg width={SIZE} height={SIZE} className="transition-transform duration-200" style={{ transform: `rotate(${compassRotation}deg)` }}>
+              <svg
+                ref={svgRef}
+                width={SIZE}
+                height={SIZE}
+                style={{ willChange: "transform" }}
+              >
                 {/* Outer ring */}
                 <circle cx={CENTER} cy={CENTER} r={RADIUS + 10} fill="none" stroke="hsl(var(--border))" strokeWidth="2" />
                 <circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none" stroke="hsl(var(--muted-foreground))" strokeWidth="0.5" opacity="0.3" />
@@ -160,7 +222,7 @@ const QiblaCompass = () => {
                 {/* Degree marks */}
                 {Array.from({ length: 72 }).map((_, i) => {
                   const angle = (i * 5 * Math.PI) / 180;
-                  const isMajor = i % 6 === 0; // every 30°
+                  const isMajor = i % 6 === 0;
                   const isMinor = i % 2 === 0;
                   const len = isMajor ? 14 : isMinor ? 8 : 4;
                   const r1 = RADIUS + 8;
@@ -205,7 +267,6 @@ const QiblaCompass = () => {
 
                 {/* Qibla needle */}
                 <g transform={`rotate(${qiblaAngle}, ${CENTER}, ${CENTER})`}>
-                  {/* Needle line */}
                   <line
                     x1={CENTER}
                     y1={CENTER}
@@ -215,18 +276,16 @@ const QiblaCompass = () => {
                     strokeWidth="3"
                     strokeLinecap="round"
                   />
-                  {/* Arrow head */}
                   <polygon
                     points={`${CENTER},${CENTER - RADIUS + 18} ${CENTER - 8},${CENTER - RADIUS + 36} ${CENTER + 8},${CENTER - RADIUS + 36}`}
                     fill="#16a34a"
                   />
-                  {/* Kaaba icon position */}
                   <foreignObject x={CENTER - 14} y={CENTER - RADIUS - 2} width="28" height="28">
                     <KaabaIcon />
                   </foreignObject>
                 </g>
 
-                {/* Opposite end (tail) */}
+                {/* Tail */}
                 <g transform={`rotate(${qiblaAngle}, ${CENTER}, ${CENTER})`}>
                   <line
                     x1={CENTER}
@@ -255,12 +314,12 @@ const QiblaCompass = () => {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">কম্পাস হেডিং</p>
-                  <p className="text-xl font-bold">{heading !== null ? `${heading.toFixed(0)}°` : "—"}</p>
+                  <p ref={headingTextRef} className="text-xl font-bold">{headingReady ? "0°" : "—"}</p>
                 </div>
               </CardContent>
             </Card>
 
-            {heading === null && (
+            {!headingReady && (
               <p className="text-xs text-muted-foreground bg-amber-500/10 text-amber-700 rounded-lg p-3 flex items-center gap-2">
                 <Smartphone size={14} className="shrink-0" /> সেরা ফলাফলের জন্য মোবাইল ফোন ব্যবহার করুন। কম্পাস ক্যালিব্রেট করতে ফোনটি ৮-আকৃতিতে ঘোরান।
               </p>
