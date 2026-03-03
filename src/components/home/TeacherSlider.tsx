@@ -32,7 +32,7 @@ const TeacherSlider = () => {
 
   return (
     <div>
-      <SectionHeader title="শিক্ষক তথ্য" linkUrl="/teachers" />
+      <SectionHeader title="আপনার মাদরাসার জন্য শিক্ষক খুঁজুন" linkUrl="/teachers" />
       <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
         <div className="flex gap-3 pb-2" style={{ minWidth: "max-content" }}>
           {teachers.map((t) => {

@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
   Download, Smartphone, Monitor, CheckCircle, Share, PlusSquare,
-  MoreVertical, Zap, BookOpen, Users, Bell, ShoppingBag, MapPin, Wifi, WifiOff,
+  MoreVertical, Zap, BookOpen, Users, Bell, ShoppingBag, MapPin, WifiOff,
+  Loader2, ExternalLink,
 } from "lucide-react";
 
 const Install = () => {
@@ -13,8 +15,10 @@ const Install = () => {
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const intervalRef = useRef<any>(null);
 
-  // If opened inside installed PWA/app, redirect to home immediately
   useEffect(() => {
     if (window.matchMedia("(display-mode: standalone)").matches || sessionStorage.getItem("ittehad_app_mode") === "1") {
       window.location.replace("/");
@@ -29,14 +33,46 @@ const Install = () => {
       setDeferredPrompt(e);
     };
     window.addEventListener("beforeinstallprompt", handler);
+    
+    window.addEventListener("appinstalled", () => {
+      setIsInstalled(true);
+      setDownloading(false);
+      setProgress(100);
+      // Redirect to app after short delay
+      setTimeout(() => window.location.replace("/"), 1500);
+    });
+
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
+    
+    // Start download animation
+    setDownloading(true);
+    setProgress(0);
+    
+    // Simulate progress while PWA resources cache
+    let p = 0;
+    intervalRef.current = setInterval(() => {
+      p += Math.random() * 15 + 5;
+      if (p >= 90) { p = 90; clearInterval(intervalRef.current); }
+      setProgress(Math.min(p, 90));
+    }, 200);
+
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") setIsInstalled(true);
+    
+    clearInterval(intervalRef.current);
+    
+    if (outcome === "accepted") {
+      setProgress(100);
+      setIsInstalled(true);
+      setTimeout(() => window.location.replace("/"), 1500);
+    } else {
+      setDownloading(false);
+      setProgress(0);
+    }
     setDeferredPrompt(null);
   };
 
@@ -51,9 +87,6 @@ const Install = () => {
     { icon: Smartphone, label: "নেটিভ অ্যাপের মতো অভিজ্ঞতা", color: "text-primary" },
   ];
 
-  // Direct install link for sharing
-  const installUrl = `${window.location.origin}/install`;
-
   return (
     <Layout>
       <SEOHead title="অ্যাপ ডাউনলোড করুন" description="ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ অ্যাপ ডাউনলোড করুন — অ্যাপ স্টোর ছাড়াই!" />
@@ -63,89 +96,71 @@ const Install = () => {
             <Smartphone className="text-primary-foreground" size={36} />
           </div>
           <h1 className="text-2xl font-bold mb-2">ইত্তেহাদ অ্যাপ</h1>
-          <p className="text-muted-foreground">
-            আপনার ফোনে ইনস্টল করুন — অ্যাপ স্টোর ছাড়াই!
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            ওয়েবসাইটটিকে একটি পূর্ণাঙ্গ অ্যাপ হিসেবে ব্যবহার করুন
-          </p>
+          <p className="text-muted-foreground">আপনার ফোনে ইনস্টল করুন — অ্যাপ স্টোর ছাড়াই!</p>
+          <p className="text-xs text-muted-foreground mt-1">ওয়েবসাইটটিকে একটি পূর্ণাঙ্গ অ্যাপ হিসেবে ব্যবহার করুন</p>
         </div>
 
         {isInstalled ? (
           <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20 mb-6">
             <CardContent className="py-6 text-center">
               <CheckCircle className="mx-auto text-green-600 mb-3" size={40} />
-              <h2 className="text-lg font-bold mb-1">অ্যাপ ইতিমধ্যে ইনস্টল আছে!</h2>
-              <p className="text-sm text-muted-foreground">আপনি ইতিমধ্যে অ্যাপটি ব্যবহার করছেন।</p>
+              <h2 className="text-lg font-bold mb-1">ইনস্টল সম্পন্ন!</h2>
+              <p className="text-sm text-muted-foreground">অ্যাপে নিয়ে যাওয়া হচ্ছে...</p>
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-4 mb-8">
-            {/* Direct install button */}
-            {deferredPrompt && (
-              <Card className="border-primary/30 shadow-lg">
+            {/* Download progress */}
+            {downloading && (
+              <Card className="border-primary/30 shadow-lg overflow-hidden">
                 <CardContent className="py-5">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
-                      <Download className="text-primary" size={24} />
-                    </div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <Loader2 size={20} className="text-primary animate-spin" />
                     <div className="flex-1">
-                      <h3 className="font-semibold">এখনই ইনস্টল করুন</h3>
-                      <p className="text-sm text-muted-foreground">একটি ক্লিকেই আপনার ফোনে ইনস্টল হবে</p>
+                      <h3 className="font-semibold text-sm">
+                        {progress >= 100 ? "ইনস্টল সম্পন্ন হচ্ছে..." : "ডাউনলোড হচ্ছে..."}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {progress >= 100 ? "অ্যাপে নিয়ে যাওয়া হবে" : `${Math.round(progress)}% সম্পন্ন`}
+                      </p>
                     </div>
-                    <Button onClick={handleInstall} size="lg" className="shrink-0 shadow-md">
-                      <Download size={16} className="mr-1" /> ইনস্টল
-                    </Button>
                   </div>
+                  <Progress value={progress} className="h-2.5" />
                 </CardContent>
               </Card>
             )}
 
-            {/* Shareable install link */}
-            <Card className="border-primary/20">
-              <CardContent className="py-4">
-                <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                  <Share size={14} className="text-primary" /> ইনস্টল লিংক শেয়ার করুন
-                </h3>
-                <p className="text-xs text-muted-foreground mb-3">
-                  এই লিংকটি অন্যদের পাঠান — ক্লিক করলেই অ্যাপ ইনস্টল পেজে যাবে
-                </p>
-                <div className="flex gap-2">
-                  <input
-                    readOnly
-                    value={installUrl}
-                    className="flex-1 text-xs bg-muted rounded-lg px-3 py-2.5 border border-border font-mono"
-                    onClick={(e) => (e.target as HTMLInputElement).select()}
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(installUrl);
-                      // Simple feedback
-                      const btn = document.getElementById("copy-btn");
-                      if (btn) { btn.textContent = "কপি হয়েছে!"; setTimeout(() => { btn.textContent = "কপি"; }, 2000); }
-                    }}
-                    id="copy-btn"
-                    className="shrink-0"
-                  >
-                    কপি
+            {/* Direct install button */}
+            {deferredPrompt && !downloading && (
+              <Card className="border-primary/30 shadow-lg">
+                <CardContent className="py-5 text-center space-y-3">
+                  <div className="w-14 h-14 bg-primary/10 rounded-2xl mx-auto flex items-center justify-center">
+                    <Download className="text-primary" size={28} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg">অ্যাপ ডাউনলোড করুন</h3>
+                    <p className="text-sm text-muted-foreground">মাত্র ~২ MB • ১ ক্লিকেই ইনস্টল</p>
+                  </div>
+                  <Button onClick={handleInstall} size="lg" className="w-full text-base gap-2 shadow-md h-12">
+                    <Download size={18} /> এখনই ডাউনলোড করুন
                   </Button>
-                </div>
-                {typeof navigator.share === "function" && (
-                  <Button
-                    variant="outline"
-                    className="w-full mt-2"
-                    onClick={() => navigator.share({ title: "ইত্তেহাদ অ্যাপ", text: "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ অ্যাপ ইনস্টল করুন", url: installUrl })}
-                  >
-                    <Share size={14} className="mr-1" /> শেয়ার করুন
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Share button */}
+            {typeof navigator.share === "function" && (
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                onClick={() => navigator.share({ title: "ইত্তেহাদ অ্যাপ", text: "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ অ্যাপ ডাউনলোড করুন", url: `${window.location.origin}/install` })}
+              >
+                <Share size={14} /> অন্যদের সাথে শেয়ার করুন
+              </Button>
+            )}
 
             {/* iOS instructions */}
-            {isIOS && !deferredPrompt && (
+            {isIOS && !deferredPrompt && !downloading && (
               <Card>
                 <CardContent className="py-5">
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -170,7 +185,7 @@ const Install = () => {
             )}
 
             {/* Android instructions */}
-            {isAndroid && !deferredPrompt && (
+            {isAndroid && !deferredPrompt && !downloading && (
               <Card>
                 <CardContent className="py-5">
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -195,7 +210,7 @@ const Install = () => {
             )}
 
             {/* Desktop */}
-            {!isIOS && !isAndroid && !deferredPrompt && (
+            {!isIOS && !isAndroid && !deferredPrompt && !downloading && (
               <Card>
                 <CardContent className="py-5">
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
@@ -225,7 +240,6 @@ const Install = () => {
           </div>
         </div>
 
-        {/* App info */}
         <div className="mt-8 text-center space-y-1">
           <p className="text-xs text-muted-foreground">ভার্সন ২.০ • আকার ~২ MB</p>
           <p className="text-xs text-muted-foreground">সর্বশেষ আপডেট: মার্চ ২০২৬</p>

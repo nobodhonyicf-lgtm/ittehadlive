@@ -1,4 +1,5 @@
 import Layout from "@/components/layout/Layout";
+import SEOHead from "@/components/SEOHead";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useEffect, useState, useMemo, useCallback } from "react";
@@ -469,7 +470,7 @@ const HadithContent = () => {
 const HadithPage = () => {
   const isApp = useIsApp();
   if (isApp) return <AppLayout><HadithContent /></AppLayout>;
-  return <Layout fullWidth><HadithContent /></Layout>;
+  return <Layout fullWidth><SEOHead title="হাদিস শরীফ" description="ছয়টি সহীহ হাদিস গ্রন্থ — বুখারী, মুসলিম, তিরমিযী, আবু দাউদ, নাসাঈ ও ইবনে মাজাহ। আরবি, বাংলা অনুবাদ ও সনদ গ্রেডিংসহ।" keywords="হাদিস, বুখারী, মুসলিম, তিরমিযী, সহীহ, বাংলা" /><HadithContent /></Layout>;
 };
 
 export default HadithPage;

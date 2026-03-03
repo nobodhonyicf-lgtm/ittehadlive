@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import Layout from "@/components/layout/Layout";
+import SEOHead from "@/components/SEOHead";
 import AppLayout from "@/components/app/AppLayout";
 import { useIsApp } from "@/hooks/useIsApp";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -225,7 +226,7 @@ const ZakatCalculator = () => {
   if (isApp) {
     return <AppLayout><ZakatContent /></AppLayout>;
   }
-  return <Layout><ZakatContent /></Layout>;
+  return <Layout><SEOHead title="যাকাত ক্যালকুলেটর" description="ইসলামী যাকাত হিসাব করুন — স্বর্ণ, রৌপ্য, নগদ ও সম্পদের ওপর যাকাত নির্ণয় করুন।" keywords="যাকাত, ক্যালকুলেটর, ইসলাম, হিসাব" /><ZakatContent /></Layout>;
 };
 
 export default ZakatCalculator;

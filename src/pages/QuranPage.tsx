@@ -1,4 +1,5 @@
 import Layout from "@/components/layout/Layout";
+import SEOHead from "@/components/SEOHead";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -867,7 +868,7 @@ const QuranContent = ({ fullscreen = false }: { fullscreen?: boolean }) => {
 const QuranPage = () => {
   const isApp = useIsApp();
   if (isApp) return <AppLayout><QuranContent /></AppLayout>;
-  return <Layout fullWidth><QuranContent /></Layout>;
+  return <Layout fullWidth><SEOHead title="কুরআন মাজীদ" description="সম্পূর্ণ কুরআন বাংলা অনুবাদ ও তাফসীরসহ — সূরা, আয়াত, শব্দার্থ এবং অডিও তিলাওয়াত।" keywords="কুরআন, বাংলা অনুবাদ, তাফসীর, সূরা, আয়াত, তিলাওয়াত" /><QuranContent /></Layout>;
 };
 
 export default QuranPage;
