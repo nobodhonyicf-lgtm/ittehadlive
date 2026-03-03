@@ -1,10 +1,11 @@
 import Layout from "@/components/layout/Layout";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
-import { useIslamicContents } from "@/hooks/useData";
+import { useIslamicContents, useSiteSettings } from "@/hooks/useData";
 import { useState, useMemo } from "react";
 import { Search, ChevronRight, X, Plus, Minus, BookOpen, HelpCircle, Filter, HandHelping, Scale, PenLine, CheckCircle, Languages } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { SeasonalIslamicCards } from "@/components/home/SeasonalIslamicCards";
 
 const toBengaliNum = (n: number | string) => {
   const d = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
@@ -94,10 +95,13 @@ const IslamicListContent = ({
   category: string; title: string; emoji: string; gradientClass: string; description: string;
 }) => {
   const { data: allContents } = useIslamicContents();
+  const { data: siteSettings } = useSiteSettings();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<ContentItem | null>(null);
   const [activeSubcat, setActiveSubcat] = useState<string>("all");
   const [fontSize, setFontSize] = useState(18);
+
+  const showSeasonal = siteSettings?.["section_seasonal_islamic"] !== "false";
 
   const items = (allContents as ContentItem[] | undefined)?.filter(c => c.category === category) || [];
 
@@ -129,6 +133,7 @@ const IslamicListContent = ({
       </div>
 
       <div className="p-4 space-y-3">
+        {showSeasonal && allContents && <SeasonalIslamicCards contents={allContents as any} />}
         {/* Font size + Search row */}
         <div className="flex gap-2 items-center">
           <div className="relative flex-1">
@@ -235,10 +240,13 @@ const AppIslamicListContent = ({
   category: string; title: string; emoji: string; gradientClass: string; description: string;
 }) => {
   const { data: allContents } = useIslamicContents();
+  const { data: siteSettings } = useSiteSettings();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<ContentItem | null>(null);
   const [activeSubcat, setActiveSubcat] = useState<string>("all");
   const [fontSize, setFontSize] = useState(17);
+
+  const showSeasonal = siteSettings?.["section_seasonal_islamic"] !== "false";
 
   const items = (allContents as ContentItem[] | undefined)?.filter(c => c.category === category) || [];
 
@@ -322,6 +330,7 @@ const AppIslamicListContent = ({
 
       {/* Content list */}
       <div className="p-3 space-y-2 pb-20">
+        {showSeasonal && allContents && <SeasonalIslamicCards contents={allContents as any} isApp />}
         {filtered.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             <p className="text-4xl mb-3">{emoji}</p>

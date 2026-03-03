@@ -1,7 +1,8 @@
-import { useIslamicContents } from "@/hooks/useData";
+import { useIslamicContents, useSiteSettings } from "@/hooks/useData";
 import { BookOpen, Quote, HandHelping, X, ChevronRight } from "lucide-react";
 import SectionHeader from "./SectionHeader";
 import IftarCountdownWidget from "./IftarCountdownWidget";
+import { SeasonalIslamicCards } from "./SeasonalIslamicCards";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -54,7 +55,9 @@ const ContentModal = ({ item, onClose }: { item: any; onClose: () => void }) => 
 
 const IslamicContentWidget = () => {
   const { data: contents } = useIslamicContents();
+  const { data: siteSettings } = useSiteSettings();
   const [selected, setSelected] = useState<any | null>(null);
+  const showSeasonal = siteSettings?.["section_seasonal_islamic"] !== "false";
 
   const grouped = useMemo(() => {
     if (!contents?.length) return null;
@@ -72,6 +75,7 @@ const IslamicContentWidget = () => {
     <div className="bg-card border border-border rounded-lg overflow-hidden">
       <SectionHeader title="ইসলামী কন্টেন্ট" />
       <div className="p-4 space-y-4">
+        {showSeasonal && contents && <SeasonalIslamicCards contents={contents as any} />}
         <IftarCountdownWidget />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
