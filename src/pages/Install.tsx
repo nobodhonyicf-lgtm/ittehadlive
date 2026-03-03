@@ -14,9 +14,11 @@ const Install = () => {
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
 
+  // If opened inside installed PWA/app, redirect to home immediately
   useEffect(() => {
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      setIsInstalled(true);
+    if (window.matchMedia("(display-mode: standalone)").matches || sessionStorage.getItem("ittehad_app_mode") === "1") {
+      window.location.replace("/");
+      return;
     }
     const ua = navigator.userAgent;
     setIsIOS(/iPad|iPhone|iPod/.test(ua));
@@ -50,7 +52,7 @@ const Install = () => {
   ];
 
   // Direct install link for sharing
-  const installUrl = `${window.location.origin}/install?app=1`;
+  const installUrl = `${window.location.origin}/install`;
 
   return (
     <Layout>
