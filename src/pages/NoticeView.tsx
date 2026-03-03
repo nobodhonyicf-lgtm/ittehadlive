@@ -248,7 +248,9 @@ const NoticeView = () => {
     }
   };
 
-  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const noticeId = id || "";
+  const shareUrl = noticeId ? `https://ittehad.bd/share/notice/${noticeId}` : (typeof window !== "undefined" ? window.location.href : "");
+  const directUrl = typeof window !== "undefined" ? window.location.href : "";
   const shareTitle = notice?.title || "নোটিশ";
 
   const handleCopyLink = async () => {

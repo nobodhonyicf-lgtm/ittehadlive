@@ -49,10 +49,12 @@ const JobPostingsSlider = () => {
   const { data: jobs } = useQuery({
     queryKey: ["public_job_postings_slider"],
     queryFn: async () => {
+      const today = new Date().toISOString().split("T")[0];
       const { data, error } = await supabase
         .from("job_postings")
         .select("*")
         .eq("is_active", true)
+        .or(`deadline.is.null,deadline.gte.${today}`)
         .order("created_at", { ascending: false })
         .limit(10);
       if (error) throw error;

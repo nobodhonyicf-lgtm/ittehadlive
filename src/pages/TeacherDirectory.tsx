@@ -131,11 +131,12 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
                   </Link>
                   <Button size="sm" variant="ghost" className="h-7 w-7 p-0 ml-auto" onClick={(e) => {
                     e.preventDefault();
-                    const url = `${window.location.origin}/teachers?job=${j.id}`;
+                    const shareUrl = `https://ittehad.bd/share/job/${j.id}`;
+                    const directUrl = `${window.location.origin}/job-apply/${j.id}`;
                     if (typeof navigator.share === "function") {
-                      navigator.share({ title: j.title, text: `নিয়োগ বিজ্ঞপ্তি: ${j.title}`, url });
+                      navigator.share({ title: j.title, text: `নিয়োগ বিজ্ঞপ্তি: ${j.title}`, url: shareUrl });
                     } else {
-                      navigator.clipboard.writeText(url);
+                      navigator.clipboard.writeText(directUrl);
                       toast.success("লিংক কপি হয়েছে!");
                     }
                   }}>
@@ -249,7 +250,8 @@ const TeacherDirectory = () => {
   const { data: jobs } = useQuery({
     queryKey: ["public_job_postings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("job_postings").select("*").eq("is_active", true).order("created_at", { ascending: false });
+      const today = new Date().toISOString().split("T")[0];
+      const { data, error } = await supabase.from("job_postings").select("*").eq("is_active", true).or(`deadline.is.null,deadline.gte.${today}`).order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },

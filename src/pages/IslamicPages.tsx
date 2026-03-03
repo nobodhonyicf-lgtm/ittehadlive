@@ -5,7 +5,8 @@ import AppLayout from "@/components/app/AppLayout";
 import { useIslamicContents, useSiteSettings } from "@/hooks/useData";
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, ChevronRight, X, Plus, Minus, BookOpen, HelpCircle, Filter, HandHelping, Scale, PenLine, CheckCircle, Languages } from "lucide-react";
+import { Search, ChevronRight, X, Plus, Minus, BookOpen, HelpCircle, Filter, HandHelping, Scale, PenLine, CheckCircle, Languages, Share2 } from "lucide-react";
+import { toast } from "@/components/ui/sonner";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { SeasonalIslamicCards } from "@/components/home/SeasonalIslamicCards";
 
@@ -85,6 +86,27 @@ const ContentModal = ({ item, onClose, fontSize, category }: { item: ContentItem
             <BookOpen size={12} /> সূত্র: {item.reference || item.source}
           </p>
         )}
+
+        {/* Share button */}
+        <div className="border-t border-border pt-3">
+          <button
+            onClick={() => {
+              const catLabels: Record<string, string> = { hadith: "হাদিস", dua: "দোয়া", masala: "মাসআলা", quran: "কুরআন" };
+              const catLabel = catLabels[category] || category;
+              const shareUrl = `https://ittehad.bd/share/islamic/${category}/${item.id}`;
+              const shareText = `${catLabel}: ${item.title}\n${item.meaning || item.content?.substring(0, 100) || ""}`;
+              if (typeof navigator.share === "function") {
+                navigator.share({ title: `${catLabel}: ${item.title}`, text: shareText, url: shareUrl });
+              } else {
+                navigator.clipboard.writeText(shareUrl);
+                toast.success("লিংক কপি হয়েছে!");
+              }
+            }}
+            className="flex items-center gap-2 text-sm text-primary font-medium hover:underline"
+          >
+            <Share2 size={14} /> শেয়ার করুন
+          </button>
+        </div>
       </div>
     </div>
   </div>

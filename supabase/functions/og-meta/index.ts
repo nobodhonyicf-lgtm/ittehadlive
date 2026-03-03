@@ -71,6 +71,10 @@ serve(async (req) => {
   else if (type === "notice" && id) pageUrl = `${siteUrl}/notice/${id}`;
   else if (type === "book" && slug) pageUrl = `${siteUrl}/book/${slug}`;
   else if (type === "branch" && id) pageUrl = `${siteUrl}/branch/${id}`;
+  else if (type === "islamic" && id) {
+    const cat = url.searchParams.get("category") || "hadith";
+    pageUrl = `${siteUrl}/${cat}?highlight=${id}`;
+  }
 
   if (!isCrawler(userAgent)) {
     return new Response(null, { status: 302, headers: { ...corsHeaders, "Location": pageUrl } });
@@ -125,6 +129,12 @@ serve(async (req) => {
         if (j.salary_range) parts.push(`বেতন: ${j.salary_range}`);
         if (j.deadline) parts.push(`শেষ তারিখ: ${j.deadline}`);
         description = j.description?.substring(0, 160) || parts.join(" | ");
+        // Try to get branch image
+        if (j.branch_id) {
+          const { data: br } = await supabase.from("branches").select("name, image_url").eq("id", j.branch_id).maybeSingle();
+          if (br?.image_url) image = br.image_url;
+          if (br?.name) description = `${br.name} | ${description}`;
+        }
       }
     } else if (type === "page" && slug) {
       const { data: p } = await supabase
@@ -164,6 +174,21 @@ serve(async (req) => {
         title = br.name;
         description = br.description?.substring(0, 160) || br.address || "";
         image = br.image_url || defaultImage;
+      }
+    } else if (type === "islamic" && id) {
+      const { data: ic } = await supabase
+        .from("islamic_contents")
+        .select("title, content, category, meaning, source, reference, question")
+        .eq("id", id).eq("is_active", true).maybeSingle();
+      if (ic) {
+        const catLabels: Record<string, string> = { hadith: "হাদিস", dua: "দোয়া", masala: "মাসআলা", quran: "কুরআন" };
+        const catLabel = catLabels[ic.category] || ic.category;
+        title = `${catLabel}: ${ic.title}`;
+        description = ic.meaning || ic.question || ic.content?.substring(0, 160) || "";
+        if (ic.source || ic.reference) {
+          description += ` — সূত্র: ${ic.reference || ic.source}`;
+        }
+        description = description.substring(0, 200);
       }
     }
 

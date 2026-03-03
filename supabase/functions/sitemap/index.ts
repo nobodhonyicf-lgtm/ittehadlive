@@ -21,7 +21,7 @@ serve(async (req) => {
     const siteUrl = origin || "https://ittehad.bd";
 
     // Fetch all data in parallel
-    const [postsRes, pagesRes, noticesRes, branchesRes, leadersRes, booksRes, categoriesRes, teachersRes, jobsRes] = await Promise.all([
+    const [postsRes, pagesRes, noticesRes, branchesRes, leadersRes, booksRes, categoriesRes, teachersRes, jobsRes, islamicRes] = await Promise.all([
       supabase.from("posts").select("slug, updated_at, created_at").eq("is_published", true).order("created_at", { ascending: false }),
       supabase.from("pages").select("slug, updated_at").order("created_at", { ascending: false }),
       supabase.from("notices").select("id, updated_at, created_at").eq("is_active", true).order("created_at", { ascending: false }),
@@ -30,7 +30,8 @@ serve(async (req) => {
       supabase.from("books").select("slug, updated_at").eq("is_active", true),
       supabase.from("categories").select("slug, created_at"),
       supabase.from("teachers").select("id, created_at, updated_at").eq("is_active", true).order("created_at", { ascending: false }),
-      supabase.from("job_postings").select("id, created_at, updated_at").eq("is_active", true).order("created_at", { ascending: false }),
+      supabase.from("job_postings").select("id, created_at, updated_at, deadline").eq("is_active", true).order("created_at", { ascending: false }),
+      supabase.from("islamic_contents").select("id, category, updated_at, created_at").eq("is_active", true),
     ]);
 
     let urls = '';
@@ -84,9 +85,16 @@ serve(async (req) => {
       urls += `\n  <url>\n    <loc>${siteUrl}/teachers?highlight=${t.id}</loc>\n    <lastmod>${new Date(t.updated_at || t.created_at).toISOString()}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>`;
     }
 
-    // Job postings
+    // Job postings (only non-expired)
+    const today = new Date().toISOString().split("T")[0];
     for (const j of jobsRes.data || []) {
+      if (j.deadline && j.deadline < today) continue;
       urls += `\n  <url>\n    <loc>${siteUrl}/job-apply/${j.id}</loc>\n    <lastmod>${new Date(j.updated_at || j.created_at).toISOString()}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`;
+    }
+
+    // Islamic contents
+    for (const ic of islamicRes.data || []) {
+      urls += `\n  <url>\n    <loc>${siteUrl}/${ic.category}?highlight=${ic.id}</loc>\n    <lastmod>${new Date(ic.updated_at || ic.created_at).toISOString()}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>`;
     }
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}\n</urlset>`;
