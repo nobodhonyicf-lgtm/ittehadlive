@@ -11,6 +11,7 @@ import PageViewTracker from "@/components/PageViewTracker";
 import DynamicFavicon from "@/components/DynamicFavicon";
 import DynamicManifest from "@/components/DynamicManifest";
 import { lazy, Suspense } from "react";
+import { ActivityTrackerWrapper as ActivityTracker } from "@/components/ActivityTracker";
 
 // Eagerly loaded (homepage + common)
 import Index from "./pages/Index";
@@ -97,6 +98,7 @@ const App = () => (
         <AuthProvider>
           <CartProvider>
             <PageViewTracker />
+            <ActivityTracker />
             <DynamicFavicon />
             <DynamicManifest />
             <Suspense fallback={<PageLoader />}>

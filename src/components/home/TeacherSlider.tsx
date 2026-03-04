@@ -32,7 +32,11 @@ const TeacherSlider = () => {
   if (!teachers?.length) return null;
 
   return (
-    <div>
+    <div className="relative rounded-2xl overflow-hidden">
+      {/* Attractive gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-teal-50/50 to-cyan-50 dark:from-emerald-950/30 dark:via-teal-950/20 dark:to-cyan-950/30 rounded-2xl" />
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20.5z' fill='%23059669' fill-opacity='0.08'/%3E%3C/svg%3E\")" }} />
+      <div className="relative p-4 pb-3">
       <SectionHeader title="আপনার মাদরাসার জন্য শিক্ষক খুঁজুন" linkUrl="/teachers" />
       <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
         <div className="flex gap-3 pb-2" style={{ minWidth: "max-content" }}>
@@ -69,6 +73,9 @@ const TeacherSlider = () => {
                         </Tooltip>
                       </TooltipProvider>
                     )}
+                    {t.institution_logo_url && (
+                      <img src={t.institution_logo_url} alt="" className="w-2.5 h-2.5 rounded-sm object-contain shrink-0" />
+                    )}
                   </h4>
                   <p className="text-[9px] text-muted-foreground flex items-center justify-center gap-0.5 mt-0.5">
                     <BookOpen size={8} /> {t.subject}
@@ -94,6 +101,7 @@ const TeacherSlider = () => {
             );
           })}
         </div>
+      </div>
       </div>
     </div>
   );
