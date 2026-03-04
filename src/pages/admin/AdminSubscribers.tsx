@@ -87,7 +87,7 @@ const AdminSubscribers = () => {
       const { error } = await supabase.from("newsletter_subscribers").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => toast.success("মুছে ফেলা হয়েছে"),
+    onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); qc.invalidateQueries({ queryKey: ["admin_subscribers"] }); },
   });
 
   const toggleSelect = (id: string) => {

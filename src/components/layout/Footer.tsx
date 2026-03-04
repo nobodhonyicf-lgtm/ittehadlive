@@ -193,9 +193,16 @@ const Footer = () => {
                     const email = emailInput?.value?.trim();
                     if (!email) return;
                     try {
-                      const { error } = await supabase.from("newsletter_subscribers").upsert({ email }, { onConflict: "email" });
-                      if (error) throw error;
-                      toast.success("সাবস্ক্রিপশন সফল হয়েছে!");
+                      const { error } = await supabase.from("newsletter_subscribers").insert({ email });
+                      if (error) {
+                        if (error.code === "23505") {
+                          toast.info("এই ইমেইল আগেই সাবস্ক্রাইব করা আছে!");
+                        } else {
+                          throw error;
+                        }
+                      } else {
+                        toast.success("সাবস্ক্রিপশন সফল হয়েছে!");
+                      }
                       emailInput.value = "";
                     } catch {
                       toast.error("সাবস্ক্রিপশন ব্যর্থ হয়েছে");
