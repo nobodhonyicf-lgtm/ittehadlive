@@ -46,6 +46,7 @@ import AdminPushNotifications from "./AdminPushNotifications";
 import AdminIslamicContent from "./AdminIslamicContent";
 import AdminTeachers from "./AdminTeachers";
 import AdminInstitutions from "./AdminInstitutions";
+import AdminSitePages from "./AdminSitePages";
 
 interface NavItem {
   label: string;
@@ -75,6 +76,7 @@ const navCategories: NavCategory[] = [
     items: [
       { label: "পোস্ট", icon: Newspaper, path: "/admin/posts", section: "posts" },
       { label: "পেজ", icon: FileText, path: "/admin/pages", section: "pages" },
+      { label: "পাতাসমূহ ও SEO", icon: Globe, path: "/admin/site-pages", section: "settings" },
       { label: "ফটো কার্ড", icon: Image, path: "/admin/photo-card", section: "photo-card" },
       { label: "ক্যাটাগরি", icon: Tag, path: "/admin/categories", section: "categories" },
       { label: "নোটিশ", icon: Bell, path: "/admin/notices", section: "notices" },
@@ -731,6 +733,7 @@ const AdminDashboard = () => {
             <Route path="islamic-content" element={<AdminIslamicContent />} />
             <Route path="teachers" element={<AdminTeachers />} />
             <Route path="institutions" element={<AdminInstitutions />} />
+            <Route path="site-pages" element={<AdminSitePages />} />
           </Routes>
         </div>
       </main>

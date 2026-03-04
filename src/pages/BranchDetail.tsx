@@ -2,13 +2,14 @@ import { useParams, Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { useBranches, useStudents } from "@/hooks/useBoardData";
-import { Building2, MapPin, User, Phone, Mail, Users, ArrowLeft, Globe, GraduationCap, BookOpen, Bell, ChevronRight, ExternalLink } from "lucide-react";
+import { Building2, MapPin, User, Phone, Mail, Users, ArrowLeft, Globe, GraduationCap, BookOpen, Bell, ChevronRight, ExternalLink, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toBengali } from "@/lib/bengali";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsApp } from "@/hooks/useIsApp";
 import SEOHead from "@/components/SEOHead";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const BranchDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +25,21 @@ const BranchDetail = () => {
       const { data } = await supabase.from("notices").select("id, title, created_at").eq("is_active", true).order("created_at", { ascending: false }).limit(5);
       return data || [];
     },
+  });
+
+  // Fetch affiliated teachers
+  const { data: affiliatedTeachers } = useQuery({
+    queryKey: ["affiliated_teachers", id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("teachers")
+        .select("id, name, subject, photo_url, is_verified, rating, experience_years, institution_logo_url")
+        .eq("institution_id", id!)
+        .eq("is_active", true)
+        .order("sort_order");
+      return data || [];
+    },
+    enabled: !!id,
   });
 
   if (!branch) {
@@ -211,6 +227,64 @@ const BranchDetail = () => {
                       </Link>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Affiliated Teachers */}
+            {affiliatedTeachers && affiliatedTeachers.length > 0 && (
+              <Card className="border-border/60 overflow-hidden">
+                <div className="bg-emerald-500/10 dark:bg-emerald-500/20 px-5 py-3 border-b border-border/50">
+                  <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                    <GraduationCap size={18} className="text-emerald-600" /> এফিলিয়েটেড শিক্ষক
+                    <span className="text-xs text-muted-foreground font-normal ml-1">({toBengali(affiliatedTeachers.length)} জন)</span>
+                  </h2>
+                </div>
+                <CardContent className="p-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {affiliatedTeachers.map((teacher: any) => (
+                      <Link key={teacher.id} to={`/teachers?highlight=${teacher.id}`} className="flex gap-3 items-center p-3 rounded-xl bg-muted/40 border border-border/40 hover:border-primary/30 transition-all group">
+                        <div className="w-11 h-11 rounded-xl bg-background flex items-center justify-center shrink-0 overflow-hidden border border-border">
+                          {teacher.photo_url ? (
+                            <img src={teacher.photo_url} alt={teacher.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <User className="text-muted-foreground" size={18} />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-sm truncate text-foreground flex items-center gap-1">
+                            {teacher.name}
+                            {teacher.is_verified && (
+                              <TooltipProvider delayDuration={0}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="inline-flex"><BadgeCheck size={14} className="text-blue-500 fill-blue-500 stroke-white shrink-0" /></span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="bg-[#1c1e21] text-white text-[10px] border-0 shadow-lg px-2 py-1 rounded-md">
+                                    যাচাইকৃত শিক্ষক
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                            {/* Institution logo badge */}
+                            {teacher.institution_logo_url && (
+                              <TooltipProvider delayDuration={0}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <img src={teacher.institution_logo_url} alt="" className="w-3.5 h-3.5 rounded-sm object-contain shrink-0" />
+                                  </TooltipTrigger>
+                                  <TooltipContent className="bg-[#1c1e21] text-white text-[10px] border-0 shadow-lg px-2 py-1 rounded-md">
+                                    {branch.name} এর শিক্ষক
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                          </h3>
+                          <p className="text-[11px] text-muted-foreground">{teacher.subject}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}

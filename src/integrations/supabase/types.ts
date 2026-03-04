@@ -1033,6 +1033,54 @@ export type Database = {
         }
         Relationships: []
       }
+      page_seo: {
+        Row: {
+          canonical_url: string | null
+          created_at: string
+          id: string
+          keywords: string | null
+          meta_description: string | null
+          meta_title: string | null
+          og_description: string | null
+          og_image_url: string | null
+          og_title: string | null
+          page_name: string
+          page_path: string
+          structured_data: Json | null
+          updated_at: string
+        }
+        Insert: {
+          canonical_url?: string | null
+          created_at?: string
+          id?: string
+          keywords?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
+          page_name: string
+          page_path: string
+          structured_data?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          canonical_url?: string | null
+          created_at?: string
+          id?: string
+          keywords?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
+          page_name?: string
+          page_path?: string
+          structured_data?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       page_views: {
         Row: {
           created_at: string
@@ -1859,6 +1907,8 @@ export type Database = {
           experience_years: number | null
           grade_obtained: string | null
           id: string
+          institution_id: string | null
+          institution_logo_url: string | null
           is_active: boolean | null
           is_available: boolean | null
           is_verified: boolean | null
@@ -1886,6 +1936,8 @@ export type Database = {
           experience_years?: number | null
           grade_obtained?: string | null
           id?: string
+          institution_id?: string | null
+          institution_logo_url?: string | null
           is_active?: boolean | null
           is_available?: boolean | null
           is_verified?: boolean | null
@@ -1913,6 +1965,8 @@ export type Database = {
           experience_years?: number | null
           grade_obtained?: string | null
           id?: string
+          institution_id?: string | null
+          institution_logo_url?: string | null
           is_active?: boolean | null
           is_available?: boolean | null
           is_verified?: boolean | null
@@ -1927,6 +1981,44 @@ export type Database = {
           specialization?: string | null
           subject?: string
           updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teachers_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_activities: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          created_at: string
+          device_id: string | null
+          id: string
+          page_path: string | null
+          user_email: string | null
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          page_path?: string | null
+          user_email?: string | null
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          page_path?: string | null
+          user_email?: string | null
         }
         Relationships: []
       }

@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2, Link2, Bell, Newspaper, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Link2, Bell, Newspaper, Search, Sparkles, Loader2 } from "lucide-react";
 import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCategories } from "@/hooks/useData";
@@ -48,6 +48,10 @@ const AdminPosts = () => {
   const [sendPush, setSendPush] = useState(false);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [linkSearch, setLinkSearch] = useState("");
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiContext, setAiContext] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const [form, setForm] = useState<PostForm>(() => {
     const saved = localStorage.getItem(DRAFT_KEY);
@@ -170,15 +174,51 @@ const AdminPosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const filteredPosts = posts?.filter(p => !searchQuery || p.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
+  const generatePostWithAI = async () => {
+    if (!aiTopic.trim()) { toast.error("বিষয়বস্তু লিখুন"); return; }
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-seo-generate", {
+        body: { postTitle: aiTopic, postContent: aiContext, mode: "post" },
+      });
+      if (error) throw error;
+      if (data) {
+        setForm({
+          ...emptyForm,
+          title: data.title || aiTopic,
+          content: data.content || "",
+          summary: data.summary || "",
+          slug: data.slug || "",
+          meta_title: data.meta_title || "",
+          meta_description: data.meta_description || "",
+          is_published: false,
+        });
+        setAiDialogOpen(false);
+        setOpen(true);
+        toast.success("AI পোস্ট তৈরি হয়েছে! পর্যালোচনা করুন।");
+      }
+    } catch (e: any) {
+      toast.error("AI জেনারেট ব্যর্থ: " + e.message);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   return (
     <AdminPageWrapper
       title="পোস্ট ব্যবস্থাপনা"
       icon={Newspaper}
       action={
-        <Dialog open={open} onOpenChange={setOpen}>
-          {canEdit && <DialogTrigger asChild>
-            <Button onClick={openNew} className="gap-1.5"><Plus size={16} /> নতুন পোস্ট</Button>
-          </DialogTrigger>}
+        <div className="flex gap-2">
+          {canEdit && (
+            <Button variant="outline" className="gap-1.5 border-primary/30 text-primary" onClick={() => { setAiTopic(""); setAiContext(""); setAiDialogOpen(true); }}>
+              <Sparkles size={16} /> AI পোস্ট
+            </Button>
+          )}
+          <Dialog open={open} onOpenChange={setOpen}>
+            {canEdit && <DialogTrigger asChild>
+              <Button onClick={openNew} className="gap-1.5"><Plus size={16} /> নতুন পোস্ট</Button>
+            </DialogTrigger>}
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editId ? "পোস্ট সম্পাদনা" : "নতুন পোস্ট"}</DialogTitle>
@@ -323,6 +363,7 @@ const AdminPosts = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       }
     >
       {/* Search bar */}
@@ -375,6 +416,33 @@ const AdminPosts = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* AI Post Generation Dialog */}
+      <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles size={18} className="text-primary" /> AI দিয়ে পোস্ট তৈরি করুন
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>বিষয়বস্তু / টপিক *</Label>
+              <Input value={aiTopic} onChange={e => setAiTopic(e.target.value)} placeholder="যেমন: রমযানের ফযীলত, ইসলামে শিক্ষার গুরুত্ব..." />
+            </div>
+            <div>
+              <Label>অতিরিক্ত নির্দেশনা (ঐচ্ছিক)</Label>
+              <Textarea rows={3} value={aiContext} onChange={e => setAiContext(e.target.value)} placeholder="পোস্টে কী কী বিষয় অন্তর্ভুক্ত করতে চান..." />
+            </div>
+            <Button onClick={generatePostWithAI} disabled={aiLoading} className="w-full gap-2">
+              {aiLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+              {aiLoading ? "AI তৈরি করছে..." : "পোস্ট তৈরি করুন"}
+            </Button>
+            <p className="text-[11px] text-muted-foreground text-center">AI তৈরি করা পোস্ট পর্যালোচনা করে প্রকাশ করুন</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </AdminPageWrapper>
   );
 };
