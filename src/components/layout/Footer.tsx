@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import logoImg from "@/assets/logo.png";
 import { toBengali } from "@/lib/bengali";
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/sonner";
 
 const BackToTop = () => {
   const [visible, setVisible] = useState(false);
@@ -184,15 +186,27 @@ const Footer = () => {
               <div className="mt-5 pt-4 border-t border-primary-foreground/10">
                 <h4 className="text-sm font-semibold mb-2.5">আপডেট পেতে সংযুক্ত থাকুন</h4>
                 <form
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
-                    window.open(settings?.facebook_url || "https://www.facebook.com/ittehadbd", "_blank");
+                    const form = e.currentTarget;
+                    const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
+                    const email = emailInput?.value?.trim();
+                    if (!email) return;
+                    try {
+                      const { error } = await supabase.from("newsletter_subscribers").upsert({ email }, { onConflict: "email" });
+                      if (error) throw error;
+                      toast.success("সাবস্ক্রিপশন সফল হয়েছে!");
+                      emailInput.value = "";
+                    } catch {
+                      toast.error("সাবস্ক্রিপশন ব্যর্থ হয়েছে");
+                    }
                   }}
                   className="flex gap-1.5"
                 >
                   <input
                     type="email"
                     placeholder="ইমেইল দিন..."
+                    required
                     className="flex-1 px-3 py-2 rounded-lg bg-primary-foreground/10 border border-primary-foreground/10 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-primary-foreground/30 transition-colors"
                   />
                   <button
