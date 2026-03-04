@@ -47,6 +47,7 @@ import AdminIslamicContent from "./AdminIslamicContent";
 import AdminTeachers from "./AdminTeachers";
 import AdminInstitutions from "./AdminInstitutions";
 import AdminSitePages from "./AdminSitePages";
+import AdminSubscribers from "./AdminSubscribers";
 
 interface NavItem {
   label: string;
@@ -128,6 +129,7 @@ const navCategories: NavCategory[] = [
     items: [
       { label: "যোগাযোগ", icon: Mail, path: "/admin/contacts", section: "contacts" },
       { label: "ইমেইল", icon: Mail, path: "/admin/email", section: "email" },
+      { label: "সাবস্ক্রাইবার", icon: Users, path: "/admin/subscribers", section: "email" },
       { label: "SMS", icon: MessageSquare, path: "/admin/sms", section: "sms" },
       { label: "পুশ নোটিফিকেশন", icon: Bell, path: "/admin/push-notifications", section: "notifications" },
     ],
@@ -734,6 +736,7 @@ const AdminDashboard = () => {
             <Route path="teachers" element={<AdminTeachers />} />
             <Route path="institutions" element={<AdminInstitutions />} />
             <Route path="site-pages" element={<AdminSitePages />} />
+            <Route path="subscribers" element={<AdminSubscribers />} />
           </Routes>
         </div>
       </main>
