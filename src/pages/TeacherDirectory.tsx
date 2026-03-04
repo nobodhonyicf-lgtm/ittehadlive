@@ -534,7 +534,7 @@ const TeacherDirectory = () => {
                           </Button>
                           <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={(e) => {
                             e.stopPropagation();
-                            const shareUrl = `${window.location.origin}/share/teacher/${t.id}`;
+                            const shareUrl = `https://ittehad.bd/share/teacher/${t.id}`;
                             if (typeof navigator.share === "function") {
                               navigator.share({ title: t.name, text: `শিক্ষক: ${t.name} - ${t.subject}`, url: shareUrl });
                             } else {

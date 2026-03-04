@@ -194,7 +194,12 @@ serve(async (req) => {
 
     const html = buildHtml(title, description, image, pageUrl, extras);
     return new Response(html, {
-      headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=3600" },
+      status: 200,
+      headers: new Headers({
+        ...corsHeaders,
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+      }),
     });
   } catch {
     return new Response(null, { status: 302, headers: { ...corsHeaders, "Location": pageUrl } });
