@@ -1,5 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Layout from "@/components/layout/Layout";
@@ -59,53 +58,52 @@ const TeacherApply = () => {
     return data.publicUrl;
   };
 
-  const submitMutation = useMutation({
-    mutationFn: async (data: typeof form) => {
-      if (!user) throw new Error("লগইন করুন");
-      if (!captcha.isValid) throw new Error("ক্যাপচার উত্তর ভুল হয়েছে");
-      if (!nidFile) throw new Error("ভোটার আইডি / জন্ম নিবন্ধনের ছবি দিন");
-      if (!videoFile) throw new Error("সেলফি ভিডিও আপলোড করুন");
-
-      // Validate video size (max 50MB)
-      if (videoFile.size > 50 * 1024 * 1024) throw new Error("ভিডিও ৫০MB এর মধ্যে হতে হবে");
-      if (nidFile.size > 10 * 1024 * 1024) throw new Error("NID ছবি ১০MB এর মধ্যে হতে হবে");
-      if (photoFile && photoFile.size > 5 * 1024 * 1024) throw new Error("প্রোফাইল ছবি ৫MB এর মধ্যে হতে হবে");
+  const handleSubmitForm = async () => {
+    try {
+      if (!user) { toast.error("লগইন করুন"); return; }
+      if (!captcha.isValid) { toast.error("ক্যাপচার উত্তর ভুল হয়েছে"); return; }
+      if (!nidFile) { toast.error("ভোটার আইডি / জন্ম নিবন্ধনের ছবি দিন"); return; }
+      if (!videoFile) { toast.error("সেলফি ভিডিও আপলোড করুন"); return; }
+      if (videoFile.size > 50 * 1024 * 1024) { toast.error("ভিডিও ৫০MB এর মধ্যে হতে হবে"); return; }
+      if (nidFile.size > 10 * 1024 * 1024) { toast.error("NID ছবি ১০MB এর মধ্যে হতে হবে"); return; }
+      if (photoFile && photoFile.size > 5 * 1024 * 1024) { toast.error("প্রোফাইল ছবি ৫MB এর মধ্যে হতে হবে"); return; }
 
       setUploading(true);
 
-      try {
-        const uploads: Promise<string>[] = [
-          uploadFile(nidFile, "teacher-nid"),
-          uploadFile(videoFile, "teacher-video"),
-        ];
-        if (photoFile) uploads.push(uploadFile(photoFile, "teacher-photos"));
+      const uploads: Promise<string>[] = [
+        uploadFile(nidFile, "teacher-nid"),
+        uploadFile(videoFile, "teacher-video"),
+      ];
+      if (photoFile) uploads.push(uploadFile(photoFile, "teacher-photos"));
 
-        const results = await Promise.all(uploads);
-        const nidUrl = results[0];
-        const videoUrl = results[1];
-        const photoUrl = photoFile ? results[2] : null;
+      const results = await Promise.all(uploads);
+      const nidUrl = results[0];
+      const videoUrl = results[1];
+      const photoUrl = photoFile ? results[2] : null;
 
-        const payload = {
-          ...data,
-          user_id: user.id,
-          nid_image_url: nidUrl,
-          verification_video_url: videoUrl,
-          photo_url: photoUrl,
-          email: data.email || null, address: data.address || null, district: data.district || null,
-          qualification: data.qualification || null, specialization: data.specialization || null,
-          certification: data.certification || null, bio: data.bio || null,
-          preferred_area: data.preferred_area || null, expected_salary: data.expected_salary || null,
-          reference_name: data.reference_name || null, reference_phone: data.reference_phone || null,
-        };
-        const { error } = await supabase.from("teacher_applications").insert([payload as any]);
-        if (error) throw error;
-      } finally {
-        setUploading(false);
-      }
-    },
-    onSuccess: () => { setSubmitted(true); toast.success("আবেদন সফলভাবে জমা হয়েছে"); },
-    onError: (e: Error) => toast.error(e.message),
-  });
+      const payload = {
+        ...form,
+        user_id: user.id,
+        nid_image_url: nidUrl,
+        verification_video_url: videoUrl,
+        photo_url: photoUrl,
+        email: form.email || null, address: form.address || null, district: form.district || null,
+        qualification: form.qualification || null, specialization: form.specialization || null,
+        certification: form.certification || null, bio: form.bio || null,
+        preferred_area: form.preferred_area || null, expected_salary: form.expected_salary || null,
+        reference_name: form.reference_name || null, reference_phone: form.reference_phone || null,
+      };
+      const { error } = await supabase.from("teacher_applications").insert([payload as any]);
+      if (error) throw error;
+      
+      setSubmitted(true);
+      toast.success("আবেদন সফলভাবে জমা হয়েছে");
+    } catch (e: any) {
+      toast.error(e?.message || "আবেদন জমা দিতে ব্যর্থ");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // Not logged in
   if (!authLoading && !user) {
@@ -172,7 +170,7 @@ const TeacherApply = () => {
 
         <Card>
           <CardContent className="pt-6">
-            <form onSubmit={e => { e.preventDefault(); if (!form.name || !form.phone || !form.subject) { toast.error("নাম, ফোন ও বিষয় আবশ্যক"); return; } submitMutation.mutate(form); }} className="space-y-4">
+            <form onSubmit={e => { e.preventDefault(); if (!form.name || !form.phone || !form.subject) { toast.error("নাম, ফোন ও বিষয় আবশ্যক"); return; } handleSubmitForm(); }} className="space-y-4">
               {/* Basic Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><Label>নাম *</Label><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
@@ -283,8 +281,8 @@ const TeacherApply = () => {
                 </div>
               </div>
 
-              <Button type="submit" disabled={submitMutation.isPending || uploading} className="w-full">
-                {uploading ? "ফাইল আপলোড হচ্ছে..." : submitMutation.isPending ? "জমা হচ্ছে..." : "আবেদন জমা দিন"}
+              <Button type="submit" disabled={uploading} className="w-full">
+                {uploading ? "ফাইল আপলোড হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন" : "আবেদন জমা দিন"}
               </Button>
             </form>
           </CardContent>
