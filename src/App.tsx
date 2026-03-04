@@ -58,6 +58,7 @@ const NearbyMap = lazy(() => import("./pages/NearbyMap"));
 const QiblaCompass = lazy(() => import("./pages/QiblaCompass"));
 const ZakatCalculator = lazy(() => import("./pages/ZakatCalculator"));
 const JobApply = lazy(() => import("./pages/JobApply"));
+const ShareRedirect = lazy(() => import("./pages/ShareRedirect"));
 
 // Lazy Islamic pages
 const DuaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ default: m.DuaPage })));
@@ -143,6 +144,8 @@ const App = () => (
                 <Route path="/qibla" element={<QiblaCompass />} />
                 <Route path="/zakat" element={<ZakatCalculator />} />
                 <Route path="/job-apply/:jobId" element={<JobApply />} />
+                <Route path="/share/:type/:id" element={<ShareRedirect />} />
+                <Route path="/share/:type/:category/:id" element={<ShareRedirect />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/reset-password" element={<ResetPassword />} />
                 <Route path="/admin/*" element={<AdminDashboard />} />

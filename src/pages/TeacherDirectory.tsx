@@ -478,6 +478,18 @@ const TeacherDirectory = () => {
                                   </Tooltip>
                                 </TooltipProvider>
                               )}
+                              {(t as any).institution_logo_url && (
+                                <TooltipProvider delayDuration={0}>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <img src={(t as any).institution_logo_url} alt="" className="w-4 h-4 rounded-sm object-contain shrink-0 ring-1 ring-border" />
+                                    </TooltipTrigger>
+                                    <TooltipContent className="bg-[#1c1e21] text-white text-[10px] border-0 shadow-lg px-2 py-1 rounded-md">
+                                      এফিলিয়েটেড প্রতিষ্ঠান
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
                             </h3>
                             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                               <BookOpen size={11} className="shrink-0" /> {t.subject}
@@ -584,6 +596,18 @@ const TeacherDirectory = () => {
                               </TooltipTrigger>
                               <TooltipContent className="bg-[#1c1e21] text-white text-[11px] border-0 shadow-lg px-2.5 py-1.5 rounded-lg max-w-[220px]">
                                 <p>এই শিক্ষক ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ কর্তৃক যাচাইকৃত ও বিশ্বস্ত</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                        {(selectedTeacher as any).institution_logo_url && (
+                          <TooltipProvider delayDuration={0}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <img src={(selectedTeacher as any).institution_logo_url} alt="" className="w-5 h-5 rounded-sm object-contain shrink-0 ring-1 ring-border" />
+                              </TooltipTrigger>
+                              <TooltipContent className="bg-[#1c1e21] text-white text-[10px] border-0 shadow-lg px-2 py-1 rounded-md">
+                                এফিলিয়েটেড প্রতিষ্ঠান
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
