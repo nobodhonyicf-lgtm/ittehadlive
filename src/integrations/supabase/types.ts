@@ -325,9 +325,14 @@ export type Database = {
       branches: {
         Row: {
           address: string | null
+          admin_note: string | null
+          approval_letter_url: string | null
+          classes: string | null
           code: string | null
           created_at: string
+          departments: string | null
           description: string | null
+          district: string | null
           email: string | null
           head_name: string | null
           head_photo_url: string | null
@@ -335,17 +340,27 @@ export type Database = {
           image_url: string | null
           is_active: boolean | null
           name: string
+          pending_changes: Json | null
           phone: string | null
+          registration_cert_url: string | null
           sort_order: number | null
+          status: string
+          subscription_plan: string | null
           total_students: number | null
           total_teachers: number | null
+          user_id: string | null
           website: string | null
         }
         Insert: {
           address?: string | null
+          admin_note?: string | null
+          approval_letter_url?: string | null
+          classes?: string | null
           code?: string | null
           created_at?: string
+          departments?: string | null
           description?: string | null
+          district?: string | null
           email?: string | null
           head_name?: string | null
           head_photo_url?: string | null
@@ -353,17 +368,27 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           name: string
+          pending_changes?: Json | null
           phone?: string | null
+          registration_cert_url?: string | null
           sort_order?: number | null
+          status?: string
+          subscription_plan?: string | null
           total_students?: number | null
           total_teachers?: number | null
+          user_id?: string | null
           website?: string | null
         }
         Update: {
           address?: string | null
+          admin_note?: string | null
+          approval_letter_url?: string | null
+          classes?: string | null
           code?: string | null
           created_at?: string
+          departments?: string | null
           description?: string | null
+          district?: string | null
           email?: string | null
           head_name?: string | null
           head_photo_url?: string | null
@@ -371,10 +396,15 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           name?: string
+          pending_changes?: Json | null
           phone?: string | null
+          registration_cert_url?: string | null
           sort_order?: number | null
+          status?: string
+          subscription_plan?: string | null
           total_students?: number | null
           total_teachers?: number | null
+          user_id?: string | null
           website?: string | null
         }
         Relationships: []

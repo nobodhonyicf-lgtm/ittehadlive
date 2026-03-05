@@ -19,9 +19,9 @@ const InstitutionRegister = () => {
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     name: "", address: "", district: "", phone: "", email: "",
-    website: "", muhtamim_name: "", description: "",
+    website: "", head_name: "", description: "",
     total_students: "", total_teachers: "", departments: "", classes: "",
-    logo_url: "", muhtamim_photo_url: "", registration_cert_url: "", approval_letter_url: "",
+    image_url: "", head_photo_url: "", registration_cert_url: "", approval_letter_url: "",
   });
 
   const set = (key: string, val: string) => setForm(f => ({ ...f, [key]: val }));
@@ -50,25 +50,28 @@ const InstitutionRegister = () => {
     mutationFn: async () => {
       if (!user) throw new Error("আগে লগইন করুন");
       if (!form.name.trim() || !form.phone.trim()) throw new Error("নাম ও ফোন আবশ্যক");
-      const { error } = await (supabase as any).from("institutions").insert([{
+      // Insert into branches with status='pending'
+      const { error } = await supabase.from("branches").insert([{
         user_id: user.id,
+        status: "pending",
         name: form.name.trim(),
         address: form.address.trim() || null,
         district: form.district || null,
         phone: form.phone.trim(),
         email: form.email.trim() || null,
         website: form.website.trim() || null,
-        muhtamim_name: form.muhtamim_name.trim() || null,
+        head_name: form.head_name.trim() || null,
+        head_photo_url: form.head_photo_url || null,
         description: form.description.trim() || null,
         total_students: parseInt(form.total_students) || 0,
         total_teachers: parseInt(form.total_teachers) || 0,
         departments: form.departments.trim() || null,
         classes: form.classes.trim() || null,
-        logo_url: form.logo_url || null,
-        muhtamim_photo_url: form.muhtamim_photo_url || null,
+        image_url: form.image_url || null,
         registration_cert_url: form.registration_cert_url || null,
         approval_letter_url: form.approval_letter_url || null,
-      }]);
+        is_active: false,
+      }] as any);
       if (error) throw error;
     },
     onSuccess: () => { setSubmitted(true); toast.success("আবেদন সফলভাবে জমা হয়েছে!"); },
@@ -116,7 +119,6 @@ const InstitutionRegister = () => {
         </div>
 
         <form onSubmit={e => { e.preventDefault(); submitMutation.mutate(); }} className="space-y-6">
-          {/* মৌলিক তথ্য */}
           <Card>
             <CardContent className="p-5 space-y-4">
               <h2 className="font-semibold text-sm border-b pb-2">মৌলিক তথ্য</h2>
@@ -133,13 +135,12 @@ const InstitutionRegister = () => {
                     {BD_DISTRICTS.map(d => <option key={d.name} value={d.name}>{d.name}</option>)}
                   </select>
                 </div>
-                <div><Label>মুহতামিম/প্রধানের নাম</Label><Input value={form.muhtamim_name} onChange={e => set("muhtamim_name", e.target.value)} /></div>
+                <div><Label>মুহতামিম/প্রধানের নাম</Label><Input value={form.head_name} onChange={e => set("head_name", e.target.value)} /></div>
               </div>
               <div><Label>প্রতিষ্ঠানের বিবরণ</Label><Textarea value={form.description} onChange={e => set("description", e.target.value)} rows={3} /></div>
             </CardContent>
           </Card>
 
-          {/* শিক্ষা সংক্রান্ত */}
           <Card>
             <CardContent className="p-5 space-y-4">
               <h2 className="font-semibold text-sm border-b pb-2">শিক্ষা সংক্রান্ত তথ্য</h2>
@@ -152,7 +153,6 @@ const InstitutionRegister = () => {
             </CardContent>
           </Card>
 
-          {/* ডকুমেন্ট আপলোড */}
           <Card>
             <CardContent className="p-5 space-y-4">
               <h2 className="font-semibold text-sm border-b pb-2">ডকুমেন্ট আপলোড</h2>
@@ -160,13 +160,13 @@ const InstitutionRegister = () => {
                 <div>
                   <Label>প্রতিষ্ঠানের লোগো</Label>
                   <div className="flex items-center gap-2 mt-1">
-                    <Input type="file" accept="image/*" onChange={e => handleFileUpload(e, "logo_url", "logo")} className="text-xs" />
-                    {form.logo_url && <img src={form.logo_url} alt="" className="w-8 h-8 rounded object-contain" />}
+                    <Input type="file" accept="image/*" onChange={e => handleFileUpload(e, "image_url", "logo")} className="text-xs" />
+                    {form.image_url && <img src={form.image_url} alt="" className="w-8 h-8 rounded object-contain" />}
                   </div>
                 </div>
                 <div>
                   <Label>মুহতামিমের ছবি</Label>
-                  <Input type="file" accept="image/*" onChange={e => handleFileUpload(e, "muhtamim_photo_url", "muhtamim")} className="text-xs" />
+                  <Input type="file" accept="image/*" onChange={e => handleFileUpload(e, "head_photo_url", "muhtamim")} className="text-xs" />
                 </div>
                 <div>
                   <Label>রেজিস্ট্রেশন সার্টিফিকেট</Label>
