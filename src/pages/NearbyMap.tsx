@@ -22,36 +22,20 @@ const createSvgIcon = (color: string, symbol: string) => {
     <circle cx="16" cy="14" r="10" fill="white" opacity="0.3"/>
     <text x="16" y="19" text-anchor="middle" font-size="14" fill="white" font-weight="bold">${symbol}</text>
   </svg>`;
-  return new L.DivIcon({
-    html: svg,
-    iconSize: [32, 40],
-    iconAnchor: [16, 40],
-    popupAnchor: [0, -40],
-    className: "",
-  });
+  return new L.DivIcon({ html: svg, iconSize: [32, 40], iconAnchor: [16, 40], popupAnchor: [0, -40], className: "" });
 };
 
 const mosqueIcon = createSvgIcon("#16a34a", "🕌");
 const madrasaIcon = createSvgIcon("#2563eb", "📖");
 const userIcon = createSvgIcon("#dc2626", "●");
 
-type Place = {
-  id: number;
-  lat: number;
-  lon: number;
-  name: string;
-  type: "mosque" | "madrasa";
-  address?: string;
-};
+type Place = { id: number; lat: number; lon: number; name: string; type: "mosque" | "madrasa"; address?: string };
 
 function RecenterMap({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
   const didCenter = useRef(false);
   useEffect(() => {
-    if (!didCenter.current) {
-      map.setView([lat, lng], 15);
-      didCenter.current = true;
-    }
+    if (!didCenter.current) { map.setView([lat, lng], 15); didCenter.current = true; }
   }, [lat, lng, map]);
   return null;
 }
@@ -64,16 +48,13 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))).toFixed(1);
 }
 
-// Endpoints list for fallback
 const OVERPASS_ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
-  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 ];
 
 async function fetchOverpass(query: string, signal?: AbortSignal): Promise<any> {
   let lastError: Error | null = null;
-
   for (const endpoint of OVERPASS_ENDPOINTS) {
     try {
       const res = await fetch(endpoint, {
@@ -82,10 +63,7 @@ async function fetchOverpass(query: string, signal?: AbortSignal): Promise<any> 
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         signal,
       });
-      if (!res.ok) {
-        lastError = new Error(`HTTP ${res.status} from ${endpoint}`);
-        continue;
-      }
+      if (!res.ok) { lastError = new Error(`HTTP ${res.status}`); continue; }
       return await res.json();
     } catch (err: any) {
       lastError = err;
@@ -109,23 +87,25 @@ const NearbyMap = () => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+    // Auto-abort after 15s
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     setLoading(true);
     setError("");
     setPlaces([]);
 
-    // Simple, reliable query
-    const query = `[out:json][timeout:30];
+    // Simplified query with shorter timeout
+    const query = `[out:json][timeout:15];
 (
-  nwr["amenity"="place_of_worship"]["religion"="muslim"](around:5000,${lat},${lng});
-  nwr["building"="mosque"](around:5000,${lat},${lng});
-  nwr["amenity"="school"]["name"~"মাদ্রাসা|মাদরাসা|madrasa|Madrasa|দারুল|মক্তব|Maktab|হাফিজিয়া|কওমী|Qawmi|ইসলামী",i](around:5000,${lat},${lng});
-  nwr["amenity"="place_of_worship"]["name"~"মসজিদ|Mosque|mosque|জামে|Jame|masjid|Masjid",i](around:5000,${lat},${lng});
+  nwr["amenity"="place_of_worship"]["religion"="muslim"](around:3000,${lat},${lng});
+  nwr["building"="mosque"](around:3000,${lat},${lng});
+  nwr["amenity"="school"]["name"~"মাদ্রাসা|মাদরাসা|madrasa|দারুল|মক্তব|হাফিজিয়া",i](around:3000,${lat},${lng});
 );
-out center body;`;
+out center;`;
 
     try {
       const data = await fetchOverpass(query, controller.signal);
+      clearTimeout(timeout);
       const seen = new Set<string>();
       const results: Place[] = [];
 
@@ -140,9 +120,7 @@ out center body;`;
         seen.add(coordKey);
 
         const nameStr = (tags.name || tags["name:bn"] || "").toLowerCase();
-        const isMadrasa =
-          tags["school:type"] === "madrasa" ||
-          /মাদ্রাসা|মাদরাসা|madrasa|দারুল|মক্তব|maktab|হাফিজিয়া|কওমী|qawmi|ইসলামী/i.test(nameStr);
+        const isMadrasa = /মাদ্রাসা|মাদরাসা|madrasa|দারুল|মক্তব|maktab|হাফিজিয়া|কওমী|qawmi|ইসলামী/i.test(nameStr);
 
         results.push({
           id: el.id,
@@ -150,19 +128,23 @@ out center body;`;
           lon: elLon,
           name: tags.name || tags["name:bn"] || (isMadrasa ? "মাদ্রাসা" : "মসজিদ"),
           type: isMadrasa ? "madrasa" : "mosque",
-          address: tags["addr:full"] || tags["addr:street"] || tags["addr:city"] || "",
+          address: tags["addr:full"] || tags["addr:street"] || "",
         });
       }
 
       results.sort((a, b) => parseFloat(getDistanceKm(lat, lng, a.lat, a.lon)) - parseFloat(getDistanceKm(lat, lng, b.lat, b.lon)));
       setPlaces(results);
       if (results.length === 0) {
-        setError("এই এলাকায় কোনো মসজিদ বা মাদ্রাসা পাওয়া যায়নি। ৫ কি.মি. এর মধ্যে অনুসন্ধান করা হয়েছে।");
+        setError("এই এলাকায় কোনো মসজিদ বা মাদ্রাসা পাওয়া যায়নি। ৩ কি.মি. এর মধ্যে অনুসন্ধান করা হয়েছে।");
       }
     } catch (err: any) {
-      if (err.name === "AbortError") return;
-      console.error("Overpass error:", err);
-      setError("তথ্য লোড করতে সমস্যা হয়েছে। ইন্টারনেট সংযোগ চেক করে আবার চেষ্টা করুন।");
+      clearTimeout(timeout);
+      if (err.name === "AbortError") {
+        setError("অনুসন্ধানে সময় বেশি লাগছে। আবার চেষ্টা করুন।");
+      } else {
+        console.error("Overpass error:", err);
+        setError("তথ্য লোড করতে সমস্যা হয়েছে। ইন্টারনেট সংযোগ চেক করে আবার চেষ্টা করুন।");
+      }
     } finally {
       setLoading(false);
     }
@@ -187,7 +169,7 @@ out center body;`;
         setError("লোকেশন অনুমতি দিন। ব্রাউজার সেটিংস থেকে লোকেশন অ্যাক্সেস চালু করুন।");
         setLocating(false);
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 120000 }
     );
   }, [fetchNearby]);
 
@@ -209,7 +191,7 @@ out center body;`;
             <h1 className="text-xl font-bold flex items-center gap-2">
               <MapPin className="text-primary" size={22} /> আশেপাশের মসজিদ ও মাদ্রাসা
             </h1>
-            <p className="text-xs text-muted-foreground mt-1">৫ কি.মি. এর মধ্যে</p>
+            <p className="text-xs text-muted-foreground mt-1">৩ কি.মি. এর মধ্যে</p>
           </div>
           <Button variant="outline" size="sm" onClick={getLocation} disabled={locating || loading} className="gap-1">
             {locating || loading ? <Loader2 size={14} className="animate-spin" /> : <LocateFixed size={14} />}
@@ -219,15 +201,9 @@ out center body;`;
 
         {places.length > 0 && (
           <div className="flex gap-2 mb-4">
-            <Button size="sm" variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>
-              সব ({places.length})
-            </Button>
-            <Button size="sm" variant={filter === "mosque" ? "default" : "outline"} onClick={() => setFilter("mosque")} className="gap-1">
-              <Landmark size={14} /> মসজিদ ({mosqueCount})
-            </Button>
-            <Button size="sm" variant={filter === "madrasa" ? "default" : "outline"} onClick={() => setFilter("madrasa")} className="gap-1">
-              <BookOpen size={14} /> মাদ্রাসা ({madrasaCount})
-            </Button>
+            <Button size="sm" variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>সব ({places.length})</Button>
+            <Button size="sm" variant={filter === "mosque" ? "default" : "outline"} onClick={() => setFilter("mosque")} className="gap-1"><Landmark size={14} /> মসজিদ ({mosqueCount})</Button>
+            <Button size="sm" variant={filter === "madrasa" ? "default" : "outline"} onClick={() => setFilter("madrasa")} className="gap-1"><BookOpen size={14} /> মাদ্রাসা ({madrasaCount})</Button>
           </div>
         )}
 
@@ -261,16 +237,8 @@ out center body;`;
               </div>
             )}
             <div className="rounded-xl overflow-hidden border shadow-lg" style={{ height: "60vh" }}>
-              <MapContainer
-                center={[position.lat, position.lng]}
-                zoom={15}
-                style={{ height: "100%", width: "100%" }}
-                scrollWheelZoom
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org">OSM</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
+              <MapContainer center={[position.lat, position.lng]} zoom={15} style={{ height: "100%", width: "100%" }} scrollWheelZoom>
+                <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <RecenterMap lat={position.lat} lng={position.lng} />
                 <Marker position={[position.lat, position.lng]} icon={userIcon}>
                   <Popup><div className="text-sm font-medium">আপনার অবস্থান</div></Popup>
@@ -284,15 +252,8 @@ out center body;`;
                           {p.type === "mosque" ? "🕌 মসজিদ" : "📖 মাদ্রাসা"}
                         </p>
                         {p.address && <p className="text-xs mt-1 text-gray-600">{p.address}</p>}
-                        <p className="text-xs text-gray-400 mt-1">
-                          দূরত্ব: {getDistanceKm(position.lat, position.lng, p.lat, p.lon)} কি.মি.
-                        </p>
-                        <a
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-blue-600 text-xs underline mt-2"
-                        >
+                        <p className="text-xs text-gray-400 mt-1">দূরত্ব: {getDistanceKm(position.lat, position.lng, p.lat, p.lon)} কি.মি.</p>
+                        <a href={`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-blue-600 text-xs underline mt-2">
                           <Navigation size={10} /> দিকনির্দেশনা
                         </a>
                       </div>
