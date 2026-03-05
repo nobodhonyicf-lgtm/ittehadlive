@@ -35,12 +35,56 @@ const AdminInstitutions = () => {
     },
   });
 
+  // Get next branch code
+  const getNextBranchCode = async (): Promise<string> => {
+    const { data } = await supabase.from("branches").select("code").order("code", { ascending: false });
+    if (!data || data.length === 0) return "001";
+    // Find the highest numeric code
+    let maxCode = 0;
+    data.forEach(b => {
+      const num = parseInt(b.code || "0");
+      if (!isNaN(num) && num > maxCode) maxCode = num;
+    });
+    return String(maxCode + 1).padStart(3, "0");
+  };
+
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const inst = institutions?.find((i: any) => i.id === id);
       const { error } = await (supabase as any).from("institutions").update({ status, admin_note: adminNote || null }).eq("id", id);
       if (error) throw error;
+
+      // If approved, auto-create a branch entry
+      if (status === "approved" && inst) {
+        // Check if branch already exists for this institution
+        const { data: existingBranch } = await supabase.from("branches").select("id").eq("name", inst.name).limit(1);
+        if (!existingBranch || existingBranch.length === 0) {
+          const nextCode = await getNextBranchCode();
+          const { error: branchErr } = await supabase.from("branches").insert([{
+            name: inst.name,
+            code: nextCode,
+            address: inst.address || null,
+            phone: inst.phone || null,
+            email: inst.email || null,
+            image_url: inst.logo_url || null,
+            head_name: inst.muhtamim_name || null,
+            head_photo_url: inst.muhtamim_photo_url || null,
+            website: inst.website || null,
+            description: inst.description || null,
+            total_students: inst.total_students || 0,
+            total_teachers: inst.total_teachers || 0,
+            is_active: true,
+          }]);
+          if (branchErr) {
+            toast.error("শাখা তৈরিতে ব্যর্থ: " + branchErr.message);
+          } else {
+            toast.success(`শাখা কোড ${nextCode} দিয়ে স্বয়ংক্রিয়ভাবে শাখা তৈরি হয়েছে`);
+            qc.invalidateQueries({ queryKey: ["branches"] });
+          }
+        }
+      }
     },
-    onSuccess: () => { toast.success("আপডেট হয়েছে"); setSelected(null); },
+    onSuccess: () => { toast.success("আপডেট হয়েছে"); setSelected(null); qc.invalidateQueries({ queryKey: ["admin_institutions"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -142,6 +186,7 @@ const AdminInstitutions = () => {
               {/* Admin Actions */}
               <div className="border-t pt-3 space-y-3">
                 <Textarea placeholder="অ্যাডমিন নোট..." value={adminNote} onChange={e => setAdminNote(e.target.value)} rows={2} />
+                <p className="text-xs text-muted-foreground">অনুমোদন করলে স্বয়ংক্রিয়ভাবে শাখা পাতায় যুক্ত হবে এবং একটি কোড বরাদ্দ হবে।</p>
                 <div className="flex gap-2">
                   <Button className="flex-1 gap-1 bg-green-600 hover:bg-green-700" onClick={() => updateStatus.mutate({ id: selected.id, status: "approved" })} disabled={updateStatus.isPending}>
                     <CheckCircle size={14} /> অনুমোদন
