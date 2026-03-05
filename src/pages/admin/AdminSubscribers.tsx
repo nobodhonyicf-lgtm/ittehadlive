@@ -45,7 +45,7 @@ const wrapWithBranding = (body: string, siteName: string, siteUrl: string, logoU
     <td align="center">
       ${logoUrl ? `<img src="${logoUrl}" alt="${siteName}" width="64" height="64" style="width:64px;height:64px;border-radius:50%;border:3px solid rgba(255,255,255,0.3);margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;" />` : ''}
       <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">${siteName}</h1>
-      <p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:13px;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">ইসলামী শিক্ষার আলোকবর্তিকা</p>
+      <p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:13px;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">প্রাইভেট মাদরাসা সমন্বয় সংগঠন</p>
     </td>
   </tr>
   </table>
@@ -110,11 +110,12 @@ const makeNotificationBody = (notif: any) => `
 <h2 style="margin:0 0 14px;color:#1a5632;font-size:20px;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">${notif.title}</h2>
 <p style="color:#444;line-height:1.8;font-size:15px;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">${notif.body}</p>`;
 
-const makeJobBody = (job: any) => `
+const makeJobBody = (job: any, branchName?: string) => `
 <div style="background:#fef2f2;border-left:4px solid #dc2626;padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:16px;">
-  <p style="margin:0;color:#dc2626;font-size:13px;font-weight:600;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">📢 শিক্ষক নিয়োগ বিজ্ঞপ্তি</p>
+  <p style="margin:0;color:#dc2626;font-size:13px;font-weight:600;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">শিক্ষক নিয়োগ বিজ্ঞপ্তি</p>
 </div>
 <h2 style="margin:0 0 14px;color:#1a5632;font-size:20px;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">${job.title}</h2>
+${branchName ? `<p style="margin:0 0 12px;color:#1a5632;font-size:14px;font-weight:600;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">প্রতিষ্ঠান: ${branchName}</p>` : ''}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:12px 0;border:1px solid #e8efe8;border-radius:8px;overflow:hidden;">
   ${job.location ? `<tr><td style="padding:10px 16px;background:#f8faf8;font-weight:600;color:#1a5632;font-size:14px;border-bottom:1px solid #e8efe8;width:120px;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">অবস্থান</td><td style="padding:10px 16px;color:#444;font-size:14px;border-bottom:1px solid #e8efe8;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">${job.location}</td></tr>` : ''}
   ${job.salary_range ? `<tr><td style="padding:10px 16px;background:#f8faf8;font-weight:600;color:#1a5632;font-size:14px;border-bottom:1px solid #e8efe8;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">বেতন</td><td style="padding:10px 16px;color:#444;font-size:14px;border-bottom:1px solid #e8efe8;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">${job.salary_range}</td></tr>` : ''}
@@ -129,7 +130,7 @@ const makeJobBody = (job: any) => `
 const makeTeacherBody = (teacher: any) => `
 <div style="text-align:center;margin-bottom:16px;">
   ${teacher.photo_url ? `<img src="${teacher.photo_url}" alt="${teacher.name}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #1a5632;margin-bottom:12px;" />` : ''}
-  <h2 style="margin:0 0 4px;color:#1a5632;font-size:20px;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">👨‍🏫 ${teacher.name}</h2>
+  <h2 style="margin:0 0 4px;color:#1a5632;font-size:20px;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">${teacher.name}</h2>
   <p style="margin:0;color:#666;font-size:14px;font-family:'SolaimanLipi','Noto Sans Bengali',sans-serif;">${teacher.subject}</p>
 </div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:12px 0;border:1px solid #e8efe8;border-radius:8px;overflow:hidden;">
@@ -209,7 +210,7 @@ const AdminSubscribers = () => {
   const { data: jobPostings } = useQuery({
     queryKey: ["admin_sub_jobs"],
     queryFn: async () => {
-      const { data } = await supabase.from("job_postings").select("id, title, description, location, salary_range, deadline, qualification_required").eq("is_active", true).order("created_at", { ascending: false }).limit(20);
+      const { data } = await supabase.from("job_postings").select("id, title, description, location, salary_range, deadline, qualification_required, branch_id, branches(name)").eq("is_active", true).order("created_at", { ascending: false }).limit(20);
       return data || [];
     },
   });
@@ -267,8 +268,9 @@ const AdminSubscribers = () => {
     } else if (type === "job") {
       const job = jobPostings?.find(j => j.id === id);
       if (job) {
+        const branchName = (job as any).branches?.name || '';
         setEmailSubject(`শিক্ষক নিয়োগ বিজ্ঞপ্তি: ${job.title}`);
-        setEmailBody(wrapWithBranding(makeJobBody(job), siteName, siteUrl, logoUrl));
+        setEmailBody(wrapWithBranding(makeJobBody(job, branchName), siteName, siteUrl, logoUrl));
       }
     } else if (type === "teacher") {
       const teacher = teachers?.find(t => t.id === id);

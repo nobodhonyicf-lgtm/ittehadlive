@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2, GraduationCap, Search, Eye, CheckCircle, XCircle, Clock, BadgeCheck, UserPlus, BookOpen, MapPin, DollarSign, CalendarDays, Star, ClipboardList, Megaphone, Briefcase } from "lucide-react";
+import { Plus, Edit, Trash2, GraduationCap, Search, Eye, CheckCircle, XCircle, Clock, BadgeCheck, UserPlus, BookOpen, MapPin, DollarSign, CalendarDays, Star, ClipboardList, Megaphone, Briefcase, ImageOff, Building2 } from "lucide-react";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
@@ -29,6 +29,25 @@ const TeachersTab = () => {
     bio: "", photo_url: "", preferred_area: "", expected_salary: "",
     is_available: true, is_active: true, is_verified: false, sort_order: 0,
     exam_result: "", grade_obtained: "", previous_institution: "",
+    institution_id: "",
+  });
+
+  // Fetch institutions for assignment
+  const { data: institutions } = useQuery({
+    queryKey: ["admin_institutions_list"],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("institutions").select("id, name, logo_url").eq("status", "approved").order("name");
+      return data || [];
+    },
+  });
+
+  // Fetch branches for assignment
+  const { data: branchesList } = useQuery({
+    queryKey: ["admin_branches_for_assign"],
+    queryFn: async () => {
+      const { data } = await supabase.from("branches").select("id, name").order("name");
+      return data || [];
+    },
   });
 
   const { data: teachers, isLoading } = useQuery({
@@ -44,7 +63,14 @@ const TeachersTab = () => {
 
   const saveMutation = useMutation({
     mutationFn: async (d: typeof form) => {
-      const payload = { ...d, email: d.email || null, photo_url: d.photo_url || null, bio: d.bio || null, certification: d.certification || null, specialization: d.specialization || null, preferred_area: d.preferred_area || null, expected_salary: d.expected_salary || null, exam_result: d.exam_result || null, grade_obtained: d.grade_obtained || null, previous_institution: d.previous_institution || null } as any;
+      const payload = { ...d, email: d.email || null, photo_url: d.photo_url || null, bio: d.bio || null, certification: d.certification || null, specialization: d.specialization || null, preferred_area: d.preferred_area || null, expected_salary: d.expected_salary || null, exam_result: d.exam_result || null, grade_obtained: d.grade_obtained || null, previous_institution: d.previous_institution || null, institution_id: d.institution_id || null } as any;
+      // If institution selected, get its logo for affiliate badge
+      if (d.institution_id) {
+        const inst = (institutions as any[])?.find((i: any) => i.id === d.institution_id);
+        if (inst?.logo_url) payload.institution_logo_url = inst.logo_url;
+      } else {
+        payload.institution_logo_url = null;
+      }
       if (editId) { const { error } = await supabase.from("teachers").update(payload).eq("id", editId); if (error) throw error; }
       else { const { error } = await supabase.from("teachers").insert([payload]); if (error) throw error; }
     },
@@ -57,7 +83,7 @@ const TeachersTab = () => {
     onSuccess: () => { toast.success("মুছে ফেলা হয়েছে"); queryClient.invalidateQueries({ queryKey: ["admin_teachers"] }); },
   });
 
-  const resetForm = () => setForm({ name: "", phone: "", email: "", address: "", district: "", subject: "", qualification: "", experience_years: 0, specialization: "", certification: "", bio: "", photo_url: "", preferred_area: "", expected_salary: "", is_available: true, is_active: true, is_verified: false, sort_order: 0, exam_result: "", grade_obtained: "", previous_institution: "" });
+  const resetForm = () => setForm({ name: "", phone: "", email: "", address: "", district: "", subject: "", qualification: "", experience_years: 0, specialization: "", certification: "", bio: "", photo_url: "", preferred_area: "", expected_salary: "", is_available: true, is_active: true, is_verified: false, sort_order: 0, exam_result: "", grade_obtained: "", previous_institution: "", institution_id: "" });
 
   return (
     <div className="space-y-4">
@@ -96,7 +122,15 @@ const TeachersTab = () => {
                 <div><Label>পরীক্ষার ফলাফল</Label><Input value={form.exam_result} onChange={e => setForm({ ...form, exam_result: e.target.value })} placeholder="যেমন: দাওরায়ে হাদিস - ১ম বিভাগ" /></div>
                 <div><Label>গ্রেড</Label><Input value={form.grade_obtained} onChange={e => setForm({ ...form, grade_obtained: e.target.value })} placeholder="যেমন: মুমতাজ / জায়্যিদ জিদ্দান" /></div>
               </div>
-              <div><Label>পূর্ববর্তী প্রতিষ্ঠান</Label><Input value={form.previous_institution} onChange={e => setForm({ ...form, previous_institution: e.target.value })} placeholder="পূর্বে যেখানে কাজ করেছেন" /></div>
+               <div><Label>পূর্ববর্তী প্রতিষ্ঠান</Label><Input value={form.previous_institution} onChange={e => setForm({ ...form, previous_institution: e.target.value })} placeholder="পূর্বে যেখানে কাজ করেছেন" /></div>
+               {/* Assign to Institution */}
+               <div>
+                 <Label className="flex items-center gap-1"><Building2 size={14} /> প্রতিষ্ঠান এসাইন</Label>
+                 <select className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background h-10 mt-1" value={form.institution_id} onChange={e => setForm({ ...form, institution_id: e.target.value })}>
+                   <option value="">কোনো প্রতিষ্ঠান নেই</option>
+                   {(institutions as any[])?.map((inst: any) => <option key={inst.id} value={inst.id}>{inst.name}</option>)}
+                 </select>
+               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>পছন্দের এলাকা</Label><Input value={form.preferred_area} onChange={e => setForm({ ...form, preferred_area: e.target.value })} /></div>
                 <div><Label>প্রত্যাশিত বেতন</Label><Input value={form.expected_salary} onChange={e => setForm({ ...form, expected_salary: e.target.value })} /></div>
@@ -137,8 +171,8 @@ const TeachersTab = () => {
                    <TableCell className="text-right">
                      {canEdit && <Button variant="ghost" size="icon" onClick={() => {
                        setEditId(t.id);
-                       setForm({ name: t.name, phone: t.phone || "", email: t.email || "", address: t.address || "", district: t.district || "", subject: t.subject, qualification: t.qualification || "", experience_years: t.experience_years || 0, specialization: t.specialization || "", certification: t.certification || "", bio: t.bio || "", photo_url: t.photo_url || "", preferred_area: t.preferred_area || "", expected_salary: t.expected_salary || "", is_available: t.is_available ?? true, is_active: t.is_active ?? true, is_verified: (t as any).is_verified ?? false, sort_order: t.sort_order || 0, exam_result: (t as any).exam_result || "", grade_obtained: (t as any).grade_obtained || "", previous_institution: (t as any).previous_institution || "" });
-                       setOpen(true);
+                        setForm({ name: t.name, phone: t.phone || "", email: t.email || "", address: t.address || "", district: t.district || "", subject: t.subject, qualification: t.qualification || "", experience_years: t.experience_years || 0, specialization: t.specialization || "", certification: t.certification || "", bio: t.bio || "", photo_url: t.photo_url || "", preferred_area: t.preferred_area || "", expected_salary: t.expected_salary || "", is_available: t.is_available ?? true, is_active: t.is_active ?? true, is_verified: (t as any).is_verified ?? false, sort_order: t.sort_order || 0, exam_result: (t as any).exam_result || "", grade_obtained: (t as any).grade_obtained || "", previous_institution: (t as any).previous_institution || "", institution_id: (t as any).institution_id || "" });
+                        setOpen(true);
                      }}><Edit size={16} /></Button>}
                      {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(t.id)}><Trash2 size={16} className="text-destructive" /></Button>}
                    </TableCell>
@@ -209,6 +243,26 @@ const ApplicationsTab = () => {
   const statusColors: Record<string, string> = { pending: "bg-accent text-accent-foreground", approved: "bg-primary/10 text-primary", rejected: "bg-destructive/10 text-destructive" };
   const statusLabels: Record<string, string> = { pending: "অপেক্ষমান", approved: "অনুমোদিত", rejected: "প্রত্যাখ্যাত" };
 
+  const deleteFilesFromStorage = async (app: any) => {
+    const filesToDelete: string[] = [];
+    const extractPath = (url: string) => {
+      try {
+        const match = url.match(/\/uploads\/(.+)$/);
+        return match ? match[1] : null;
+      } catch { return null; }
+    };
+    if (app.nid_image_url) { const p = extractPath(app.nid_image_url); if (p) filesToDelete.push(p); }
+    if (app.verification_video_url) { const p = extractPath(app.verification_video_url); if (p) filesToDelete.push(p); }
+    if (app.photo_url) { const p = extractPath(app.photo_url); if (p) filesToDelete.push(p); }
+    if (filesToDelete.length === 0) { toast.info("কোনো ফাইল পাওয়া যায়নি"); return; }
+    const { error } = await supabase.storage.from("uploads").remove(filesToDelete);
+    if (error) { toast.error("ফাইল মুছতে ব্যর্থ: " + error.message); return; }
+    // Clear URLs from the application record
+    await supabase.from("teacher_applications").update({ nid_image_url: null, verification_video_url: null, photo_url: null } as any).eq("id", app.id);
+    toast.success(`${filesToDelete.length}টি ফাইল মুছে ফেলা হয়েছে`);
+    queryClient.invalidateQueries({ queryKey: ["admin_teacher_apps"] });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex gap-2 flex-wrap">
@@ -243,6 +297,7 @@ const ApplicationsTab = () => {
                      {canEdit && a.status === "approved" && (
                        <Button variant="ghost" size="icon" title="শিক্ষক হিসেবে পুনরায় যোগ" onClick={() => convertToTeacher.mutate(a)}><UserPlus size={16} className="text-primary" /></Button>
                      )}
+                      {canDelete && <Button variant="ghost" size="icon" title="ফাইল মুছুন" onClick={() => { if(confirm("এই আবেদনের সকল আপলোড ফাইল (ছবি, ভিডিও) স্থায়ীভাবে মুছে ফেলতে চান?")) deleteFilesFromStorage(a); }}><ImageOff size={16} className="text-orange-500" /></Button>}
                      {canDelete && <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(a.id)}><Trash2 size={16} className="text-destructive" /></Button>}
                    </TableCell>
                 </TableRow>
