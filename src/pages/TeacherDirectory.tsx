@@ -243,7 +243,14 @@ const TeacherDirectory = () => {
     queryFn: async () => {
       const { data, error } = await supabase.from("teachers").select("*").eq("is_active", true).order("sort_order");
       if (error) throw error;
-      return data;
+      // Fetch branch names for teachers with institution_id
+      const branchIds = [...new Set(data?.filter(t => t.institution_id).map(t => t.institution_id) || [])];
+      let branchMap: Record<string, string> = {};
+      if (branchIds.length > 0) {
+        const { data: branchData } = await supabase.from("branches").select("id, name").in("id", branchIds);
+        branchData?.forEach(b => { branchMap[b.id] = b.name; });
+      }
+      return data?.map(t => ({ ...t, _institution_name: t.institution_id ? branchMap[t.institution_id] || null : null })) || [];
     },
   });
 
@@ -487,8 +494,8 @@ const TeacherDirectory = () => {
                                     <TooltipTrigger asChild>
                                       <img src={(t as any).institution_logo_url} alt="" className="w-4 h-4 rounded-sm object-contain shrink-0 ring-1 ring-border" />
                                     </TooltipTrigger>
-                                    <TooltipContent className="bg-[#1c1e21] text-white text-[10px] border-0 shadow-lg px-2 py-1 rounded-md">
-                                      এফিলিয়েটেড প্রতিষ্ঠান
+                                    <TooltipContent className="bg-[#1c1e21] text-white text-[10px] border-0 shadow-lg px-2 py-1 rounded-md max-w-[250px]">
+                                      এই শিক্ষক {(t as any)._institution_name || "একটি প্রতিষ্ঠান"} এর সাথে যুক্ত
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
@@ -509,10 +516,10 @@ const TeacherDirectory = () => {
                       <div className="px-4 pb-3 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5">
                           <Badge
-                            variant={t.is_available ? "default" : "secondary"}
-                            className={`text-[10px] ${t.is_available ? "bg-green-500/10 text-green-700 border-green-200" : ""}`}
+                            variant={t.institution_id ? "default" : t.is_available ? "default" : "secondary"}
+                            className={`text-[10px] ${t.institution_id ? "bg-blue-500/10 text-blue-700 border-blue-200" : t.is_available ? "bg-green-500/10 text-green-700 border-green-200" : ""}`}
                           >
-                            {t.is_available ? "✓ উপলব্ধ" : "অনুপলব্ধ"}
+                            {t.institution_id ? "✓ নিয়োগপ্রাপ্ত" : t.is_available ? "✓ উপলব্ধ" : "অনুপলব্ধ"}
                           </Badge>
                           {expBadge && (
                             <Badge variant="outline" className={`text-[10px] ${expBadge.color}`}>
@@ -609,8 +616,8 @@ const TeacherDirectory = () => {
                               <TooltipTrigger asChild>
                                 <img src={(selectedTeacher as any).institution_logo_url} alt="" className="w-5 h-5 rounded-sm object-contain shrink-0 ring-1 ring-border" />
                               </TooltipTrigger>
-                              <TooltipContent className="bg-[#1c1e21] text-white text-[10px] border-0 shadow-lg px-2 py-1 rounded-md">
-                                এফিলিয়েটেড প্রতিষ্ঠান
+                              <TooltipContent className="bg-[#1c1e21] text-white text-[10px] border-0 shadow-lg px-2 py-1 rounded-md max-w-[250px]">
+                                এই শিক্ষক {(selectedTeacher as any)._institution_name || "একটি প্রতিষ্ঠান"} এর সাথে যুক্ত
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -619,10 +626,10 @@ const TeacherDirectory = () => {
                       <p className="text-sm text-muted-foreground">{selectedTeacher.subject}</p>
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <Badge
-                          variant={selectedTeacher.is_available ? "default" : "secondary"}
-                          className={selectedTeacher.is_available ? "bg-green-500/10 text-green-700 border-green-200" : ""}
+                          variant={selectedTeacher.institution_id ? "default" : selectedTeacher.is_available ? "default" : "secondary"}
+                          className={selectedTeacher.institution_id ? "bg-blue-500/10 text-blue-700 border-blue-200" : selectedTeacher.is_available ? "bg-green-500/10 text-green-700 border-green-200" : ""}
                         >
-                          {selectedTeacher.is_available ? "✓ উপলব্ধ" : "অনুপলব্ধ"}
+                          {selectedTeacher.institution_id ? "✓ নিয়োগপ্রাপ্ত" : selectedTeacher.is_available ? "✓ উপলব্ধ" : "অনুপলব্ধ"}
                         </Badge>
                         {expBadge && (
                           <Badge variant="outline" className={`text-[10px] ${expBadge.color}`}>

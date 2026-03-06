@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth"; // refreshed
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
 import { toBengali } from "@/lib/bengali";
-import { User, Package, MessageSquare, LogOut, Save, Send, Search, Link as LinkIcon, Trash2, Mail, Phone, MapPin, ChevronRight, Briefcase, Copy } from "lucide-react";
+import { User, Package, MessageSquare, LogOut, Save, Send, Search, Link as LinkIcon, Trash2, Mail, Phone, MapPin, ChevronRight, Briefcase, Copy, Building2, GraduationCap, LayoutDashboard } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
@@ -55,6 +55,28 @@ const UserProfile = () => {
     },
     enabled: !!user?.id,
   });
+
+  // Check if user has assigned branches
+  const { data: assignedBranches } = useQuery({
+    queryKey: ["user_assigned_branches", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("branches").select("id, name, image_url, status").eq("user_id", user!.id).eq("is_active", true);
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
+
+  // Check if user has approved teacher application
+  const { data: teacherApp } = useQuery({
+    queryKey: ["user_teacher_app", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("teacher_applications").select("id, name, status, subject").eq("user_id", user!.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const hasDashboard = (assignedBranches && assignedBranches.length > 0) || (teacherApp?.status === "approved");
 
   // Sync local state from query data
   useEffect(() => {
@@ -252,6 +274,51 @@ const UserProfile = () => {
             <Button size="sm" variant="ghost" onClick={() => setShowAvatarInput(false)}>বাতিল</Button>
           </div>
         </div>
+      )}
+
+      {/* Dashboard Section for assigned users */}
+      {hasDashboard && (
+        <Card className="mb-4 border-primary/20 bg-gradient-to-br from-primary/5 to-background">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <LayoutDashboard size={18} className="text-primary" /> আমার ড্যাশবোর্ড
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {assignedBranches && assignedBranches.length > 0 && (
+              <div className="space-y-2">
+                {assignedBranches.map(branch => (
+                  <Link key={branch.id} to="/branch-dashboard">
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer group">
+                      {branch.image_url ? (
+                        <img src={branch.image_url} alt="" className="w-10 h-10 rounded-lg object-contain bg-muted" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Building2 size={20} className="text-primary" /></div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold group-hover:text-primary transition-colors truncate">{branch.name}</p>
+                        <p className="text-[11px] text-muted-foreground">প্রতিষ্ঠান ম্যানেজমেন্ট</p>
+                      </div>
+                      <ChevronRight size={16} className="text-muted-foreground group-hover:text-primary" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+            {teacherApp?.status === "approved" && (
+              <Link to="/teacher-dashboard">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer group">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center"><GraduationCap size={20} className="text-emerald-600" /></div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold group-hover:text-primary transition-colors">শিক্ষক ড্যাশবোর্ড</p>
+                    <p className="text-[11px] text-muted-foreground">{teacherApp.subject} - আবেদন অনুমোদিত</p>
+                  </div>
+                  <ChevronRight size={16} className="text-muted-foreground group-hover:text-primary" />
+                </div>
+              </Link>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       <Tabs defaultValue="profile" className="space-y-4">
