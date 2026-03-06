@@ -35,6 +35,8 @@ const pushTypeToggleKeys = [
 
 const AdminSettings = () => {
   const qc = useQueryClient();
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [uploading, setUploading] = useState<string | null>(null);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ["admin_settings"],
@@ -44,8 +46,6 @@ const AdminSettings = () => {
       return data;
     },
   });
-
-  const [values, setValues] = useState<Record<string, string>>({});
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, value }: { id: string; value: string }) => {
@@ -99,8 +99,6 @@ const AdminSettings = () => {
   const seoSettings = settings?.filter(s => seoKeys.includes(s.key));
   const adSettings = settings?.filter(s => adKeys.includes(s.key));
   const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key) && !adKeys.includes(s.key) && !authKeys.includes(s.key) && !appKeys.includes(s.key) && !allSectionKeys.includes(s.key));
-
-  const [uploading, setUploading] = useState<string | null>(null);
 
   const handleFileUpload = async (settingKey: string, file: File) => {
     try {
