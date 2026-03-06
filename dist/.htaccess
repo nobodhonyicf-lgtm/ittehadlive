@@ -1,8 +1,32 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # Serve existing files directly
   RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule . - [L]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule . - [L]
+
+  # Social media crawlers: proxy /share/ URLs to Supabase og-meta edge function
+  RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|TelegramBot|Discordbot|Viber|Line|vkShare|Pinterestbot) [NC]
+  RewriteRule ^share/post/(.+)$ https://laasotunayiivssffhnu.supabase.co/functions/v1/og-meta?type=post&slug=$1 [P,L]
+  RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|TelegramBot|Discordbot|Viber|Line|vkShare|Pinterestbot) [NC]
+  RewriteRule ^share/teacher/(.+)$ https://laasotunayiivssffhnu.supabase.co/functions/v1/og-meta?type=teacher&id=$1 [P,L]
+  RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|TelegramBot|Discordbot|Viber|Line|vkShare|Pinterestbot) [NC]
+  RewriteRule ^share/job/(.+)$ https://laasotunayiivssffhnu.supabase.co/functions/v1/og-meta?type=job&id=$1 [P,L]
+  RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|TelegramBot|Discordbot|Viber|Line|vkShare|Pinterestbot) [NC]
+  RewriteRule ^share/page/(.+)$ https://laasotunayiivssffhnu.supabase.co/functions/v1/og-meta?type=page&slug=$1 [P,L]
+  RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|TelegramBot|Discordbot|Viber|Line|vkShare|Pinterestbot) [NC]
+  RewriteRule ^share/notice/(.+)$ https://laasotunayiivssffhnu.supabase.co/functions/v1/og-meta?type=notice&id=$1 [P,L]
+  RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|TelegramBot|Discordbot|Viber|Line|vkShare|Pinterestbot) [NC]
+  RewriteRule ^share/book/(.+)$ https://laasotunayiivssffhnu.supabase.co/functions/v1/og-meta?type=book&slug=$1 [P,L]
+  RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|TelegramBot|Discordbot|Viber|Line|vkShare|Pinterestbot) [NC]
+  RewriteRule ^share/branch/(.+)$ https://laasotunayiivssffhnu.supabase.co/functions/v1/og-meta?type=branch&id=$1 [P,L]
+  RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|Slackbot|TelegramBot|Discordbot|Viber|Line|vkShare|Pinterestbot) [NC]
+  RewriteRule ^share/islamic/([^/]+)/(.+)$ https://laasotunayiivssffhnu.supabase.co/functions/v1/og-meta?type=islamic&category=$1&id=$2 [P,L]
+
+  # SPA fallback
   RewriteRule . /index.html [L]
 </IfModule>
