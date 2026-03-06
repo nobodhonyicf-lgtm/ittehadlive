@@ -87,8 +87,8 @@ const AssignedTeachers = () => {
                                 <TooltipTrigger asChild>
                                   <img src={branch.image_url} alt="" className="w-4 h-4 rounded-sm object-contain shrink-0 ring-1 ring-border" />
                                 </TooltipTrigger>
-                                <TooltipContent className="bg-[#1c1e21] text-white text-[10px] border-0 shadow-lg px-2 py-1 rounded-md">
-                                  {branch.name}
+                                <TooltipContent className="bg-[#1c1e21] text-white text-[10px] border-0 shadow-lg px-2 py-1 rounded-md max-w-[250px]">
+                                  এই শিক্ষক {branch.name} এর সাথে যুক্ত
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
