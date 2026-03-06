@@ -32,20 +32,11 @@ const TeachersTab = () => {
     institution_id: "",
   });
 
-  // Fetch institutions for assignment
-  const { data: institutions } = useQuery({
-    queryKey: ["admin_institutions_list"],
-    queryFn: async () => {
-      const { data } = await (supabase as any).from("institutions").select("id, name, logo_url").eq("status", "approved").order("name");
-      return data || [];
-    },
-  });
-
-  // Fetch branches for assignment
+  // Fetch branches for assignment (merged from institutions)
   const { data: branchesList } = useQuery({
-    queryKey: ["admin_branches_for_assign"],
+    queryKey: ["admin_branches_for_teacher_assign"],
     queryFn: async () => {
-      const { data } = await supabase.from("branches").select("id, name").order("name");
+      const { data } = await supabase.from("branches").select("id, name, image_url").eq("status", "active").order("name");
       return data || [];
     },
   });
@@ -64,10 +55,10 @@ const TeachersTab = () => {
   const saveMutation = useMutation({
     mutationFn: async (d: typeof form) => {
       const payload = { ...d, email: d.email || null, photo_url: d.photo_url || null, bio: d.bio || null, certification: d.certification || null, specialization: d.specialization || null, preferred_area: d.preferred_area || null, expected_salary: d.expected_salary || null, exam_result: d.exam_result || null, grade_obtained: d.grade_obtained || null, previous_institution: d.previous_institution || null, institution_id: d.institution_id || null } as any;
-      // If institution selected, get its logo for affiliate badge
+      // If branch selected, get its logo for affiliate badge
       if (d.institution_id) {
-        const inst = (institutions as any[])?.find((i: any) => i.id === d.institution_id);
-        if (inst?.logo_url) payload.institution_logo_url = inst.logo_url;
+        const branch = (branchesList as any[])?.find((b: any) => b.id === d.institution_id);
+        if (branch?.image_url) payload.institution_logo_url = branch.image_url;
       } else {
         payload.institution_logo_url = null;
       }
@@ -123,12 +114,12 @@ const TeachersTab = () => {
                 <div><Label>গ্রেড</Label><Input value={form.grade_obtained} onChange={e => setForm({ ...form, grade_obtained: e.target.value })} placeholder="যেমন: মুমতাজ / জায়্যিদ জিদ্দান" /></div>
               </div>
                <div><Label>পূর্ববর্তী প্রতিষ্ঠান</Label><Input value={form.previous_institution} onChange={e => setForm({ ...form, previous_institution: e.target.value })} placeholder="পূর্বে যেখানে কাজ করেছেন" /></div>
-               {/* Assign to Institution */}
+               {/* Assign to Branch/Institution */}
                <div>
-                 <Label className="flex items-center gap-1"><Building2 size={14} /> প্রতিষ্ঠান এসাইন</Label>
+                 <Label className="flex items-center gap-1"><Building2 size={14} /> প্রতিষ্ঠান/শাখা এসাইন</Label>
                  <select className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background h-10 mt-1" value={form.institution_id} onChange={e => setForm({ ...form, institution_id: e.target.value })}>
                    <option value="">কোনো প্রতিষ্ঠান নেই</option>
-                   {(institutions as any[])?.map((inst: any) => <option key={inst.id} value={inst.id}>{inst.name}</option>)}
+                   {(branchesList as any[])?.map((b: any) => <option key={b.id} value={b.id}>{b.name}</option>)}
                  </select>
                </div>
               <div className="grid grid-cols-2 gap-3">

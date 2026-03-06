@@ -61,6 +61,7 @@ const JobApply = lazy(() => import("./pages/JobApply"));
 const ShareRedirect = lazy(() => import("./pages/ShareRedirect"));
 const BranchDashboard = lazy(() => import("./pages/BranchDashboard"));
 const TeacherDashboard = lazy(() => import("./pages/TeacherDashboard"));
+const AssignedTeachers = lazy(() => import("./pages/AssignedTeachers"));
 
 // Lazy Islamic pages
 const DuaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ default: m.DuaPage })));
@@ -137,6 +138,7 @@ const App = () => (
                 <Route path="/masala" element={<MasalaPage />} />
                 <Route path="/teachers" element={<TeacherDirectory />} />
                 <Route path="/teacher-apply" element={<TeacherApply />} />
+                <Route path="/assigned-teachers" element={<AssignedTeachers />} />
                 <Route path="/advertise" element={<Advertise />} />
                 <Route path="/institution-register" element={<InstitutionRegister />} />
                 <Route path="/quiz" element={<QuizHome />} />

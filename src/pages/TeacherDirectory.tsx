@@ -39,7 +39,7 @@ const JobPostingsSection = ({ jobs, branches, highlightJobId, jobHighlightRef }:
     <div className="mb-8">
       <div className="flex items-center gap-2 mb-4">
         <div className="w-1 h-6 bg-primary rounded-full" />
-        <h2 className="text-lg font-bold">নিয়োগ বিজ্ঞপ্তি</h2>
+        <h2 className="text-lg font-bold">শিক্ষক প্রয়োজন</h2>
         <Badge variant="secondary" className="text-[10px]">{toBengaliNumber(jobs.length)}টি সক্রিয়</Badge>
       </div>
       <div className="grid gap-3 md:grid-cols-2">
@@ -337,7 +337,7 @@ const TeacherDirectory = () => {
 
   return (
     <Layout>
-      <SEOHead title="শিক্ষক সার্ভিস সেন্টার" description="যোগ্য শিক্ষক খুঁজুন এবং শিক্ষক হিসেবে আবেদন করুন" />
+      <SEOHead title="খেদমত প্রয়োজন - শিক্ষক সার্ভিস সেন্টার" description="যোগ্য শিক্ষক খুঁজুন এবং শিক্ষক হিসেবে আবেদন করুন" />
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Hero Section */}
         <div className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-background rounded-2xl p-6 md:p-10 mb-8 overflow-hidden">
@@ -345,7 +345,7 @@ const TeacherDirectory = () => {
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/5 rounded-full translate-y-1/2 -translate-x-1/2" />
           <div className="relative text-center">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-medium px-3 py-1.5 rounded-full mb-3">
-              <GraduationCap size={14} /> শিক্ষক সার্ভিস সেন্টার
+              <GraduationCap size={14} /> খেদমত প্রয়োজন
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">যোগ্য শিক্ষক খুঁজুন</h1>
             <p className="text-muted-foreground text-sm max-w-md mx-auto">কুরআন, হাদিস ও ইসলামী শিক্ষায় অভিজ্ঞ শিক্ষক খুঁজে নিন আপনার প্রতিষ্ঠানের জন্য</p>
@@ -371,6 +371,9 @@ const TeacherDirectory = () => {
             <div className="flex gap-3 justify-center mt-5">
               <Link to="/teacher-apply">
                 <Button className="gap-2 shadow-md"><Briefcase size={16} /> শিক্ষক হিসেবে আবেদন</Button>
+              </Link>
+              <Link to="/assigned-teachers">
+                <Button variant="outline" className="gap-2"><BadgeCheck size={16} /> খেদমতপ্রাপ্ত</Button>
               </Link>
             </div>
           </div>
