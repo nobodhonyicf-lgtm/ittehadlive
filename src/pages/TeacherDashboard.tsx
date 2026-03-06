@@ -33,6 +33,16 @@ const TeacherDashboard = () => {
     enabled: !!user?.id,
   });
 
+  // Check if user is an approved teacher
+  const { data: isApprovedTeacher } = useQuery({
+    queryKey: ["is_approved_teacher", user?.id],
+    queryFn: async () => {
+      const apps = await supabase.from("teacher_applications").select("status").eq("user_id", user!.id).eq("status", "approved").limit(1);
+      return (apps.data?.length || 0) > 0;
+    },
+    enabled: !!user?.id,
+  });
+
   // Job applications
   const { data: jobApps } = useQuery({
     queryKey: ["my_job_apps", user?.id],
@@ -116,6 +126,7 @@ const TeacherDashboard = () => {
                       <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1"><BookOpen size={10} /> {app.subject}</span>
                         {app.district && <span className="flex items-center gap-1"><MapPin size={10} /> {app.district}</span>}
+                        <span className="font-mono text-[10px] text-primary">TA-{app.id?.substring(0, 6)?.toUpperCase()}</span>
                       </div>
                     </div>
                     <Badge className={`${st.color} text-[10px]`}>{st.label}</Badge>

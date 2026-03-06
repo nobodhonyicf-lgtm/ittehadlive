@@ -16,11 +16,17 @@ const DynamicFavicon = () => {
 
   const appleTouchIcon = settings.app_icon_url || iconUrl;
 
-  if (!iconUrl && !appleTouchIcon) return null;
-
+  // Always set favicon even if from settings to override any default Lovable favicon
   return (
     <Helmet>
-      {iconUrl && <link rel="icon" type="image/png" href={iconUrl} />}
+      {iconUrl && (
+        <>
+          <link rel="icon" type="image/png" href={iconUrl} />
+          <link rel="icon" type="image/png" sizes="32x32" href={iconUrl} />
+          <link rel="icon" type="image/png" sizes="16x16" href={iconUrl} />
+          <link rel="shortcut icon" href={iconUrl} />
+        </>
+      )}
       {appleTouchIcon && <link rel="apple-touch-icon" href={appleTouchIcon} />}
     </Helmet>
   );

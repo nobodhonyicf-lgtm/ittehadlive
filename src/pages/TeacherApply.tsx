@@ -36,6 +36,7 @@ const useCaptcha = () => {
 const TeacherApply = () => {
   const { user, loading: authLoading } = useAuth();
   const [submitted, setSubmitted] = useState(false);
+  const [trackingCode, setTrackingCode] = useState("");
   const [nidFile, setNidFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -93,8 +94,12 @@ const TeacherApply = () => {
         preferred_area: form.preferred_area || null, expected_salary: form.expected_salary || null,
         reference_name: form.reference_name || null, reference_phone: form.reference_phone || null,
       };
-      const { error } = await supabase.from("teacher_applications").insert([payload as any]);
+      const { data: insertedData, error } = await supabase.from("teacher_applications").insert([payload as any]).select("id").single();
       if (error) throw error;
+      
+      // Generate tracking code
+      const trackingCode = "TA-" + new Date().toISOString().slice(2,4) + new Date().toISOString().slice(5,7) + "-" + (insertedData?.id?.substring(0, 6) || "000000").toUpperCase();
+      setTrackingCode(trackingCode);
       
       setSubmitted(true);
       toast.success("আবেদন সফলভাবে জমা হয়েছে");
@@ -138,8 +143,18 @@ const TeacherApply = () => {
             <CheckCircle className="text-primary" size={32} />
           </div>
           <h1 className="text-xl font-bold mb-2">আবেদন সফলভাবে জমা হয়েছে!</h1>
+          {trackingCode && (
+            <div className="bg-muted rounded-lg p-4 mb-4">
+              <p className="text-xs text-muted-foreground mb-1">আপনার ট্র্যাকিং নম্বর</p>
+              <p className="text-lg font-mono font-bold text-primary">{trackingCode}</p>
+              <p className="text-[10px] text-muted-foreground mt-1">এই নম্বরটি সংরক্ষণ করুন</p>
+            </div>
+          )}
           <p className="text-muted-foreground mb-6">আপনার আবেদন ও ভেরিফিকেশন ডকুমেন্ট পর্যালোচনা করা হবে। অনুমোদনের পর আপনাকে জানানো হবে।</p>
-          <Link to="/teachers"><Button variant="outline">শিক্ষক তালিকা দেখুন</Button></Link>
+          <div className="flex gap-3 justify-center">
+            <Link to="/teacher-dashboard"><Button>ড্যাশবোর্ড দেখুন</Button></Link>
+            <Link to="/teachers"><Button variant="outline">শিক্ষক তালিকা দেখুন</Button></Link>
+          </div>
         </div>
       </Layout>
     );

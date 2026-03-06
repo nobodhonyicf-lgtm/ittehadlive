@@ -45,7 +45,7 @@ import AdminCustomers from "./AdminCustomers";
 import AdminPushNotifications from "./AdminPushNotifications";
 import AdminIslamicContent from "./AdminIslamicContent";
 import AdminTeachers from "./AdminTeachers";
-import AdminInstitutions from "./AdminInstitutions";
+// AdminInstitutions removed - merged into AdminBranches
 import AdminSitePages from "./AdminSitePages";
 import AdminSubscribers from "./AdminSubscribers";
 
@@ -686,9 +686,11 @@ const AdminDashboard = () => {
                   <Link to="/profile" onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg hover:bg-accent transition-colors text-foreground">
                     <User size={15} /> প্রোফাইল দেখুন
                   </Link>
-                  <Link to="/admin/settings" onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg hover:bg-accent transition-colors text-foreground">
-                    <Settings size={15} /> সেটিংস
-                  </Link>
+                  {hasPermission("settings", "view") && (
+                    <Link to="/admin/settings" onClick={() => setProfileOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg hover:bg-accent transition-colors text-foreground">
+                      <Settings size={15} /> সেটিংস
+                    </Link>
+                  )}
                   <button onClick={() => { setProfileOpen(false); signOut(); }} className="flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg hover:bg-destructive/10 transition-colors text-destructive w-full text-left">
                     <LogOut size={15} /> লগআউট
                   </button>

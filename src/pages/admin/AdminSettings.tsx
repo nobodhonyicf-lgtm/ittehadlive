@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/sonner";
-import { Settings, Palette, Image, Search, ShieldCheck, Smartphone, LayoutDashboard, PenLine } from "lucide-react";
+import { Settings, Palette, Image, Search, ShieldCheck, Smartphone, LayoutDashboard, PenLine, Upload } from "lucide-react";
 import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
 const sectionToggleKeys = [
@@ -100,6 +100,26 @@ const AdminSettings = () => {
   const adSettings = settings?.filter(s => adKeys.includes(s.key));
   const generalSettings = settings?.filter(s => !brandingKeys.includes(s.key) && !signatureKeys.includes(s.key) && !seoKeys.includes(s.key) && !adKeys.includes(s.key) && !authKeys.includes(s.key) && !appKeys.includes(s.key) && !allSectionKeys.includes(s.key));
 
+  const [uploading, setUploading] = useState<string | null>(null);
+
+  const handleFileUpload = async (settingKey: string, file: File) => {
+    try {
+      setUploading(settingKey);
+      const ext = file.name.split(".").pop();
+      const path = `site/${settingKey}-${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from("uploads").upload(path, file);
+      if (uploadErr) throw uploadErr;
+      const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(path);
+      const publicUrl = urlData.publicUrl;
+      // Upsert the setting
+      upsertMutation.mutate({ key: settingKey, value: publicUrl });
+    } catch (e: any) {
+      toast.error("আপলোড ব্যর্থ: " + e.message);
+    } finally {
+      setUploading(null);
+    }
+  };
+
   const renderSettingField = (s: any) => (
     <div key={s.id}>
       <Label className="mb-1 block font-semibold">{keyLabels[s.key] || s.key}</Label>
@@ -107,6 +127,15 @@ const AdminSettings = () => {
         <Input type={s.key === "primary_color" ? "color" : "text"} defaultValue={s.value || ""} onChange={(e) => setValues({ ...values, [s.id]: e.target.value })} className={s.key === "primary_color" ? "w-20 h-10 p-1" : ""} />
         <Button onClick={() => updateMutation.mutate({ id: s.id, value: values[s.id] ?? s.value ?? "" })} disabled={updateMutation.isPending} size="sm">সংরক্ষণ</Button>
       </div>
+      {/* File upload option for image fields */}
+      {(s.key === "logo_url" || s.key === "favicon_url" || s.key === "app_icon_url" || s.key === "app_logo_url" || s.key === "default_og_image") && (
+        <div className="mt-2">
+          <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-1"><Upload size={12} /> অথবা সরাসরি আপলোড করুন</Label>
+          <Input type="file" accept="image/*" className="text-xs h-9" disabled={uploading === s.key}
+            onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(s.key, f); }} />
+          {uploading === s.key && <p className="text-xs text-primary mt-1">আপলোড হচ্ছে...</p>}
+        </div>
+      )}
       {(s.key === "logo_url" || s.key === "default_og_image" || s.key === "app_icon_url" || s.key === "app_logo_url" || s.key === "favicon_url") && s.value && <img src={s.value} alt="Preview" className="h-12 mt-2 rounded" />}
     </div>
   );

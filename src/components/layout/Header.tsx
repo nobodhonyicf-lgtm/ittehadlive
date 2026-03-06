@@ -116,7 +116,7 @@ const Header = () => {
               <BookOpen size={13} /> প্রকাশনা
             </Link>
             <Link to="/teachers" className="hidden md:flex items-center gap-1 hover:text-primary transition-colors">
-              <Users size={13} /> শিক্ষক
+              <Users size={13} /> খেদমত প্রয়োজন
             </Link>
             {user && hasAnyRole && (
               <Link to="/admin" className="hidden md:flex items-center gap-1 hover:text-primary transition-colors">
@@ -173,7 +173,7 @@ const Header = () => {
             </li>
             <li className="md:hidden">
               <Link to="/teachers" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
-                শিক্ষক সার্ভিস
+                খেদমত প্রয়োজন
               </Link>
             </li>
           </ul>
