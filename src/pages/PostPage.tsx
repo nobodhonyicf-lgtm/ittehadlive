@@ -44,8 +44,9 @@ const SocialShare = ({ url, title, slug }: { url: string; title: string; slug?: 
 };
 
 const PostPage = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const { data: post, isLoading } = usePost(slug || "");
+  const { slug: rawSlug } = useParams<{ slug: string }>();
+  const slug = rawSlug ? decodeURIComponent(rawSlug) : "";
+  const { data: post, isLoading } = usePost(slug);
   const [photoCardOpen, setPhotoCardOpen] = useState(false);
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
   const isApp = useIsApp();
