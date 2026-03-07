@@ -5,7 +5,9 @@ const ShareRedirect = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { type, id, slug, category } = params as Record<string, string | undefined>;
+  const { type, id: rawId, slug: rawSlug, category } = params as Record<string, string | undefined>;
+  const id = rawId ? decodeURIComponent(rawId) : undefined;
+  const slug = rawSlug ? decodeURIComponent(rawSlug) : undefined;
   const cat = category || searchParams.get("category");
 
   useEffect(() => {
