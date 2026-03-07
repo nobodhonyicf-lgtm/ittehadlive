@@ -26,7 +26,7 @@ const BranchDashboard = () => {
   const { data: branch, isLoading } = useQuery({
     queryKey: ["my_branch", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("branches").select("*").eq("user_id", user!.id).maybeSingle();
+      const { data, error } = await supabase.from("branches").select("*").eq("user_id", user!.id).eq("is_active", true).maybeSingle();
       if (error) throw error;
       return data as any;
     },
