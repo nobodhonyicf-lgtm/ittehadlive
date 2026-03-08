@@ -39,12 +39,6 @@ const NoticeView = () => {
         const padding = 16;
         const available = containerWidth - padding;
         let scale = Math.min(1, available / PAD_W);
-        // In app mode, shrink further so full pad is visible in viewport
-        if (isApp) {
-          const viewportH = window.innerHeight - 140; // account for header + bottom nav + buttons
-          const scaleByHeight = viewportH / PAD_H;
-          scale = Math.min(scale, scaleByHeight, 0.38);
-        }
         setPadScale(scale);
       }
     };
