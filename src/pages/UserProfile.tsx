@@ -206,6 +206,7 @@ const UserProfile = () => {
 
   const profileContent = (
     <div className={isApp ? "max-w-lg mx-auto px-4 py-6" : "max-w-4xl mx-auto px-4 py-6"}>
+      <Breadcrumbs items={[{ label: "প্রোফাইল" }]} />
       {/* Profile Header - Professional Card */}
       {isApp ? (
         <div className="bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-5 mb-6 text-primary-foreground shadow-lg">

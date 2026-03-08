@@ -206,6 +206,7 @@ const QiblaContent = () => {
 
   return (
     <div className="max-w-md mx-auto px-4 py-8 text-center">
+      <Breadcrumbs items={[{ label: "কিবলা কম্পাস" }]} />
       <h1 className="text-2xl font-bold mb-2 flex items-center justify-center gap-2">
         <Compass className="text-primary" /> কিবলা কম্পাস
       </h1>

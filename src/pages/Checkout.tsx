@@ -200,14 +200,7 @@ const Checkout = () => {
     <Layout>
       <SEOHead title="চেকআউট" />
       <div className="max-w-5xl mx-auto px-4 py-6">
-        {/* Breadcrumb-style steps */}
-        <div className="flex items-center gap-2 text-sm mb-6 text-muted-foreground">
-          <Link to="/cart" className="hover:text-primary transition-colors">কার্ট</Link>
-          <ChevronRight size={14} />
-          <span className="text-primary font-semibold">চেকআউট</span>
-          <ChevronRight size={14} />
-          <span>অর্ডার কনফার্ম</span>
-        </div>
+        <Breadcrumbs items={[{ label: "কার্ট", href: "/cart" }, { label: "চেকআউট" }]} />
 
         {/* Login prompt for guests */}
         {!user && (

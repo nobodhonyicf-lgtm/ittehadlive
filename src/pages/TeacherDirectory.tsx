@@ -359,6 +359,7 @@ const TeacherDirectory = () => {
     <Layout>
       <SEOHead title="খেদমত প্রয়োজন - শিক্ষক সার্ভিস সেন্টার" description="যোগ্য শিক্ষক খুঁজুন এবং শিক্ষক হিসেবে আবেদন করুন" />
       <div className="container mx-auto px-4 py-6 max-w-6xl">
+        <Breadcrumbs items={[{ label: "শিক্ষক সার্ভিস সেন্টার" }]} />
         {/* Hero Section */}
         <div className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-background rounded-2xl p-6 md:p-10 mb-8 overflow-hidden">
           <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />

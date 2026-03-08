@@ -111,6 +111,7 @@ const InstitutionRegister = () => {
     <Layout>
       <SEOHead title="প্রতিষ্ঠান নিবন্ধন" description="আপনার প্রতিষ্ঠান ইত্তেহাদুল মাদারিসে নিবন্ধন করুন" />
       <div className="container mx-auto px-4 py-6 max-w-3xl">
+        <Breadcrumbs items={[{ label: "প্রতিষ্ঠান নিবন্ধন" }]} />
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-medium px-3 py-1.5 rounded-full mb-3">
             <Building2 size={14} /> প্রতিষ্ঠান নিবন্ধন

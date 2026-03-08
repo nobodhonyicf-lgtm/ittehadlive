@@ -80,10 +80,8 @@ const QuizLevels = () => {
     <Layout>
       <SEOHead title={`${category.name} - কুইজ`} />
       <div className="max-w-2xl mx-auto px-4 py-8">
+        <Breadcrumbs items={[{ label: "কুইজ গেম", href: "/quiz" }, { label: category.name }]} />
         {/* Header */}
-        <Button variant="ghost" size="sm" onClick={() => navigate("/quiz")} className="mb-4 gap-1">
-          <ArrowLeft size={16} /> ফিরে যান
-        </Button>
 
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">{category.icon}</div>
