@@ -64,7 +64,7 @@ const WebPushPrompt = () => {
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md animate-fade-in">
+    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md animate-fade-in">
       <div className="relative bg-primary text-primary-foreground rounded-xl shadow-2xl p-4 flex items-center gap-3">
         <button
           onClick={handleDismiss}

@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import AppBottomNav from "./AppBottomNav";
 import AppHeader from "./AppHeader";
+import WebPushPrompt from "@/components/WebPushPrompt";
 
 const AppLayout = ({ children, hideHeader }: { children: ReactNode; hideHeader?: boolean }) => {
   const [mounted, setMounted] = useState(false);
@@ -71,6 +72,7 @@ const AppLayout = ({ children, hideHeader }: { children: ReactNode; hideHeader?:
       {!hideHeader && <AppHeader />}
       <main className="flex-1">{children}</main>
       <AppBottomNav />
+      <WebPushPrompt />
     </div>
   );
 };

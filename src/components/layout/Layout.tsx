@@ -22,6 +22,7 @@ const Layout = ({ children, fullWidth }: { children: ReactNode; fullWidth?: bool
           </div>
         </main>
         <AppBottomNav />
+        <WebPushPrompt />
       </div>
     );
   }
