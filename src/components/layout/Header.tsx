@@ -49,7 +49,7 @@ const DropdownMenu = ({ label, items, onNavigate }: { label: string; items: { la
             <li key={item.path}>
               <Link
                 to={item.path}
-                className="block px-4 py-2 hover:bg-primary-foreground/10 transition-colors text-sm whitespace-nowrap"
+                className="block px-4 py-2 hover:bg-primary/10 transition-colors text-sm whitespace-nowrap rounded-md"
                 onClick={() => { setOpen(false); onNavigate?.(); }}
               >
                 {item.label}
