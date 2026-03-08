@@ -1,21 +1,27 @@
-import { useState } from "react";
-import { X, Plus, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Plus, Trash2, RefreshCw } from "lucide-react";
 import { toBengali } from "@/lib/bengali";
+import { supabase } from "@/integrations/supabase/client";
 
 type UnitType = "gram" | "vori" | "ana" | "tola";
 type CaratType = "22" | "21" | "18" | "traditional";
 
 const BAJUS_URL = "https://www.bajus.org/gold-price";
 
-// Approximate BDT per gram by carat
-const GOLD_RATE_PER_GRAM: Record<CaratType, number> = {
-  "22": 10342,
-  "21": 9880,
-  "18": 8467,
-  "traditional": 7583,
+// Fallback rates (will be overridden by live data)
+const DEFAULT_GOLD_RATE: Record<CaratType, number> = {
+  "22": 22995,
+  "21": 21950,
+  "18": 18815,
+  "traditional": 15360,
 };
 
-const SILVER_RATE_PER_GRAM = 165;
+const DEFAULT_SILVER_RATE: Record<CaratType, number> = {
+  "22": 560,
+  "21": 535,
+  "18": 460,
+  "traditional": 345,
+};
 
 const UNIT_TO_GRAM: Record<UnitType, number> = {
   gram: 1,
@@ -45,6 +51,58 @@ const GoldSilverCalculator = ({ type, onConfirm, onClose }: Props) => {
   const [items, setItems] = useState<JewelryItem[]>([
     { id: 1, name: "", amount: 0, unit: "gram", carat: "22" },
   ]);
+  const [goldRates, setGoldRates] = useState(DEFAULT_GOLD_RATE);
+  const [silverRates, setSilverRates] = useState(DEFAULT_SILVER_RATE);
+  const [lastUpdated, setLastUpdated] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRates = async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("key, value")
+        .in("key", [
+          "bajus_gold_22k", "bajus_gold_21k", "bajus_gold_18k", "bajus_gold_traditional",
+          "bajus_silver_22k", "bajus_silver_21k", "bajus_silver_18k", "bajus_silver_traditional",
+          "bajus_last_updated",
+        ]);
+
+      if (data && data.length > 0) {
+        const get = (k: string) => {
+          const found = data.find(d => d.key === k);
+          return found?.value ? Number(found.value) : 0;
+        };
+
+        const g22 = get("bajus_gold_22k");
+        if (g22 > 0) {
+          setGoldRates({
+            "22": g22,
+            "21": get("bajus_gold_21k") || DEFAULT_GOLD_RATE["21"],
+            "18": get("bajus_gold_18k") || DEFAULT_GOLD_RATE["18"],
+            "traditional": get("bajus_gold_traditional") || DEFAULT_GOLD_RATE["traditional"],
+          });
+        }
+
+        const s22 = get("bajus_silver_22k");
+        if (s22 > 0) {
+          setSilverRates({
+            "22": s22,
+            "21": get("bajus_silver_21k") || DEFAULT_SILVER_RATE["21"],
+            "18": get("bajus_silver_18k") || DEFAULT_SILVER_RATE["18"],
+            "traditional": get("bajus_silver_traditional") || DEFAULT_SILVER_RATE["traditional"],
+          });
+        }
+
+        const updated = data.find(d => d.key === "bajus_last_updated");
+        if (updated?.value) {
+          const d = new Date(updated.value);
+          setLastUpdated(d.toLocaleDateString("bn-BD"));
+        }
+      }
+      setLoading(false);
+    };
+    fetchRates();
+  }, []);
 
   const addItem = () => {
     setItems(prev => [...prev, { id: Date.now(), name: "", amount: 0, unit: "gram", carat: "22" }]);
@@ -61,7 +119,7 @@ const GoldSilverCalculator = ({ type, onConfirm, onClose }: Props) => {
   const calculateTotal = () => {
     return items.reduce((sum, item) => {
       const grams = item.amount * UNIT_TO_GRAM[item.unit];
-      const rate = isGold ? GOLD_RATE_PER_GRAM[item.carat] : SILVER_RATE_PER_GRAM;
+      const rate = isGold ? goldRates[item.carat] : silverRates[item.carat];
       return sum + Math.round(grams * rate * SELLING_RATE);
     }, 0);
   };
@@ -89,8 +147,43 @@ const GoldSilverCalculator = ({ type, onConfirm, onClose }: Props) => {
               <a href={BAJUS_URL} target="_blank" rel="noopener noreferrer" className="text-primary font-bold underline">
                 বাজুসের ওয়েবসাইট
               </a>{" "}
-              থেকে নেওয়া। বাজার মূল্যের ৮৩% ধরে আমরা আনুমানিক বিক্রয় মূল্য হিসাব করেছি।
+              থেকে অটো সিংক করা। বাজার মূল্যের ৮৩% ধরে আমরা আনুমানিক বিক্রয় মূল্য হিসাব করেছি।
+              {lastUpdated && (
+                <span className="block mt-1 text-xs">
+                  <RefreshCw size={10} className="inline mr-1" />
+                  সর্বশেষ আপডেট: {lastUpdated}
+                </span>
+              )}
             </p>
+          </div>
+
+          {/* Rate display */}
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {isGold ? (
+              <>
+                <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2 text-center">
+                  <span className="font-bold">২২ ক্যারেট:</span> ৳{toBengali(goldRates["22"].toLocaleString("en-IN"))}/গ্রাম
+                </div>
+                <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2 text-center">
+                  <span className="font-bold">২১ ক্যারেট:</span> ৳{toBengali(goldRates["21"].toLocaleString("en-IN"))}/গ্রাম
+                </div>
+                <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2 text-center">
+                  <span className="font-bold">১৮ ক্যারেট:</span> ৳{toBengali(goldRates["18"].toLocaleString("en-IN"))}/গ্রাম
+                </div>
+                <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2 text-center">
+                  <span className="font-bold">সনাতনী:</span> ৳{toBengali(goldRates["traditional"].toLocaleString("en-IN"))}/গ্রাম
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="bg-gray-100 dark:bg-gray-800/30 rounded-lg p-2 text-center">
+                  <span className="font-bold">২২ ক্যারেট:</span> ৳{toBengali(silverRates["22"].toLocaleString("en-IN"))}/গ্রাম
+                </div>
+                <div className="bg-gray-100 dark:bg-gray-800/30 rounded-lg p-2 text-center">
+                  <span className="font-bold">সনাতনী:</span> ৳{toBengali(silverRates["traditional"].toLocaleString("en-IN"))}/গ্রাম
+                </div>
+              </>
+            )}
           </div>
 
           {/* Items */}
@@ -150,7 +243,7 @@ const GoldSilverCalculator = ({ type, onConfirm, onClose }: Props) => {
                   </div>
                 </div>
 
-                {/* Carat (gold only) */}
+                {/* Carat */}
                 {isGold && (
                   <div>
                     <label className="text-sm font-medium text-foreground mb-1.5 block">ক্যারেট:</label>
