@@ -33,12 +33,12 @@ async function scrapeGoldr(): Promise<Rates | null> {
       headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
     });
     const html = await res.text();
+    console.log("V3 - GoldR HTML length:", html.length, "first 300:", html.substring(0, 300));
 
     // Extract per-gram gold prices from table-gram section
-    // Pattern: <td>22 Karat Gold</td> ... <strong>৳২২,৯৯৫</strong>
     const gramSection = html.match(/id="table-gram"[\s\S]*?<\/div>/);
     if (!gramSection) {
-      console.error("Could not find gram table section");
+      console.error("Could not find gram table section. Has table-gram:", html.includes("table-gram"));
       return null;
     }
     const section = gramSection[0];
