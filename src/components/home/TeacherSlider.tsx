@@ -22,6 +22,7 @@ const TeacherSlider = () => {
         .from("teachers")
         .select("*")
         .eq("is_active", true)
+        .is("institution_id", null)
         .order("sort_order")
         .limit(20);
       if (error) throw error;
