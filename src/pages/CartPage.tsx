@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart, Trash2, Minus, Plus, BookOpen } from "lucide-react";
 import { toBengali } from "@/lib/bengali";
 import SEOHead from "@/components/SEOHead";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const CartPage = () => {
   const { items, removeFromCart, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
