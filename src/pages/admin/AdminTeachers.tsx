@@ -382,6 +382,7 @@ const JobPostingsTab = () => {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [sendJobPush, setSendJobPush] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", subject: "", qualification_required: "", experience_required: "", salary_range: "", location: "", deadline: "", is_active: true, branch_id: "" });
 
   const { data: branches } = useQuery({
