@@ -60,7 +60,7 @@ const WebPushPrompt = () => {
   const handleDismiss = () => {
     setShow(false);
     setDismissed(true);
-    sessionStorage.setItem(DISMISS_KEY, "1");
+    localStorage.setItem(DISMISS_KEY, "1");
   };
 
   return (
