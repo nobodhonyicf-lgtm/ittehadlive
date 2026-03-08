@@ -187,6 +187,7 @@ out center;`;
     <Layout>
       <SEOHead title="আশেপাশের মসজিদ ও মাদ্রাসা" />
       <div className="max-w-4xl mx-auto px-4 py-6">
+        <Breadcrumbs items={[{ label: "আশেপাশের মসজিদ ও মাদ্রাসা" }]} />
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-xl font-bold flex items-center gap-2">

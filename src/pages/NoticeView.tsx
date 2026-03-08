@@ -281,6 +281,7 @@ const NoticeView = () => {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-6">
+        <Breadcrumbs items={[{ label: notice?.title || "নোটিশ" }]} />
         <div className={`grid grid-cols-1 ${isApp ? "" : "lg:grid-cols-3"} gap-6`}>
           <div className={isApp ? "" : "lg:col-span-2"}>
             {isLoading ? (

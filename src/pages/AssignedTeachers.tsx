@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { GraduationCap, MapPin, BookOpen, Users, UserCircle, Phone, Mail, Star, BadgeCheck } from "lucide-react";
 import { toBengaliNumber } from "@/lib/bengali";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const AssignedTeachers = () => {
   const { data: teachers, isLoading } = useQuery({

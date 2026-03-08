@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import { CheckCircle, LogIn, Upload, Video, ShieldCheck, AlertTriangle, ClipboardList, Camera } from "lucide-react";
 import { Link } from "react-router-dom";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 /* ─── Simple Math CAPTCHA ─── */
 const useCaptcha = () => {

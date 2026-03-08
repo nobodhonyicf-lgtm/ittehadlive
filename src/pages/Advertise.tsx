@@ -9,6 +9,7 @@ import { toBengaliNumber } from "@/lib/bengali";
 import { useSiteSettings } from "@/hooks/useData";
 import { Megaphone, Monitor, Sidebar, FileText, LayoutTemplate, Phone, Mail, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const slotIcons: Record<string, any> = {
   header: Monitor,

@@ -3,6 +3,7 @@ import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { Progress } from "@/components/ui/progress";
 import {
   Download, Smartphone, Monitor, CheckCircle, Share, PlusSquare,

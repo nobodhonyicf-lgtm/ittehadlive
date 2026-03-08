@@ -16,6 +16,7 @@ import { toBengali } from "@/lib/bengali";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const DELIVERY_CHARGE_DHAKA = 60;
 const DELIVERY_CHARGE_OUTSIDE = 120;

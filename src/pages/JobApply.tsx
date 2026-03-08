@@ -6,6 +6,7 @@ import Layout from "@/components/layout/Layout";
 import AppLayout from "@/components/app/AppLayout";
 import SEOHead from "@/components/SEOHead";
 import { useIsApp } from "@/hooks/useIsApp";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

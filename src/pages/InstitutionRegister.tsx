@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
 import { Building2, Upload, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { BD_DISTRICTS } from "@/lib/bdDistricts";
 
 const InstitutionRegister = () => {
