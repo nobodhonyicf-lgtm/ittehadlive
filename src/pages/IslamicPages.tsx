@@ -219,10 +219,10 @@ const IslamicListContent = ({
         ) : (
           <div className="space-y-2">
             {filtered.map((item, idx) => (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => setSelected(item)}
-                className="w-full text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:shadow-md transition-all active:scale-[0.99]"
+                to={`/${category}/${item.id}`}
+                className="w-full text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:shadow-md transition-all active:scale-[0.99] block"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
@@ -256,7 +256,7 @@ const IslamicListContent = ({
                   </div>
                   <ChevronRight size={16} className="text-muted-foreground flex-shrink-0 mt-1" />
                 </div>
-              </button>
+              </Link>
             ))}
           </div>
         )}
