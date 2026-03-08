@@ -36,6 +36,7 @@ const StudentDirectory = () => {
     <Layout>
       <SEOHead title="শিক্ষার্থী ডিরেক্টরি" description="ইত্তেহাদুল মাদারিসের শিক্ষার্থী অনুসন্ধান — শাখা ও ক্লাস অনুযায়ী শিক্ষার্থীর তথ্য দেখুন।" keywords="শিক্ষার্থী, ডিরেক্টরি, মাদরাসা, ছাত্র" />
       <div className="px-4 py-8">
+        <Breadcrumbs items={[{ label: "শিক্ষার্থী ডিরেক্টরি" }]} />
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary flex items-center justify-center gap-3">
             <Users size={32} />

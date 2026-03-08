@@ -14,6 +14,7 @@ import { Phone, Mail, Send, Search, Reply, Clock, MessageSquare } from "lucide-r
 import { toBengali } from "@/lib/bengali";
 import PageSidebar from "@/components/home/PageSidebar";
 import { useIsApp } from "@/hooks/useIsApp";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { useQuery } from "@tanstack/react-query";
 
 const contactSchema = z.object({

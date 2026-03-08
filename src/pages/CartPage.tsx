@@ -15,6 +15,7 @@ const CartPage = () => {
     <Layout>
       <SEOHead title="কার্ট" description="আপনার কার্টে থাকা বই সমূহ" />
       <div className="max-w-4xl mx-auto px-4 py-6">
+        <Breadcrumbs items={[{ label: "প্রকাশনা", href: "/books" }, { label: "কার্ট" }]} />
         <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
           <ShoppingCart size={24} /> কার্ট ({toBengali(totalItems)}টি আইটেম)
         </h1>

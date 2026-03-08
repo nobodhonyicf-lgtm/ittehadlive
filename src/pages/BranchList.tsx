@@ -17,6 +17,7 @@ const BranchList = () => {
     <Layout>
       <SEOHead title="শাখা সমূহ" description="ইত্তেহাদুল মাদারিসের সকল শাখা প্রতিষ্ঠান — ঠিকানা, শিক্ষক ও শিক্ষার্থী সংখ্যাসহ বিস্তারিত তথ্য।" keywords="শাখা, মাদরাসা, প্রতিষ্ঠান, বাংলাদেশ" />
       <div className="px-4 py-8 max-w-6xl mx-auto">
+        <Breadcrumbs items={[{ label: "শাখা সমূহ" }]} />
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 dark:bg-primary/20 mb-3">
             <Building2 size={28} className="text-primary" />

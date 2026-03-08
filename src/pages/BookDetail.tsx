@@ -93,12 +93,7 @@ const BookDetail = () => {
       <SEOHead title={book.title} description={book.description || `${book.title} - ${book.author_name}`} />
       
       <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Breadcrumb */}
-        <div className="text-sm text-muted-foreground mb-4 flex gap-1">
-          <Link to="/books" className="hover:text-primary">প্রকাশনা</Link>
-          <span>/</span>
-          <span>{book.title}</span>
-        </div>
+        <Breadcrumbs items={[{ label: "প্রকাশনা", href: "/books" }, { label: book.title }]} />
 
         <div className="grid md:grid-cols-3 gap-8">
           {/* Cover Image */}
