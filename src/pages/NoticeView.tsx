@@ -30,7 +30,7 @@ const NoticeView = () => {
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [sigLoaded, setSigLoaded] = useState(false);
   const [padScale, setPadScale] = useState(1);
-
+  const [scaledHeight, setScaledHeight] = useState(PAD_H);
   // Responsive scaling for mobile / app
   useEffect(() => {
     const updateScale = () => {
