@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsApp } from "@/hooks/useIsApp";
 import SEOHead from "@/components/SEOHead";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const BranchDetail = () => {
   const { id } = useParams<{ id: string }>();
