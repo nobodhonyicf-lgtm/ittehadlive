@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
 
     // VAPID configuration
     const vapid: VapidKeys = {
-      subject: 'mailto:admin@ittehadlive.lovable.app',
+      subject: 'mailto:admin@ittehad.bd',
       publicKey: VAPID_PUBLIC_KEY,
       privateKey: VAPID_PRIVATE_KEY,
     };
