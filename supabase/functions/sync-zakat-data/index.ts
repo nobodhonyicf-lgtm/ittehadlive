@@ -30,10 +30,12 @@ async function scrapeBajus(): Promise<GoldSilverRates | null> {
     console.log("Contains 'price':", html.includes('price'));
     console.log("Contains 'BDT':", html.includes('BDT'));
     
-    // Log a sample of HTML around price
-    const priceIdx = html.indexOf('BDT');
+    // Log first 500 chars of HTML for debugging
+    console.log("HTML sample:", html.substring(0, 500));
+    
+    const priceIdx = html.indexOf('price');
     if (priceIdx > 0) {
-      console.log("Around BDT:", html.substring(Math.max(0, priceIdx - 80), priceIdx + 30));
+      console.log("Around 'price':", html.substring(Math.max(0, priceIdx - 20), priceIdx + 200));
     }
 
     // Extract prices - try multiple patterns
