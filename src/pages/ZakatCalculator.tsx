@@ -5,6 +5,7 @@ import AppLayout from "@/components/app/AppLayout";
 import { useIsApp } from "@/hooks/useIsApp";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Calculator, Info, RotateCcw, ChevronRight, ChevronLeft, Printer } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { toBengali } from "@/lib/bengali";
 import GoldSilverCalculator from "@/components/zakat/GoldSilverCalculator";
