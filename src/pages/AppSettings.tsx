@@ -449,6 +449,27 @@ const AppSettings = () => {
                 </button>
               </div>
             </div>
+
+            {/* Banner Ads Toggle */}
+            <div className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-yellow-500 flex items-center justify-center">
+                  <Megaphone size={18} className="text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">বিজ্ঞাপন বন্ধ করুন</p>
+                  <p className="text-[11px] text-muted-foreground">{hideAds ? "বিজ্ঞাপন লুকানো আছে" : "ব্যানার বিজ্ঞাপন দেখা যাচ্ছে"}</p>
+                </div>
+              </div>
+              <Switch
+                checked={hideAds}
+                onCheckedChange={(v) => {
+                  setHideAds(v);
+                  localStorage.setItem("app-hide-ads", v ? "true" : "false");
+                  toast.success(v ? "বিজ্ঞাপন বন্ধ করা হয়েছে" : "বিজ্ঞাপন চালু করা হয়েছে");
+                }}
+              />
+            </div>
           </div>
         </div>
 
