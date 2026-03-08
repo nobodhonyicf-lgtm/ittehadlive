@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy, Star, Lock, ChevronRight, Gamepad2, Medal, Crown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const QuizHome = () => {
   const navigate = useNavigate();
