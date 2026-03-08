@@ -311,7 +311,10 @@ const TeacherDirectory = () => {
   }, [hasMore, filtered.length]);
 
   // Reset visible count when filters change
-  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, districtFilter, subjectFilter, availabilityFilter, experienceFilter]);
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, districtFilter, subjectFilter, availabilityFilter, experienceFilter, activeTab]);
+  
+  // Reset filters when switching tabs
+  useEffect(() => { setSearch(""); setDistrictFilter(""); setSubjectFilter(""); setAvailabilityFilter(""); setExperienceFilter(""); }, [activeTab]);
 
   // Scroll to highlighted teacher
   useEffect(() => {
