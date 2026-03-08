@@ -24,6 +24,7 @@ const sectionToggleKeys = [
   { key: "section_videos", label: "ভিডিও গ্যালারী", desc: "ইউটিউব ভিডিও সেকশন" },
   { key: "section_seasonal_islamic", label: "সিজনাল ইসলামী কন্টেন্ট", desc: "রমাদান/কুরবানী ইত্যাদি মাসভিত্তিক বিশেষ কার্ড" },
   { key: "auto_islamic_push_enabled", label: "দৈনিক ইসলামী পুশ নোটিফিকেশন", desc: "প্রতিদিন অটোমেটিক আয়াত/হাদিস/দোয়া/মাসআলা পুশ পাঠায়" },
+  { key: "auto_post_enabled", label: "🤖 AI অটো পোস্টিং", desc: "প্রতিদিন AI দিয়ে ৩টি পোস্ট (মাদরাসা তথ্য, শিক্ষা, ইসলামী) অটোমেটিক তৈরি ও প্রকাশ করে" },
 ];
 
 const pushTypeToggleKeys = [
