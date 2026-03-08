@@ -68,25 +68,6 @@ const AppTeacherSlider = () => {
                       <div className="w-8 h-8 rounded-full bg-card ring-2 ring-card flex items-center justify-center"><UserCircle size={18} className="text-primary" /></div>
                     )}
                   </div>
-                  {/* Affiliate badge */}
-                  {branch && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="absolute top-1 right-1">
-                          {branch.image_url ? (
-                            <img src={branch.image_url} alt="" className="w-5 h-5 rounded-full object-contain bg-white ring-1 ring-border shadow-sm" />
-                          ) : (
-                            <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center ring-1 ring-white shadow-sm">
-                              <BadgeCheck size={10} className="text-white" />
-                            </div>
-                          )}
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="text-xs max-w-[200px]">
-                        এই শিক্ষক {branch.name} এর সাথে যুক্ত
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
                 </div>
                 <div className="pt-6 pb-2.5 px-2 text-center">
                   <h4 className="text-[10px] font-semibold line-clamp-1 flex items-center justify-center gap-0.5">
