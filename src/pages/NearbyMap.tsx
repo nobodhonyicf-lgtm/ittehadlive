@@ -4,6 +4,7 @@ import SEOHead from "@/components/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Navigation, Loader2, LocateFixed, Landmark, BookOpen, List, AlertCircle, RefreshCw } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -186,6 +187,7 @@ out center;`;
     <Layout>
       <SEOHead title="আশেপাশের মসজিদ ও মাদ্রাসা" />
       <div className="max-w-4xl mx-auto px-4 py-6">
+        <Breadcrumbs items={[{ label: "আশেপাশের মসজিদ ও মাদ্রাসা" }]} />
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-xl font-bold flex items-center gap-2">

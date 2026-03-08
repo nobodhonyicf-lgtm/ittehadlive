@@ -18,6 +18,7 @@ import { User, Package, MessageSquare, LogOut, Save, Send, Search, Link as LinkI
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const statusMap: Record<string, { label: string; color: string }> = {
   pending: { label: "অপেক্ষমান", color: "bg-yellow-100 text-yellow-800" },
@@ -205,6 +206,7 @@ const UserProfile = () => {
 
   const profileContent = (
     <div className={isApp ? "max-w-lg mx-auto px-4 py-6" : "max-w-4xl mx-auto px-4 py-6"}>
+      <Breadcrumbs items={[{ label: "প্রোফাইল" }]} />
       {/* Profile Header - Professional Card */}
       {isApp ? (
         <div className="bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-5 mb-6 text-primary-foreground shadow-lg">

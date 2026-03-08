@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart, Trash2, Minus, Plus, BookOpen } from "lucide-react";
 import { toBengali } from "@/lib/bengali";
 import SEOHead from "@/components/SEOHead";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const CartPage = () => {
   const { items, removeFromCart, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
@@ -14,6 +15,7 @@ const CartPage = () => {
     <Layout>
       <SEOHead title="কার্ট" description="আপনার কার্টে থাকা বই সমূহ" />
       <div className="max-w-4xl mx-auto px-4 py-6">
+        <Breadcrumbs items={[{ label: "প্রকাশনা", href: "/books" }, { label: "কার্ট" }]} />
         <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
           <ShoppingCart size={24} /> কার্ট ({toBengali(totalItems)}টি আইটেম)
         </h1>

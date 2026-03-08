@@ -5,6 +5,7 @@ import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { User } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const LeaderDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,6 +46,7 @@ const LeaderDetail = () => {
     <Layout>
       <SEOHead title={`${leader.name} - ${leader.title}`} description={leader.bio || leader.name} />
       <div className="px-4 py-8">
+        <Breadcrumbs items={[{ label: leader.name }]} />
         <Card className="max-w-3xl mx-auto border-t-4 border-t-primary">
           <CardContent className="p-6 md:p-8">
             <div className="flex flex-col items-center text-center mb-6">

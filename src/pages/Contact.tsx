@@ -14,6 +14,7 @@ import { Phone, Mail, Send, Search, Reply, Clock, MessageSquare } from "lucide-r
 import { toBengali } from "@/lib/bengali";
 import PageSidebar from "@/components/home/PageSidebar";
 import { useIsApp } from "@/hooks/useIsApp";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { useQuery } from "@tanstack/react-query";
 
 const contactSchema = z.object({
@@ -82,6 +83,7 @@ const Contact = () => {
     <Layout>
       <SEOHead title="যোগাযোগ" description="ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ-এর সাথে যোগাযোগ করুন — ফোন, ইমেইল অথবা মেসেজ পাঠান।" keywords="যোগাযোগ, ইত্তেহাদ, মাদরাসা, বাংলাদেশ" />
       <div className="max-w-7xl mx-auto px-4 py-6">
+        <Breadcrumbs items={[{ label: "যোগাযোগ" }]} />
         <div className={`grid grid-cols-1 ${isApp ? '' : 'lg:grid-cols-3'} gap-6`}>
           <div className={isApp ? '' : 'lg:col-span-2'}>
             {/* Tabs */}

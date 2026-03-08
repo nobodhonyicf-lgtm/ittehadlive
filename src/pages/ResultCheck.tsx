@@ -13,6 +13,7 @@ import { GraduationCap, Search, User, Printer } from "lucide-react";
 import { getGradeFromMarks, getOverallGPA, getOverallGrade } from "@/lib/grading";
 import { toBengali } from "@/lib/bengali";
 import { useIsApp } from "@/hooks/useIsApp";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const ResultCheck = () => {
   const isApp = useIsApp();
@@ -135,6 +136,7 @@ const ResultCheck = () => {
     <Wrapper>
       <SEOHead title="রেজাল্ট চেক করুন" description="ইত্তেহাদুল মাদারিসের পরীক্ষার ফলাফল — রোল ও রেজিস্ট্রেশন নম্বর দিয়ে রেজাল্ট দেখুন।" keywords="রেজাল্ট, পরীক্ষা, মাদরাসা, ফলাফল" />
       <div className={`max-w-4xl mx-auto px-4 ${isApp ? 'py-4' : 'py-8'}`}>
+        <Breadcrumbs items={[{ label: "রেজাল্ট চেক" }]} />
         <div className="text-center mb-6 print:hidden">
           {isApp ? (
             <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-2xl p-6 mb-4 shadow-lg">

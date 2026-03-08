@@ -9,6 +9,7 @@ import { useBranches, useStudents } from "@/hooks/useBoardData";
 import { Users, Search, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "react-router-dom";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const STUDENTS_PER_PAGE = 12;
 
@@ -35,6 +36,7 @@ const StudentDirectory = () => {
     <Layout>
       <SEOHead title="শিক্ষার্থী ডিরেক্টরি" description="ইত্তেহাদুল মাদারিসের শিক্ষার্থী অনুসন্ধান — শাখা ও ক্লাস অনুযায়ী শিক্ষার্থীর তথ্য দেখুন।" keywords="শিক্ষার্থী, ডিরেক্টরি, মাদরাসা, ছাত্র" />
       <div className="px-4 py-8">
+        <Breadcrumbs items={[{ label: "শিক্ষার্থী ডিরেক্টরি" }]} />
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary flex items-center justify-center gap-3">
             <Users size={32} />

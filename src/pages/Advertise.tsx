@@ -9,6 +9,7 @@ import { toBengaliNumber } from "@/lib/bengali";
 import { useSiteSettings } from "@/hooks/useData";
 import { Megaphone, Monitor, Sidebar, FileText, LayoutTemplate, Phone, Mail, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const slotIcons: Record<string, any> = {
   header: Monitor,
@@ -32,6 +33,7 @@ const Advertise = () => {
     <Layout>
       <SEOHead title="বিজ্ঞাপন দিন" description="আমাদের ওয়েবসাইট ও অ্যাপে বিজ্ঞাপন দিন" />
       <div className="container mx-auto px-4 py-8 max-w-5xl">
+        <Breadcrumbs items={[{ label: "বিজ্ঞাপন দিন" }]} />
         {/* Hero */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-medium px-4 py-2 rounded-full mb-4">

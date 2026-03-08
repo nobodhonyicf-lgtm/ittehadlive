@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy, Star, Lock, ChevronRight, Gamepad2, Medal, Crown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const QuizHome = () => {
   const navigate = useNavigate();
@@ -118,6 +119,7 @@ const QuizHome = () => {
     <Layout>
       <SEOHead title="কুইজ গেম" />
       <div className="max-w-3xl mx-auto px-4 py-8">
+        <Breadcrumbs items={[{ label: "কুইজ গেম" }]} />
         {/* Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-3">

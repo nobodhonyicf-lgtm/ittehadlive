@@ -6,6 +6,7 @@ import Layout from "@/components/layout/Layout";
 import AppLayout from "@/components/app/AppLayout";
 import SEOHead from "@/components/SEOHead";
 import { useIsApp } from "@/hooks/useIsApp";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -140,6 +141,7 @@ const JobApply = () => {
 
   const content = (
     <div className="max-w-2xl mx-auto px-4 py-6">
+      <Breadcrumbs items={[{ label: "শিক্ষক তালিকা", href: "/teachers" }, { label: job?.title || "নিয়োগ আবেদন" }]} />
       <SEOHead title={job ? `আবেদন: ${job.title}` : "নিয়োগ আবেদন"} />
 
       {/* Job Info Card */}

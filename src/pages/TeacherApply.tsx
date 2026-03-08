@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import { CheckCircle, LogIn, Upload, Video, ShieldCheck, AlertTriangle, ClipboardList, Camera } from "lucide-react";
 import { Link } from "react-router-dom";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 /* ─── Simple Math CAPTCHA ─── */
 const useCaptcha = () => {
@@ -164,6 +165,7 @@ const TeacherApply = () => {
     <Layout>
       <SEOHead title="শিক্ষক আবেদন ফর্ম" description="শিক্ষক হিসেবে আবেদন করুন" />
       <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <Breadcrumbs items={[{ label: "শিক্ষক তালিকা", href: "/teachers" }, { label: "শিক্ষক আবেদন" }]} />
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold flex items-center justify-center gap-2"><ClipboardList size={24} /> শিক্ষক আবেদন ফর্ম</h1>
           <p className="text-muted-foreground text-sm mt-1">নিচের ফর্মটি পূরণ করে শিক্ষক হিসেবে আবেদন করুন</p>

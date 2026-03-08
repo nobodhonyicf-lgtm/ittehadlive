@@ -12,6 +12,7 @@ import { ShoppingCart, Search, Star, BookOpen } from "lucide-react";
 import { toBengali } from "@/lib/bengali";
 import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const BookStore = () => {
   const isApp = useIsApp();
@@ -46,6 +47,7 @@ const BookStore = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 pb-10">
+        <Breadcrumbs items={[{ label: "প্রকাশনা" }]} />
         {/* Search & Filter Bar */}
         <div className="flex flex-col md:flex-row gap-3 mb-6 items-center justify-between">
           <div className="relative w-full md:w-80">

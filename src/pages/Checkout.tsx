@@ -16,6 +16,7 @@ import { toBengali } from "@/lib/bengali";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const DELIVERY_CHARGE_DHAKA = 60;
 const DELIVERY_CHARGE_OUTSIDE = 120;
@@ -199,14 +200,7 @@ const Checkout = () => {
     <Layout>
       <SEOHead title="চেকআউট" />
       <div className="max-w-5xl mx-auto px-4 py-6">
-        {/* Breadcrumb-style steps */}
-        <div className="flex items-center gap-2 text-sm mb-6 text-muted-foreground">
-          <Link to="/cart" className="hover:text-primary transition-colors">কার্ট</Link>
-          <ChevronRight size={14} />
-          <span className="text-primary font-semibold">চেকআউট</span>
-          <ChevronRight size={14} />
-          <span>অর্ডার কনফার্ম</span>
-        </div>
+        <Breadcrumbs items={[{ label: "কার্ট", href: "/cart" }, { label: "চেকআউট" }]} />
 
         {/* Login prompt for guests */}
         {!user && (

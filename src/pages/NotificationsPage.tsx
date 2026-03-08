@@ -7,6 +7,7 @@ import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { toBengali } from "@/lib/bengali";
 import { useEffect } from "react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const NotificationsPage = () => {
   const isApp = useIsApp();
@@ -69,6 +70,7 @@ const NotificationsPage = () => {
 
   const content = (
     <div className="max-w-2xl mx-auto px-4 py-6">
+      <Breadcrumbs items={[{ label: "নোটিফিকেশন" }]} />
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">

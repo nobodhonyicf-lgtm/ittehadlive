@@ -3,6 +3,7 @@ import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { Progress } from "@/components/ui/progress";
 import {
   Download, Smartphone, Monitor, CheckCircle, Share, PlusSquare,
@@ -91,6 +92,7 @@ const Install = () => {
     <Layout>
       <SEOHead title="অ্যাপ ডাউনলোড করুন" description="ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ অ্যাপ ডাউনলোড করুন — অ্যাপ স্টোর ছাড়াই!" />
       <div className="max-w-2xl mx-auto px-4 py-10">
+        <Breadcrumbs items={[{ label: "অ্যাপ ইনস্টল" }]} />
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
             <Smartphone className="text-primary-foreground" size={36} />

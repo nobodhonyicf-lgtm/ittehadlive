@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { GraduationCap, MapPin, BookOpen, Users, UserCircle, Phone, Mail, Star, BadgeCheck } from "lucide-react";
 import { toBengaliNumber } from "@/lib/bengali";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const AssignedTeachers = () => {
   const { data: teachers, isLoading } = useQuery({
@@ -37,6 +38,7 @@ const AssignedTeachers = () => {
     <Layout>
       <SEOHead title="খেদমতপ্রাপ্ত শিক্ষক" description="প্রতিষ্ঠানে খেদমতরত শিক্ষকগণ" />
       <div className="container mx-auto px-4 py-6 max-w-5xl">
+        <Breadcrumbs items={[{ label: "শিক্ষক তালিকা", href: "/teachers" }, { label: "খেদমতপ্রাপ্ত শিক্ষক" }]} />
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-medium px-3 py-1.5 rounded-full mb-3">
             <BadgeCheck size={14} /> খেদমতপ্রাপ্ত

@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsApp } from "@/hooks/useIsApp";
 import SEOHead from "@/components/SEOHead";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const BranchDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,6 +54,9 @@ const BranchDetail = () => {
   return (
     <Layout fullWidth>
       <SEOHead title={`${branch.name} | ইত্তেহাদুল মাদারিস`} description={branch.address || branch.name} />
+      <div className="px-4 pt-4">
+        <Breadcrumbs items={[{ label: "শাখা সমূহ", href: "/branches" }, { label: branch.name }]} />
+      </div>
 
       {/* Large Hero Banner - inspired by uqicm.com */}
       <div className="relative w-full bg-gradient-to-b from-[hsl(var(--primary))] to-[hsl(var(--primary)/0.85)] overflow-hidden">

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, LocateFixed, Compass, Smartphone, MapPin } from "lucide-react";
 import AppLayout from "@/components/app/AppLayout";
 import { useIsApp } from "@/hooks/useIsApp";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const KAABA_LAT = 21.4225;
 const KAABA_LNG = 39.8262;
@@ -205,6 +206,7 @@ const QiblaContent = () => {
 
   return (
     <div className="max-w-md mx-auto px-4 py-8 text-center">
+      <Breadcrumbs items={[{ label: "কিবলা কম্পাস" }]} />
       <h1 className="text-2xl font-bold mb-2 flex items-center justify-center gap-2">
         <Compass className="text-primary" /> কিবলা কম্পাস
       </h1>

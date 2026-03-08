@@ -6,6 +6,7 @@ import Sidebar from "@/components/home/Sidebar";
 import { Download, Share2, FileImage, FileText, Copy, Facebook, MessageCircle } from "lucide-react";
 import { useIsApp } from "@/hooks/useIsApp";
 import { useSiteSettings } from "@/hooks/useData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -280,6 +281,7 @@ const NoticeView = () => {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-6">
+        <Breadcrumbs items={[{ label: notice?.title || "নোটিশ" }]} />
         <div className={`grid grid-cols-1 ${isApp ? "" : "lg:grid-cols-3"} gap-6`}>
           <div className={isApp ? "" : "lg:col-span-2"}>
             {isLoading ? (
