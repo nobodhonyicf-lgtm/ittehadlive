@@ -47,21 +47,16 @@ const AdminSettings = () => {
     },
   });
 
-  // Helper to sync VAPID keys to server secrets
-  const syncVapidToSecrets = async (key: string, value: string) => {
+  // When VAPID keys change, clear old push subscriptions (they won't work with new keys)
+  const handleVapidKeyChange = async (key: string) => {
     if (key !== 'vapid_public_key' && key !== 'vapid_private_key') return;
     try {
-      const payload: Record<string, string> = {};
-      payload[key] = value;
-      const { error } = await supabase.functions.invoke('sync-vapid-keys', { body: payload });
-      if (error) {
-        console.error('VAPID sync error:', error);
-        toast.error('VAPID সিক্রেট সিঙ্ক ব্যর্থ: ' + error.message);
-      } else {
-        toast.success('VAPID সিক্রেট সার্ভারে সিঙ্ক করা হয়েছে। পুরানো সাবস্ক্রিপশন মুছে দেওয়া হয়েছে।');
-      }
-    } catch (e: any) {
-      console.error('VAPID sync failed:', e);
+      // Clear all push subscriptions since they're tied to old VAPID keys
+      const { error } = await supabase.from('push_subscriptions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) console.error('Failed to clear push subs:', error);
+      else toast.info('পুরানো পুশ সাবস্ক্রিপশন মুছে দেওয়া হয়েছে। ব্যবহারকারীদের পুনরায় সাবস্ক্রাইব করতে হবে।');
+    } catch (e) {
+      console.error('Clear push subs error:', e);
     }
   };
 
@@ -69,8 +64,7 @@ const AdminSettings = () => {
     mutationFn: async ({ id, value, key }: { id: string; value: string; key?: string }) => {
       const { error } = await supabase.from("site_settings").update({ value }).eq("id", id);
       if (error) throw error;
-      // Sync VAPID keys to server secrets
-      if (key) await syncVapidToSecrets(key, value);
+      if (key) await handleVapidKeyChange(key);
     },
     onSuccess: () => { toast.success("সংরক্ষিত"); qc.invalidateQueries({ queryKey: ["admin_settings"] }); qc.invalidateQueries({ queryKey: ["site_settings"] }); },
   });
