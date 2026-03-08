@@ -17,7 +17,10 @@ const categoryMeta: Record<string, { label: string; emoji: string; gradient: str
 };
 
 const IslamicContentDetail = () => {
-  const { category, id } = useParams<{ category: string; id: string }>();
+  const { category: paramCategory, id } = useParams<{ category: string; id: string }>();
+  const location = useLocation();
+  // Extract category from URL path (e.g., /masala/abc -> masala)
+  const category = paramCategory || location.pathname.split("/")[1];
   const { data: allContents, isLoading } = useIslamicContents();
   const isApp = useIsApp();
 
