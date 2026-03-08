@@ -351,7 +351,8 @@ const TeacherDirectory = () => {
   };
 
   const totalTeachers = teachers?.length || 0;
-  const availableTeachers = teachers?.filter(t => t.is_available)?.length || 0;
+  const availableTeachers = availableTeachersList.length;
+  const assignedTeachers = assignedTeachersList.length;
 
   return (
     <Layout>
