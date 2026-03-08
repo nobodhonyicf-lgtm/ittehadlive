@@ -67,7 +67,20 @@ const TeachersTab = () => {
       if (editId) { const { error } = await supabase.from("teachers").update(payload).eq("id", editId); if (error) throw error; }
       else { const { error } = await supabase.from("teachers").insert([payload]); if (error) throw error; }
     },
-    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); setEditId(null); queryClient.invalidateQueries({ queryKey: ["admin_teachers"] }); },
+    onSuccess: () => {
+      toast.success("সংরক্ষিত");
+      if (sendPush && !editId) {
+        supabase.functions.invoke("send-push", {
+          body: {
+            title: `📋 নতুন শিক্ষক: ${form.name}`,
+            body: `${form.subject} বিষয়ে নতুন শিক্ষক যুক্ত হয়েছেন${form.district ? ` (${form.district})` : ""}`,
+            url: "/teachers",
+          },
+        }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
+      }
+      setSendPush(false);
+      setOpen(false); setEditId(null); queryClient.invalidateQueries({ queryKey: ["admin_teachers"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
