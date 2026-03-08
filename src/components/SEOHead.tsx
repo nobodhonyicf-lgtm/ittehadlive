@@ -61,7 +61,7 @@ const SEOHead = ({
     ],
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "সিদ্ধিরগঞ্জ",
+      "streetAddress": "২১১/১ আরামবাগ, গোদনাইল, সিদ্ধিরগঞ্জ",
       "addressLocality": "নারায়ণগঞ্জ",
       "postalCode": "1432",
       "addressCountry": "BD",
@@ -75,6 +75,7 @@ const SEOHead = ({
     ],
     "contactPoint": {
       "@type": "ContactPoint",
+      "telephone": "+8801856878690",
       "contactType": "customer service",
       "availableLanguage": ["Bengali", "Arabic"],
     },
