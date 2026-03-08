@@ -7,11 +7,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 
 const DISMISS_KEY = "push_prompt_dismissed";
+const SUBSCRIBED_KEY = "push_subscribed";
 
 const WebPushPrompt = () => {
   const { isSupported, isSubscribed, isLoading, subscribe } = usePushNotifications();
   const [dismissed, setDismissed] = useState(() => {
-    return sessionStorage.getItem(DISMISS_KEY) === "1";
+    return localStorage.getItem(DISMISS_KEY) === "1" || localStorage.getItem(SUBSCRIBED_KEY) === "1";
   });
   const [show, setShow] = useState(false);
 
