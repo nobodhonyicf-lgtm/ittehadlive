@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, LocateFixed, Compass, Smartphone, MapPin } from "lucide-react";
 import AppLayout from "@/components/app/AppLayout";
 import { useIsApp } from "@/hooks/useIsApp";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const KAABA_LAT = 21.4225;
 const KAABA_LNG = 39.8262;
