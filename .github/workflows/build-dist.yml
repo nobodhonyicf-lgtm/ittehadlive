@@ -26,6 +26,9 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://laasotunayiivssffhnu.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhYXNvdHVuYXlpaXZzc2ZmaG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0NDUzNDgsImV4cCI6MjA4NjAyMTM0OH0.b3dPEebr3J3o-l2OAZHHpSb13wj__S9XBPmj3Sa5Yy4
 
       - name: Commit dist back to repo
         run: |
