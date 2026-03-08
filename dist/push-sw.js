@@ -33,20 +33,23 @@ self.addEventListener('push', function(event) {
   var options = {
     body: data.body || 'নতুন আপডেট পাওয়া গেছে',
     icon: data.icon || '/pwa-192x192.png',
-    badge: data.badge || '/pwa-192x192.png',
-    image: data.image || undefined,
+    badge: '/badge-mono.png',
     vibrate: [200, 100, 200, 100, 200],
     data: data.data || { url: '/' },
     dir: 'auto',
     lang: 'bn',
     tag: data.tag || 'ittehad-push-' + Date.now(),
     renotify: true,
-    requireInteraction: true,
+    requireInteraction: false,
     actions: [
       { action: 'open', title: 'দেখুন' },
     ],
     silent: false,
   };
+  // Only add large image if explicitly provided (avoid duplicate logo)
+  if (data.image) {
+    options.image = data.image;
+  }
 
   event.waitUntil(
     self.registration.showNotification(data.title, options)
