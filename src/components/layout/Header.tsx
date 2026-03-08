@@ -144,7 +144,7 @@ const Header = () => {
         </div>
       </div>
 
-      <nav className="bg-primary text-primary-foreground">
+      <nav className="bg-primary/95 backdrop-blur-xl text-primary-foreground">
         <div className="max-w-[1200px] mx-auto px-4">
           <ul className={`${mobileOpen ? "block py-2" : "hidden"} md:flex md:items-center md:justify-center`}>
             {menuItems?.map((item) => (
