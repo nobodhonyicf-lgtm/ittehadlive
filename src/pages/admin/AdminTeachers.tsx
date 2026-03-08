@@ -506,15 +506,21 @@ const JobPostingsTab = () => {
                 </div>
               </div>
               <div className="flex gap-1 shrink-0">
-                {canEdit && <Button variant="ghost" size="icon" title="পুশ নোটিফিকেশন পাঠান" onClick={() => {
-                  supabase.functions.invoke("send-push", {
-                    body: {
-                      title: `📢 নিয়োগ বিজ্ঞপ্তি: ${j.title}`,
-                      body: `${j.subject ? j.subject + " বিষয়ে " : ""}নিয়োগ বিজ্ঞপ্তি${j.location ? ` (${j.location})` : ""}`,
-                      url: "/teachers",
-                    },
-                  }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
-                }}><Bell size={16} className="text-primary" /></Button>}
+                {canEdit && <Button variant="ghost" size="icon" title="পুশ নোটিফিকেশন পাঠান" onClick={async () => {
+                   let branchLogo: string | undefined;
+                   if (j.branch_id) {
+                     const { data: br } = await supabase.from("branches").select("image_url").eq("id", j.branch_id).maybeSingle();
+                     branchLogo = br?.image_url || undefined;
+                   }
+                   supabase.functions.invoke("send-push", {
+                     body: {
+                       title: `📢 নিয়োগ বিজ্ঞপ্তি: ${j.title}`,
+                       body: `${j.subject ? j.subject + " বিষয়ে " : ""}নিয়োগ বিজ্ঞপ্তি${j.location ? ` (${j.location})` : ""}`,
+                       url: `/teachers?tab=jobs&selected=${j.id}`,
+                       image: branchLogo,
+                     },
+                   }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
+                 }}><Bell size={16} className="text-primary" /></Button>}
                 {canEdit && <Button variant="ghost" size="icon" onClick={() => {
                   setEditId(j.id);
                   setForm({ title: j.title, description: j.description || "", subject: j.subject || "", qualification_required: j.qualification_required || "", experience_required: j.experience_required || "", salary_range: j.salary_range || "", location: j.location || "", deadline: j.deadline || "", is_active: j.is_active ?? true, branch_id: j.branch_id || "" });
