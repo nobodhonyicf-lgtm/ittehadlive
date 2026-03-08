@@ -44,7 +44,7 @@ const DropdownMenu = ({ label, items, onNavigate }: { label: string; items: { la
         {label} <ChevronDown size={12} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <ul className="md:absolute md:top-full md:left-0 md:mt-1 md:bg-primary md:rounded-lg md:shadow-xl md:min-w-[140px] md:border md:border-primary-foreground/10 md:z-50 md:py-1">
+        <ul className="md:absolute md:top-full md:left-0 md:mt-1 md:bg-card/95 md:backdrop-blur-xl md:rounded-lg md:shadow-xl md:min-w-[140px] md:border md:border-border/50 md:z-50 md:py-1 md:text-foreground">
           {items.map((item) => (
             <li key={item.path}>
               <Link
