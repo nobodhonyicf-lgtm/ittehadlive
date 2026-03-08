@@ -159,6 +159,8 @@ const App = () => (
                 <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
                 <Route path="/share/:type/:id" element={<ShareRedirect />} />
                 <Route path="/share/:type/:category/:id" element={<ShareRedirect />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/reset-password" element={<ResetPassword />} />
                 <Route path="/admin/*" element={<AdminDashboard />} />
