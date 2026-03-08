@@ -46,6 +46,7 @@ const WebPushPrompt = () => {
     const ok = await subscribe(vapidKey);
     if (ok) {
       toast.success("নোটিফিকেশন চালু করা হয়েছে!");
+      localStorage.setItem(SUBSCRIBED_KEY, "1");
       setShow(false);
     } else {
       if (Notification.permission === "denied") {
