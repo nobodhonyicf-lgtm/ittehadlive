@@ -6,6 +6,7 @@ import AppHeader from "@/components/app/AppHeader";
 import AppBottomNav from "@/components/app/AppBottomNav";
 import HeaderAd from "@/components/ads/HeaderAd";
 import FooterAd from "@/components/ads/FooterAd";
+import WebPushPrompt from "@/components/WebPushPrompt";
 
 const Layout = ({ children, fullWidth }: { children: ReactNode; fullWidth?: boolean }) => {
   const isMobile = useIsMobile();
@@ -39,6 +40,7 @@ const Layout = ({ children, fullWidth }: { children: ReactNode; fullWidth?: bool
       </main>
       <FooterAd />
       <Footer />
+      <WebPushPrompt />
     </div>
   );
 };
