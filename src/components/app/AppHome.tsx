@@ -11,6 +11,7 @@ import AppIslamicContent from "./AppIslamicContent";
 import AppIslamicNav from "./AppIslamicNav";
 import AppTeacherSlider from "./AppTeacherSlider";
 import AppJobPostings from "./AppJobPostings";
+import AppBannerAd from "./AppBannerAd";
 
 const AppHome = () => {
   return (
@@ -19,6 +20,9 @@ const AppHome = () => {
       <div className="px-4 py-4 space-y-4">
         <div className="animate-fade-in" style={{ animationDelay: "0.05s", animationFillMode: "both" }}>
           <AppQuickActions />
+        </div>
+        <div className="animate-fade-in" style={{ animationDelay: "0.07s", animationFillMode: "both" }}>
+          <AppBannerAd position="header" />
         </div>
         <div className="animate-fade-in" style={{ animationDelay: "0.08s", animationFillMode: "both" }}>
           <AppTeacherSlider />
@@ -29,6 +33,9 @@ const AppHome = () => {
         <div className="animate-fade-in" style={{ animationDelay: "0.12s", animationFillMode: "both" }}>
           <AppNoticeSection />
         </div>
+        <div className="animate-fade-in" style={{ animationDelay: "0.13s", animationFillMode: "both" }}>
+          <AppBannerAd position="in_post" />
+        </div>
         <div className="animate-fade-in" style={{ animationDelay: "0.14s", animationFillMode: "both" }}>
           <AppIslamicNav />
         </div>
@@ -37,6 +44,9 @@ const AppHome = () => {
         </div>
         <div className="animate-fade-in" style={{ animationDelay: "0.18s", animationFillMode: "both" }}>
           <AppIslamicContent />
+        </div>
+        <div className="animate-fade-in" style={{ animationDelay: "0.19s", animationFillMode: "both" }}>
+          <AppBannerAd position="footer" />
         </div>
         <div className="animate-fade-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
           <AppPollWidget />

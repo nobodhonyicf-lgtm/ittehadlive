@@ -4,7 +4,7 @@ import {
   Smartphone, BookOpen, GraduationCap, Bookmark, Globe, Heart, FileText, ShoppingBag,
   BookMarked, Languages, Palette, Navigation, LayoutDashboard, Newspaper, Image, Video,
   Mail, Tag, Building2, ClipboardList, Package, MessageSquare, Clock, Users, BarChart3,
-  Camera, Menu as MenuIcon,
+  Camera, Menu as MenuIcon, Megaphone,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useQuery } from "@tanstack/react-query";
@@ -131,6 +131,7 @@ const AppSettings = () => {
   const [cacheSize, setCacheSize] = useState<string | null>(null);
   const [detecting, setDetecting] = useState(false);
   const [district, setDistrict] = useSelectedDistrict();
+  const [hideAds, setHideAds] = useState(() => localStorage.getItem("app-hide-ads") === "true");
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains("dark"));
@@ -447,6 +448,27 @@ const AppSettings = () => {
                   <Plus size={16} />
                 </button>
               </div>
+            </div>
+
+            {/* Banner Ads Toggle */}
+            <div className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-yellow-500 flex items-center justify-center">
+                  <Megaphone size={18} className="text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">বিজ্ঞাপন বন্ধ করুন</p>
+                  <p className="text-[11px] text-muted-foreground">{hideAds ? "বিজ্ঞাপন লুকানো আছে" : "ব্যানার বিজ্ঞাপন দেখা যাচ্ছে"}</p>
+                </div>
+              </div>
+              <Switch
+                checked={hideAds}
+                onCheckedChange={(v) => {
+                  setHideAds(v);
+                  localStorage.setItem("app-hide-ads", v ? "true" : "false");
+                  toast.success(v ? "বিজ্ঞাপন বন্ধ করা হয়েছে" : "বিজ্ঞাপন চালু করা হয়েছে");
+                }}
+              />
             </div>
           </div>
         </div>
