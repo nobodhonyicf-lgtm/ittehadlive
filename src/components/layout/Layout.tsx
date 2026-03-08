@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsApp } from "@/hooks/useIsApp";
 import AppHeader from "@/components/app/AppHeader";
 import AppBottomNav from "@/components/app/AppBottomNav";
 import HeaderAd from "@/components/ads/HeaderAd";
@@ -9,10 +9,10 @@ import FooterAd from "@/components/ads/FooterAd";
 import WebPushPrompt from "@/components/WebPushPrompt";
 
 const Layout = ({ children, fullWidth }: { children: ReactNode; fullWidth?: boolean }) => {
-  const isMobile = useIsMobile();
+  const isApp = useIsApp();
 
-  // Mobile: app-like layout with bottom nav
-  if (isMobile) {
+  // App mode (PWA standalone / Capacitor): app-like layout with bottom nav
+  if (isApp) {
     return (
       <div className="min-h-screen flex flex-col bg-background pb-16">
         <AppHeader />
