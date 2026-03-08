@@ -126,6 +126,15 @@ const AdminNotices = () => {
                     <TableCell><span className={`text-xs px-2 py-1 rounded-full font-medium ${n.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{n.is_active ? "সক্রিয়" : "নিষ্ক্রিয়"}</span></TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-0.5">
+                        {canEdit && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title="পুশ নোটিফিকেশন পাঠান" onClick={() => {
+                          supabase.functions.invoke("send-push", {
+                            body: {
+                              title: "📢 নোটিশ",
+                              body: n.title,
+                              url: `/notice/${n.id}`,
+                            },
+                          }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
+                        }}><Bell size={15} /></Button>}
                         {canEdit && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => { setEditId(n.id); setForm({ title: n.title, content: n.content || "", is_active: n.is_active ?? true, source: (n as any).source || "" }); setOpen(true); }}><Edit size={15} /></Button>}
                         {canDelete && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteMutation.mutate(n.id)}><Trash2 size={15} /></Button>}
                       </div>
