@@ -261,8 +261,6 @@ const IslamicListContent = ({
           </div>
         )}
       </div>
-
-      {selected && <ContentModal item={selected} onClose={() => setSelected(null)} fontSize={fontSize} category={category} />}
     </div>
   );
 };
