@@ -205,9 +205,15 @@ const ZakatContent = () => {
                   <ChevronLeft size={14} /> পূর্ববর্তী ধাপে যান
                 </button>
               )}
-              {step === 1 && (
+                {step === 1 && (
                 <button
-                  onClick={() => setStep(2)}
+                  onClick={() => {
+                    if (!zakatYearType || !zakatYearDate) {
+                      alert("যাকাত বর্ষের ধরণ এবং যাকাত বর্ষ পূর্ণ হওয়ার তারিখ পূরণ করা আবশ্যক।");
+                      return;
+                    }
+                    setStep(2);
+                  }}
                   className="flex items-center gap-1 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium ml-auto hover:opacity-90 transition-opacity"
                 >
                   পরবর্তী ধাপে যান <ChevronRight size={14} />
