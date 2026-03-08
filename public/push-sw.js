@@ -1,13 +1,17 @@
 // Push notification service worker - handles background push notifications
-// IMPORTANT: This file runs independently of the main app
+// This file is imported into the main workbox SW via importScripts
+// It also works standalone if registered directly
 
-self.addEventListener('install', function(event) {
-  event.waitUntil(self.skipWaiting());
-});
+// Only add install/activate if this is the main SW (not imported via importScripts)
+if (typeof __WB_MANIFEST === 'undefined') {
+  self.addEventListener('install', function(event) {
+    event.waitUntil(self.skipWaiting());
+  });
 
-self.addEventListener('activate', function(event) {
-  event.waitUntil(self.clients.claim());
-});
+  self.addEventListener('activate', function(event) {
+    event.waitUntil(self.clients.claim());
+  });
+}
 
 self.addEventListener('push', function(event) {
   console.log('[Push SW] Push event received');
@@ -35,7 +39,7 @@ self.addEventListener('push', function(event) {
     data: data.data || { url: '/' },
     dir: 'auto',
     lang: 'bn',
-    tag: 'ittehad-push-' + Date.now(),
+    tag: data.tag || 'ittehad-push-' + Date.now(),
     renotify: true,
     requireInteraction: true,
     actions: [
@@ -59,16 +63,26 @@ self.addEventListener('notificationclick', function(event) {
   console.log('[Push SW] Notification clicked');
   event.notification.close();
   
-  var url = event.notification.data && event.notification.data.url ? event.notification.data.url : '/';
+  var url = '/';
+  if (event.notification.data && event.notification.data.url) {
+    url = event.notification.data.url;
+  }
   
+  // If an action button was clicked
+  if (event.action === 'open') {
+    // Use the URL from notification data
+  }
+
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      // Try to focus an existing window
       for (var i = 0; i < clientList.length; i++) {
         var client = clientList[i];
         if ('focus' in client) {
           return client.navigate(url).then(function(c) { return c.focus(); });
         }
       }
+      // Open a new window if none exists
       if (self.clients.openWindow) {
         return self.clients.openWindow(url);
       }
@@ -78,4 +92,11 @@ self.addEventListener('notificationclick', function(event) {
 
 self.addEventListener('notificationclose', function(event) {
   console.log('[Push SW] Notification closed');
+});
+
+// Handle push subscription changes (e.g., browser refreshes the subscription)
+self.addEventListener('pushsubscriptionchange', function(event) {
+  console.log('[Push SW] Subscription changed');
+  // The subscription has expired or been invalidated
+  // The app will need to re-subscribe on next visit
 });
