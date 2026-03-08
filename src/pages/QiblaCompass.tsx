@@ -357,7 +357,11 @@ const QiblaContent = () => {
 
           {!headingReady && (
             <p className="text-xs text-muted-foreground bg-amber-500/10 text-amber-700 rounded-lg p-3 flex items-center gap-2">
-              <Smartphone size={14} className="shrink-0" /> সেরা ফলাফলের জন্য মোবাইল ফোন ব্যবহার করুন। কম্পাস ক্যালিব্রেট করতে ফোনটি ∞-আকৃতিতে ঘোরান।
+              <Smartphone size={14} className="shrink-0" /> সেরা ফলাফলের জন্য মোবাইল ফোন ব্যবহার করুন। কম্পাস ক্যালিব্রেট করতে ফোনটি
+              <svg width="18" height="14" viewBox="0 0 40 20" className="inline-block shrink-0 rotate-90" aria-label="ইনফিনিটি">
+                <path d="M10 10C10 6 6 3 3 6C0 9 0 11 3 14C6 17 10 14 10 10ZM10 10C10 14 14 17 17 14C20 11 20 9 17 6C14 3 10 6 10 10Z" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" transform="translate(10, 0)" />
+              </svg>
+              আকৃতিতে ঘোরান।
             </p>
           )}
 
