@@ -29,16 +29,22 @@ const WebPushPrompt = () => {
     },
   });
 
-  // Auto-sync: if permission is already granted but not subscribed in DB, auto-subscribe silently
+  // Auto-sync: re-subscribe if VAPID key changed or if permission granted but not subscribed
   useEffect(() => {
     if (!isSupported || isLoading || autoSynced || !vapidKey) return;
-    if (Notification.permission === 'granted' && !isSubscribed) {
-      console.log('[WebPush] Permission granted but not subscribed, auto-subscribing...');
+    
+    const storedVapidKey = localStorage.getItem(VAPID_KEY_USED);
+    const vapidKeyChanged = storedVapidKey && storedVapidKey !== vapidKey;
+    
+    if (Notification.permission === 'granted' && (!isSubscribed || vapidKeyChanged)) {
+      const reason = vapidKeyChanged ? 'VAPID key changed, re-subscribing...' : 'Permission granted but not subscribed, auto-subscribing...';
+      console.log(`[WebPush] ${reason}`);
       setAutoSynced(true);
       subscribe(vapidKey).then((ok) => {
         if (ok) {
           console.log('[WebPush] Auto-subscribe successful');
           localStorage.setItem(SUBSCRIBED_KEY, "1");
+          localStorage.setItem(VAPID_KEY_USED, vapidKey);
         } else {
           console.log('[WebPush] Auto-subscribe failed');
         }
