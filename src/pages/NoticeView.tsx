@@ -41,12 +41,21 @@ const NoticeView = () => {
         let scale = Math.min(1, available / PAD_W);
         if (isApp) scale = Math.min(scale, 0.42);
         setPadScale(scale);
+        // Calculate actual height of pad content and scale it
+        const padEl = padRef.current;
+        const actualH = padEl ? padEl.scrollHeight : PAD_H;
+        setScaledHeight(actualH * scale);
       }
     };
     updateScale();
+    // Re-measure after content loads
+    const timer = setTimeout(updateScale, 500);
     window.addEventListener("resize", updateScale);
-    return () => window.removeEventListener("resize", updateScale);
-  }, [isApp]);
+    return () => {
+      window.removeEventListener("resize", updateScale);
+      clearTimeout(timer);
+    };
+  }, [isApp, notice]);
 
   const { data: notice, isLoading } = useQuery({
     queryKey: ["notice", id],
