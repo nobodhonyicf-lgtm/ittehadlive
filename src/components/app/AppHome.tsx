@@ -11,6 +11,7 @@ import AppIslamicContent from "./AppIslamicContent";
 import AppIslamicNav from "./AppIslamicNav";
 import AppTeacherSlider from "./AppTeacherSlider";
 import AppJobPostings from "./AppJobPostings";
+import AppBannerAd from "./AppBannerAd";
 
 const AppHome = () => {
   return (
