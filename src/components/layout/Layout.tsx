@@ -41,7 +41,7 @@ const Layout = ({ children, fullWidth }: { children: ReactNode; fullWidth?: bool
       <FooterAd />
       <Footer />
       {/* Windows 11 Taskbar */}
-      <div className="w-full h-10 bg-card/80 backdrop-blur-xl border-t border-border/50 flex items-center justify-center gap-6 shrink-0 select-none z-[60]">
+      <div className="w-full h-10 bg-card/80 backdrop-blur-xl border-t border-border/50 flex items-center justify-center gap-6 shrink-0 select-none z-[60] sticky bottom-0">
         <div className="flex items-center gap-1 px-2.5 py-1 rounded-md hover:bg-muted/60 transition-colors cursor-default">
           <div className="w-4 h-4 rounded bg-primary/20 flex items-center justify-center">
             <div className="w-2 h-2 rounded-sm bg-primary" />

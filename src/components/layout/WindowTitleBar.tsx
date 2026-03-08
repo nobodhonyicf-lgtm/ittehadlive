@@ -5,7 +5,7 @@ const WindowTitleBar = () => {
   const { data: settings } = useSiteSettings();
 
   return (
-    <div className="w-full h-9 bg-card/80 backdrop-blur-xl border-b border-border/50 flex items-center justify-between px-3 select-none shrink-0 z-[60]">
+    <div className="w-full h-9 bg-card/80 backdrop-blur-xl border-b border-border/50 flex items-center justify-between px-3 select-none shrink-0 sticky top-0 z-[60]">
       {/* Left: App icon + title */}
       <div className="flex items-center gap-2 min-w-0">
         <Globe size={14} className="text-primary shrink-0" />
