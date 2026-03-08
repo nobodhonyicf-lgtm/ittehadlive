@@ -4,7 +4,7 @@ import {
   Smartphone, BookOpen, GraduationCap, Bookmark, Globe, Heart, FileText, ShoppingBag,
   BookMarked, Languages, Palette, Navigation, LayoutDashboard, Newspaper, Image, Video,
   Mail, Tag, Building2, ClipboardList, Package, MessageSquare, Clock, Users, BarChart3,
-  Camera, Menu as MenuIcon,
+  Camera, Menu as MenuIcon, Megaphone,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useQuery } from "@tanstack/react-query";
