@@ -234,6 +234,7 @@ const TeacherDirectory = () => {
   const [experienceFilter, setExperienceFilter] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [activeTab, setActiveTab] = useState<"available" | "assigned">("available");
   const loaderRef = useRef<HTMLDivElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
   const jobHighlightRef = useRef<HTMLDivElement>(null);
