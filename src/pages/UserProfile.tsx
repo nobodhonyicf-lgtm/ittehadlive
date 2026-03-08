@@ -18,6 +18,7 @@ import { User, Package, MessageSquare, LogOut, Save, Send, Search, Link as LinkI
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const statusMap: Record<string, { label: string; color: string }> = {
   pending: { label: "অপেক্ষমান", color: "bg-yellow-100 text-yellow-800" },
