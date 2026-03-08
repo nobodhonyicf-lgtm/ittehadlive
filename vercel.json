@@ -8,6 +8,10 @@
     { "source": "/share/book/:slug", "destination": "/api/og-proxy?type=book&slug=:slug" },
     { "source": "/share/branch/:id", "destination": "/api/og-proxy?type=branch&id=:id" },
     { "source": "/share/islamic/:category/:id", "destination": "/api/og-proxy?type=islamic&category=:category&id=:id" },
+    { "source": "/quran/:id", "destination": "/index.html" },
+    { "source": "/hadith/:id", "destination": "/index.html" },
+    { "source": "/dua/:id", "destination": "/index.html" },
+    { "source": "/masala/:id", "destination": "/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "redirects": [

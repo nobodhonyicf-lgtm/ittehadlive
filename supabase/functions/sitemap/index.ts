@@ -92,9 +92,9 @@ serve(async (req) => {
       urls += `\n  <url>\n    <loc>${siteUrl}/job-apply/${j.id}</loc>\n    <lastmod>${new Date(j.updated_at || j.created_at).toISOString()}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.7</priority>\n  </url>`;
     }
 
-    // Islamic contents
+    // Islamic contents - individual pages for SEO
     for (const ic of islamicRes.data || []) {
-      urls += `\n  <url>\n    <loc>${siteUrl}/${ic.category}?highlight=${ic.id}</loc>\n    <lastmod>${new Date(ic.updated_at || ic.created_at).toISOString()}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>`;
+      urls += `\n  <url>\n    <loc>${siteUrl}/${ic.category}/${ic.id}</loc>\n    <lastmod>${new Date(ic.updated_at || ic.created_at).toISOString()}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`;
     }
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}\n</urlset>`;
