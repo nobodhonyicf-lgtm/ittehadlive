@@ -39,6 +39,7 @@ const NoticeView = () => {
         const padding = 16;
         const available = containerWidth - padding;
         let scale = Math.min(1, available / PAD_W);
+        if (isApp) scale = Math.min(scale, 0.42);
         setPadScale(scale);
       }
     };
