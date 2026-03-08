@@ -131,6 +131,7 @@ const AppSettings = () => {
   const [cacheSize, setCacheSize] = useState<string | null>(null);
   const [detecting, setDetecting] = useState(false);
   const [district, setDistrict] = useSelectedDistrict();
+  const [hideAds, setHideAds] = useState(() => localStorage.getItem("app-hide-ads") === "true");
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains("dark"));
