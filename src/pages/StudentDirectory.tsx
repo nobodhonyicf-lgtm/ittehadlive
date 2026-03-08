@@ -9,6 +9,7 @@ import { useBranches, useStudents } from "@/hooks/useBoardData";
 import { Users, Search, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "react-router-dom";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const STUDENTS_PER_PAGE = 12;
 
