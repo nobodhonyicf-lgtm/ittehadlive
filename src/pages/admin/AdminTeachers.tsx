@@ -431,7 +431,10 @@ const JobPostingsTab = () => {
             url: "/teachers?tab=jobs",
             image: (branchLogo as any)?.image_url || undefined,
           },
-        }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
+        }).then(({ data, error }) => {
+          if (error) { toast.error("পুশ পাঠানো ব্যর্থ"); console.error(error); }
+          else toast.success(`পুশ পাঠানো হয়েছে (${data?.sent || 0}/${data?.total || 0})`);
+        });
       }
       setSendJobPush(false);
       setOpen(false); setEditId(null); queryClient.invalidateQueries({ queryKey: ["admin_job_postings"] });
@@ -507,19 +510,26 @@ const JobPostingsTab = () => {
               </div>
               <div className="flex gap-1 shrink-0">
                 {canEdit && <Button variant="ghost" size="icon" title="পুশ নোটিফিকেশন পাঠান" onClick={async () => {
-                   let branchLogo: string | undefined;
-                   if (j.branch_id) {
-                     const { data: br } = await supabase.from("branches").select("image_url").eq("id", j.branch_id).maybeSingle();
-                     branchLogo = br?.image_url || undefined;
+                   try {
+                     let branchLogo: string | undefined;
+                     if (j.branch_id) {
+                        const { data: br } = await supabase.from("branches").select("image_url").eq("id", j.branch_id).maybeSingle();
+                        branchLogo = br?.image_url || undefined;
+                     }
+                     const { data, error } = await supabase.functions.invoke("send-push", {
+                        body: {
+                          title: `📢 নিয়োগ বিজ্ঞপ্তি: ${j.title}`,
+                          body: `${j.subject ? j.subject + " বিষয়ে " : ""}নিয়োগ বিজ্ঞপ্তি${j.location ? ` (${j.location})` : ""}`,
+                          url: `/teachers?tab=jobs&selected=${j.id}`,
+                          image: branchLogo,
+                        },
+                     });
+                     if (error) throw error;
+                     toast.success(`পুশ পাঠানো হয়েছে (${data?.sent || 0}/${data?.total || 0})`);
+                   } catch (err: any) {
+                     console.error("Job push error:", err);
+                     toast.error("পুশ পাঠানো ব্যর্থ: " + (err?.message || "অজানা ত্রুটি"));
                    }
-                   supabase.functions.invoke("send-push", {
-                     body: {
-                       title: `📢 নিয়োগ বিজ্ঞপ্তি: ${j.title}`,
-                       body: `${j.subject ? j.subject + " বিষয়ে " : ""}নিয়োগ বিজ্ঞপ্তি${j.location ? ` (${j.location})` : ""}`,
-                       url: `/teachers?tab=jobs&selected=${j.id}`,
-                       image: branchLogo,
-                     },
-                   }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
                  }}><Bell size={16} className="text-primary" /></Button>}
                 {canEdit && <Button variant="ghost" size="icon" onClick={() => {
                   setEditId(j.id);
