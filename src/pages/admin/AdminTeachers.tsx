@@ -12,7 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2, GraduationCap, Search, Eye, CheckCircle, XCircle, Clock, BadgeCheck, UserPlus, BookOpen, MapPin, DollarSign, CalendarDays, Star, ClipboardList, Megaphone, Briefcase, ImageOff, Building2 } from "lucide-react";
+import { Plus, Edit, Trash2, GraduationCap, Search, Eye, CheckCircle, XCircle, Clock, BadgeCheck, UserPlus, BookOpen, MapPin, DollarSign, CalendarDays, Star, ClipboardList, Megaphone, Briefcase, ImageOff, Building2, Bell } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
@@ -23,6 +24,7 @@ const TeachersTab = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [sendPush, setSendPush] = useState(false);
   const [form, setForm] = useState({
     name: "", phone: "", email: "", address: "", district: "", subject: "",
     qualification: "", experience_years: 0, specialization: "", certification: "",
@@ -65,7 +67,20 @@ const TeachersTab = () => {
       if (editId) { const { error } = await supabase.from("teachers").update(payload).eq("id", editId); if (error) throw error; }
       else { const { error } = await supabase.from("teachers").insert([payload]); if (error) throw error; }
     },
-    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); setEditId(null); queryClient.invalidateQueries({ queryKey: ["admin_teachers"] }); },
+    onSuccess: () => {
+      toast.success("সংরক্ষিত");
+      if (sendPush && !editId) {
+        supabase.functions.invoke("send-push", {
+          body: {
+            title: `📋 নতুন শিক্ষক: ${form.name}`,
+            body: `${form.subject} বিষয়ে নতুন শিক্ষক যুক্ত হয়েছেন${form.district ? ` (${form.district})` : ""}`,
+            url: "/teachers",
+          },
+        }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
+      }
+      setSendPush(false);
+      setOpen(false); setEditId(null); queryClient.invalidateQueries({ queryKey: ["admin_teachers"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -133,6 +148,12 @@ const TeachersTab = () => {
                 <label className="flex items-center gap-2 text-sm"><Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} />সক্রিয়</label>
                 <label className="flex items-center gap-2 text-sm"><Switch checked={form.is_verified} onCheckedChange={v => setForm({ ...form, is_verified: v })} /><BadgeCheck size={16} className="text-blue-500" /> যাচাইকৃত</label>
               </div>
+              {!editId && (
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <Checkbox checked={sendPush} onCheckedChange={(v) => setSendPush(!!v)} />
+                  <Bell size={14} className="text-primary" /> সংরক্ষণের পর পুশ নোটিফিকেশন পাঠান
+                </label>
+              )}
               <Button type="submit" disabled={saveMutation.isPending} className="w-full">সংরক্ষণ</Button>
             </form>
           </DialogContent>
@@ -361,6 +382,7 @@ const JobPostingsTab = () => {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [sendJobPush, setSendJobPush] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", subject: "", qualification_required: "", experience_required: "", salary_range: "", location: "", deadline: "", is_active: true, branch_id: "" });
 
   const { data: branches } = useQuery({
@@ -387,7 +409,20 @@ const JobPostingsTab = () => {
       if (editId) { const { error } = await supabase.from("job_postings").update(payload).eq("id", editId); if (error) throw error; }
       else { const { error } = await supabase.from("job_postings").insert([payload]); if (error) throw error; }
     },
-    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); setEditId(null); queryClient.invalidateQueries({ queryKey: ["admin_job_postings"] }); },
+    onSuccess: () => {
+      toast.success("সংরক্ষিত");
+      if (sendJobPush && !editId) {
+        supabase.functions.invoke("send-push", {
+          body: {
+            title: `📢 নিয়োগ বিজ্ঞপ্তি: ${form.title}`,
+            body: `${form.subject ? form.subject + " বিষয়ে " : ""}নতুন নিয়োগ বিজ্ঞপ্তি প্রকাশিত হয়েছে${form.location ? ` (${form.location})` : ""}`,
+            url: "/teachers",
+          },
+        }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
+      }
+      setSendJobPush(false);
+      setOpen(false); setEditId(null); queryClient.invalidateQueries({ queryKey: ["admin_job_postings"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -428,6 +463,12 @@ const JobPostingsTab = () => {
                 <div><Label>শেষ তারিখ</Label><Input type="date" value={form.deadline} onChange={e => setForm({ ...form, deadline: e.target.value })} /></div>
               </div>
               <label className="flex items-center gap-2 text-sm"><Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} />সক্রিয়</label>
+              {!editId && (
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <Checkbox checked={sendJobPush} onCheckedChange={(v) => setSendJobPush(!!v)} />
+                  <Bell size={14} className="text-primary" /> সংরক্ষণের পর পুশ নোটিফিকেশন পাঠান
+                </label>
+              )}
               <Button type="submit" disabled={saveMutation.isPending} className="w-full">সংরক্ষণ</Button>
             </form>
           </DialogContent>
