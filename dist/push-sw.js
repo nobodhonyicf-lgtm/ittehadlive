@@ -16,7 +16,7 @@ if (typeof __WB_MANIFEST === 'undefined') {
 self.addEventListener('push', function(event) {
   console.log('[Push SW] Push event received');
   
-  var data = { title: 'নতুন নোটিফিকেশন', body: '', icon: '/pwa-192x192.png', badge: '/pwa-192x192.png', data: { url: '/' } };
+  var data = { title: 'নতুন নোটিফিকেশন', body: '', icon: '/pwa-192x192.png', data: { url: '/' } };
   
   try {
     if (event.data) {
@@ -40,9 +40,10 @@ self.addEventListener('push', function(event) {
     lang: 'bn',
     tag: data.tag || 'ittehad-push-' + Date.now(),
     renotify: true,
-    requireInteraction: false,
+    requireInteraction: true,
     actions: [
-      { action: 'open', title: 'দেখুন' },
+      { action: 'open', title: 'বিস্তারিত দেখুন' },
+      { action: 'dismiss', title: 'বন্ধ করুন' },
     ],
     silent: false,
   };
@@ -66,6 +67,11 @@ self.addEventListener('notificationclick', function(event) {
   console.log('[Push SW] Notification clicked');
   event.notification.close();
   
+  // Handle dismiss action
+  if (event.action === 'dismiss') {
+    return;
+  }
+
   var targetUrl = '/notifications';
   if (event.notification.data && event.notification.data.url && event.notification.data.url !== '/') {
     targetUrl = event.notification.data.url;
