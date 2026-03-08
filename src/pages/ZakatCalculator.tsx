@@ -273,8 +273,31 @@ const ZakatContent = () => {
             {/* Nisab card */}
             <div className="bg-card border border-border rounded-2xl p-5 text-center sticky top-4">
               <h3 className="text-sm font-bold text-foreground mb-2">যাকাতের নিসাব</h3>
-              <p className="text-3xl font-bold text-primary">{formatBDT(nisabAmount)}</p>
-              <p className="text-[11px] text-muted-foreground mt-1">সর্বশেষ হালনাগাদ {nisabDate}</p>
+              <div className="flex items-center justify-center gap-1.5">
+                <p className="text-3xl font-bold text-primary">{formatBDT(nisabAmount)}</p>
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="text-primary hover:text-primary/80 transition-colors">
+                        <Info size={18} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-xs text-xs leading-relaxed">
+                      যাকাতের নিসাব হলো যাকাত ফরজ হওয়ার জন্য নির্ধারিত পরিমাণ সম্পদ। এই নির্দিষ্ট সম্পদের সীমা, স্বর্ণের ৮৭.৪৮ গ্রাম অথবা রূপার ৬১২.৩৬ গ্রামের সমান হিসেবে পরিমাপিত হয়। আমাদের এই ক্যালকুলেটরে রূপার নিসাব ধরা হয়েছে।
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="text-[11px] text-muted-foreground mt-1 cursor-help underline decoration-dotted">সর্বশেষ হালনাগাদ {nisabDate}</p>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs text-xs leading-relaxed">
+                    তাঁতিবাজারের ২৪ ক্যারেট (পাকা) রুপার পাইকারি বাজারদরের ভিত্তিতে মূল্য নির্ধারণ করা হয়েছে। যেহেতু রূপার বাজারদর সময়ের সাথে সাথে পরিবর্তিত হয় এবং বর্তমানে স্বর্ণ-রুপার দাম দ্রুত পরিবর্তন হচ্ছে, সেহেতু বাজারদর পরিবর্তনের ফলে যাকাতের নিসাবের পরিমাণও পরিবর্তিত হতে পারে।
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
 
             {/* Running totals */}
