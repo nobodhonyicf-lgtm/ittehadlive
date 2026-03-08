@@ -357,7 +357,7 @@ const QiblaContent = () => {
 
           {!headingReady && (
             <p className="text-xs text-muted-foreground bg-amber-500/10 text-amber-700 rounded-lg p-3 flex items-center gap-2">
-              <Smartphone size={14} className="shrink-0" /> সেরা ফলাফলের জন্য মোবাইল ফোন ব্যবহার করুন। কম্পাস ক্যালিব্রেট করতে ফোনটি ৮-আকৃতিতে ঘোরান।
+              <Smartphone size={14} className="shrink-0" /> সেরা ফলাফলের জন্য মোবাইল ফোন ব্যবহার করুন। কম্পাস ক্যালিব্রেট করতে ফোনটি ∞-আকৃতিতে ঘোরান।
             </p>
           )}
 
