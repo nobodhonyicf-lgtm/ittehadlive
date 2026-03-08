@@ -285,7 +285,7 @@ const NoticeView = () => {
                     transform: `scale(${padScale})`,
                     transformOrigin: "top left",
                     width: `${PAD_W}px`,
-                    height: `${PAD_H}px`,
+                    minHeight: `${PAD_H}px`,
                     marginBottom: `${-PAD_H * (1 - padScale)}px`,
                     marginRight: `${-PAD_W * (1 - padScale)}px`,
                   }}>
@@ -295,10 +295,10 @@ const NoticeView = () => {
                     style={{
                       width: `${PAD_W}px`,
                       minWidth: `${PAD_W}px`,
-                      height: `${PAD_H}px`,
+                      minHeight: `${PAD_H}px`,
                       position: "relative",
                       fontFamily: "'SolaimanLipi', 'Noto Sans Bengali', sans-serif",
-                      overflow: "hidden",
+                      overflow: "visible",
                       boxSizing: "border-box",
                       backgroundColor: "#ffffff",
                       boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
