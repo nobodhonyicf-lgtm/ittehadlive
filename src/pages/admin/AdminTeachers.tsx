@@ -12,7 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
-import { Plus, Edit, Trash2, GraduationCap, Search, Eye, CheckCircle, XCircle, Clock, BadgeCheck, UserPlus, BookOpen, MapPin, DollarSign, CalendarDays, Star, ClipboardList, Megaphone, Briefcase, ImageOff, Building2 } from "lucide-react";
+import { Plus, Edit, Trash2, GraduationCap, Search, Eye, CheckCircle, XCircle, Clock, BadgeCheck, UserPlus, BookOpen, MapPin, DollarSign, CalendarDays, Star, ClipboardList, Megaphone, Briefcase, ImageOff, Building2, Bell } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 import AdminPageWrapper from "@/components/admin/AdminPageWrapper";
 
