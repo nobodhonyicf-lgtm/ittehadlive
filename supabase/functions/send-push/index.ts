@@ -25,10 +25,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    const VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY');
-    const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY');
+    // Read VAPID keys: prefer site_settings (DB), fallback to env vars
+    let VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY') || '';
+    let VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY') || '';
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    // Try to get from site_settings (single source of truth)
+    try {
+      const settingsRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/site_settings?key=in.(vapid_public_key,vapid_private_key)&select=key,value`,
+        { headers: { 'apikey': SUPABASE_SERVICE_ROLE_KEY!, 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}` } }
+      );
+      const settingsData = await settingsRes.json();
+      for (const s of settingsData) {
+        if (s.key === 'vapid_public_key' && s.value) VAPID_PUBLIC_KEY = s.value;
+        if (s.key === 'vapid_private_key' && s.value) VAPID_PRIVATE_KEY = s.value;
+      }
+    } catch (e) {
+      console.log('Could not read VAPID from DB, using env vars:', e);
+    }
 
     if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
       return new Response(JSON.stringify({ error: 'VAPID keys not configured' }), {

@@ -47,10 +47,24 @@ const AdminSettings = () => {
     },
   });
 
+  // When VAPID keys change, clear old push subscriptions (they won't work with new keys)
+  const handleVapidKeyChange = async (key: string) => {
+    if (key !== 'vapid_public_key' && key !== 'vapid_private_key') return;
+    try {
+      // Clear all push subscriptions since they're tied to old VAPID keys
+      const { error } = await supabase.from('push_subscriptions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) console.error('Failed to clear push subs:', error);
+      else toast.info('পুরানো পুশ সাবস্ক্রিপশন মুছে দেওয়া হয়েছে। ব্যবহারকারীদের পুনরায় সাবস্ক্রাইব করতে হবে।');
+    } catch (e) {
+      console.error('Clear push subs error:', e);
+    }
+  };
+
   const updateMutation = useMutation({
-    mutationFn: async ({ id, value }: { id: string; value: string }) => {
+    mutationFn: async ({ id, value, key }: { id: string; value: string; key?: string }) => {
       const { error } = await supabase.from("site_settings").update({ value }).eq("id", id);
       if (error) throw error;
+      if (key) await handleVapidKeyChange(key);
     },
     onSuccess: () => { toast.success("সংরক্ষিত"); qc.invalidateQueries({ queryKey: ["admin_settings"] }); qc.invalidateQueries({ queryKey: ["site_settings"] }); },
   });
@@ -87,6 +101,8 @@ const AdminSettings = () => {
       const existing = settings?.find(s => s.key === key);
       if (existing) { const { error } = await supabase.from("site_settings").update({ value }).eq("id", existing.id); if (error) throw error; }
       else { const { error } = await supabase.from("site_settings").insert({ key, value }); if (error) throw error; }
+      // Clear old push subscriptions when VAPID keys change
+      await handleVapidKeyChange(key);
     },
     onSuccess: () => { toast.success("সংরক্ষিত"); qc.invalidateQueries({ queryKey: ["admin_settings"] }); qc.invalidateQueries({ queryKey: ["site_settings"] }); },
   });
@@ -123,7 +139,7 @@ const AdminSettings = () => {
       <Label className="mb-1 block font-semibold">{keyLabels[s.key] || s.key}</Label>
       <div className="flex gap-2">
         <Input type={s.key === "primary_color" ? "color" : "text"} defaultValue={s.value || ""} onChange={(e) => setValues({ ...values, [s.id]: e.target.value })} className={s.key === "primary_color" ? "w-20 h-10 p-1" : ""} />
-        <Button onClick={() => updateMutation.mutate({ id: s.id, value: values[s.id] ?? s.value ?? "" })} disabled={updateMutation.isPending} size="sm">সংরক্ষণ</Button>
+        <Button onClick={() => updateMutation.mutate({ id: s.id, value: values[s.id] ?? s.value ?? "", key: s.key })} disabled={updateMutation.isPending} size="sm">সংরক্ষণ</Button>
       </div>
       {/* File upload option for image fields */}
       {(s.key === "logo_url" || s.key === "favicon_url" || s.key === "app_icon_url" || s.key === "app_logo_url" || s.key === "default_og_image") && (
