@@ -463,6 +463,12 @@ const JobPostingsTab = () => {
                 <div><Label>শেষ তারিখ</Label><Input type="date" value={form.deadline} onChange={e => setForm({ ...form, deadline: e.target.value })} /></div>
               </div>
               <label className="flex items-center gap-2 text-sm"><Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} />সক্রিয়</label>
+              {!editId && (
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <Checkbox checked={sendJobPush} onCheckedChange={(v) => setSendJobPush(!!v)} />
+                  <Bell size={14} className="text-primary" /> সংরক্ষণের পর পুশ নোটিফিকেশন পাঠান
+                </label>
+              )}
               <Button type="submit" disabled={saveMutation.isPending} className="w-full">সংরক্ষণ</Button>
             </form>
           </DialogContent>
