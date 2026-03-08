@@ -274,20 +274,27 @@ const TeacherDirectory = () => {
     },
   });
 
-  const districts = [...new Set(teachers?.map(t => t.district).filter(Boolean) || [])];
-  const subjects = [...new Set(teachers?.map(t => t.subject).filter(Boolean) || [])];
+  // Split teachers into available and assigned
+  const availableTeachersList = teachers?.filter(t => !t.institution_id) || [];
+  const assignedTeachersList = teachers?.filter(t => t.institution_id) || [];
+  const currentTabTeachers = activeTab === "available" ? availableTeachersList : assignedTeachersList;
 
-  const filtered = teachers?.filter(t => {
+  const districts = [...new Set(currentTabTeachers.map(t => t.district).filter(Boolean))];
+  const subjects = [...new Set(currentTabTeachers.map(t => t.subject).filter(Boolean))];
+
+  const filtered = currentTabTeachers.filter(t => {
     if (search && !t.name.toLowerCase().includes(search.toLowerCase()) && !t.subject.toLowerCase().includes(search.toLowerCase())) return false;
     if (districtFilter && t.district !== districtFilter) return false;
     if (subjectFilter && t.subject !== subjectFilter) return false;
-    if (availabilityFilter === "available" && !t.is_available) return false;
-    if (availabilityFilter === "unavailable" && t.is_available) return false;
+    if (activeTab === "available") {
+      if (availabilityFilter === "available" && !t.is_available) return false;
+      if (availabilityFilter === "unavailable" && t.is_available) return false;
+    }
     if (experienceFilter === "1-3" && (t.experience_years < 1 || t.experience_years > 3)) return false;
     if (experienceFilter === "3-5" && (t.experience_years < 3 || t.experience_years > 5)) return false;
     if (experienceFilter === "5+" && t.experience_years < 5) return false;
     return true;
-  }) || [];
+  });
 
   const visibleTeachers = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
