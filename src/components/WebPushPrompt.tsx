@@ -8,6 +8,7 @@ import { toast } from "@/components/ui/sonner";
 
 const DISMISS_KEY = "push_prompt_dismissed";
 const SUBSCRIBED_KEY = "push_subscribed";
+const VAPID_KEY_USED = "push_vapid_key_used";
 
 const WebPushPrompt = () => {
   const { isSupported, isSubscribed, isLoading, permission, subscribe } = usePushNotifications();
