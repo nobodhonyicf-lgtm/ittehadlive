@@ -4,6 +4,7 @@ import SEOHead from "@/components/SEOHead";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Navigation, Loader2, LocateFixed, Landmark, BookOpen, List, AlertCircle, RefreshCw } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
