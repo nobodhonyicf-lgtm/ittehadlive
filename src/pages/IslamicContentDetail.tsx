@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { useIslamicContents } from "@/hooks/useData";
 import Layout from "@/components/layout/Layout";
 import AppLayout from "@/components/app/AppLayout";
