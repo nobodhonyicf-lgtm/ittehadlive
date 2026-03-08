@@ -223,7 +223,7 @@ const GoldSilverCalculator = ({ type, onConfirm, onClose }: Props) => {
               </div>
 
               {/* Row 2: Amount + Carat side by side */}
-              <div className={`grid gap-4 ${isGold ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"}`}>
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 {/* Amount + Unit */}
                 <div>
                   <label className="text-sm font-medium text-foreground mb-1.5 block">পরিমাণ:</label>
