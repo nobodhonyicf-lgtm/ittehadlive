@@ -40,6 +40,7 @@ const Layout = ({ children, fullWidth }: { children: ReactNode; fullWidth?: bool
       </main>
       <FooterAd />
       <Footer />
+      <WebPushPrompt />
     </div>
   );
 };
