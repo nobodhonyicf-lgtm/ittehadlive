@@ -13,6 +13,7 @@ import { GraduationCap, Search, User, Printer } from "lucide-react";
 import { getGradeFromMarks, getOverallGPA, getOverallGrade } from "@/lib/grading";
 import { toBengali } from "@/lib/bengali";
 import { useIsApp } from "@/hooks/useIsApp";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const ResultCheck = () => {
   const isApp = useIsApp();
