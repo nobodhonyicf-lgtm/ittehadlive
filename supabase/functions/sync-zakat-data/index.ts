@@ -26,12 +26,32 @@ async function scrapeBajus(): Promise<GoldSilverRates | null> {
     });
     const html = await res.text();
 
-    // Extract prices from <span class="price">XX,XXX BDT/GRAM</span>
-    const priceRegex = /<span class="price">\s*([\d,]+)\s*BDT\/GRAM\s*<\/span>/gi;
+    console.log("HTML length:", html.length);
+    console.log("Contains 'price':", html.includes('price'));
+    console.log("Contains 'BDT':", html.includes('BDT'));
+    
+    // Log a sample of HTML around price
+    const priceIdx = html.indexOf('BDT');
+    if (priceIdx > 0) {
+      console.log("Around BDT:", html.substring(Math.max(0, priceIdx - 80), priceIdx + 30));
+    }
+
+    // Extract prices - try multiple patterns
     const allPrices: number[] = [];
+    
+    // Pattern 1: <span class="price">XX,XXX BDT/GRAM</span>
+    const priceRegex1 = /class="price"[^>]*>\s*([\d,]+)\s*BDT/gi;
     let match;
-    while ((match = priceRegex.exec(html)) !== null) {
+    while ((match = priceRegex1.exec(html)) !== null) {
       allPrices.push(parseInt(match[1].replace(/,/g, "")));
+    }
+    
+    // Pattern 2: fallback - any number followed by BDT/GRAM
+    if (allPrices.length === 0) {
+      const priceRegex2 = /([\d,]+)\s*BDT\/GRAM/gi;
+      while ((match = priceRegex2.exec(html)) !== null) {
+        allPrices.push(parseInt(match[1].replace(/,/g, "")));
+      }
     }
 
     console.log("Found prices:", allPrices);
