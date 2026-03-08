@@ -409,7 +409,20 @@ const JobPostingsTab = () => {
       if (editId) { const { error } = await supabase.from("job_postings").update(payload).eq("id", editId); if (error) throw error; }
       else { const { error } = await supabase.from("job_postings").insert([payload]); if (error) throw error; }
     },
-    onSuccess: () => { toast.success("সংরক্ষিত"); setOpen(false); setEditId(null); queryClient.invalidateQueries({ queryKey: ["admin_job_postings"] }); },
+    onSuccess: () => {
+      toast.success("সংরক্ষিত");
+      if (sendJobPush && !editId) {
+        supabase.functions.invoke("send-push", {
+          body: {
+            title: `📢 নিয়োগ বিজ্ঞপ্তি: ${form.title}`,
+            body: `${form.subject ? form.subject + " বিষয়ে " : ""}নতুন নিয়োগ বিজ্ঞপ্তি প্রকাশিত হয়েছে${form.location ? ` (${form.location})` : ""}`,
+            url: "/teachers",
+          },
+        }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
+      }
+      setSendJobPush(false);
+      setOpen(false); setEditId(null); queryClient.invalidateQueries({ queryKey: ["admin_job_postings"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
