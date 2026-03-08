@@ -33,7 +33,7 @@ self.addEventListener('push', function(event) {
   var options = {
     body: data.body || 'নতুন আপডেট পাওয়া গেছে',
     icon: data.icon || '/pwa-192x192.png',
-    badge: '/badge-mono.png',
+    badge: '/badge-mono.svg',
     vibrate: [200, 100, 200, 100, 200],
     data: data.data || { url: '/' },
     dir: 'auto',
