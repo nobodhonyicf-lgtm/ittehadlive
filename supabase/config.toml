@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.ai-seo-generate]
 verify_jwt = false
+
+[functions.daily-auto-posts]
+verify_jwt = false
