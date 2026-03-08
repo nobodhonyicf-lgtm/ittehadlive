@@ -10,15 +10,10 @@ const DISMISS_KEY = "push_prompt_dismissed";
 const SUBSCRIBED_KEY = "push_subscribed";
 
 const WebPushPrompt = () => {
-  const { isSupported, isSubscribed, isLoading, subscribe } = usePushNotifications();
-  const [dismissed, setDismissed] = useState(() => {
-    // If permission is granted but not actually subscribed, don't count as dismissed
-    if ('Notification' in window && Notification.permission === 'granted') {
-      return false;
-    }
-    return localStorage.getItem(DISMISS_KEY) === "1" || localStorage.getItem(SUBSCRIBED_KEY) === "1";
-  });
+  const { isSupported, isSubscribed, isLoading, permission, subscribe } = usePushNotifications();
+  const [dismissed, setDismissed] = useState(false);
   const [show, setShow] = useState(false);
+  const [autoSynced, setAutoSynced] = useState(false);
 
   const { data: vapidKey } = useQuery({
     queryKey: ["vapid_public_key"],
@@ -33,16 +28,39 @@ const WebPushPrompt = () => {
     },
   });
 
+  // Auto-sync: if permission is already granted but not subscribed in DB, auto-subscribe silently
   useEffect(() => {
-    if (!isSupported || isSubscribed || dismissed || isLoading) return;
-    // Don't show if already denied - user must change in browser settings
-    if (Notification.permission === 'denied') return;
+    if (!isSupported || isLoading || autoSynced || !vapidKey) return;
+    if (Notification.permission === 'granted' && !isSubscribed) {
+      console.log('[WebPush] Permission granted but not subscribed, auto-subscribing...');
+      setAutoSynced(true);
+      subscribe(vapidKey).then((ok) => {
+        if (ok) {
+          console.log('[WebPush] Auto-subscribe successful');
+          localStorage.setItem(SUBSCRIBED_KEY, "1");
+        } else {
+          console.log('[WebPush] Auto-subscribe failed');
+        }
+      });
+    }
+  }, [isSupported, isLoading, isSubscribed, vapidKey, autoSynced, subscribe]);
+
+  useEffect(() => {
+    if (!isSupported || isSubscribed || isLoading) return;
+    // Don't show if already denied
+    if ('Notification' in window && Notification.permission === 'denied') return;
+    // Don't show if dismissed and permission is not granted
+    if (Notification.permission !== 'granted' && 
+        (localStorage.getItem(DISMISS_KEY) === "1" || localStorage.getItem(SUBSCRIBED_KEY) === "1")) {
+      setDismissed(true);
+      return;
+    }
     // Show prompt after 5 seconds
     const timer = setTimeout(() => setShow(true), 5000);
     return () => clearTimeout(timer);
-  }, [isSupported, isSubscribed, dismissed, isLoading]);
+  }, [isSupported, isSubscribed, isLoading]);
 
-  if (!show || isSubscribed) return null;
+  if (!show || isSubscribed || dismissed) return null;
 
   const handleSubscribe = async () => {
     if (!vapidKey) {
