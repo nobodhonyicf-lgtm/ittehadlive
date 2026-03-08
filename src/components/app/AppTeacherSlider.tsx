@@ -92,6 +92,9 @@ const AppTeacherSlider = () => {
                   <h4 className="text-[10px] font-semibold line-clamp-1 flex items-center justify-center gap-0.5">
                     {t.name}
                     {t.is_verified && <BadgeCheck size={10} className="text-blue-500 fill-blue-500 stroke-white shrink-0" />}
+                    {(t as any).institution_logo_url && (
+                      <img src={(t as any).institution_logo_url} alt="" className="w-2.5 h-2.5 rounded-sm object-contain shrink-0" />
+                    )}
                   </h4>
                   <p className="text-[8px] text-muted-foreground flex items-center justify-center gap-0.5">
                     <BookOpen size={7} /> {t.subject}
