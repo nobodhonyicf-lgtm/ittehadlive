@@ -64,8 +64,8 @@ const TeachersTab = () => {
       } else {
         payload.institution_logo_url = null;
       }
-      if (editId) { const { error } = await supabase.from("teachers").update(payload).eq("id", editId); if (error) throw error; }
-      else { const { error } = await supabase.from("teachers").insert([payload]); if (error) throw error; }
+      if (editId) { const { error } = await supabase.from("teachers").update(payload).eq("id", editId); if (error) throw error; return editId; }
+      else { const { data: inserted, error } = await supabase.from("teachers").insert([payload]).select("id").single(); if (error) throw error; return inserted?.id; }
     },
     onSuccess: () => {
       toast.success("সংরক্ষিত");
