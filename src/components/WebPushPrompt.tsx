@@ -31,6 +31,8 @@ const WebPushPrompt = () => {
 
   useEffect(() => {
     if (!isSupported || isSubscribed || dismissed || isLoading) return;
+    // Don't show if already denied - user must change in browser settings
+    if (Notification.permission === 'denied') return;
     // Show prompt after 5 seconds
     const timer = setTimeout(() => setShow(true), 5000);
     return () => clearTimeout(timer);
