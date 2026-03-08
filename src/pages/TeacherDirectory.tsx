@@ -234,6 +234,7 @@ const TeacherDirectory = () => {
   const [experienceFilter, setExperienceFilter] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [activeTab, setActiveTab] = useState<"available" | "assigned">("available");
   const loaderRef = useRef<HTMLDivElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
   const jobHighlightRef = useRef<HTMLDivElement>(null);
@@ -273,20 +274,27 @@ const TeacherDirectory = () => {
     },
   });
 
-  const districts = [...new Set(teachers?.map(t => t.district).filter(Boolean) || [])];
-  const subjects = [...new Set(teachers?.map(t => t.subject).filter(Boolean) || [])];
+  // Split teachers into available and assigned
+  const availableTeachersList = teachers?.filter(t => !t.institution_id) || [];
+  const assignedTeachersList = teachers?.filter(t => t.institution_id) || [];
+  const currentTabTeachers = activeTab === "available" ? availableTeachersList : assignedTeachersList;
 
-  const filtered = teachers?.filter(t => {
+  const districts = [...new Set(currentTabTeachers.map(t => t.district).filter(Boolean))];
+  const subjects = [...new Set(currentTabTeachers.map(t => t.subject).filter(Boolean))];
+
+  const filtered = currentTabTeachers.filter(t => {
     if (search && !t.name.toLowerCase().includes(search.toLowerCase()) && !t.subject.toLowerCase().includes(search.toLowerCase())) return false;
     if (districtFilter && t.district !== districtFilter) return false;
     if (subjectFilter && t.subject !== subjectFilter) return false;
-    if (availabilityFilter === "available" && !t.is_available) return false;
-    if (availabilityFilter === "unavailable" && t.is_available) return false;
+    if (activeTab === "available") {
+      if (availabilityFilter === "available" && !t.is_available) return false;
+      if (availabilityFilter === "unavailable" && t.is_available) return false;
+    }
     if (experienceFilter === "1-3" && (t.experience_years < 1 || t.experience_years > 3)) return false;
     if (experienceFilter === "3-5" && (t.experience_years < 3 || t.experience_years > 5)) return false;
     if (experienceFilter === "5+" && t.experience_years < 5) return false;
     return true;
-  }) || [];
+  });
 
   const visibleTeachers = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
@@ -303,7 +311,10 @@ const TeacherDirectory = () => {
   }, [hasMore, filtered.length]);
 
   // Reset visible count when filters change
-  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, districtFilter, subjectFilter, availabilityFilter, experienceFilter]);
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, districtFilter, subjectFilter, availabilityFilter, experienceFilter, activeTab]);
+  
+  // Reset filters when switching tabs
+  useEffect(() => { setSearch(""); setDistrictFilter(""); setSubjectFilter(""); setAvailabilityFilter(""); setExperienceFilter(""); }, [activeTab]);
 
   // Scroll to highlighted teacher
   useEffect(() => {
@@ -340,7 +351,8 @@ const TeacherDirectory = () => {
   };
 
   const totalTeachers = teachers?.length || 0;
-  const availableTeachers = teachers?.filter(t => t.is_available)?.length || 0;
+  const availableTeachers = availableTeachersList.length;
+  const assignedTeachers = assignedTeachersList.length;
 
   return (
     <Layout>
@@ -370,17 +382,34 @@ const TeacherDirectory = () => {
               </div>
               <div className="w-px bg-border" />
               <div className="text-center">
+                <div className="text-xl font-bold text-primary">{toBengaliNumber(assignedTeachers)}</div>
+                <div className="text-[10px] text-muted-foreground">খেদমতপ্রাপ্ত</div>
+              </div>
+              <div className="w-px bg-border" />
+              <div className="text-center">
                 <div className="text-xl font-bold text-primary">{toBengaliNumber(districts.length)}</div>
                 <div className="text-[10px] text-muted-foreground">জেলা</div>
               </div>
             </div>
 
-            <div className="flex gap-3 justify-center mt-5">
+            {/* Tabs + Apply Button */}
+            <div className="flex flex-col items-center gap-3 mt-5">
+              <div className="inline-flex bg-muted rounded-lg p-1 gap-1">
+                <button
+                  onClick={() => setActiveTab("available")}
+                  className={`px-4 py-2 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${activeTab === "available" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <Users size={14} /> উপলব্ধ শিক্ষক ({toBengaliNumber(availableTeachers)})
+                </button>
+                <button
+                  onClick={() => setActiveTab("assigned")}
+                  className={`px-4 py-2 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${activeTab === "assigned" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <BadgeCheck size={14} /> খেদমতপ্রাপ্ত ({toBengaliNumber(assignedTeachers)})
+                </button>
+              </div>
               <Link to="/teacher-apply">
                 <Button className="gap-2 shadow-md"><Briefcase size={16} /> শিক্ষক হিসেবে আবেদন</Button>
-              </Link>
-              <Link to="/assigned-teachers">
-                <Button variant="outline" className="gap-2"><BadgeCheck size={16} /> খেদমতপ্রাপ্ত</Button>
               </Link>
             </div>
           </div>
@@ -396,7 +425,7 @@ const TeacherDirectory = () => {
           <div className="flex items-center gap-2 mb-3">
             <Filter size={14} className="text-primary" />
             <span className="text-sm font-medium">শিক্ষক খুঁজুন</span>
-            {filtered.length !== (teachers?.length || 0) && (
+            {filtered.length !== currentTabTeachers.length && (
               <Badge variant="outline" className="text-[10px] ml-auto">{toBengaliNumber(filtered.length)} জন পাওয়া গেছে</Badge>
             )}
           </div>
@@ -413,11 +442,13 @@ const TeacherDirectory = () => {
               <option value="">সকল বিষয়</option>
               {subjects.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
-            <select className="border border-input rounded-md px-3 py-2 text-xs bg-background h-9" value={availabilityFilter} onChange={e => setAvailabilityFilter(e.target.value)}>
-              <option value="">সকল অবস্থা</option>
-              <option value="available">উপলব্ধ</option>
-              <option value="unavailable">অনুপলব্ধ</option>
-            </select>
+            {activeTab === "available" && (
+              <select className="border border-input rounded-md px-3 py-2 text-xs bg-background h-9" value={availabilityFilter} onChange={e => setAvailabilityFilter(e.target.value)}>
+                <option value="">সকল অবস্থা</option>
+                <option value="available">উপলব্ধ</option>
+                <option value="unavailable">অনুপলব্ধ</option>
+              </select>
+            )}
             <select className="border border-input rounded-md px-3 py-2 text-xs bg-background h-9" value={experienceFilter} onChange={e => setExperienceFilter(e.target.value)}>
               <option value="">সকল অভিজ্ঞতা</option>
               <option value="1-3">১-৩ বছর</option>
