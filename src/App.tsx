@@ -66,6 +66,7 @@ const AssignedTeachers = lazy(() => import("./pages/AssignedTeachers"));
 // Lazy Islamic pages
 const DuaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ default: m.DuaPage })));
 const MasalaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ default: m.MasalaPage })));
+const IslamicContentDetail = lazy(() => import("./pages/IslamicContentDetail"));
 
 const queryClient = new QueryClient({
   mutationCache: new MutationCache({
@@ -136,6 +137,10 @@ const App = () => (
                 <Route path="/hadith" element={<HadithPage />} />
                 <Route path="/dua" element={<DuaPage />} />
                 <Route path="/masala" element={<MasalaPage />} />
+                <Route path="/quran/:id" element={<IslamicContentDetail />} />
+                <Route path="/hadith/:id" element={<IslamicContentDetail />} />
+                <Route path="/dua/:id" element={<IslamicContentDetail />} />
+                <Route path="/masala/:id" element={<IslamicContentDetail />} />
                 <Route path="/teachers" element={<TeacherDirectory />} />
                 <Route path="/teacher-apply" element={<TeacherApply />} />
                 <Route path="/assigned-teachers" element={<AssignedTeachers />} />

@@ -73,7 +73,7 @@ serve(async (req) => {
   else if (type === "branch" && id) pageUrl = `${siteUrl}/branch/${id}`;
   else if (type === "islamic" && id) {
     const cat = url.searchParams.get("category") || "hadith";
-    pageUrl = `${siteUrl}/${cat}?highlight=${id}`;
+    pageUrl = `${siteUrl}/${cat}/${id}`;
   }
 
   if (!isCrawler(userAgent)) {

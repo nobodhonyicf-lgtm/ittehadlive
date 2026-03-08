@@ -4,7 +4,7 @@ import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useIslamicContents, useSiteSettings } from "@/hooks/useData";
 import { useState, useMemo, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { Search, ChevronRight, X, Plus, Minus, BookOpen, HelpCircle, Filter, HandHelping, Scale, PenLine, CheckCircle, Languages, Share2 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -219,10 +219,10 @@ const IslamicListContent = ({
         ) : (
           <div className="space-y-2">
             {filtered.map((item, idx) => (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => setSelected(item)}
-                className="w-full text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:shadow-md transition-all active:scale-[0.99]"
+                to={`/${category}/${item.id}`}
+                className="w-full text-left bg-card border border-border rounded-xl p-4 hover:border-primary hover:shadow-md transition-all active:scale-[0.99] block"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
@@ -256,13 +256,11 @@ const IslamicListContent = ({
                   </div>
                   <ChevronRight size={16} className="text-muted-foreground flex-shrink-0 mt-1" />
                 </div>
-              </button>
+              </Link>
             ))}
           </div>
         )}
       </div>
-
-      {selected && <ContentModal item={selected} onClose={() => setSelected(null)} fontSize={fontSize} category={category} />}
     </div>
   );
 };
@@ -383,10 +381,10 @@ const AppIslamicListContent = ({
           </div>
         ) : (
           filtered.map((item, idx) => (
-            <button
+            <Link
               key={item.id}
-              onClick={() => setSelected(item)}
-              className="w-full text-left bg-card border border-border/60 rounded-2xl overflow-hidden active:scale-[0.98] transition-all shadow-sm"
+              to={`/${category}/${item.id}`}
+              className="w-full text-left bg-card border border-border/60 rounded-2xl overflow-hidden active:scale-[0.98] transition-all shadow-sm block"
             >
               {/* Top accent bar */}
               <div className={`h-0.5 w-full bg-gradient-to-r ${gradientClass}`} />
@@ -424,12 +422,10 @@ const AppIslamicListContent = ({
                   <ChevronRight size={14} className="text-muted-foreground flex-shrink-0 mt-1" />
                 </div>
               </div>
-            </button>
+            </Link>
           ))
         )}
       </div>
-
-      {selected && <ContentModal item={selected} onClose={() => setSelected(null)} fontSize={fontSize} category={category} />}
     </div>
   );
 };
