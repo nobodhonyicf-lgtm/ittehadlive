@@ -67,14 +67,14 @@ const TeachersTab = () => {
       if (editId) { const { error } = await supabase.from("teachers").update(payload).eq("id", editId); if (error) throw error; return editId; }
       else { const { data: inserted, error } = await supabase.from("teachers").insert([payload]).select("id").single(); if (error) throw error; return inserted?.id; }
     },
-    onSuccess: () => {
+    onSuccess: (insertedId?: string) => {
       toast.success("সংরক্ষিত");
-      if (sendPush && !editId) {
+      if (sendPush && !editId && insertedId) {
         supabase.functions.invoke("send-push", {
           body: {
             title: `📋 নতুন শিক্ষক: ${form.name}`,
             body: `${form.subject} বিষয়ে নতুন শিক্ষক যুক্ত হয়েছেন${form.district ? ` (${form.district})` : ""}`,
-            url: "/teachers",
+            url: `/teachers?highlight=${insertedId}`,
             image: form.photo_url || undefined,
           },
         }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
