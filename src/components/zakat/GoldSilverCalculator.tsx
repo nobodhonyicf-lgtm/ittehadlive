@@ -180,6 +180,12 @@ const GoldSilverCalculator = ({ type, onConfirm, onClose }: Props) => {
                   <span className="font-bold">২২ ক্যারেট:</span> ৳{toBengali(silverRates["22"].toLocaleString("en-IN"))}/গ্রাম
                 </div>
                 <div className="bg-gray-100 dark:bg-gray-800/30 rounded-lg p-2 text-center">
+                  <span className="font-bold">২১ ক্যারেট:</span> ৳{toBengali(silverRates["21"].toLocaleString("en-IN"))}/গ্রাম
+                </div>
+                <div className="bg-gray-100 dark:bg-gray-800/30 rounded-lg p-2 text-center">
+                  <span className="font-bold">১৮ ক্যারেট:</span> ৳{toBengali(silverRates["18"].toLocaleString("en-IN"))}/গ্রাম
+                </div>
+                <div className="bg-gray-100 dark:bg-gray-800/30 rounded-lg p-2 text-center">
                   <span className="font-bold">সনাতনী:</span> ৳{toBengali(silverRates["traditional"].toLocaleString("en-IN"))}/গ্রাম
                 </div>
               </>
