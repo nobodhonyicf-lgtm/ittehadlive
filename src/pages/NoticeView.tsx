@@ -30,24 +30,8 @@ const NoticeView = () => {
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [sigLoaded, setSigLoaded] = useState(false);
   const [padScale, setPadScale] = useState(1);
-
+  const [scaledHeight, setScaledHeight] = useState(PAD_H);
   // Responsive scaling for mobile / app
-  useEffect(() => {
-    const updateScale = () => {
-      if (wrapRef.current) {
-        const containerWidth = wrapRef.current.parentElement?.clientWidth || window.innerWidth;
-        const padding = 16;
-        const available = containerWidth - padding;
-        let scale = Math.min(1, available / PAD_W);
-        if (isApp) scale = Math.min(scale, 0.42);
-        setPadScale(scale);
-      }
-    };
-    updateScale();
-    window.addEventListener("resize", updateScale);
-    return () => window.removeEventListener("resize", updateScale);
-  }, [isApp]);
-
   const { data: notice, isLoading } = useQuery({
     queryKey: ["notice", id],
     queryFn: async () => {
@@ -57,6 +41,29 @@ const NoticeView = () => {
     },
     enabled: !!id,
   });
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (wrapRef.current) {
+        const containerWidth = wrapRef.current.parentElement?.clientWidth || window.innerWidth;
+        const padding = 16;
+        const available = containerWidth - padding;
+        let scale = Math.min(1, available / PAD_W);
+        if (isApp) scale = Math.min(scale, 0.42);
+        setPadScale(scale);
+        const padEl = padRef.current;
+        const actualH = padEl ? padEl.scrollHeight : PAD_H;
+        setScaledHeight(actualH * scale);
+      }
+    };
+    updateScale();
+    const timer = setTimeout(updateScale, 500);
+    window.addEventListener("resize", updateScale);
+    return () => {
+      window.removeEventListener("resize", updateScale);
+      clearTimeout(timer);
+    };
+  }, [isApp, notice]);
 
   const orgPhone = settings?.contact_phone || "০১৯২৬-৪২৮৯৮৮";
   const orgAddress = settings?.contact_address || "মারকাযুস সুন্নাহ ক্যাডেট মাদরাসা, ওয়াবদারপুল তালতলা বাজার, ফতুল্লা, নারায়ণগঞ্জ";
@@ -280,14 +287,12 @@ const NoticeView = () => {
             ) : notice ? (
               <>
                 {/* Notice Pad - fixed A4 size, scaled for mobile */}
-                <div ref={wrapRef} style={{ overflow: "hidden", maxWidth: "100%", display: "flex", justifyContent: "center" }}>
+                <div ref={wrapRef} style={{ overflow: "visible", maxWidth: "100%", width: "100%", height: `${scaledHeight}px` }}>
                   <div style={{
                     transform: `scale(${padScale})`,
                     transformOrigin: "top left",
                     width: `${PAD_W}px`,
                     minHeight: `${PAD_H}px`,
-                    marginBottom: `${-PAD_H * (1 - padScale)}px`,
-                    marginRight: `${-PAD_W * (1 - padScale)}px`,
                   }}>
                   <div
                     ref={padRef}

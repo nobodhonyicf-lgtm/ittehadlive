@@ -125,8 +125,8 @@ Deno.serve(async (req) => {
         // Generate a unique slug with date
         const slug = `${parsed.slug || postType.key}-${today}-${randomSeed}`;
 
-        // Get image from Unsplash (free, no API key needed for source redirect)
-        const imageUrl = `https://source.unsplash.com/800x450/?${encodeURIComponent(postType.imageKeyword)}&sig=${randomSeed}`;
+        // Get image from Unsplash (using picsum as fallback since source.unsplash is deprecated)
+        const imageUrl = `https://picsum.photos/seed/${postType.key}-${today}-${randomSeed}/800/450`;
 
         // Find or create category
         let categoryId: string | null = null;
