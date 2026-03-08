@@ -85,8 +85,8 @@ const Header = () => {
   }, []);
 
   return (
-    <header className={`w-full sticky top-0 z-50 transition-all duration-300 ${scrolled ? "shadow-lg" : "shadow-sm"}`}>
-      <div className="bg-card border-b border-border">
+    <header className={`w-full sticky top-[36px] z-50 transition-all duration-300 ${scrolled ? "shadow-lg shadow-primary/5" : ""}`}>
+      <div className="bg-card/90 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 min-w-0">
             {settings?.logo_url && (
