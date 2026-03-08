@@ -98,6 +98,7 @@ Deno.serve(async (req) => {
       data: JSON.stringify(payloadData),
       options: {
         ttl: 86400,
+        urgency: 'normal',
       },
     };
 
