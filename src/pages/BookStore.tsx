@@ -12,6 +12,7 @@ import { ShoppingCart, Search, Star, BookOpen } from "lucide-react";
 import { toBengali } from "@/lib/bengali";
 import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const BookStore = () => {
   const isApp = useIsApp();
