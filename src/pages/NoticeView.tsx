@@ -279,7 +279,7 @@ const NoticeView = () => {
             ) : notice ? (
               <>
                 {/* Notice Pad - fixed A4 size, scaled for mobile */}
-                <div ref={wrapRef} style={{ overflow: "visible", maxWidth: "100%", display: "flex", justifyContent: "center" }}>
+                <div ref={wrapRef} style={{ overflow: "hidden", maxWidth: "100%", display: "flex", justifyContent: "center" }}>
                   <div style={{
                     transform: `scale(${padScale})`,
                     transformOrigin: "top left",
