@@ -399,7 +399,7 @@ const JobPostingsTab = () => {
   const { data: branches } = useQuery({
     queryKey: ["admin_branches_list"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("branches").select("id, name").order("name");
+      const { data, error } = await supabase.from("branches").select("id, name, image_url").order("name");
       if (error) throw error;
       return data;
     },
