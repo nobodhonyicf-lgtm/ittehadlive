@@ -107,6 +107,8 @@ const AdminSettings = () => {
       const existing = settings?.find(s => s.key === key);
       if (existing) { const { error } = await supabase.from("site_settings").update({ value }).eq("id", existing.id); if (error) throw error; }
       else { const { error } = await supabase.from("site_settings").insert({ key, value }); if (error) throw error; }
+      // Sync VAPID keys to server secrets
+      await syncVapidToSecrets(key, value);
     },
     onSuccess: () => { toast.success("সংরক্ষিত"); qc.invalidateQueries({ queryKey: ["admin_settings"] }); qc.invalidateQueries({ queryKey: ["site_settings"] }); },
   });
