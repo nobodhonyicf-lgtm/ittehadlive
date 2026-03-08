@@ -59,6 +59,8 @@ const QiblaCompass = lazy(() => import("./pages/QiblaCompass"));
 const ZakatCalculator = lazy(() => import("./pages/ZakatCalculator"));
 const JobApply = lazy(() => import("./pages/JobApply"));
 const ShareRedirect = lazy(() => import("./pages/ShareRedirect"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const BranchDashboard = lazy(() => import("./pages/BranchDashboard"));
 const TeacherDashboard = lazy(() => import("./pages/TeacherDashboard"));
 const AssignedTeachers = lazy(() => import("./pages/AssignedTeachers"));
@@ -157,6 +159,8 @@ const App = () => (
                 <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
                 <Route path="/share/:type/:id" element={<ShareRedirect />} />
                 <Route path="/share/:type/:category/:id" element={<ShareRedirect />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/reset-password" element={<ResetPassword />} />
                 <Route path="/admin/*" element={<AdminDashboard />} />

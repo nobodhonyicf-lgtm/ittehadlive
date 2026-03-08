@@ -231,6 +231,11 @@ const Footer = () => {
           {/* Bottom bar */}
           <div className="border-t border-primary-foreground/10 mt-10 pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm opacity-50">
             <p>{toBengali(settings?.copyright_text || "© ২০২৪ ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ। সর্বস্বত্ব সংরক্ষিত।")}</p>
+            <div className="flex items-center gap-3 text-xs">
+              <Link to="/terms" className="hover:opacity-100 transition-opacity underline">শর্তাবলী</Link>
+              <span>•</span>
+              <Link to="/privacy" className="hover:opacity-100 transition-opacity underline">গোপনীয়তা নীতি</Link>
+            </div>
             <p>
               কারিগরি সহায়তায়:{" "}
               <a
