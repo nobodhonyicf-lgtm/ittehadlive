@@ -4,7 +4,7 @@ import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { useIslamicContents, useSiteSettings } from "@/hooks/useData";
 import { useState, useMemo, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { Search, ChevronRight, X, Plus, Minus, BookOpen, HelpCircle, Filter, HandHelping, Scale, PenLine, CheckCircle, Languages, Share2 } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import Breadcrumbs from "@/components/Breadcrumbs";
