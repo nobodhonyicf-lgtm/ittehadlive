@@ -7,6 +7,7 @@ import { useIsApp } from "@/hooks/useIsApp";
 import AppLayout from "@/components/app/AppLayout";
 import { toBengali } from "@/lib/bengali";
 import { useEffect } from "react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const NotificationsPage = () => {
   const isApp = useIsApp();
