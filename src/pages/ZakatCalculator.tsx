@@ -282,7 +282,7 @@ const ZakatContent = () => {
                         <Info size={18} />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-xs text-xs leading-relaxed">
+                    <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed">
                       যাকাতের নিসাব হলো যাকাত ফরজ হওয়ার জন্য নির্ধারিত পরিমাণ সম্পদ। এই নির্দিষ্ট সম্পদের সীমা, স্বর্ণের ৮৭.৪৮ গ্রাম অথবা রূপার ৬১২.৩৬ গ্রামের সমান হিসেবে পরিমাপিত হয়। আমাদের এই ক্যালকুলেটরে রূপার নিসাব ধরা হয়েছে।
                     </TooltipContent>
                   </Tooltip>
