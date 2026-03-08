@@ -442,11 +442,13 @@ const TeacherDirectory = () => {
               <option value="">সকল বিষয়</option>
               {subjects.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
-            <select className="border border-input rounded-md px-3 py-2 text-xs bg-background h-9" value={availabilityFilter} onChange={e => setAvailabilityFilter(e.target.value)}>
-              <option value="">সকল অবস্থা</option>
-              <option value="available">উপলব্ধ</option>
-              <option value="unavailable">অনুপলব্ধ</option>
-            </select>
+            {activeTab === "available" && (
+              <select className="border border-input rounded-md px-3 py-2 text-xs bg-background h-9" value={availabilityFilter} onChange={e => setAvailabilityFilter(e.target.value)}>
+                <option value="">সকল অবস্থা</option>
+                <option value="available">উপলব্ধ</option>
+                <option value="unavailable">অনুপলব্ধ</option>
+              </select>
+            )}
             <select className="border border-input rounded-md px-3 py-2 text-xs bg-background h-9" value={experienceFilter} onChange={e => setExperienceFilter(e.target.value)}>
               <option value="">সকল অভিজ্ঞতা</option>
               <option value="1-3">১-৩ বছর</option>
