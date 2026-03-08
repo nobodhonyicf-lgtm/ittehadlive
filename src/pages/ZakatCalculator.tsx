@@ -231,9 +231,9 @@ const ZakatContent = () => {
                   {f.hasCalculator && (
                     <button
                       onClick={() => setCalcModal(f.hasCalculator!)}
-                      className="text-primary text-xs font-medium mt-1.5 hover:underline inline-block"
+                      className="mt-1.5 inline-block text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1 rounded-lg transition-colors"
                     >
-                      আজকের মূল্য হিসাব করতে এখানে ক্লিক করুন
+                      👉 আজকের মূল্য হিসাব করতে এখানে ক্লিক করুন
                     </button>
                   )}
                 </div>
