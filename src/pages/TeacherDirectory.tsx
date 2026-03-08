@@ -425,7 +425,7 @@ const TeacherDirectory = () => {
           <div className="flex items-center gap-2 mb-3">
             <Filter size={14} className="text-primary" />
             <span className="text-sm font-medium">শিক্ষক খুঁজুন</span>
-            {filtered.length !== (teachers?.length || 0) && (
+            {filtered.length !== currentTabTeachers.length && (
               <Badge variant="outline" className="text-[10px] ml-auto">{toBengaliNumber(filtered.length)} জন পাওয়া গেছে</Badge>
             )}
           </div>
