@@ -72,6 +72,7 @@ const AppLayout = ({ children, hideHeader }: { children: ReactNode; hideHeader?:
       {!hideHeader && <AppHeader />}
       <main className="flex-1">{children}</main>
       <AppBottomNav />
+      <WebPushPrompt />
     </div>
   );
 };
