@@ -184,40 +184,64 @@ const PostPage = () => {
 
                 {/* Content with in-post ad */}
                 <div className="prose max-w-none text-foreground px-6 py-4" itemProp="articleBody">
-                  {contentParagraphs.map((paragraph, index) => {
-                    if (paragraph.startsWith("📖 ") || paragraph.startsWith("আরও পড়ুন:")) {
-                      const titleText = paragraph.replace("📖 আরও পড়ুন: ", "").replace("📖 ", "").replace("আরও পড়ুন: ", "").trim();
-                      const nextLine = contentParagraphs[index + 1];
-                      const linkPath = nextLine?.startsWith("🔗 ") ? nextLine.replace("🔗 ", "").trim() : (nextLine?.startsWith("/post/") ? nextLine.trim() : null);
+                  {(() => {
+                    const rawContent = post?.content || "";
+                    const isHtml = /<[a-z][\s\S]*>/i.test(rawContent);
+                    
+                    if (isHtml) {
+                      // AI-generated HTML content - render as HTML with ad insertion
+                      const midPoint = Math.floor(rawContent.length / 2);
+                      const insertAt = rawContent.indexOf("</p>", midPoint);
+                      if (insertAt > -1) {
+                        const before = rawContent.slice(0, insertAt + 4);
+                        const after = rawContent.slice(insertAt + 4);
+                        return (
+                          <>
+                            <div dangerouslySetInnerHTML={{ __html: before }} />
+                            <InPostAd />
+                            <div dangerouslySetInnerHTML={{ __html: after }} />
+                          </>
+                        );
+                      }
+                      return <div dangerouslySetInnerHTML={{ __html: rawContent }} />;
+                    }
+                    
+                    // Plain text content - original paragraph logic
+                    return contentParagraphs.map((paragraph, index) => {
+                      if (paragraph.startsWith("📖 ") || paragraph.startsWith("আরও পড়ুন:")) {
+                        const titleText = paragraph.replace("📖 আরও পড়ুন: ", "").replace("📖 ", "").replace("আরও পড়ুন: ", "").trim();
+                        const nextLine = contentParagraphs[index + 1];
+                        const linkPath = nextLine?.startsWith("🔗 ") ? nextLine.replace("🔗 ", "").trim() : (nextLine?.startsWith("/post/") ? nextLine.trim() : null);
+                        return (
+                          <div key={index} className="my-4">
+                            <Link
+                              to={linkPath || "#"}
+                              className="flex items-center gap-0 bg-muted rounded-lg overflow-hidden border border-border hover:shadow-md transition-shadow group no-underline"
+                            >
+                              <div className="flex-1 px-4 py-3">
+                                <p className="text-sm md:text-base font-semibold text-foreground group-hover:text-primary transition-colors leading-snug m-0">
+                                  {titleText}
+                                </p>
+                              </div>
+                              <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 m-3 rounded shrink-0 whitespace-nowrap">
+                                আরো পড়ুন
+                              </span>
+                            </Link>
+                            {index === adInsertIndex && <InPostAd />}
+                          </div>
+                        );
+                      }
+                      if (paragraph.startsWith("🔗 ") || paragraph.startsWith("/post/")) {
+                        return null;
+                      }
                       return (
-                        <div key={index} className="my-4">
-                          <Link
-                            to={linkPath || "#"}
-                            className="flex items-center gap-0 bg-muted rounded-lg overflow-hidden border border-border hover:shadow-md transition-shadow group no-underline"
-                          >
-                            <div className="flex-1 px-4 py-3">
-                              <p className="text-sm md:text-base font-semibold text-foreground group-hover:text-primary transition-colors leading-snug m-0">
-                                {titleText}
-                              </p>
-                            </div>
-                            <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 m-3 rounded shrink-0 whitespace-nowrap">
-                              আরো পড়ুন
-                            </span>
-                          </Link>
+                        <div key={index}>
+                          <p className="mb-3 leading-relaxed text-[15px]">{paragraph}</p>
                           {index === adInsertIndex && <InPostAd />}
                         </div>
                       );
-                    }
-                    if (paragraph.startsWith("🔗 ") || paragraph.startsWith("/post/")) {
-                      return null;
-                    }
-                    return (
-                      <div key={index}>
-                        <p className="mb-3 leading-relaxed text-[15px]">{paragraph}</p>
-                        {index === adInsertIndex && <InPostAd />}
-                      </div>
-                    );
-                  })}
+                    });
+                  })()}
                 </div>
 
                 {/* Social Share */}
