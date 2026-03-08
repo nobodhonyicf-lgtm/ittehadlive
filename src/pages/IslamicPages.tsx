@@ -383,10 +383,10 @@ const AppIslamicListContent = ({
           </div>
         ) : (
           filtered.map((item, idx) => (
-            <button
+            <Link
               key={item.id}
-              onClick={() => setSelected(item)}
-              className="w-full text-left bg-card border border-border/60 rounded-2xl overflow-hidden active:scale-[0.98] transition-all shadow-sm"
+              to={`/${category}/${item.id}`}
+              className="w-full text-left bg-card border border-border/60 rounded-2xl overflow-hidden active:scale-[0.98] transition-all shadow-sm block"
             >
               {/* Top accent bar */}
               <div className={`h-0.5 w-full bg-gradient-to-r ${gradientClass}`} />
@@ -424,7 +424,7 @@ const AppIslamicListContent = ({
                   <ChevronRight size={14} className="text-muted-foreground flex-shrink-0 mt-1" />
                 </div>
               </div>
-            </button>
+            </Link>
           ))
         )}
       </div>
