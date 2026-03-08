@@ -139,7 +139,7 @@ const ZakatContent = () => {
                   </label>
                   <select
                     value={zakatYearType}
-                    onChange={e => setZakatYearType(e.target.value)}
+                    onChange={e => { setZakatYearType(e.target.value); setZakatYearDate(""); }}
                     required
                     className="w-full border border-border rounded-xl px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   >
@@ -154,13 +154,58 @@ const ZakatContent = () => {
                   <label className="text-sm font-medium text-foreground mb-1.5 block">
                     যে তারিখে আপনার যাকাত বর্ষ পূর্ণ হবে: <span className="text-destructive">*</span>
                   </label>
-                  <input
-                    type="date"
-                    value={zakatYearDate}
-                    onChange={e => setZakatYearDate(e.target.value)}
-                    required
-                    className="w-full border border-border rounded-xl px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
+                  {zakatYearType === "hijri" ? (
+                    <div className="flex gap-2">
+                      <select
+                        value={zakatYearDate.split("-")[2] || ""}
+                        onChange={e => {
+                          const parts = (zakatYearDate || "--").split("-");
+                          setZakatYearDate(`${parts[0] || ""}-${parts[1] || ""}-${e.target.value}`);
+                        }}
+                        className="flex-1 border border-border rounded-xl px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="">দিন</option>
+                        {Array.from({ length: 30 }, (_, i) => (
+                          <option key={i + 1} value={String(i + 1)}>{toBengali(i + 1)}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={zakatYearDate.split("-")[1] || ""}
+                        onChange={e => {
+                          const parts = (zakatYearDate || "--").split("-");
+                          setZakatYearDate(`${parts[0] || ""}-${e.target.value}-${parts[2] || ""}`);
+                        }}
+                        className="flex-1 border border-border rounded-xl px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="">মাস</option>
+                        {["মুহাররম","সফর","রবিউল আউয়াল","রবিউস সানি","জমাদিউল আউয়াল","জমাদিউস সানি","রজব","শাবান","রমজান","শাওয়াল","জিলক্বদ","জিলহজ্জ"].map((m, i) => (
+                          <option key={i} value={String(i + 1)}>{m}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={zakatYearDate.split("-")[0] || ""}
+                        onChange={e => {
+                          const parts = (zakatYearDate || "--").split("-");
+                          setZakatYearDate(`${e.target.value}-${parts[1] || ""}-${parts[2] || ""}`);
+                        }}
+                        className="flex-1 border border-border rounded-xl px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="">বছর</option>
+                        {Array.from({ length: 10 }, (_, i) => {
+                          const y = 1446 + i;
+                          return <option key={y} value={String(y)}>{toBengali(y)}</option>;
+                        })}
+                      </select>
+                    </div>
+                  ) : (
+                    <input
+                      type="date"
+                      value={zakatYearDate}
+                      onChange={e => setZakatYearDate(e.target.value)}
+                      required
+                      className="w-full border border-border rounded-xl px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  )}
                 </div>
               </div>
             )}
@@ -186,9 +231,9 @@ const ZakatContent = () => {
                   {f.hasCalculator && (
                     <button
                       onClick={() => setCalcModal(f.hasCalculator!)}
-                      className="text-primary text-xs font-medium mt-1.5 hover:underline inline-block"
+                      className="mt-1.5 inline-block text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1 rounded-lg transition-colors"
                     >
-                      আজকের মূল্য হিসাব করতে এখানে ক্লিক করুন
+                      👉 আজকের মূল্য হিসাব করতে এখানে ক্লিক করুন
                     </button>
                   )}
                 </div>

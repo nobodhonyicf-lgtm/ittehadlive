@@ -111,19 +111,20 @@ const GoldSilverCalculator = ({ type, onConfirm, onClose }: Props) => {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Name */}
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-1.5 block">গহনার নাম:</label>
-                  <input
-                    type="text"
-                    placeholder="লিখুন"
-                    value={item.name}
-                    onChange={e => updateItem(item.id, "name", e.target.value)}
-                    className="w-full border border-border rounded-xl px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
+              {/* Row 1: Name */}
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">গহনার নাম:</label>
+                <input
+                  type="text"
+                  placeholder="লিখুন"
+                  value={item.name}
+                  onChange={e => updateItem(item.id, "name", e.target.value)}
+                  className="w-full border border-border rounded-xl px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
 
+              {/* Row 2: Amount + Carat side by side */}
+              <div className={`grid gap-4 ${isGold ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"}`}>
                 {/* Amount + Unit */}
                 <div>
                   <label className="text-sm font-medium text-foreground mb-1.5 block">পরিমাণ:</label>
@@ -134,7 +135,7 @@ const GoldSilverCalculator = ({ type, onConfirm, onClose }: Props) => {
                       placeholder="০"
                       value={item.amount || ""}
                       onChange={e => updateItem(item.id, "amount", parseFloat(e.target.value) || 0)}
-                      className="flex-1 border border-border rounded-l-xl px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary border-r-0"
+                      className="flex-1 border border-border rounded-l-xl px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary border-r-0 min-w-0"
                     />
                     <select
                       value={item.unit}
@@ -154,7 +155,7 @@ const GoldSilverCalculator = ({ type, onConfirm, onClose }: Props) => {
                   <div>
                     <label className="text-sm font-medium text-foreground mb-1.5 block">ক্যারেট:</label>
                     <div className="flex">
-                      <span className="border border-border rounded-l-xl px-3 py-2.5 bg-muted text-sm text-muted-foreground border-r-0">ক্যারেট</span>
+                      <span className="border border-border rounded-l-xl px-3 py-2.5 bg-muted text-sm text-muted-foreground border-r-0 whitespace-nowrap">ক্যারেট</span>
                       <select
                         value={item.carat}
                         onChange={e => updateItem(item.id, "carat", e.target.value)}
