@@ -145,10 +145,6 @@ const Sidebar = () => {
               {leader.title}
             </div>
             
-            {/* View profile hint */}
-            <p className={`text-[10px] mt-3 flex items-center justify-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity ${i === 0 ? "text-primary-foreground" : "text-accent-foreground"}`}>
-              প্রোফাইল দেখুন <ChevronRight size={12} />
-            </p>
           </div>
         </Link>
       ))}
