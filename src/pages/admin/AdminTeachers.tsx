@@ -428,7 +428,7 @@ const JobPostingsTab = () => {
           body: {
             title: `📢 নিয়োগ বিজ্ঞপ্তি: ${form.title}`,
             body: `${form.subject ? form.subject + " বিষয়ে " : ""}নতুন নিয়োগ বিজ্ঞপ্তি প্রকাশিত হয়েছে${form.location ? ` (${form.location})` : ""}`,
-            url: "/teachers?tab=jobs",
+            url: `/teachers?job=${form.title}`,
             image: (branchLogo as any)?.image_url || undefined,
           },
         }).then(({ data, error }) => {
