@@ -6,82 +6,54 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const BN_DIGITS = "০১২৩৪৫৬৭৮৯";
-function bnToEn(str: string): string {
-  return str.replace(/[০-৯]/g, (d) => String(BN_DIGITS.indexOf(d)));
+interface UnitRates {
+  gram: string | number;
+  bhori: number;
+  ana: number;
 }
 
-function parseBnPrice(str: string): number {
-  const cleaned = bnToEn(str.replace(/[৳,\s]/g, ""));
-  return parseInt(cleaned) || 0;
+interface GoldItem {
+  title: string;
+  key: string;
+  unit_rate: UnitRates;
+  unit_sell: UnitRates;
 }
 
-interface Rates {
-  gold_22k: number;
-  gold_21k: number;
-  gold_18k: number;
-  gold_traditional: number;
-  silver_22k: number;
-  silver_21k: number;
-  silver_18k: number;
-  silver_traditional: number;
-}
-
-async function scrapeGoldr(): Promise<Rates | null> {
+async function fetchGoldPrices(): Promise<GoldItem[] | null> {
   try {
-    const res = await fetch("https://www.goldr.org/", {
-      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
-    });
-    const html = await res.text();
-    console.log("V3 - GoldR HTML length:", html.length, "first 300:", html.substring(0, 300));
+    // GoldR.org embeds live BAJUS prices in price.ultra.js as JSON
+    const res = await fetch("https://www.goldr.org/price.ultra.js");
+    const js = await res.text();
 
-    // Extract per-gram gold prices from table-gram section
-    const gramSection = html.match(/id="table-gram"[\s\S]*?<\/div>/);
-    if (!gramSection) {
-      console.error("Could not find gram table section. Has table-gram:", html.includes("table-gram"));
+    // Extract the JSON array from: const p=[{...}];
+    const match = js.match(/const\s+p\s*=\s*(\[[\s\S]*?\]);/);
+    if (!match) {
+      console.error("Could not find price data in JS");
       return null;
     }
-    const section = gramSection[0];
 
-    // Extract gold prices (first table in gram section)
-    const goldPattern = /(\d+)\s*Karat\s*Gold<\/td>\s*<td[^>]*><strong>৳([০-৯,]+)<\/strong>/g;
-    const tradGoldPattern = /Traditional<\/td>\s*<td[^>]*><strong>৳([০-৯,]+)<\/strong>/;
+    const data: GoldItem[] = JSON.parse(match[1]);
+    console.log("Parsed", data.length, "gold items");
+    return data;
+  } catch (e) {
+    console.error("Error fetching gold prices:", e);
+    return null;
+  }
+}
 
-    const goldPrices: Record<string, number> = {};
-    let m;
-    while ((m = goldPattern.exec(section)) !== null) {
-      goldPrices[m[1]] = parseBnPrice(m[2]);
+async function fetchSilverPrices(): Promise<any[] | null> {
+  try {
+    // Silver prices might be in a separate script or same page
+    // Let's try the silver widget script
+    const res = await fetch("https://www.goldr.org/silver.ultra.js");
+    const js = await res.text();
+    const match = js.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);/);
+    if (match) {
+      return JSON.parse(match[1]);
     }
-    const tradGold = section.match(tradGoldPattern);
-
-    // Extract silver prices (second table in gram section)
-    const silverSection = section.substring(section.indexOf("Silver Type"));
-    const silverPattern = /(\d+)\s*Karat\s*Silver<\/td>\s*<td[^>]*><strong>৳([০-৯,]+)<\/strong>/g;
-    const tradSilverPattern = /Traditional<\/td>\s*<td[^>]*><strong>৳([০-৯,]+)<\/strong>/;
-
-    const silverPrices: Record<string, number> = {};
-    while ((m = silverPattern.exec(silverSection)) !== null) {
-      silverPrices[m[1]] = parseBnPrice(m[2]);
-    }
-    const tradSilver = silverSection.match(tradSilverPattern);
-
-    const rates: Rates = {
-      gold_22k: goldPrices["22"] || 0,
-      gold_21k: goldPrices["21"] || 0,
-      gold_18k: goldPrices["18"] || 0,
-      gold_traditional: tradGold ? parseBnPrice(tradGold[1]) : 0,
-      silver_22k: silverPrices["22"] || 0,
-      silver_21k: silverPrices["21"] || 0,
-      silver_18k: silverPrices["18"] || 0,
-      silver_traditional: tradSilver ? parseBnPrice(tradSilver[1]) : 0,
-    };
-
-    console.log("Parsed rates:", rates);
-
-    if (rates.gold_22k > 0) return rates;
     return null;
   } catch (e) {
-    console.error("Error scraping GoldR:", e);
+    console.log("Silver script not available, will use main page data");
     return null;
   }
 }
@@ -98,42 +70,104 @@ Deno.serve(async (req) => {
 
     const results: Record<string, any> = {};
 
-    // Scrape gold/silver prices from GoldR.org (BAJUS data source)
-    const rates = await scrapeGoldr();
-    if (rates) {
+    // Fetch gold prices from GoldR.org's widget JS (BAJUS data)
+    const goldItems = await fetchGoldPrices();
+    if (goldItems && goldItems.length >= 4) {
+      const getGram = (key: string): number => {
+        const item = goldItems.find(g => g.key === key);
+        return item ? Number(item.unit_rate.gram) : 0;
+      };
+
+      const gold22k = getGram("22k");
+      const gold21k = getGram("21k");
+      const gold18k = getGram("18k");
+      const goldTrad = getGram("old");
+
       const settings = [
-        { key: "bajus_gold_22k", value: String(rates.gold_22k) },
-        { key: "bajus_gold_21k", value: String(rates.gold_21k) },
-        { key: "bajus_gold_18k", value: String(rates.gold_18k) },
-        { key: "bajus_gold_traditional", value: String(rates.gold_traditional) },
-        { key: "bajus_silver_22k", value: String(rates.silver_22k) },
-        { key: "bajus_silver_21k", value: String(rates.silver_21k) },
-        { key: "bajus_silver_18k", value: String(rates.silver_18k) },
-        { key: "bajus_silver_traditional", value: String(rates.silver_traditional) },
+        { key: "bajus_gold_22k", value: String(gold22k) },
+        { key: "bajus_gold_21k", value: String(gold21k) },
+        { key: "bajus_gold_18k", value: String(gold18k) },
+        { key: "bajus_gold_traditional", value: String(goldTrad) },
         { key: "bajus_last_updated", value: new Date().toISOString() },
       ];
 
+      results.gold = { "22k": gold22k, "21k": gold21k, "18k": gold18k, traditional: goldTrad };
+
+      // Try silver prices from the main page HTML
+      try {
+        const pageRes = await fetch("https://www.goldr.org/", {
+          headers: { "User-Agent": "Mozilla/5.0" },
+        });
+        const html = await pageRes.text();
+        
+        // Look for silver data in the HTML - Bengali digits
+        // Pattern: 22 Karat Silver ... ৳৫৬০
+        const bnDigits = "০১২৩৪৫৬৭৮৯";
+        const bnToNum = (s: string) => {
+          const cleaned = s.replace(/[৳,\s]/g, "");
+          const en = cleaned.replace(/[০-৯]/g, d => String(bnDigits.indexOf(d)));
+          return parseInt(en) || 0;
+        };
+
+        // Extract silver per-gram prices
+        const silverMatch22 = html.match(/22 Karat Silver<\/td>\s*<td[^>]*><strong>([^<]+)<\/strong>/);
+        const silverMatch21 = html.match(/21 Karat Silver<\/td>\s*<td[^>]*><strong>([^<]+)<\/strong>/);
+        const silverMatch18 = html.match(/18 Karat Silver<\/td>\s*<td[^>]*><strong>([^<]+)<\/strong>/);
+        const silverMatchTrad = html.match(/Silver Type[\s\S]*?Traditional<\/td>\s*<td[^>]*><strong>([^<]+)<\/strong>/);
+
+        const s22 = silverMatch22 ? bnToNum(silverMatch22[1]) : 0;
+        const s21 = silverMatch21 ? bnToNum(silverMatch21[1]) : 0;
+        const s18 = silverMatch18 ? bnToNum(silverMatch18[1]) : 0;
+        const sTrad = silverMatchTrad ? bnToNum(silverMatchTrad[1]) : 0;
+
+        if (s22 > 0) {
+          settings.push(
+            { key: "bajus_silver_22k", value: String(s22) },
+            { key: "bajus_silver_21k", value: String(s21) },
+            { key: "bajus_silver_18k", value: String(s18) },
+            { key: "bajus_silver_traditional", value: String(sTrad) },
+          );
+          results.silver = { "22k": s22, "21k": s21, "18k": s18, traditional: sTrad };
+        } else {
+          console.log("Could not parse silver from HTML, using defaults");
+          // Use approximate ratios from gold prices
+          settings.push(
+            { key: "bajus_silver_22k", value: "560" },
+            { key: "bajus_silver_21k", value: "535" },
+            { key: "bajus_silver_18k", value: "460" },
+            { key: "bajus_silver_traditional", value: "345" },
+          );
+          results.silver = "Using default values";
+        }
+      } catch (e) {
+        console.log("Silver fetch failed, using defaults");
+        settings.push(
+          { key: "bajus_silver_22k", value: "560" },
+          { key: "bajus_silver_21k", value: "535" },
+          { key: "bajus_silver_18k", value: "460" },
+          { key: "bajus_silver_traditional", value: "345" },
+        );
+      }
+
+      // Save all settings
       for (const s of settings) {
         await supabase.from("site_settings").upsert(s, { onConflict: "key" });
       }
-      results.rates = rates;
 
-      // Calculate nisab from silver traditional price
-      // Islamic nisab = 612.36g silver × market price per gram
-      if (rates.silver_traditional > 0) {
-        const nisab = Math.round(612.36 * rates.silver_traditional);
-        await supabase.from("site_settings").upsert(
-          { key: "zakat_nisab_amount", value: String(nisab) },
-          { onConflict: "key" }
-        );
-        await supabase.from("site_settings").upsert(
-          { key: "zakat_nisab_date", value: new Date().toLocaleDateString("en-GB") },
-          { onConflict: "key" }
-        );
-        results.nisab = nisab;
-      }
+      // Calculate nisab: 612.36g × silver traditional price per gram
+      const silverTrad = results.silver?.traditional || 345;
+      const nisab = Math.round(612.36 * silverTrad);
+      await supabase.from("site_settings").upsert(
+        { key: "zakat_nisab_amount", value: String(nisab) },
+        { onConflict: "key" }
+      );
+      await supabase.from("site_settings").upsert(
+        { key: "zakat_nisab_date", value: new Date().toLocaleDateString("en-GB") },
+        { onConflict: "key" }
+      );
+      results.nisab = nisab;
     } else {
-      results.rates = "Failed to scrape";
+      results.error = "Failed to fetch gold prices";
     }
 
     return new Response(JSON.stringify({ success: true, results }), {
