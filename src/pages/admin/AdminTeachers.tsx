@@ -24,6 +24,7 @@ const TeachersTab = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [sendPush, setSendPush] = useState(false);
   const [form, setForm] = useState({
     name: "", phone: "", email: "", address: "", district: "", subject: "",
     qualification: "", experience_years: 0, specialization: "", certification: "",
