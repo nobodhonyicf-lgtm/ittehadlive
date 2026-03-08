@@ -66,15 +66,20 @@ Deno.serve(async (req) => {
     });
     const subscriptions = await subRes.json();
 
+    // Build minimal payload to stay within ~4KB web push limit
+    const payloadData: Record<string, unknown> = {
+      title,
+      body,
+      icon: logoUrl,
+      data: { url: url || '/' },
+    };
+    // Only add image if provided (skip badge to save space)
+    if (image) {
+      payloadData.image = image;
+    }
+
     const pushMessage: PushMessage = {
-      data: JSON.stringify({
-        title,
-        body,
-        icon: logoUrl,
-        badge: badge || logoUrl,
-        image: image || undefined,
-        data: { url: url || '/' },
-      }),
+      data: JSON.stringify(payloadData),
       options: {
         ttl: 86400,
       },
