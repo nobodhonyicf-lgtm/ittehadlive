@@ -44,12 +44,12 @@ const DropdownMenu = ({ label, items, onNavigate }: { label: string; items: { la
         {label} <ChevronDown size={12} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <ul className="md:absolute md:top-full md:left-0 md:mt-1 md:bg-primary md:rounded-lg md:shadow-xl md:min-w-[140px] md:border md:border-primary-foreground/10 md:z-50 md:py-1">
+        <ul className="md:absolute md:top-full md:left-0 md:mt-1 md:bg-card/95 md:backdrop-blur-xl md:rounded-lg md:shadow-xl md:min-w-[140px] md:border md:border-border/50 md:z-50 md:py-1 md:text-foreground">
           {items.map((item) => (
             <li key={item.path}>
               <Link
                 to={item.path}
-                className="block px-4 py-2 hover:bg-primary-foreground/10 transition-colors text-sm whitespace-nowrap"
+                className="block px-4 py-2 hover:bg-primary/10 transition-colors text-sm whitespace-nowrap rounded-md"
                 onClick={() => { setOpen(false); onNavigate?.(); }}
               >
                 {item.label}
@@ -85,8 +85,8 @@ const Header = () => {
   }, []);
 
   return (
-    <header className={`w-full sticky top-0 z-50 transition-all duration-300 ${scrolled ? "shadow-lg" : "shadow-sm"}`}>
-      <div className="bg-card border-b border-border">
+    <header className={`w-full sticky top-[36px] z-50 transition-all duration-300 ${scrolled ? "shadow-lg shadow-primary/5" : ""}`}>
+      <div className="bg-card/90 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 min-w-0">
             {settings?.logo_url && (
@@ -144,7 +144,7 @@ const Header = () => {
         </div>
       </div>
 
-      <nav className="bg-primary text-primary-foreground">
+      <nav className="bg-primary/95 backdrop-blur-xl text-primary-foreground">
         <div className="max-w-[1200px] mx-auto px-4">
           <ul className={`${mobileOpen ? "block py-2" : "hidden"} md:flex md:items-center md:justify-center`}>
             {menuItems?.map((item) => (
