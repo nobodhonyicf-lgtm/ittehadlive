@@ -109,11 +109,12 @@ Deno.serve(async (req) => {
         console.log(`Push to ${sub.endpoint.substring(0, 60)}: status=${res.status}, body=${resText.substring(0, 200)}`);
         if (res.status === 201 || res.status === 200) {
           sent++;
-        } else if (res.status === 404 || res.status === 410 || res.status === 403 || res.status === 401) {
-          // 403 = VAPID mismatch (stale subscription), treat as expired
+        } else if (res.status === 404 || res.status === 410) {
+          // Only delete truly expired/unsubscribed endpoints
           expiredEndpoints.push(sub.endpoint);
           failed++;
         } else {
+          // 403/401 = VAPID mismatch - don't delete, it's a server config issue
           failed++;
         }
       } catch (err) {
