@@ -250,24 +250,22 @@ const GoldSilverCalculator = ({ type, onConfirm, onClose }: Props) => {
                 </div>
 
                 {/* Carat */}
-                {isGold && (
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-1.5 block">ক্যারেট:</label>
-                    <div className="flex">
-                      <span className="border border-border rounded-l-xl px-3 py-2.5 bg-muted text-sm text-muted-foreground border-r-0 whitespace-nowrap">ক্যারেট</span>
-                      <select
-                        value={item.carat}
-                        onChange={e => updateItem(item.id, "carat", e.target.value)}
-                        className="flex-1 border border-border rounded-r-xl px-2 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                      >
-                        <option value="22">২২</option>
-                        <option value="21">২১</option>
-                        <option value="18">১৮</option>
-                        <option value="traditional">সনাতনী</option>
-                      </select>
-                    </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1.5 block">ক্যারেট:</label>
+                  <div className="flex">
+                    <span className="border border-border rounded-l-xl px-3 py-2.5 bg-muted text-sm text-muted-foreground border-r-0 whitespace-nowrap">ক্যারেট</span>
+                    <select
+                      value={item.carat}
+                      onChange={e => updateItem(item.id, "carat", e.target.value)}
+                      className="flex-1 border border-border rounded-r-xl px-2 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      <option value="22">২২</option>
+                      <option value="21">২১</option>
+                      <option value="18">১৮</option>
+                      <option value="traditional">সনাতনী</option>
+                    </select>
                   </div>
-                )}
+                </div>
               </div>
             </div>
           ))}
