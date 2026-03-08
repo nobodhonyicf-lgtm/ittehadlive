@@ -423,11 +423,13 @@ const JobPostingsTab = () => {
     onSuccess: () => {
       toast.success("সংরক্ষিত");
       if (sendJobPush && !editId) {
+        const branchLogo = form.branch_id ? branches?.find(b => b.id === form.branch_id) : null;
         supabase.functions.invoke("send-push", {
           body: {
             title: `📢 নিয়োগ বিজ্ঞপ্তি: ${form.title}`,
             body: `${form.subject ? form.subject + " বিষয়ে " : ""}নতুন নিয়োগ বিজ্ঞপ্তি প্রকাশিত হয়েছে${form.location ? ` (${form.location})` : ""}`,
-            url: "/teachers",
+            url: "/teachers?tab=jobs",
+            image: (branchLogo as any)?.image_url || undefined,
           },
         }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
       }
