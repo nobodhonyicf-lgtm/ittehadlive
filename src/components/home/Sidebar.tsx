@@ -111,25 +111,44 @@ const Sidebar = () => {
 
   return (
     <div className="space-y-5">
-      {/* Leader profiles - centered, no bio */}
-      {leaders?.map((leader) => (
+      {/* Leader profiles - premium cards */}
+      {leaders?.map((leader, i) => (
         <Link
           key={leader.id}
           to={`/leader/${leader.id}`}
-          className="block bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group"
+          className="block rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group relative"
         >
-          <div className="px-4 py-5 text-center">
-            <div className="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-2 ring-primary/15 ring-offset-2 ring-offset-background group-hover:ring-primary/30 transition-colors">
-              {leader.image_url ? (
-                <img src={leader.image_url} alt={leader.name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <User className="text-muted-foreground" size={28} />
-                </div>
-              )}
+          {/* Gradient background */}
+          <div className={`absolute inset-0 ${i === 0 ? "bg-gradient-to-br from-primary via-primary/90 to-primary/70" : "bg-gradient-to-br from-accent via-accent/90 to-accent/70"}`} />
+          <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
+          
+          <div className="relative px-5 py-6 text-center">
+            {/* Photo with decorative border */}
+            <div className="relative w-24 h-24 mx-auto mb-4">
+              <div className={`absolute inset-0 rounded-full ${i === 0 ? "bg-primary-foreground/20" : "bg-foreground/10"} animate-pulse`} style={{ animationDuration: "3s" }} />
+              <div className="absolute inset-[3px] rounded-full overflow-hidden ring-2 ring-white/30 shadow-lg">
+                {leader.image_url ? (
+                  <img src={leader.image_url} alt={leader.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                ) : (
+                  <div className="w-full h-full bg-muted flex items-center justify-center">
+                    <User className="text-muted-foreground" size={32} />
+                  </div>
+                )}
+              </div>
             </div>
-            <h3 className="font-bold text-sm text-foreground">{leader.name}</h3>
-            <p className="text-xs text-primary font-medium mt-1">{leader.title}</p>
+            
+            {/* Name & Title */}
+            <h3 className={`font-bold text-base ${i === 0 ? "text-primary-foreground" : "text-accent-foreground"}`}>
+              {leader.name}
+            </h3>
+            <div className={`inline-block mt-2 px-3 py-1 rounded-full text-[11px] font-semibold ${i === 0 ? "bg-primary-foreground/15 text-primary-foreground" : "bg-foreground/10 text-accent-foreground"}`}>
+              {leader.title}
+            </div>
+            
+            {/* View profile hint */}
+            <p className={`text-[10px] mt-3 flex items-center justify-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity ${i === 0 ? "text-primary-foreground" : "text-accent-foreground"}`}>
+              প্রোফাইল দেখুন <ChevronRight size={12} />
+            </p>
           </div>
         </Link>
       ))}
