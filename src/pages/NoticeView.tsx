@@ -32,31 +32,6 @@ const NoticeView = () => {
   const [padScale, setPadScale] = useState(1);
   const [scaledHeight, setScaledHeight] = useState(PAD_H);
   // Responsive scaling for mobile / app
-  useEffect(() => {
-    const updateScale = () => {
-      if (wrapRef.current) {
-        const containerWidth = wrapRef.current.parentElement?.clientWidth || window.innerWidth;
-        const padding = 16;
-        const available = containerWidth - padding;
-        let scale = Math.min(1, available / PAD_W);
-        if (isApp) scale = Math.min(scale, 0.42);
-        setPadScale(scale);
-        // Calculate actual height of pad content and scale it
-        const padEl = padRef.current;
-        const actualH = padEl ? padEl.scrollHeight : PAD_H;
-        setScaledHeight(actualH * scale);
-      }
-    };
-    updateScale();
-    // Re-measure after content loads
-    const timer = setTimeout(updateScale, 500);
-    window.addEventListener("resize", updateScale);
-    return () => {
-      window.removeEventListener("resize", updateScale);
-      clearTimeout(timer);
-    };
-  }, [isApp, notice]);
-
   const { data: notice, isLoading } = useQuery({
     queryKey: ["notice", id],
     queryFn: async () => {
@@ -66,6 +41,29 @@ const NoticeView = () => {
     },
     enabled: !!id,
   });
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (wrapRef.current) {
+        const containerWidth = wrapRef.current.parentElement?.clientWidth || window.innerWidth;
+        const padding = 16;
+        const available = containerWidth - padding;
+        let scale = Math.min(1, available / PAD_W);
+        if (isApp) scale = Math.min(scale, 0.42);
+        setPadScale(scale);
+        const padEl = padRef.current;
+        const actualH = padEl ? padEl.scrollHeight : PAD_H;
+        setScaledHeight(actualH * scale);
+      }
+    };
+    updateScale();
+    const timer = setTimeout(updateScale, 500);
+    window.addEventListener("resize", updateScale);
+    return () => {
+      window.removeEventListener("resize", updateScale);
+      clearTimeout(timer);
+    };
+  }, [isApp, notice]);
 
   const orgPhone = settings?.contact_phone || "০১৯২৬-৪২৮৯৮৮";
   const orgAddress = settings?.contact_address || "মারকাযুস সুন্নাহ ক্যাডেট মাদরাসা, ওয়াবদারপুল তালতলা বাজার, ফতুল্লা, নারায়ণগঞ্জ";
