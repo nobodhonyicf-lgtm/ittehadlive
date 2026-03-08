@@ -75,6 +75,7 @@ const SEOHead = ({
     ],
     "contactPoint": {
       "@type": "ContactPoint",
+      "telephone": "+8801856878690",
       "contactType": "customer service",
       "availableLanguage": ["Bengali", "Arabic"],
     },
