@@ -528,7 +528,8 @@ const AppSettings = () => {
             <SettingsRow icon={Star} iconBg="bg-yellow-500" label="অ্যাপ রেটিং দিন" sub="আমাদের ৫ স্টার দিন" onClick={() => toast.success("ধন্যবাদ! আপনার রেটিং গ্রহণ করা হয়েছে")} />
             <SettingsRow icon={MessageCircle} iconBg="bg-indigo-500" label="যোগাযোগ ও মতামত" to="/app-contact" />
             <SettingsRow icon={Info} iconBg="bg-teal-500" label="আমাদের সম্পর্কে" to="/page/about" />
-            <SettingsRow icon={Shield} iconBg="bg-gray-500" label="গোপনীয়তা নীতি" to="/page/privacy" />
+            <SettingsRow icon={Shield} iconBg="bg-gray-500" label="গোপনীয়তা নীতি" to="/privacy" />
+            <SettingsRow icon={FileText} iconBg="bg-slate-500" label="শর্তাবলী" to="/terms" />
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-xl bg-slate-500 flex items-center justify-center">
