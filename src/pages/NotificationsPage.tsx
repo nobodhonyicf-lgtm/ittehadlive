@@ -117,7 +117,16 @@ const NotificationsPage = () => {
                 {items?.map((n) => (
                   <div
                     key={n.id}
-                    className="group p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-200"
+                    onClick={() => {
+                      if (n.link) {
+                        if (n.link.startsWith("http")) {
+                          window.open(n.link, "_blank");
+                        } else {
+                          navigate(n.link);
+                        }
+                      }
+                    }}
+                    className={`group p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-200 ${n.link ? "cursor-pointer active:scale-[0.98]" : ""}`}
                   >
                     <div className="flex items-start gap-3">
                       {/* Category icon */}
@@ -155,15 +164,12 @@ const NotificationsPage = () => {
                           </div>
                         )}
 
-                        {/* Link */}
+                        {/* Link indicator */}
                         {n.link && (
-                          <Link
-                            to={n.link}
-                            className="inline-flex items-center gap-1.5 text-xs text-primary mt-2.5 font-medium hover:underline transition-colors"
-                          >
+                          <span className="inline-flex items-center gap-1.5 text-xs text-primary mt-2.5 font-medium">
                             <ExternalLink size={12} />
                             বিস্তারিত দেখুন
-                          </Link>
+                          </span>
                         )}
                       </div>
                     </div>
