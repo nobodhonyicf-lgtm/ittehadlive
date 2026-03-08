@@ -139,7 +139,7 @@ const ZakatContent = () => {
                   </label>
                   <select
                     value={zakatYearType}
-                    onChange={e => setZakatYearType(e.target.value)}
+                    onChange={e => { setZakatYearType(e.target.value); setZakatYearDate(""); }}
                     required
                     className="w-full border border-border rounded-xl px-3 py-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   >
