@@ -382,17 +382,34 @@ const TeacherDirectory = () => {
               </div>
               <div className="w-px bg-border" />
               <div className="text-center">
+                <div className="text-xl font-bold text-primary">{toBengaliNumber(assignedTeachers)}</div>
+                <div className="text-[10px] text-muted-foreground">খেদমতপ্রাপ্ত</div>
+              </div>
+              <div className="w-px bg-border" />
+              <div className="text-center">
                 <div className="text-xl font-bold text-primary">{toBengaliNumber(districts.length)}</div>
                 <div className="text-[10px] text-muted-foreground">জেলা</div>
               </div>
             </div>
 
-            <div className="flex gap-3 justify-center mt-5">
+            {/* Tabs + Apply Button */}
+            <div className="flex flex-col items-center gap-3 mt-5">
+              <div className="inline-flex bg-muted rounded-lg p-1 gap-1">
+                <button
+                  onClick={() => setActiveTab("available")}
+                  className={`px-4 py-2 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${activeTab === "available" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <Users size={14} /> উপলব্ধ শিক্ষক ({toBengaliNumber(availableTeachers)})
+                </button>
+                <button
+                  onClick={() => setActiveTab("assigned")}
+                  className={`px-4 py-2 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${activeTab === "assigned" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <BadgeCheck size={14} /> খেদমতপ্রাপ্ত ({toBengaliNumber(assignedTeachers)})
+                </button>
+              </div>
               <Link to="/teacher-apply">
                 <Button className="gap-2 shadow-md"><Briefcase size={16} /> শিক্ষক হিসেবে আবেদন</Button>
-              </Link>
-              <Link to="/assigned-teachers">
-                <Button variant="outline" className="gap-2"><BadgeCheck size={16} /> খেদমতপ্রাপ্ত</Button>
               </Link>
             </div>
           </div>
