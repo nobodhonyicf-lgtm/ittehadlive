@@ -63,28 +63,28 @@ self.addEventListener('notificationclick', function(event) {
   console.log('[Push SW] Notification clicked');
   event.notification.close();
   
-  var url = '/';
+  var targetUrl = '/';
   if (event.notification.data && event.notification.data.url) {
-    url = event.notification.data.url;
+    targetUrl = event.notification.data.url;
   }
   
-  // If an action button was clicked
-  if (event.action === 'open') {
-    // Use the URL from notification data
+  // Make relative URLs absolute
+  if (targetUrl.startsWith('/')) {
+    targetUrl = self.location.origin + targetUrl;
   }
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-      // Try to focus an existing window
+      // Try to find an existing window and navigate it
       for (var i = 0; i < clientList.length; i++) {
         var client = clientList[i];
-        if ('focus' in client) {
-          return client.navigate(url).then(function(c) { return c.focus(); });
+        if ('navigate' in client && 'focus' in client) {
+          return client.navigate(targetUrl).then(function(c) { return c.focus(); });
         }
       }
       // Open a new window if none exists
       if (self.clients.openWindow) {
-        return self.clients.openWindow(url);
+        return self.clients.openWindow(targetUrl);
       }
     })
   );
