@@ -6,6 +6,7 @@ import Sidebar from "@/components/home/Sidebar";
 import { Download, Share2, FileImage, FileText, Copy, Facebook, MessageCircle } from "lucide-react";
 import { useIsApp } from "@/hooks/useIsApp";
 import { useSiteSettings } from "@/hooks/useData";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
