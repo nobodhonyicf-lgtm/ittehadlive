@@ -59,6 +59,8 @@ const QiblaCompass = lazy(() => import("./pages/QiblaCompass"));
 const ZakatCalculator = lazy(() => import("./pages/ZakatCalculator"));
 const JobApply = lazy(() => import("./pages/JobApply"));
 const ShareRedirect = lazy(() => import("./pages/ShareRedirect"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const BranchDashboard = lazy(() => import("./pages/BranchDashboard"));
 const TeacherDashboard = lazy(() => import("./pages/TeacherDashboard"));
 const AssignedTeachers = lazy(() => import("./pages/AssignedTeachers"));
