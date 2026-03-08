@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Lock, Star, CheckCircle2, Play, Trophy } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const QuizLevels = () => {
   const { slug } = useParams<{ slug: string }>();
