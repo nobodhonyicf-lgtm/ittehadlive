@@ -61,7 +61,7 @@ const SEOHead = ({
     ],
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "সিদ্ধিরগঞ্জ",
+      "streetAddress": "২১১/১ আরামবাগ, গোদনাইল, সিদ্ধিরগঞ্জ",
       "addressLocality": "নারায়ণগঞ্জ",
       "postalCode": "1432",
       "addressCountry": "BD",
