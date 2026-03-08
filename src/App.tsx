@@ -66,6 +66,7 @@ const AssignedTeachers = lazy(() => import("./pages/AssignedTeachers"));
 // Lazy Islamic pages
 const DuaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ default: m.DuaPage })));
 const MasalaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ default: m.MasalaPage })));
+const IslamicContentDetail = lazy(() => import("./pages/IslamicContentDetail"));
 
 const queryClient = new QueryClient({
   mutationCache: new MutationCache({
