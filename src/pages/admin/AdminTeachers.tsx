@@ -431,7 +431,10 @@ const JobPostingsTab = () => {
             url: "/teachers?tab=jobs",
             image: (branchLogo as any)?.image_url || undefined,
           },
-        }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
+        }).then(({ data, error }) => {
+          if (error) { toast.error("পুশ পাঠানো ব্যর্থ"); console.error(error); }
+          else toast.success(`পুশ পাঠানো হয়েছে (${data?.sent || 0}/${data?.total || 0})`);
+        });
       }
       setSendJobPush(false);
       setOpen(false); setEditId(null); queryClient.invalidateQueries({ queryKey: ["admin_job_postings"] });
