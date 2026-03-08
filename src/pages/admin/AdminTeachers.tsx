@@ -75,6 +75,7 @@ const TeachersTab = () => {
             title: `📋 নতুন শিক্ষক: ${form.name}`,
             body: `${form.subject} বিষয়ে নতুন শিক্ষক যুক্ত হয়েছেন${form.district ? ` (${form.district})` : ""}`,
             url: "/teachers",
+            image: form.photo_url || undefined,
           },
         }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
       }
@@ -181,15 +182,16 @@ const TeachersTab = () => {
                      {(t as any).is_verified ? <BadgeCheck size={18} className="text-blue-500" /> : <span className="text-muted-foreground text-xs">—</span>}
                    </TableCell>
                    <TableCell className="text-right">
-                     {canEdit && <Button variant="ghost" size="icon" title="পুশ নোটিফিকেশন পাঠান" onClick={() => {
-                       supabase.functions.invoke("send-push", {
-                         body: {
-                           title: `📋 শিক্ষক তথ্য: ${t.name}`,
-                           body: `${t.subject} বিষয়ে শিক্ষক${t.district ? ` (${t.district})` : ""}`,
-                           url: "/teachers",
-                         },
-                       }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
-                     }}><Bell size={16} className="text-primary" /></Button>}
+                      {canEdit && <Button variant="ghost" size="icon" title="পুশ নোটিফিকেশন পাঠান" onClick={() => {
+                        supabase.functions.invoke("send-push", {
+                          body: {
+                            title: `📋 শিক্ষক তথ্য: ${t.name}`,
+                            body: `${t.subject} বিষয়ে শিক্ষক${t.district ? ` (${t.district})` : ""}`,
+                            url: `/teachers?selected=${t.id}`,
+                            image: t.photo_url || undefined,
+                          },
+                        }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
+                      }}><Bell size={16} className="text-primary" /></Button>}
                      {canEdit && <Button variant="ghost" size="icon" onClick={() => {
                        setEditId(t.id);
                         setForm({ name: t.name, phone: t.phone || "", email: t.email || "", address: t.address || "", district: t.district || "", subject: t.subject, qualification: t.qualification || "", experience_years: t.experience_years || 0, specialization: t.specialization || "", certification: t.certification || "", bio: t.bio || "", photo_url: t.photo_url || "", preferred_area: t.preferred_area || "", expected_salary: t.expected_salary || "", is_available: t.is_available ?? true, is_active: t.is_active ?? true, is_verified: (t as any).is_verified ?? false, sort_order: t.sort_order || 0, exam_result: (t as any).exam_result || "", grade_obtained: (t as any).grade_obtained || "", previous_institution: (t as any).previous_institution || "", institution_id: (t as any).institution_id || "" });
@@ -397,7 +399,7 @@ const JobPostingsTab = () => {
   const { data: branches } = useQuery({
     queryKey: ["admin_branches_list"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("branches").select("id, name").order("name");
+      const { data, error } = await supabase.from("branches").select("id, name, image_url").order("name");
       if (error) throw error;
       return data;
     },
@@ -421,11 +423,13 @@ const JobPostingsTab = () => {
     onSuccess: () => {
       toast.success("সংরক্ষিত");
       if (sendJobPush && !editId) {
+        const branchLogo = form.branch_id ? branches?.find(b => b.id === form.branch_id) : null;
         supabase.functions.invoke("send-push", {
           body: {
             title: `📢 নিয়োগ বিজ্ঞপ্তি: ${form.title}`,
             body: `${form.subject ? form.subject + " বিষয়ে " : ""}নতুন নিয়োগ বিজ্ঞপ্তি প্রকাশিত হয়েছে${form.location ? ` (${form.location})` : ""}`,
-            url: "/teachers",
+            url: "/teachers?tab=jobs",
+            image: (branchLogo as any)?.image_url || undefined,
           },
         }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
       }
@@ -502,15 +506,21 @@ const JobPostingsTab = () => {
                 </div>
               </div>
               <div className="flex gap-1 shrink-0">
-                {canEdit && <Button variant="ghost" size="icon" title="পুশ নোটিফিকেশন পাঠান" onClick={() => {
-                  supabase.functions.invoke("send-push", {
-                    body: {
-                      title: `📢 নিয়োগ বিজ্ঞপ্তি: ${j.title}`,
-                      body: `${j.subject ? j.subject + " বিষয়ে " : ""}নিয়োগ বিজ্ঞপ্তি${j.location ? ` (${j.location})` : ""}`,
-                      url: "/teachers",
-                    },
-                  }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
-                }}><Bell size={16} className="text-primary" /></Button>}
+                {canEdit && <Button variant="ghost" size="icon" title="পুশ নোটিফিকেশন পাঠান" onClick={async () => {
+                   let branchLogo: string | undefined;
+                   if (j.branch_id) {
+                     const { data: br } = await supabase.from("branches").select("image_url").eq("id", j.branch_id).maybeSingle();
+                     branchLogo = br?.image_url || undefined;
+                   }
+                   supabase.functions.invoke("send-push", {
+                     body: {
+                       title: `📢 নিয়োগ বিজ্ঞপ্তি: ${j.title}`,
+                       body: `${j.subject ? j.subject + " বিষয়ে " : ""}নিয়োগ বিজ্ঞপ্তি${j.location ? ` (${j.location})` : ""}`,
+                       url: `/teachers?tab=jobs&selected=${j.id}`,
+                       image: branchLogo,
+                     },
+                   }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
+                 }}><Bell size={16} className="text-primary" /></Button>}
                 {canEdit && <Button variant="ghost" size="icon" onClick={() => {
                   setEditId(j.id);
                   setForm({ title: j.title, description: j.description || "", subject: j.subject || "", qualification_required: j.qualification_required || "", experience_required: j.experience_required || "", salary_range: j.salary_range || "", location: j.location || "", deadline: j.deadline || "", is_active: j.is_active ?? true, branch_id: j.branch_id || "" });

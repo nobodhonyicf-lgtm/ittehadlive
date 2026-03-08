@@ -405,9 +405,19 @@ const AdminPosts = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-0.5">
-                      {canEdit && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(post)}><Edit size={15} /></Button>}
-                      {canDelete && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteMutation.mutate(post.id)}><Trash2 size={15} /></Button>}
+                     <div className="flex items-center justify-end gap-0.5">
+                       {canEdit && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title="পুশ নোটিফিকেশন পাঠান" onClick={() => {
+                         supabase.functions.invoke("send-push", {
+                           body: {
+                             title: post.title,
+                             body: (post as any).summary || post.title,
+                             url: `/post/${post.slug}`,
+                             image: post.image_url || undefined,
+                           },
+                         }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
+                       }}><Bell size={15} /></Button>}
+                       {canEdit && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(post)}><Edit size={15} /></Button>}
+                       {canDelete && <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => deleteMutation.mutate(post.id)}><Trash2 size={15} /></Button>}
                     </div>
                   </TableCell>
                 </TableRow>
