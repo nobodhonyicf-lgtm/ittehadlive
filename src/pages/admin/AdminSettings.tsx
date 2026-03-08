@@ -47,10 +47,30 @@ const AdminSettings = () => {
     },
   });
 
+  // Helper to sync VAPID keys to server secrets
+  const syncVapidToSecrets = async (key: string, value: string) => {
+    if (key !== 'vapid_public_key' && key !== 'vapid_private_key') return;
+    try {
+      const payload: Record<string, string> = {};
+      payload[key] = value;
+      const { error } = await supabase.functions.invoke('sync-vapid-keys', { body: payload });
+      if (error) {
+        console.error('VAPID sync error:', error);
+        toast.error('VAPID সিক্রেট সিঙ্ক ব্যর্থ: ' + error.message);
+      } else {
+        toast.success('VAPID সিক্রেট সার্ভারে সিঙ্ক করা হয়েছে। পুরানো সাবস্ক্রিপশন মুছে দেওয়া হয়েছে।');
+      }
+    } catch (e: any) {
+      console.error('VAPID sync failed:', e);
+    }
+  };
+
   const updateMutation = useMutation({
-    mutationFn: async ({ id, value }: { id: string; value: string }) => {
+    mutationFn: async ({ id, value, key }: { id: string; value: string; key?: string }) => {
       const { error } = await supabase.from("site_settings").update({ value }).eq("id", id);
       if (error) throw error;
+      // Sync VAPID keys to server secrets
+      if (key) await syncVapidToSecrets(key, value);
     },
     onSuccess: () => { toast.success("সংরক্ষিত"); qc.invalidateQueries({ queryKey: ["admin_settings"] }); qc.invalidateQueries({ queryKey: ["site_settings"] }); },
   });
