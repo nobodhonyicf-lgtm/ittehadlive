@@ -145,7 +145,7 @@ const AdminSettings = () => {
       <Label className="mb-1 block font-semibold">{keyLabels[s.key] || s.key}</Label>
       <div className="flex gap-2">
         <Input type={s.key === "primary_color" ? "color" : "text"} defaultValue={s.value || ""} onChange={(e) => setValues({ ...values, [s.id]: e.target.value })} className={s.key === "primary_color" ? "w-20 h-10 p-1" : ""} />
-        <Button onClick={() => updateMutation.mutate({ id: s.id, value: values[s.id] ?? s.value ?? "" })} disabled={updateMutation.isPending} size="sm">সংরক্ষণ</Button>
+        <Button onClick={() => updateMutation.mutate({ id: s.id, value: values[s.id] ?? s.value ?? "", key: s.key })} disabled={updateMutation.isPending} size="sm">সংরক্ষণ</Button>
       </div>
       {/* File upload option for image fields */}
       {(s.key === "logo_url" || s.key === "favicon_url" || s.key === "app_icon_url" || s.key === "app_logo_url" || s.key === "default_og_image") && (
