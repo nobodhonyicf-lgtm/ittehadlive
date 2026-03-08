@@ -63,8 +63,8 @@ self.addEventListener('notificationclick', function(event) {
   console.log('[Push SW] Notification clicked');
   event.notification.close();
   
-  var targetUrl = '/';
-  if (event.notification.data && event.notification.data.url) {
+  var targetUrl = '/notifications';
+  if (event.notification.data && event.notification.data.url && event.notification.data.url !== '/') {
     targetUrl = event.notification.data.url;
   }
   
