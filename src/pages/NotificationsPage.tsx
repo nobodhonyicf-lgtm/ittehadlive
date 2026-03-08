@@ -10,6 +10,7 @@ import { useEffect } from "react";
 
 const NotificationsPage = () => {
   const isApp = useIsApp();
+  const navigate = useNavigate();
 
   const { data: notifications, isLoading } = useQuery({
     queryKey: ["public_notifications_full"],
