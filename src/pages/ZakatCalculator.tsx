@@ -293,7 +293,7 @@ const ZakatContent = () => {
                   <TooltipTrigger asChild>
                     <p className="text-[11px] text-muted-foreground mt-1 cursor-help underline decoration-dotted">সর্বশেষ হালনাগাদ {nisabDate}</p>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs text-xs leading-relaxed">
+                  <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed">
                     তাঁতিবাজারের ২৪ ক্যারেট (পাকা) রুপার পাইকারি বাজারদরের ভিত্তিতে মূল্য নির্ধারণ করা হয়েছে। যেহেতু রূপার বাজারদর সময়ের সাথে সাথে পরিবর্তিত হয় এবং বর্তমানে স্বর্ণ-রুপার দাম দ্রুত পরিবর্তন হচ্ছে, সেহেতু বাজারদর পরিবর্তনের ফলে যাকাতের নিসাবের পরিমাণও পরিবর্তিত হতে পারে।
                   </TooltipContent>
                 </Tooltip>
