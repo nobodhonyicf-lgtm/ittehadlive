@@ -29,13 +29,22 @@ const WebPushPrompt = () => {
     },
   });
 
-  // Auto-sync: re-subscribe if VAPID key changed or if permission granted but not subscribed
+  // Check if running as installed app (PWA standalone or Capacitor)
+  const isAppMode = typeof window !== 'undefined' && (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window as any).Capacitor?.isNativePlatform?.() ||
+    sessionStorage.getItem("ittehad_app_mode") === "1"
+  );
+
+  // Auto-sync: re-subscribe if VAPID key changed, permission granted but not subscribed,
+  // OR if in app mode auto-subscribe immediately (request permission if needed)
   useEffect(() => {
     if (!isSupported || isLoading || autoSynced || !vapidKey) return;
     
     const storedVapidKey = localStorage.getItem(VAPID_KEY_USED);
     const vapidKeyChanged = storedVapidKey && storedVapidKey !== vapidKey;
     
+    // Case 1: Permission already granted — re-sync or fix VAPID key change
     if (Notification.permission === 'granted' && (!isSubscribed || vapidKeyChanged)) {
       const reason = vapidKeyChanged ? 'VAPID key changed, re-subscribing...' : 'Permission granted but not subscribed, auto-subscribing...';
       console.log(`[WebPush] ${reason}`);
@@ -49,8 +58,27 @@ const WebPushPrompt = () => {
           console.log('[WebPush] Auto-subscribe failed');
         }
       });
+      return;
     }
-  }, [isSupported, isLoading, isSubscribed, vapidKey, autoSynced, subscribe]);
+    
+    // Case 2: App mode (PWA/Capacitor) — auto-request permission & subscribe
+    if (isAppMode && !isSubscribed && Notification.permission !== 'denied') {
+      console.log('[WebPush] App mode detected, auto-subscribing...');
+      setAutoSynced(true);
+      // Small delay to let app finish loading
+      const timer = setTimeout(() => {
+        subscribe(vapidKey).then((ok) => {
+          if (ok) {
+            console.log('[WebPush] App mode auto-subscribe successful');
+            localStorage.setItem(SUBSCRIBED_KEY, "1");
+            localStorage.setItem(VAPID_KEY_USED, vapidKey);
+            setShow(false);
+          }
+        });
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSupported, isLoading, isSubscribed, vapidKey, autoSynced, subscribe, isAppMode]);
 
   useEffect(() => {
     if (!isSupported || isSubscribed || isLoading) return;
