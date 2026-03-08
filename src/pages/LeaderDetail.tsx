@@ -5,6 +5,7 @@ import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { User } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const LeaderDetail = () => {
   const { id } = useParams<{ id: string }>();
