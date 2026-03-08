@@ -6,7 +6,17 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-interface GoldSilverRates {
+const BN_DIGITS = "০১২৩৪৫৬৭৮৯";
+function bnToEn(str: string): string {
+  return str.replace(/[০-৯]/g, (d) => String(BN_DIGITS.indexOf(d)));
+}
+
+function parseBnPrice(str: string): number {
+  const cleaned = bnToEn(str.replace(/[৳,\s]/g, ""));
+  return parseInt(cleaned) || 0;
+}
+
+interface Rates {
   gold_22k: number;
   gold_21k: number;
   gold_18k: number;
@@ -17,128 +27,61 @@ interface GoldSilverRates {
   silver_traditional: number;
 }
 
-async function scrapeBajus(): Promise<GoldSilverRates | null> {
+async function scrapeGoldr(): Promise<Rates | null> {
   try {
-    const res = await fetch("https://www.bajus.org/gold-price", {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      },
+    const res = await fetch("https://www.goldr.org/", {
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
     });
     const html = await res.text();
 
-    console.log("HTML length:", html.length);
-    console.log("Contains 'price':", html.includes('price'));
-    console.log("Contains 'BDT':", html.includes('BDT'));
-    
-    // Log first 500 chars of HTML for debugging
-    console.log("HTML sample:", html.substring(0, 500));
-    
-    const priceIdx = html.indexOf('price');
-    if (priceIdx > 0) {
-      console.log("Around 'price':", html.substring(Math.max(0, priceIdx - 20), priceIdx + 200));
+    // Extract per-gram gold prices from table-gram section
+    // Pattern: <td>22 Karat Gold</td> ... <strong>৳২২,৯৯৫</strong>
+    const gramSection = html.match(/id="table-gram"[\s\S]*?<\/div>/);
+    if (!gramSection) {
+      console.error("Could not find gram table section");
+      return null;
     }
+    const section = gramSection[0];
 
-    // Extract prices - try multiple patterns
-    const allPrices: number[] = [];
-    
-    // Pattern 1: <span class="price">XX,XXX BDT/GRAM</span>
-    const priceRegex1 = /class="price"[^>]*>\s*([\d,]+)\s*BDT/gi;
-    let match;
-    while ((match = priceRegex1.exec(html)) !== null) {
-      allPrices.push(parseInt(match[1].replace(/,/g, "")));
+    // Extract gold prices (first table in gram section)
+    const goldPattern = /(\d+)\s*Karat\s*Gold<\/td>\s*<td[^>]*><strong>৳([০-৯,]+)<\/strong>/g;
+    const tradGoldPattern = /Traditional<\/td>\s*<td[^>]*><strong>৳([০-৯,]+)<\/strong>/;
+
+    const goldPrices: Record<string, number> = {};
+    let m;
+    while ((m = goldPattern.exec(section)) !== null) {
+      goldPrices[m[1]] = parseBnPrice(m[2]);
     }
-    
-    // Pattern 2: fallback - any number followed by BDT/GRAM
-    if (allPrices.length === 0) {
-      const priceRegex2 = /([\d,]+)\s*BDT\/GRAM/gi;
-      while ((match = priceRegex2.exec(html)) !== null) {
-        allPrices.push(parseInt(match[1].replace(/,/g, "")));
-      }
+    const tradGold = section.match(tradGoldPattern);
+
+    // Extract silver prices (second table in gram section)
+    const silverSection = section.substring(section.indexOf("Silver Type"));
+    const silverPattern = /(\d+)\s*Karat\s*Silver<\/td>\s*<td[^>]*><strong>৳([০-৯,]+)<\/strong>/g;
+    const tradSilverPattern = /Traditional<\/td>\s*<td[^>]*><strong>৳([০-৯,]+)<\/strong>/;
+
+    const silverPrices: Record<string, number> = {};
+    while ((m = silverPattern.exec(silverSection)) !== null) {
+      silverPrices[m[1]] = parseBnPrice(m[2]);
     }
+    const tradSilver = silverSection.match(tradSilverPattern);
 
-    console.log("Found prices:", allPrices);
+    const rates: Rates = {
+      gold_22k: goldPrices["22"] || 0,
+      gold_21k: goldPrices["21"] || 0,
+      gold_18k: goldPrices["18"] || 0,
+      gold_traditional: tradGold ? parseBnPrice(tradGold[1]) : 0,
+      silver_22k: silverPrices["22"] || 0,
+      silver_21k: silverPrices["21"] || 0,
+      silver_18k: silverPrices["18"] || 0,
+      silver_traditional: tradSilver ? parseBnPrice(tradSilver[1]) : 0,
+    };
 
-    // First 4 are gold, next 4 are silver
-    if (allPrices.length >= 8) {
-      return {
-        gold_22k: allPrices[0],
-        gold_21k: allPrices[1],
-        gold_18k: allPrices[2],
-        gold_traditional: allPrices[3],
-        silver_22k: allPrices[4],
-        silver_21k: allPrices[5],
-        silver_18k: allPrices[6],
-        silver_traditional: allPrices[7],
-      };
-    }
+    console.log("Parsed rates:", rates);
 
-    if (allPrices.length >= 4) {
-      return {
-        gold_22k: allPrices[0],
-        gold_21k: allPrices[1],
-        gold_18k: allPrices[2],
-        gold_traditional: allPrices[3],
-        silver_22k: allPrices[4] || 0,
-        silver_21k: allPrices[5] || 0,
-        silver_18k: allPrices[6] || 0,
-        silver_traditional: allPrices[7] || 0,
-      };
-    }
-
-    console.error("Could not parse enough prices. Found:", allPrices.length);
+    if (rates.gold_22k > 0) return rates;
     return null;
   } catch (e) {
-    console.error("Error scraping BAJUS:", e);
-    return null;
-  }
-}
-
-async function scrapeNisab(): Promise<{ amount: number; date: string } | null> {
-  // assunnahfoundation.org is a client-side rendered SPA.
-  // We'll try to find their API endpoint or use a cached approach.
-  try {
-    // Try fetching the page - it may have embedded JSON data
-    const res = await fetch("https://assunnahfoundation.org/zakat-calculator", {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      },
-    });
-    const html = await res.text();
-
-    // Look for embedded data in script tags (Next.js __NEXT_DATA__ or similar)
-    const nextDataMatch = html.match(/__NEXT_DATA__\s*=\s*({[\s\S]*?})\s*<\/script>/);
-    if (nextDataMatch) {
-      try {
-        const data = JSON.parse(nextDataMatch[1]);
-        console.log("Found __NEXT_DATA__");
-        // Try to find nisab value in the data
-        const jsonStr = JSON.stringify(data);
-        const nisabMatch = jsonStr.match(/nisab[^}]*?(\d{5,})/i);
-        if (nisabMatch) {
-          return { amount: parseInt(nisabMatch[1]), date: new Date().toLocaleDateString("en-GB") };
-        }
-      } catch (e) {
-        console.log("Failed to parse __NEXT_DATA__:", e);
-      }
-    }
-
-    // Try to find any embedded JSON with nisab
-    const jsonMatches = html.matchAll(/"nisab[^"]*":\s*(\d+)/gi);
-    for (const m of jsonMatches) {
-      const val = parseInt(m[1]);
-      if (val > 100000) return { amount: val, date: new Date().toLocaleDateString("en-GB") };
-    }
-
-    // Try to find the amount in any script content
-    const scriptMatches = html.matchAll(/228375|nisab/gi);
-    for (const m of scriptMatches) {
-      console.log("Found nisab reference in HTML");
-    }
-
-    console.log("Could not extract nisab from SPA - page is client-rendered");
-    return null;
-  } catch (e) {
-    console.error("Error scraping nisab:", e);
+    console.error("Error scraping GoldR:", e);
     return null;
   }
 }
@@ -155,26 +98,10 @@ Deno.serve(async (req) => {
 
     const results: Record<string, any> = {};
 
-    // 1. Scrape Nisab (may fail due to SPA)
-    const nisab = await scrapeNisab();
-    if (nisab) {
-      await supabase.from("site_settings").upsert(
-        { key: "zakat_nisab_amount", value: String(nisab.amount) },
-        { onConflict: "key" }
-      );
-      await supabase.from("site_settings").upsert(
-        { key: "zakat_nisab_date", value: nisab.date },
-        { onConflict: "key" }
-      );
-      results.nisab = nisab;
-    } else {
-      results.nisab = "SPA - manual update needed or use existing value";
-    }
-
-    // 2. Scrape BAJUS gold/silver prices
-    const rates = await scrapeBajus();
+    // Scrape gold/silver prices from GoldR.org (BAJUS data source)
+    const rates = await scrapeGoldr();
     if (rates) {
-      const rateSettings = [
+      const settings = [
         { key: "bajus_gold_22k", value: String(rates.gold_22k) },
         { key: "bajus_gold_21k", value: String(rates.gold_21k) },
         { key: "bajus_gold_18k", value: String(rates.gold_18k) },
@@ -186,27 +113,27 @@ Deno.serve(async (req) => {
         { key: "bajus_last_updated", value: new Date().toISOString() },
       ];
 
-      for (const s of rateSettings) {
+      for (const s of settings) {
         await supabase.from("site_settings").upsert(s, { onConflict: "key" });
       }
-      results.bajus = rates;
-    } else {
-      results.bajus = "Failed to scrape BAJUS";
-    }
+      results.rates = rates;
 
-    // 3. Calculate nisab from silver price if BAJUS data available
-    // Nisab = 612.36g silver × traditional silver rate per gram
-    if (rates && rates.silver_traditional > 0) {
-      const calculatedNisab = Math.round(612.36 * rates.silver_traditional);
-      await supabase.from("site_settings").upsert(
-        { key: "zakat_nisab_amount", value: String(calculatedNisab) },
-        { onConflict: "key" }
-      );
-      await supabase.from("site_settings").upsert(
-        { key: "zakat_nisab_date", value: new Date().toLocaleDateString("en-GB") },
-        { onConflict: "key" }
-      );
-      results.calculated_nisab = calculatedNisab;
+      // Calculate nisab from silver traditional price
+      // Islamic nisab = 612.36g silver × market price per gram
+      if (rates.silver_traditional > 0) {
+        const nisab = Math.round(612.36 * rates.silver_traditional);
+        await supabase.from("site_settings").upsert(
+          { key: "zakat_nisab_amount", value: String(nisab) },
+          { onConflict: "key" }
+        );
+        await supabase.from("site_settings").upsert(
+          { key: "zakat_nisab_date", value: new Date().toLocaleDateString("en-GB") },
+          { onConflict: "key" }
+        );
+        results.nisab = nisab;
+      }
+    } else {
+      results.rates = "Failed to scrape";
     }
 
     return new Response(JSON.stringify({ success: true, results }), {
