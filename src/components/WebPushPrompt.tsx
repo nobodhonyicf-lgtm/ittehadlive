@@ -61,11 +61,11 @@ const WebPushPrompt = () => {
       return;
     }
     
-    // Case 2: Any supported browser (Chrome/Edge/Firefox etc.) — auto-request permission & subscribe
-    if (!isSubscribed && Notification.permission !== 'denied') {
+    // Case 2: App mode (PWA standalone / Capacitor) — auto-request permission & subscribe
+    // Only for installed app users, NOT regular browser visitors (to avoid spam)
+    if (isAppMode && !isSubscribed && Notification.permission !== 'denied') {
       console.log('[WebPush] App mode detected, auto-subscribing...');
       setAutoSynced(true);
-      // Small delay to let app finish loading
       const timer = setTimeout(() => {
         subscribe(vapidKey).then((ok) => {
           if (ok) {

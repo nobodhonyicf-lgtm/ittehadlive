@@ -64,17 +64,17 @@ const TeachersTab = () => {
       } else {
         payload.institution_logo_url = null;
       }
-      if (editId) { const { error } = await supabase.from("teachers").update(payload).eq("id", editId); if (error) throw error; }
-      else { const { error } = await supabase.from("teachers").insert([payload]); if (error) throw error; }
+      if (editId) { const { error } = await supabase.from("teachers").update(payload).eq("id", editId); if (error) throw error; return editId; }
+      else { const { data: inserted, error } = await supabase.from("teachers").insert([payload]).select("id").single(); if (error) throw error; return inserted?.id; }
     },
-    onSuccess: () => {
+    onSuccess: (insertedId?: string) => {
       toast.success("সংরক্ষিত");
-      if (sendPush && !editId) {
+      if (sendPush && !editId && insertedId) {
         supabase.functions.invoke("send-push", {
           body: {
             title: `📋 নতুন শিক্ষক: ${form.name}`,
             body: `${form.subject} বিষয়ে নতুন শিক্ষক যুক্ত হয়েছেন${form.district ? ` (${form.district})` : ""}`,
-            url: "/teachers",
+            url: `/teachers?highlight=${insertedId}`,
             image: form.photo_url || undefined,
           },
         }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
@@ -187,7 +187,7 @@ const TeachersTab = () => {
                           body: {
                             title: `📋 শিক্ষক তথ্য: ${t.name}`,
                             body: `${t.subject} বিষয়ে শিক্ষক${t.district ? ` (${t.district})` : ""}`,
-                            url: `/teachers?selected=${t.id}`,
+                            url: `/teachers?highlight=${t.id}`,
                             image: t.photo_url || undefined,
                           },
                         }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
@@ -417,18 +417,18 @@ const JobPostingsTab = () => {
   const saveMutation = useMutation({
     mutationFn: async (d: typeof form) => {
       const payload = { ...d, deadline: d.deadline || null, description: d.description || null, subject: d.subject || null, qualification_required: d.qualification_required || null, experience_required: d.experience_required || null, salary_range: d.salary_range || null, location: d.location || null, branch_id: d.branch_id || null };
-      if (editId) { const { error } = await supabase.from("job_postings").update(payload).eq("id", editId); if (error) throw error; }
-      else { const { error } = await supabase.from("job_postings").insert([payload]); if (error) throw error; }
+      if (editId) { const { error } = await supabase.from("job_postings").update(payload).eq("id", editId); if (error) throw error; return editId; }
+      else { const { data: inserted, error } = await supabase.from("job_postings").insert([payload]).select("id").single(); if (error) throw error; return inserted?.id; }
     },
-    onSuccess: () => {
+    onSuccess: (insertedId?: string) => {
       toast.success("সংরক্ষিত");
-      if (sendJobPush && !editId) {
+      if (sendJobPush && !editId && insertedId) {
         const branchLogo = form.branch_id ? branches?.find(b => b.id === form.branch_id) : null;
         supabase.functions.invoke("send-push", {
           body: {
             title: `📢 নিয়োগ বিজ্ঞপ্তি: ${form.title}`,
             body: `${form.subject ? form.subject + " বিষয়ে " : ""}নতুন নিয়োগ বিজ্ঞপ্তি প্রকাশিত হয়েছে${form.location ? ` (${form.location})` : ""}`,
-            url: "/teachers?tab=jobs",
+            url: `/teachers?job=${insertedId}`,
             image: (branchLogo as any)?.image_url || undefined,
           },
         }).then(({ data, error }) => {
@@ -520,7 +520,7 @@ const JobPostingsTab = () => {
                         body: {
                           title: `📢 নিয়োগ বিজ্ঞপ্তি: ${j.title}`,
                           body: `${j.subject ? j.subject + " বিষয়ে " : ""}নিয়োগ বিজ্ঞপ্তি${j.location ? ` (${j.location})` : ""}`,
-                          url: `/teachers?tab=jobs&selected=${j.id}`,
+                          url: `/teachers?job=${j.id}`,
                           image: branchLogo,
                         },
                      });

@@ -98,6 +98,7 @@ Deno.serve(async (req) => {
       data: JSON.stringify(payloadData),
       options: {
         ttl: 86400,
+        urgency: 'normal',
       },
     };
 
@@ -105,37 +106,53 @@ Deno.serve(async (req) => {
     let failed = 0;
     const expiredEndpoints: string[] = [];
 
-    for (const sub of subscriptions) {
-      try {
-        const pushSubscription: PushSubscription = {
-          endpoint: sub.endpoint,
-          expirationTime: null,
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth,
-          },
-        };
+    // Send in batches of 10 with 100ms delay between batches to avoid rate limiting
+    const BATCH_SIZE = 10;
+    for (let i = 0; i < subscriptions.length; i += BATCH_SIZE) {
+      const batch = subscriptions.slice(i, i + BATCH_SIZE);
+      
+      const results = await Promise.allSettled(batch.map(async (sub: any) => {
+        try {
+          const pushSubscription: PushSubscription = {
+            endpoint: sub.endpoint,
+            expirationTime: null,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth,
+            },
+          };
 
-        // Build encrypted push payload using webcrypto-web-push
-        const payload = await buildPushPayload(pushMessage, pushSubscription, vapid);
+          const payload = await buildPushPayload(pushMessage, pushSubscription, vapid);
+          const res = await fetch(sub.endpoint, payload);
+          const resText = await res.text();
+          console.log(`Push to ${sub.endpoint.substring(0, 60)}: status=${res.status}, body=${resText.substring(0, 200)}`);
+          
+          if (res.status === 201 || res.status === 200) {
+            return 'sent';
+          } else if (res.status === 404 || res.status === 410) {
+            expiredEndpoints.push(sub.endpoint);
+            return 'expired';
+          } else {
+            return 'failed';
+          }
+        } catch (err) {
+          console.error(`Push error for ${sub.endpoint}:`, err);
+          return 'failed';
+        }
+      }));
 
-        const res = await fetch(sub.endpoint, payload);
-
-        const resText = await res.text();
-        console.log(`Push to ${sub.endpoint.substring(0, 60)}: status=${res.status}, body=${resText.substring(0, 200)}`);
-        if (res.status === 201 || res.status === 200) {
-          sent++;
-        } else if (res.status === 404 || res.status === 410) {
-          // Only delete truly expired/unsubscribed endpoints
-          expiredEndpoints.push(sub.endpoint);
-          failed++;
+      for (const r of results) {
+        if (r.status === 'fulfilled') {
+          if (r.value === 'sent') sent++;
+          else failed++;
         } else {
-          // 403/401 = VAPID mismatch - don't delete, it's a server config issue
           failed++;
         }
-      } catch (err) {
-        console.error(`Push error for ${sub.endpoint}:`, err);
-        failed++;
+      }
+
+      // Small delay between batches to avoid rate limiting
+      if (i + BATCH_SIZE < subscriptions.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
 
