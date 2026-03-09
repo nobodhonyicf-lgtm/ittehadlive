@@ -82,6 +82,7 @@ const navCategories: NavCategory[] = [
       { label: "ফটো কার্ড", icon: Image, path: "/admin/photo-card", section: "photo-card" },
       { label: "ক্যাটাগরি", icon: Tag, path: "/admin/categories", section: "categories" },
       { label: "নোটিশ", icon: Bell, path: "/admin/notices", section: "notices" },
+      { label: "FAQ", icon: MessageSquare, path: "/admin/faq", section: "faqs" },
     ],
   },
   {
