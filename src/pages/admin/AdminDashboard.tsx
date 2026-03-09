@@ -739,6 +739,7 @@ const AdminDashboard = () => {
             <Route path="teachers" element={<AdminTeachers />} />
             <Route path="site-pages" element={<AdminSitePages />} />
             <Route path="subscribers" element={<AdminSubscribers />} />
+            <Route path="faq" element={<AdminFAQ />} />
           </Routes>
         </div>
       </main>

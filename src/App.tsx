@@ -166,6 +166,7 @@ const App = () => (
                 <Route path="/share/:type/:category/:id" element={<ShareRedirect />} />
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/faq" element={<FAQPage />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/reset-password" element={<ResetPassword />} />
                 <Route path="/admin/*" element={<AdminDashboard />} />

@@ -15,7 +15,16 @@ serve(async (req) => {
 
     let prompt = "";
 
-    if (mode === "post") {
+    if (mode === "faq") {
+      prompt = `You are a professional Bengali content writer for an Islamic educational institution website called "ইত্তেহাদুল মাদারিস বাংলাদেশ" (Ittehadul Madaris Bangladesh).
+Generate 15-20 frequently asked questions (FAQs) and their answers in Bengali.
+Topics should include admission, education system, rules, exams, etc.
+Return a JSON array of objects, where each object has:
+- question: The question in Bengali
+- answer: The detailed answer in Bengali
+- category: A category name (e.g. 'ভর্তি', 'শিক্ষা', 'সাধারণ')
+Make sure the output is a valid JSON array only, without markdown formatting.`;
+    } else if (mode === "post") {
       // AI post generation
       prompt = `You are a professional Bengali content writer for an Islamic educational institution website called "ইত্তেহাদুল মাদারিস বাংলাদেশ" (Ittehadul Madaris Bangladesh).
 
