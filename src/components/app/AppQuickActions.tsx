@@ -12,6 +12,7 @@ import {
   Compass,
   Calculator,
   MapPin,
+  MessageCircleQuestion,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -29,6 +30,7 @@ const AppQuickActions = () => {
     { icon: Compass, label: "কিবলা", path: "/qibla", bg: "bg-teal-600" },
     { icon: Calculator, label: "যাকাত", path: "/zakat", bg: "bg-amber-600" },
     { icon: MapPin, label: "ম্যাপ", path: "/nearby-map", bg: "bg-sky-600" },
+    { icon: MessageCircleQuestion, label: "জিজ্ঞাসা", path: "/faq", bg: "bg-cyan-600" },
     { icon: Mail, label: "যোগাযোগ", path: "/app-contact", bg: "bg-indigo-600" },
     ...(user && hasAnyRole
       ? [{ icon: LayoutDashboard, label: "ড্যাশবোর্ড", path: "/admin", bg: "bg-slate-600" }]
