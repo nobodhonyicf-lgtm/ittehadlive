@@ -48,6 +48,7 @@ import AdminTeachers from "./AdminTeachers";
 // AdminInstitutions removed - merged into AdminBranches
 import AdminSitePages from "./AdminSitePages";
 import AdminSubscribers from "./AdminSubscribers";
+import AdminFAQ from "./AdminFAQ";
 
 interface NavItem {
   label: string;
@@ -81,6 +82,7 @@ const navCategories: NavCategory[] = [
       { label: "ফটো কার্ড", icon: Image, path: "/admin/photo-card", section: "photo-card" },
       { label: "ক্যাটাগরি", icon: Tag, path: "/admin/categories", section: "categories" },
       { label: "নোটিশ", icon: Bell, path: "/admin/notices", section: "notices" },
+      { label: "FAQ", icon: MessageSquare, path: "/admin/faq", section: "faqs" },
     ],
   },
   {
@@ -737,6 +739,7 @@ const AdminDashboard = () => {
             <Route path="teachers" element={<AdminTeachers />} />
             <Route path="site-pages" element={<AdminSitePages />} />
             <Route path="subscribers" element={<AdminSubscribers />} />
+            <Route path="faq" element={<AdminFAQ />} />
           </Routes>
         </div>
       </main>
