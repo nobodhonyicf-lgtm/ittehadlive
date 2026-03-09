@@ -12,6 +12,7 @@ import DynamicFavicon from "@/components/DynamicFavicon";
 import DynamicManifest from "@/components/DynamicManifest";
 import { lazy, Suspense } from "react";
 import { ActivityTrackerWrapper as ActivityTracker } from "@/components/ActivityTracker";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Eagerly loaded (homepage + common)
 import Index from "./pages/Index";
@@ -68,6 +69,11 @@ const TeacherDashboard = lazy(() => import("./pages/TeacherDashboard"));
 const AssignedTeachers = lazy(() => import("./pages/AssignedTeachers"));
 const FAQPage = lazy(() => import("./pages/FAQPage"));
 
+// New pages
+const VerifyHub = lazy(() => import("./pages/VerifyHub"));
+const HelpCenter = lazy(() => import("./pages/HelpCenter"));
+const DocumentCenter = lazy(() => import("./pages/DocumentCenter"));
+
 // Lazy Islamic pages
 const DuaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ default: m.DuaPage })));
 const MasalaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ default: m.MasalaPage })));
@@ -113,6 +119,7 @@ const App = () => (
             <DynamicManifest />
             <Suspense fallback={<PageLoader />}>
               <Routes>
+                {/* ═══ Public Website ═══ */}
                 <Route path="/" element={<Index />} />
                 <Route path="/post/:slug" element={<PostPage />} />
                 <Route path="/posts" element={<PostsList />} />
@@ -126,18 +133,21 @@ const App = () => (
                 <Route path="/branch/:id" element={<BranchDetail />} />
                 <Route path="/books" element={<BookStore />} />
                 <Route path="/book/:slug" element={<BookDetail />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/login" element={<CustomerLogin />} />
-                <Route path="/register" element={<CustomerRegister />} />
-                <Route path="/profile" element={<UserProfile />} />
-                <Route path="/reset-password" element={<CustomerResetPassword />} />
-                <Route path="/oauth-bridge" element={<OAuthBridge />} />
-                <Route path="/oauth-callback" element={<OAuthCallback />} />
+                <Route path="/teachers" element={<TeacherDirectory />} />
+                <Route path="/teacher/:id" element={<TeacherDetail />} />
+                <Route path="/job/:id" element={<JobDetail />} />
+                <Route path="/advertise" element={<Advertise />} />
+                <Route path="/faq" element={<FAQPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
                 <Route path="/install" element={<Install />} />
-                <Route path="/notifications" element={<NotificationsPage />} />
-                <Route path="/app-settings" element={<AppSettings />} />
-                <Route path="/app-contact" element={<AppContact />} />
+
+                {/* ═══ Verification & Trust ═══ */}
+                <Route path="/verify" element={<VerifyHub />} />
+                <Route path="/support" element={<HelpCenter />} />
+                <Route path="/documents" element={<DocumentCenter />} />
+
+                {/* ═══ Islamic Library ═══ */}
                 <Route path="/quran" element={<QuranPage />} />
                 <Route path="/hadith" element={<HadithPage />} />
                 <Route path="/dua" element={<DuaPage />} />
@@ -146,30 +156,66 @@ const App = () => (
                 <Route path="/hadith/:id" element={<IslamicContentDetail />} />
                 <Route path="/dua/:id" element={<IslamicContentDetail />} />
                 <Route path="/masala/:id" element={<IslamicContentDetail />} />
-                <Route path="/teachers" element={<TeacherDirectory />} />
-                <Route path="/teacher/:id" element={<TeacherDetail />} />
-                <Route path="/job/:id" element={<JobDetail />} />
-                <Route path="/teacher-apply" element={<TeacherApply />} />
-                <Route path="/assigned-teachers" element={<AssignedTeachers />} />
-                <Route path="/advertise" element={<Advertise />} />
-                <Route path="/institution-register" element={<InstitutionRegister />} />
+
+                {/* ═══ Quiz ═══ */}
                 <Route path="/quiz" element={<QuizHome />} />
                 <Route path="/quiz/:slug" element={<QuizLevels />} />
                 <Route path="/quiz/:slug/play/:levelId" element={<QuizPlay />} />
+
+                {/* ═══ Tools ═══ */}
                 <Route path="/nearby-map" element={<NearbyMap />} />
                 <Route path="/qibla" element={<QiblaCompass />} />
                 <Route path="/zakat" element={<ZakatCalculator />} />
-                <Route path="/job-apply/:jobId" element={<JobApply />} />
-                <Route path="/branch-dashboard" element={<BranchDashboard />} />
-                <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+
+                {/* ═══ Auth (Public) ═══ */}
+                <Route path="/login" element={<CustomerLogin />} />
+                <Route path="/register" element={<CustomerRegister />} />
+                <Route path="/reset-password" element={<CustomerResetPassword />} />
+                <Route path="/oauth-bridge" element={<OAuthBridge />} />
+                <Route path="/oauth-callback" element={<OAuthCallback />} />
+
+                {/* ═══ Protected: User ═══ */}
+                <Route path="/profile" element={
+                  <ProtectedRoute><UserProfile /></ProtectedRoute>
+                } />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/checkout" element={
+                  <ProtectedRoute><Checkout /></ProtectedRoute>
+                } />
+                <Route path="/notifications" element={<NotificationsPage />} />
+                <Route path="/app-settings" element={<AppSettings />} />
+                <Route path="/app-contact" element={<AppContact />} />
+
+                {/* ═══ Protected: Teacher ═══ */}
+                <Route path="/teacher-apply" element={
+                  <ProtectedRoute><TeacherApply /></ProtectedRoute>
+                } />
+                <Route path="/teacher-dashboard" element={
+                  <ProtectedRoute><TeacherDashboard /></ProtectedRoute>
+                } />
+                <Route path="/job-apply/:jobId" element={
+                  <ProtectedRoute><JobApply /></ProtectedRoute>
+                } />
+                <Route path="/assigned-teachers" element={<AssignedTeachers />} />
+
+                {/* ═══ Protected: Branch/Institution ═══ */}
+                <Route path="/institution-register" element={
+                  <ProtectedRoute><InstitutionRegister /></ProtectedRoute>
+                } />
+                <Route path="/branch-dashboard" element={
+                  <ProtectedRoute><BranchDashboard /></ProtectedRoute>
+                } />
+
+                {/* ═══ Share Redirects ═══ */}
                 <Route path="/share/:type/:id" element={<ShareRedirect />} />
                 <Route path="/share/:type/:category/:id" element={<ShareRedirect />} />
-                <Route path="/terms" element={<TermsPage />} />
-                <Route path="/privacy" element={<PrivacyPage />} />
-                <Route path="/faq" element={<FAQPage />} />
+
+                {/* ═══ Admin ═══ */}
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/reset-password" element={<ResetPassword />} />
                 <Route path="/admin/*" element={<AdminDashboard />} />
+
+                {/* ═══ 404 ═══ */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
