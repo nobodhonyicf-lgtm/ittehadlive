@@ -74,7 +74,7 @@ const TeachersTab = () => {
           body: {
             title: `📋 নতুন শিক্ষক: ${form.name}`,
             body: `${form.subject} বিষয়ে নতুন শিক্ষক যুক্ত হয়েছেন${form.district ? ` (${form.district})` : ""}`,
-            url: `/teachers?highlight=${insertedId}`,
+            url: `/teacher/${insertedId}`,
             image: form.photo_url || undefined,
           },
         }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
@@ -187,7 +187,7 @@ const TeachersTab = () => {
                           body: {
                             title: `📋 শিক্ষক তথ্য: ${t.name}`,
                             body: `${t.subject} বিষয়ে শিক্ষক${t.district ? ` (${t.district})` : ""}`,
-                            url: `/teachers?highlight=${t.id}`,
+                            url: `/teacher/${t.id}`,
                             image: t.photo_url || undefined,
                           },
                         }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
@@ -428,7 +428,7 @@ const JobPostingsTab = () => {
           body: {
             title: `📢 নিয়োগ বিজ্ঞপ্তি: ${form.title}`,
             body: `${form.subject ? form.subject + " বিষয়ে " : ""}নতুন নিয়োগ বিজ্ঞপ্তি প্রকাশিত হয়েছে${form.location ? ` (${form.location})` : ""}`,
-            url: `/teachers?job=${insertedId}`,
+            url: `/job/${insertedId}`,
             image: (branchLogo as any)?.image_url || undefined,
           },
         }).then(({ data, error }) => {
@@ -520,7 +520,7 @@ const JobPostingsTab = () => {
                         body: {
                           title: `📢 নিয়োগ বিজ্ঞপ্তি: ${j.title}`,
                           body: `${j.subject ? j.subject + " বিষয়ে " : ""}নিয়োগ বিজ্ঞপ্তি${j.location ? ` (${j.location})` : ""}`,
-                          url: `/teachers?job=${j.id}`,
+                          url: `/job/${j.id}`,
                           image: branchLogo,
                         },
                      });

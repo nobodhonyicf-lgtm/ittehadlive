@@ -58,6 +58,8 @@ const NearbyMap = lazy(() => import("./pages/NearbyMap"));
 const QiblaCompass = lazy(() => import("./pages/QiblaCompass"));
 const ZakatCalculator = lazy(() => import("./pages/ZakatCalculator"));
 const JobApply = lazy(() => import("./pages/JobApply"));
+const TeacherDetail = lazy(() => import("./pages/TeacherDetail"));
+const JobDetail = lazy(() => import("./pages/JobDetail"));
 const ShareRedirect = lazy(() => import("./pages/ShareRedirect"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
@@ -144,6 +146,8 @@ const App = () => (
                 <Route path="/dua/:id" element={<IslamicContentDetail />} />
                 <Route path="/masala/:id" element={<IslamicContentDetail />} />
                 <Route path="/teachers" element={<TeacherDirectory />} />
+                <Route path="/teacher/:id" element={<TeacherDetail />} />
+                <Route path="/job/:id" element={<JobDetail />} />
                 <Route path="/teacher-apply" element={<TeacherApply />} />
                 <Route path="/assigned-teachers" element={<AssignedTeachers />} />
                 <Route path="/advertise" element={<Advertise />} />
