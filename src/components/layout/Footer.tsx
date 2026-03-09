@@ -97,6 +97,8 @@ const Footer = () => {
                   { href: "/posts", label: "সাম্প্রতিক খবর" },
                   { href: "/result", label: "রেজাল্ট দেখুন" },
                   { href: "/branches", label: "শাখা সমূহ" },
+                  { href: "/verify", label: "যাচাই কেন্দ্র" },
+                  { href: "/documents", label: "দলিলপত্র" },
                   { href: "/books", label: "প্রকাশনা" },
                 ].map((link) => (
                   <li key={link.href}>
