@@ -97,6 +97,8 @@ const Footer = () => {
                   { href: "/posts", label: "সাম্প্রতিক খবর" },
                   { href: "/result", label: "রেজাল্ট দেখুন" },
                   { href: "/branches", label: "শাখা সমূহ" },
+                  { href: "/verify", label: "যাচাই কেন্দ্র" },
+                  { href: "/documents", label: "দলিলপত্র" },
                   { href: "/books", label: "প্রকাশনা" },
                 ].map((link) => (
                   <li key={link.href}>
@@ -123,7 +125,7 @@ const Footer = () => {
                   { href: "/students", label: "শিক্ষার্থী ডিরেক্টরি" },
                   { href: "/teachers", label: "শিক্ষক সার্ভিস সেন্টার" },
                   { href: "/institution-register", label: "প্রতিষ্ঠান নিবন্ধন" },
-                  { href: "/advertise", label: "বিজ্ঞাপন দিন" },
+                  { href: "/support", label: "সহায়তা কেন্দ্র" },
                   { href: "/contact", label: "যোগাযোগ" },
                   { href: "/faq", label: "জিজ্ঞাসা (FAQ)" },
                   { href: "/quran", label: "কুরআন পাঠ" },
