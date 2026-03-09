@@ -125,6 +125,7 @@ const Footer = () => {
                   { href: "/institution-register", label: "প্রতিষ্ঠান নিবন্ধন" },
                   { href: "/advertise", label: "বিজ্ঞাপন দিন" },
                   { href: "/contact", label: "যোগাযোগ" },
+                  { href: "/faq", label: "জিজ্ঞাসা (FAQ)" },
                   { href: "/quran", label: "কুরআন পাঠ" },
                 ].map((link) => (
                   <li key={link.href}>
