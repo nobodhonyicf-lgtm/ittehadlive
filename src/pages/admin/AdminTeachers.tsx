@@ -187,7 +187,7 @@ const TeachersTab = () => {
                           body: {
                             title: `📋 শিক্ষক তথ্য: ${t.name}`,
                             body: `${t.subject} বিষয়ে শিক্ষক${t.district ? ` (${t.district})` : ""}`,
-                            url: `/teachers?highlight=${t.id}`,
+                            url: `/teacher/${t.id}`,
                             image: t.photo_url || undefined,
                           },
                         }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
