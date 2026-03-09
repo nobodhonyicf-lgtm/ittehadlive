@@ -66,6 +66,7 @@ const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const BranchDashboard = lazy(() => import("./pages/BranchDashboard"));
 const TeacherDashboard = lazy(() => import("./pages/TeacherDashboard"));
 const AssignedTeachers = lazy(() => import("./pages/AssignedTeachers"));
+const FAQPage = lazy(() => import("./pages/FAQPage"));
 
 // Lazy Islamic pages
 const DuaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ default: m.DuaPage })));
