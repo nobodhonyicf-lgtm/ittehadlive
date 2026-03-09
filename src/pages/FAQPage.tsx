@@ -109,7 +109,7 @@ const FAQPage = () => {
   );
 
   return isApp ? (
-    <AppLayout title="সাধারণ জিজ্ঞাসা (FAQ)">
+    <AppLayout>
       <PageContent />
     </AppLayout>
   ) : (
