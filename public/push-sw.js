@@ -90,16 +90,29 @@ self.addEventListener('notificationclick', function(event) {
     targetUrl = self.location.origin + targetUrl;
   }
 
+  console.log('[Push SW] Navigating to:', targetUrl);
+
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-      // Try to find an existing window and navigate it
+      // Try to focus an existing window and navigate it
       for (var i = 0; i < clientList.length; i++) {
         var client = clientList[i];
-        if ('navigate' in client && 'focus' in client) {
-          return client.navigate(targetUrl).then(function(c) { return c.focus(); });
+        try {
+          if ('navigate' in client) {
+            return client.navigate(targetUrl).then(function(c) {
+              if (c && 'focus' in c) return c.focus();
+            });
+          }
+        } catch (e) {
+          console.log('[Push SW] client.navigate failed, will openWindow', e);
         }
       }
-      // Open a new window if none exists
+      // Open a new window if no existing client or navigate failed
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(targetUrl);
+      }
+    }).catch(function(err) {
+      console.error('[Push SW] Navigation error, opening new window', err);
       if (self.clients.openWindow) {
         return self.clients.openWindow(targetUrl);
       }
