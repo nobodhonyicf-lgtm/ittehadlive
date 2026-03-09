@@ -13,6 +13,8 @@ import {
   Calculator,
   MapPin,
   MessageCircleQuestion,
+  Shield,
+  LifeBuoy,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
