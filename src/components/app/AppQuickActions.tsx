@@ -12,6 +12,7 @@ import {
   Compass,
   Calculator,
   MapPin,
+  MessageCircleQuestion,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
