@@ -520,7 +520,7 @@ const JobPostingsTab = () => {
                         body: {
                           title: `📢 নিয়োগ বিজ্ঞপ্তি: ${j.title}`,
                           body: `${j.subject ? j.subject + " বিষয়ে " : ""}নিয়োগ বিজ্ঞপ্তি${j.location ? ` (${j.location})` : ""}`,
-                          url: `/teachers?job=${j.id}`,
+                          url: `/job/${j.id}`,
                           image: branchLogo,
                         },
                      });

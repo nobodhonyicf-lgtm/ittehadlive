@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
       : todayItem.title;
 
     // Deep link to specific content item
-    const url = `/${todayCategory}?highlight=${todayItem.id}`;
+    const url = `/${todayCategory}/${todayItem.id}`;
 
     // Delete old daily islamic notifications
     await supabase
