@@ -1,0 +1,1 @@
+UPDATE notifications SET link = '/masala/a947bba8-6fa4-4b55-8a21-52134a99b079' WHERE id = 'c084163f-9707-43b8-9c21-df715c4f2290';

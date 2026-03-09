@@ -121,10 +121,26 @@ const NotificationsPage = () => {
                     key={n.id}
                     onClick={() => {
                       if (n.link) {
-                        if (n.link.startsWith("http")) {
-                          window.open(n.link, "_blank");
+                        let targetLink = n.link;
+                        // Convert old ?highlight= format to direct detail URLs
+                        const highlightMatch = targetLink.match(/^\/(quran|hadith|dua|masala)\?highlight=(.+)$/);
+                        if (highlightMatch) {
+                          targetLink = `/${highlightMatch[1]}/${highlightMatch[2]}`;
+                        }
+                        // Convert old /teachers?highlight= to /teacher/
+                        const teacherMatch = targetLink.match(/^\/teachers\?highlight=(.+)$/);
+                        if (teacherMatch) {
+                          targetLink = `/teacher/${teacherMatch[1]}`;
+                        }
+                        // Convert old /teachers?job= to /job/
+                        const jobMatch = targetLink.match(/^\/teachers\?job=(.+)$/);
+                        if (jobMatch) {
+                          targetLink = `/job/${jobMatch[1]}`;
+                        }
+                        if (targetLink.startsWith("http")) {
+                          window.open(targetLink, "_blank");
                         } else {
-                          navigate(n.link);
+                          navigate(targetLink);
                         }
                       }
                     }}
