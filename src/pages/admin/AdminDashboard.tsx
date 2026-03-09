@@ -48,6 +48,7 @@ import AdminTeachers from "./AdminTeachers";
 // AdminInstitutions removed - merged into AdminBranches
 import AdminSitePages from "./AdminSitePages";
 import AdminSubscribers from "./AdminSubscribers";
+import AdminFAQ from "./AdminFAQ";
 
 interface NavItem {
   label: string;
