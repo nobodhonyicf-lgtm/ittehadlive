@@ -125,7 +125,7 @@ const Footer = () => {
                   { href: "/students", label: "শিক্ষার্থী ডিরেক্টরি" },
                   { href: "/teachers", label: "শিক্ষক সার্ভিস সেন্টার" },
                   { href: "/institution-register", label: "প্রতিষ্ঠান নিবন্ধন" },
-                  { href: "/advertise", label: "বিজ্ঞাপন দিন" },
+                  { href: "/support", label: "সহায়তা কেন্দ্র" },
                   { href: "/contact", label: "যোগাযোগ" },
                   { href: "/faq", label: "জিজ্ঞাসা (FAQ)" },
                   { href: "/quran", label: "কুরআন পাঠ" },
