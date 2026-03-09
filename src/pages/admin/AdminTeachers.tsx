@@ -74,7 +74,7 @@ const TeachersTab = () => {
           body: {
             title: `📋 নতুন শিক্ষক: ${form.name}`,
             body: `${form.subject} বিষয়ে নতুন শিক্ষক যুক্ত হয়েছেন${form.district ? ` (${form.district})` : ""}`,
-            url: `/teachers?highlight=${insertedId}`,
+            url: `/teacher/${insertedId}`,
             image: form.photo_url || undefined,
           },
         }).then(() => toast.success("পুশ নোটিফিকেশন পাঠানো হয়েছে")).catch(() => toast.error("পুশ পাঠানো ব্যর্থ"));
