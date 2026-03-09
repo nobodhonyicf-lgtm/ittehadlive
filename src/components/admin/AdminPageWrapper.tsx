@@ -1,15 +1,35 @@
 import { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, ShieldAlert } from "lucide-react";
+import { useSectionPermissions } from "@/hooks/useSectionPermissions";
 
 interface AdminPageWrapperProps {
   title: string;
   icon?: LucideIcon;
   children: ReactNode;
   action?: ReactNode;
+  /** If set, checks view permission for this section. Falls back to auto-detect from URL. */
+  permissionSection?: string;
 }
 
-const AdminPageWrapper = ({ title, icon: Icon, children, action }: AdminPageWrapperProps) => {
+const AdminPageWrapper = ({ title, icon: Icon, children, action, permissionSection }: AdminPageWrapperProps) => {
+  const { canView } = useSectionPermissions();
+
+  // If explicitly denied view permission, show access denied
+  if (permissionSection !== undefined && !canView) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-300">
+        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+          <ShieldAlert size={28} className="text-destructive" />
+        </div>
+        <h2 className="text-lg font-bold text-foreground mb-1">অ্যাক্সেস নেই</h2>
+        <p className="text-sm text-muted-foreground max-w-xs">
+          এই সেকশনে প্রবেশের অনুমতি আপনার নেই। প্রয়োজনে অ্যাডমিনের সাথে যোগাযোগ করুন।
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5 animate-in fade-in duration-300">
       {/* Page Header */}
