@@ -76,6 +76,14 @@ self.addEventListener('notificationclick', function(event) {
   if (event.notification.data && event.notification.data.url && event.notification.data.url !== '/') {
     targetUrl = event.notification.data.url;
   }
+
+  // Convert old ?highlight= format to direct detail URLs
+  var hlMatch = targetUrl.match(/^\/(quran|hadith|dua|masala)\?highlight=(.+)$/);
+  if (hlMatch) { targetUrl = '/' + hlMatch[1] + '/' + hlMatch[2]; }
+  var tMatch = targetUrl.match(/^\/teachers\?highlight=(.+)$/);
+  if (tMatch) { targetUrl = '/teacher/' + tMatch[1]; }
+  var jMatch = targetUrl.match(/^\/teachers\?job=(.+)$/);
+  if (jMatch) { targetUrl = '/job/' + jMatch[1]; }
   
   // Make relative URLs absolute
   if (targetUrl.startsWith('/')) {
