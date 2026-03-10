@@ -37,32 +37,46 @@ const SEOHead = ({
   const orgJsonLd = {
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
+    "@id": `${SITE_URL}/#organization`,
     "name": SITE_NAME,
-    "alternateName": ["ইত্তেহাদ", "Ittehadul Madarisil Khususiyyah", "IMKB"],
+    "alternateName": ["ইত্তেহাদ", "Ittehadul Madarisil Khususiyyah", "IMKB", "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ বাংলাদেশ"],
     "description": "প্রাইভেট মাদরাসাগুলোর মধ্যে ভ্রাতৃত্ব ও সহযোগিতার বন্ধন দৃঢ় করা, দক্ষ শিক্ষক ও আদর্শ ছাত্র তৈরি এবং সামাজিক উন্নয়নে ঐক্যবদ্ধভাবে কাজ করার লক্ষ্যে প্রতিষ্ঠিত প্রাইভেট মাদরাসাগুলোর সমন্বিত সংগঠন।",
     "url": SITE_URL,
-    "logo": DEFAULT_IMAGE,
+    "logo": {
+      "@type": "ImageObject",
+      "url": DEFAULT_IMAGE,
+      "width": 512,
+      "height": 512,
+    },
     "image": DEFAULT_IMAGE,
     "foundingDate": "2024",
+    "foundingLocation": {
+      "@type": "Place",
+      "name": "নারায়ণগঞ্জ, বাংলাদেশ",
+    },
     "founder": [
       {
         "@type": "Person",
         "name": "মাহমুদুল হাসান খান",
+        "jobTitle": "প্রতিষ্ঠাতা সভাপতি",
         "sameAs": "https://share.google/AYdOE7ggKBL8ww5Bc",
       },
       {
         "@type": "Person",
         "name": "হাফেজ মাওলানা সাইফুল ইসলাম সাইফ",
+        "jobTitle": "সহ-প্রতিষ্ঠাতা",
       },
       {
         "@type": "Person",
         "name": "মাওলানা মামুনুর রশীদ",
+        "jobTitle": "সহ-প্রতিষ্ঠাতা",
       },
     ],
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "২১১/১ আরামবাগ, গোদনাইল, সিদ্ধিরগঞ্জ",
       "addressLocality": "নারায়ণগঞ্জ",
+      "addressRegion": "ঢাকা বিভাগ",
       "postalCode": "1432",
       "addressCountry": "BD",
     },
@@ -73,17 +87,33 @@ const SEOHead = ({
       "https://www.instagram.com/ittehadbd",
       "https://www.tiktok.com/@ittehadbd",
     ],
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": "+8801856878690",
-      "contactType": "customer service",
-      "availableLanguage": ["Bengali", "Arabic"],
-    },
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "telephone": "+8801856878690",
+        "contactType": "customer service",
+        "availableLanguage": ["Bengali", "Arabic"],
+        "areaServed": "BD",
+      },
+    ],
     "areaServed": {
       "@type": "Country",
       "name": "Bangladesh",
     },
-    "knowsAbout": ["Islamic Education", "Madrasa", "Private Madrasa Coordination", "কওমী মাদরাসা"],
+    "knowsAbout": ["Islamic Education", "Madrasa", "Private Madrasa Coordination", "কওমী মাদরাসা", "হিফজুল কুরআন", "ইসলামী শিক্ষা"],
+    "slogan": "প্রাইভেট মাদরাসাগুলোর সমন্বিত সংগঠন",
+    "legalName": "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ বাংলাদেশ",
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "সেবাসমূহ",
+      "itemListElement": [
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "পরীক্ষার ফলাফল প্রকাশনা" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "শিক্ষার্থী ডিরেক্টরি" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "শাখা সমন্বয় ও তথ্য ব্যবস্থাপনা" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "শিক্ষক নিয়োগ সেবা" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "ইসলামী কন্টেন্ট লাইব্রেরি" } },
+      ],
+    },
   };
 
   // Website SearchAction JSON-LD
