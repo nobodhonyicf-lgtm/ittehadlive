@@ -493,7 +493,7 @@ const TeacherDirectory = () => {
                   <Card
                     key={t.id}
                     ref={highlightId === t.id ? highlightRef as React.RefObject<HTMLDivElement> : undefined}
-                    className={`group hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer overflow-hidden ${highlightId === t.id ? "ring-2 ring-primary shadow-lg" : ""}`}
+                    className={`group hover:shadow-lg hover:border-primary/20 transition-all duration-300 cursor-pointer ${highlightId === t.id ? "ring-2 ring-primary shadow-lg" : ""}`}
                     onClick={() => setSelectedTeacher(t)}
                   >
                     <CardContent className="p-0">
