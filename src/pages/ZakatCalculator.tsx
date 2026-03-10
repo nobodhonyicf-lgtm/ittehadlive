@@ -16,8 +16,8 @@ const formatBDT = (amount: number) => {
 };
 
 const ZAKAT_RATE = 0.025;
-const DEFAULT_NISAB_BDT = 228375;
-const DEFAULT_NISAB_DATE = "২৮/০২/২০২৬";
+const DEFAULT_NISAB_BDT = 225750;
+const DEFAULT_NISAB_DATE = "০৮/০৩/২০২৬";
 
 const ZakatContent = () => {
   const [values, setValues] = useState<Record<string, number>>({});

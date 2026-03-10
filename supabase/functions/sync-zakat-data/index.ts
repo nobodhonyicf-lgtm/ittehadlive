@@ -21,17 +21,13 @@ interface GoldItem {
 
 async function fetchGoldPrices(): Promise<GoldItem[] | null> {
   try {
-    // GoldR.org embeds live BAJUS prices in price.ultra.js as JSON
     const res = await fetch("https://www.goldr.org/price.ultra.js");
     const js = await res.text();
-
-    // Extract the JSON array from: const p=[{...}];
     const match = js.match(/const\s+p\s*=\s*(\[[\s\S]*?\]);/);
     if (!match) {
       console.error("Could not find price data in JS");
       return null;
     }
-
     const data: GoldItem[] = JSON.parse(match[1]);
     console.log("Parsed", data.length, "gold items");
     return data;
@@ -41,19 +37,55 @@ async function fetchGoldPrices(): Promise<GoldItem[] | null> {
   }
 }
 
-async function fetchSilverPrices(): Promise<any[] | null> {
+/** Scrape nisab amount directly from As-Sunnah Foundation's zakat calculator page */
+async function fetchNisabFromAsSunnah(): Promise<{ amount: number; date: string } | null> {
   try {
-    // Silver prices might be in a separate script or same page
-    // Let's try the silver widget script
-    const res = await fetch("https://www.goldr.org/silver.ultra.js");
-    const js = await res.text();
-    const match = js.match(/const\s+\w+\s*=\s*(\[[\s\S]*?\]);/);
-    if (match) {
-      return JSON.parse(match[1]);
+    const res = await fetch("https://assunnahfoundation.org/zakat-calculator", {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; IttehadBot/1.0)" },
+    });
+    const html = await res.text();
+
+    // Bengali digits map
+    const bnDigits = "০১২৩৪৫৬৭৮৯";
+    const bnToNum = (s: string) => {
+      const cleaned = s.replace(/[৳,\s।]/g, "");
+      const en = cleaned.replace(/[০-৯]/g, (d) => String(bnDigits.indexOf(d)));
+      return parseInt(en) || 0;
+    };
+
+    // Look for the nisab amount — it appears as ৳ ২,২৫,৭৫০ or similar
+    // Pattern: "যাকাতের নিসাব" followed by a large Bengali number with ৳
+    // The HTML typically has something like: ৳ ২,২৫,৭৫০
+    const nisabMatch = html.match(/[৳]\s*([০-৯][০-৯,.\s]*[০-৯])/);
+    
+    if (nisabMatch) {
+      const amount = bnToNum(nisabMatch[1]);
+      if (amount > 100000) {
+        // Extract date - look for "সর্বশেষ হালনাগাদ" or update date
+        let dateStr = new Date().toLocaleDateString("en-GB");
+        const dateMatch = html.match(/(?:হালনাগাদ|update[d]?)\s*[:\s]*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i);
+        if (dateMatch) {
+          dateStr = dateMatch[1];
+        }
+        console.log("As-Sunnah nisab:", amount, "date:", dateStr);
+        return { amount, date: dateStr };
+      }
     }
+
+    // Fallback: try English digit pattern
+    const enMatch = html.match(/nisab[^}]*?amount['":\s]*(\d[\d,]+)/i);
+    if (enMatch) {
+      const amount = parseInt(enMatch[1].replace(/,/g, ""));
+      if (amount > 100000) {
+        console.log("As-Sunnah nisab (en):", amount);
+        return { amount, date: new Date().toLocaleDateString("en-GB") };
+      }
+    }
+
+    console.error("Could not parse nisab from As-Sunnah page");
     return null;
   } catch (e) {
-    console.log("Silver script not available, will use main page data");
+    console.error("Error fetching As-Sunnah nisab:", e);
     return null;
   }
 }
@@ -70,11 +102,29 @@ Deno.serve(async (req) => {
 
     const results: Record<string, any> = {};
 
-    // Fetch gold prices from GoldR.org's widget JS (BAJUS data)
+    // 1. Fetch nisab directly from As-Sunnah Foundation (primary source)
+    const asSunnahNisab = await fetchNisabFromAsSunnah();
+    if (asSunnahNisab && asSunnahNisab.amount > 0) {
+      await supabase.from("site_settings").upsert(
+        { key: "zakat_nisab_amount", value: String(asSunnahNisab.amount) },
+        { onConflict: "key" }
+      );
+      await supabase.from("site_settings").upsert(
+        { key: "zakat_nisab_date", value: asSunnahNisab.date },
+        { onConflict: "key" }
+      );
+      results.nisab = asSunnahNisab.amount;
+      results.nisab_source = "as-sunnah-foundation";
+      results.nisab_date = asSunnahNisab.date;
+    } else {
+      results.nisab_error = "Could not fetch from As-Sunnah, will use gold prices as fallback";
+    }
+
+    // 2. Fetch gold prices from GoldR.org (for gold/silver calculator)
     const goldItems = await fetchGoldPrices();
     if (goldItems && goldItems.length >= 4) {
       const getGram = (key: string): number => {
-        const item = goldItems.find(g => g.key === key);
+        const item = goldItems.find((g) => g.key === key);
         return item ? Number(item.unit_rate.gram) : 0;
       };
 
@@ -93,23 +143,20 @@ Deno.serve(async (req) => {
 
       results.gold = { "22k": gold22k, "21k": gold21k, "18k": gold18k, traditional: goldTrad };
 
-      // Try silver prices from the main page HTML
+      // Silver prices from HTML
       try {
         const pageRes = await fetch("https://www.goldr.org/", {
           headers: { "User-Agent": "Mozilla/5.0" },
         });
         const html = await pageRes.text();
-        
-        // Look for silver data in the HTML - Bengali digits
-        // Pattern: 22 Karat Silver ... ৳৫৬০
+
         const bnDigits = "০১২৩৪৫৬৭৮৯";
         const bnToNum = (s: string) => {
           const cleaned = s.replace(/[৳,\s]/g, "");
-          const en = cleaned.replace(/[০-৯]/g, d => String(bnDigits.indexOf(d)));
+          const en = cleaned.replace(/[০-৯]/g, (d) => String(bnDigits.indexOf(d)));
           return parseInt(en) || 0;
         };
 
-        // Extract silver per-gram prices
         const silverMatch22 = html.match(/22 Karat Silver<\/td>\s*<td[^>]*><strong>([^<]+)<\/strong>/);
         const silverMatch21 = html.match(/21 Karat Silver<\/td>\s*<td[^>]*><strong>([^<]+)<\/strong>/);
         const silverMatch18 = html.match(/18 Karat Silver<\/td>\s*<td[^>]*><strong>([^<]+)<\/strong>/);
@@ -129,8 +176,6 @@ Deno.serve(async (req) => {
           );
           results.silver = { "22k": s22, "21k": s21, "18k": s18, traditional: sTrad };
         } else {
-          console.log("Could not parse silver from HTML, using defaults");
-          // Use approximate ratios from gold prices
           settings.push(
             { key: "bajus_silver_22k", value: "560" },
             { key: "bajus_silver_21k", value: "535" },
@@ -149,25 +194,28 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Save all settings
+      // Save all gold/silver settings
       for (const s of settings) {
         await supabase.from("site_settings").upsert(s, { onConflict: "key" });
       }
 
-      // Calculate nisab: 612.36g × silver traditional price per gram
-      const silverTrad = results.silver?.traditional || 345;
-      const nisab = Math.round(612.36 * silverTrad);
-      await supabase.from("site_settings").upsert(
-        { key: "zakat_nisab_amount", value: String(nisab) },
-        { onConflict: "key" }
-      );
-      await supabase.from("site_settings").upsert(
-        { key: "zakat_nisab_date", value: new Date().toLocaleDateString("en-GB") },
-        { onConflict: "key" }
-      );
-      results.nisab = nisab;
+      // Fallback: if As-Sunnah fetch failed, calculate nisab from silver
+      if (!asSunnahNisab || asSunnahNisab.amount <= 0) {
+        const silverTrad = results.silver?.traditional || 345;
+        const nisab = Math.round(612.36 * silverTrad);
+        await supabase.from("site_settings").upsert(
+          { key: "zakat_nisab_amount", value: String(nisab) },
+          { onConflict: "key" }
+        );
+        await supabase.from("site_settings").upsert(
+          { key: "zakat_nisab_date", value: new Date().toLocaleDateString("en-GB") },
+          { onConflict: "key" }
+        );
+        results.nisab = nisab;
+        results.nisab_source = "calculated-from-silver-fallback";
+      }
     } else {
-      results.error = "Failed to fetch gold prices";
+      results.gold_error = "Failed to fetch gold prices";
     }
 
     return new Response(JSON.stringify({ success: true, results }), {
