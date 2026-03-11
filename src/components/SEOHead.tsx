@@ -44,11 +44,11 @@ const SEOHead = ({
     "url": SITE_URL,
     "logo": {
       "@type": "ImageObject",
-      "url": DEFAULT_IMAGE,
+      "url": `${SITE_URL}/images/ittehad-logo.png`,
       "width": 512,
       "height": 512,
     },
-    "image": DEFAULT_IMAGE,
+    "image": `${SITE_URL}/images/ittehad-logo.png`,
     "foundingDate": "2024",
     "foundingLocation": {
       "@type": "Place",
