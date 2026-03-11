@@ -145,6 +145,7 @@ const App = () => (
 
                 {/* ═══ Verification & Trust ═══ */}
                 <Route path="/verify" element={<VerifyHub />} />
+                <Route path="/certificate" element={<CertificateDownload />} />
                 <Route path="/support" element={<HelpCenter />} />
                 <Route path="/documents" element={<DocumentCenter />} />
 
