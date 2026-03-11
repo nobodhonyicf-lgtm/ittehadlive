@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, Search, CheckCircle, XCircle, Clock, Building2, GraduationCap, FileText, User, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { toBengaliNumber } from "@/lib/bengali";
 
 type VerifyType = "branch" | "result" | "certificate" | "teacher";
 type VerifyStatus = "idle" | "searching" | "valid" | "invalid" | "pending" | "expired";
@@ -32,18 +31,25 @@ const statusConfig: Record<VerifyStatus, { icon: any; color: string; label: stri
 };
 
 const verifyTypes: { key: VerifyType; label: string; icon: any; placeholder: string; description: string }[] = [
-  { key: "branch", label: "শাখা যাচাই", icon: Building2, placeholder: "শাখা কোড লিখুন (যেমন: BR-001)", description: "ইত্তেহাদের অধিভুক্ত শাখার তথ্য যাচাই করুন।" },
-  { key: "result", label: "রেজাল্ট যাচাই", icon: GraduationCap, placeholder: "রোল নম্বর বা রেজিস্ট্রেশন নম্বর", description: "পরীক্ষার ফলাফলের সত্যতা যাচাই করুন।" },
-  { key: "certificate", label: "সনদ যাচাই", icon: FileText, placeholder: "সনদ/সার্টিফিকেট নম্বর", description: "প্রদত্ত সনদপত্রের সত্যতা যাচাই করুন।" },
-  { key: "teacher", label: "শিক্ষক যাচাই", icon: User, placeholder: "শিক্ষক আইডি বা ফোন নম্বর", description: "নিবন্ধিত শিক্ষকের তথ্য যাচাই করুন।" },
+  { key: "branch", label: "শাখা", icon: Building2, placeholder: "শাখা কোড বা যাচাই কোড (যেমন: BR-2503-A1B2C3)", description: "ইত্তেহাদের অধিভুক্ত শাখার তথ্য যাচাই করুন।" },
+  { key: "result", label: "রেজাল্ট", icon: GraduationCap, placeholder: "রেজাল্ট যাচাই কোড (যেমন: RS-2503-A1B2C3)", description: "পরীক্ষার ফলাফলের সত্যতা যাচাই করুন।" },
+  { key: "certificate", label: "সনদ", icon: FileText, placeholder: "সনদ নম্বর বা যাচাই কোড (যেমন: CV-2503-A1B2C3D4)", description: "প্রদত্ত সনদপত্রের সত্যতা যাচাই করুন।" },
+  { key: "teacher", label: "শিক্ষক", icon: User, placeholder: "শিক্ষক যাচাই কোড বা ফোন নম্বর", description: "নিবন্ধিত শিক্ষকের তথ্য যাচাই করুন।" },
 ];
 
 const VerifyHub = () => {
   const isApp = useIsApp();
   const [searchParams] = useSearchParams();
   const defaultTab = (searchParams.get("type") as VerifyType) || "branch";
+  const [activeTab, setActiveTab] = useState<string>(defaultTab);
   const [searchQuery, setSearchQuery] = useState("");
   const [result, setResult] = useState<VerifyResult>({ status: "idle" });
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setSearchQuery("");
+    setResult({ status: "idle" });
+  };
 
   const handleVerify = async (type: VerifyType) => {
     if (!searchQuery.trim()) return;
@@ -53,8 +59,8 @@ const VerifyHub = () => {
       if (type === "branch") {
         const { data } = await supabase
           .from("branches")
-          .select("id, name, code, address, district, status, is_active, head_name, created_at")
-          .or(`code.ilike.%${searchQuery}%,name.ilike.%${searchQuery}%`)
+          .select("id, name, code, address, district, status, is_active, head_name, created_at, verification_code")
+          .or(`code.ilike.%${searchQuery}%,name.ilike.%${searchQuery}%,verification_code.ilike.%${searchQuery}%`)
           .limit(1)
           .maybeSingle();
 
@@ -72,8 +78,8 @@ const VerifyHub = () => {
       } else if (type === "teacher") {
         const { data } = await supabase
           .from("teachers")
-          .select("id, name, subject, district, is_verified, is_active, photo_url, qualification")
-          .or(`phone.eq.${searchQuery},name.ilike.%${searchQuery}%`)
+          .select("id, name, subject, district, is_verified, is_active, photo_url, qualification, verification_code")
+          .or(`phone.eq.${searchQuery},verification_code.ilike.%${searchQuery}%,name.ilike.%${searchQuery}%`)
           .eq("is_active", true)
           .limit(1)
           .maybeSingle();
@@ -89,21 +95,47 @@ const VerifyHub = () => {
         } else {
           setResult({ status: "invalid", message: "এই তথ্যে কোনো নিবন্ধিত শিক্ষক পাওয়া যায়নি।" });
         }
-      } else {
-        // Result & certificate verification - placeholder
-        setResult({
-          status: "invalid",
-          message: "এই ফিচারটি শীঘ্রই চালু হবে। অনুগ্রহ করে অফিসে যোগাযোগ করুন।",
-        });
+      } else if (type === "result") {
+        const { data } = await supabase
+          .from("results")
+          .select("id, marks_obtained, gpa, grade, verification_code, student_id, exam_id, subjects(name, full_marks), exams(name, year)")
+          .or(`verification_code.ilike.%${searchQuery}%`)
+          .limit(1)
+          .maybeSingle();
+
+        if (data) {
+          setResult({
+            status: "valid",
+            data,
+            message: `রেজাল্ট যাচাই সফল — পরীক্ষা: ${(data as any).exams?.name || "—"}, বিষয়: ${(data as any).subjects?.name || "—"}`,
+          });
+        } else {
+          setResult({ status: "invalid", message: "এই যাচাই কোডে কোনো রেজাল্ট পাওয়া যায়নি।" });
+        }
+      } else if (type === "certificate") {
+        const { data } = await supabase
+          .from("certificates")
+          .select("id, certificate_number, verification_code, issue_date, status, students(name, roll_number, class_name), exams(name, year)")
+          .or(`certificate_number.ilike.%${searchQuery}%,verification_code.ilike.%${searchQuery}%`)
+          .limit(1)
+          .maybeSingle();
+
+        if (data) {
+          const isActive = data.status === "active";
+          setResult({
+            status: isActive ? "valid" : "expired",
+            data,
+            message: isActive
+              ? `সনদপত্র যাচাই সফল — "${(data as any).students?.name || "—"}", সনদ নম্বর: ${data.certificate_number}`
+              : `এই সনদপত্রটি বাতিল বা মেয়াদ উত্তীর্ণ।`,
+          });
+        } else {
+          setResult({ status: "invalid", message: "এই নম্বরে কোনো সনদপত্র পাওয়া যায়নি।" });
+        }
       }
     } catch {
       setResult({ status: "invalid", message: "অনুসন্ধানে সমস্যা হয়েছে। আবার চেষ্টা করুন।" });
     }
-  };
-
-  const resetSearch = () => {
-    setSearchQuery("");
-    setResult({ status: "idle" });
   };
 
   const PageContent = () => (
@@ -123,12 +155,12 @@ const VerifyHub = () => {
         </p>
       </div>
 
-      <Tabs defaultValue={defaultTab} onValueChange={resetSearch}>
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full mb-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList className="grid grid-cols-4 w-full mb-6">
           {verifyTypes.map((t) => (
             <TabsTrigger key={t.key} value={t.key} className="text-xs md:text-sm gap-1">
               <t.icon size={14} />
-              {t.label.split(" ")[0]}
+              {t.label}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -177,29 +209,49 @@ const VerifyHub = () => {
                         </div>
                         <p className="text-sm">{result.message}</p>
 
-                        {/* Valid branch details */}
-                        {result.data && t.key === "branch" && result.status === "valid" && (
+                        {/* Branch details */}
+                        {result.data && t.key === "branch" && (result.status === "valid" || result.status === "pending") && (
                           <div className="mt-3 pt-3 border-t border-current/10 grid grid-cols-2 gap-2 text-xs">
                             <div><span className="opacity-60">শাখা কোড:</span> <strong>{result.data.code || "—"}</strong></div>
                             <div><span className="opacity-60">জেলা:</span> <strong>{result.data.district || "—"}</strong></div>
                             <div><span className="opacity-60">প্রধান:</span> <strong>{result.data.head_name || "—"}</strong></div>
-                            <div><span className="opacity-60">ঠিকানা:</span> <strong>{result.data.address || "—"}</strong></div>
+                            <div><span className="opacity-60">যাচাই কোড:</span> <strong>{result.data.verification_code || "—"}</strong></div>
                           </div>
                         )}
 
-                        {/* Valid teacher details */}
-                        {result.data && t.key === "teacher" && result.status === "valid" && (
+                        {/* Teacher details */}
+                        {result.data && t.key === "teacher" && (result.status === "valid" || result.status === "pending") && (
                           <div className="mt-3 pt-3 border-t border-current/10 grid grid-cols-2 gap-2 text-xs">
                             <div><span className="opacity-60">বিষয়:</span> <strong>{result.data.subject}</strong></div>
                             <div><span className="opacity-60">জেলা:</span> <strong>{result.data.district || "—"}</strong></div>
                             <div><span className="opacity-60">যোগ্যতা:</span> <strong>{result.data.qualification || "—"}</strong></div>
-                            <div><span className="opacity-60">স্ট্যাটাস:</span> <strong>{result.data.is_verified ? "যাচাইকৃত" : "অপেক্ষমান"}</strong></div>
+                            <div><span className="opacity-60">যাচাই কোড:</span> <strong>{result.data.verification_code || "—"}</strong></div>
+                          </div>
+                        )}
+
+                        {/* Result details */}
+                        {result.data && t.key === "result" && result.status === "valid" && (
+                          <div className="mt-3 pt-3 border-t border-current/10 grid grid-cols-2 gap-2 text-xs">
+                            <div><span className="opacity-60">নম্বর:</span> <strong>{result.data.marks_obtained || "—"}</strong></div>
+                            <div><span className="opacity-60">গ্রেড:</span> <strong>{result.data.grade || "—"}</strong></div>
+                            <div><span className="opacity-60">জিপিএ:</span> <strong>{result.data.gpa || "—"}</strong></div>
+                            <div><span className="opacity-60">যাচাই কোড:</span> <strong>{result.data.verification_code || "—"}</strong></div>
+                          </div>
+                        )}
+
+                        {/* Certificate details */}
+                        {result.data && t.key === "certificate" && (result.status === "valid" || result.status === "expired") && (
+                          <div className="mt-3 pt-3 border-t border-current/10 grid grid-cols-2 gap-2 text-xs">
+                            <div><span className="opacity-60">শিক্ষার্থী:</span> <strong>{result.data.students?.name || "—"}</strong></div>
+                            <div><span className="opacity-60">শ্রেণি:</span> <strong>{result.data.students?.class_name || "—"}</strong></div>
+                            <div><span className="opacity-60">পরীক্ষা:</span> <strong>{result.data.exams?.name || "—"} ({result.data.exams?.year || "—"})</strong></div>
+                            <div><span className="opacity-60">ইস্যু তারিখ:</span> <strong>{result.data.issue_date || "—"}</strong></div>
                           </div>
                         )}
                       </div>
                     </div>
                     <div className="mt-3 text-right">
-                      <Button variant="ghost" size="sm" onClick={resetSearch} className="text-xs">নতুন অনুসন্ধান</Button>
+                      <Button variant="ghost" size="sm" onClick={() => { setSearchQuery(""); setResult({ status: "idle" }); }} className="text-xs">নতুন অনুসন্ধান</Button>
                     </div>
                   </div>
                 )}

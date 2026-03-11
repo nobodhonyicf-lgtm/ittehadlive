@@ -34,6 +34,7 @@ const AppQuickActions = () => {
     { icon: MapPin, label: "ম্যাপ", path: "/nearby-map", bg: "bg-sky-600" },
     { icon: MessageCircleQuestion, label: "জিজ্ঞাসা", path: "/faq", bg: "bg-cyan-600" },
     { icon: Shield, label: "যাচাই", path: "/verify", bg: "bg-violet-600" },
+    { icon: FileText, label: "সনদ", path: "/certificate", bg: "bg-orange-600" },
     { icon: LifeBuoy, label: "সহায়তা", path: "/support", bg: "bg-rose-600" },
     { icon: Mail, label: "যোগাযোগ", path: "/app-contact", bg: "bg-indigo-600" },
     ...(user && hasAnyRole

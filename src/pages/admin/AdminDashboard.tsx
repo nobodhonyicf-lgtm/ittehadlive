@@ -49,6 +49,7 @@ import AdminTeachers from "./AdminTeachers";
 import AdminSitePages from "./AdminSitePages";
 import AdminSubscribers from "./AdminSubscribers";
 import AdminFAQ from "./AdminFAQ";
+import AdminCertificates from "./AdminCertificates";
 
 interface NavItem {
   label: string;
@@ -94,6 +95,7 @@ const navCategories: NavCategory[] = [
       { label: "পরীক্ষা", icon: ClipboardList, path: "/admin/exams", section: "exams" },
       { label: "বিষয়", icon: BookOpen, path: "/admin/subjects", section: "subjects" },
       { label: "রেজাল্ট", icon: GraduationCap, path: "/admin/results", section: "results" },
+      { label: "সনদপত্র", icon: FileText, path: "/admin/certificates", section: "results" },
       { label: "শিক্ষক সার্ভিস", icon: GraduationCap, path: "/admin/teachers", section: "teachers" },
     ],
   },
@@ -740,6 +742,7 @@ const AdminDashboard = () => {
             <Route path="site-pages" element={<AdminSitePages />} />
             <Route path="subscribers" element={<AdminSubscribers />} />
             <Route path="faq" element={<AdminFAQ />} />
+            <Route path="certificates" element={<AdminCertificates />} />
           </Routes>
         </div>
       </main>
