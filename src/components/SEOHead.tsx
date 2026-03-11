@@ -72,6 +72,23 @@ const SEOHead = ({
         "jobTitle": "সহ-প্রতিষ্ঠাতা",
       },
     ],
+    "member": [
+      {
+        "@type": "EducationalOrganization",
+        "name": "উম্মুল কুরা ইন্টারন্যাশনাল ক্যাডেট মাদরাসা",
+        "alternateName": "Ummul Qura International Cadet Madrasah",
+      },
+      {
+        "@type": "EducationalOrganization",
+        "name": "আল ফাতাহ ইসলামিক একাডেমি",
+        "alternateName": "Al Fatah Islamic Academy",
+      },
+      {
+        "@type": "EducationalOrganization",
+        "name": "আস-সুন্নাহ প্রি-ক্যাডেট মাদরাসা",
+        "alternateName": "As-Sunnah Pre Cadet Madrasah",
+      },
+    ],
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "২১১/১ আরামবাগ, গোদনাইল, সিদ্ধিরগঞ্জ",
