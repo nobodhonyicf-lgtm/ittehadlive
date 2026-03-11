@@ -49,6 +49,7 @@ import AdminTeachers from "./AdminTeachers";
 import AdminSitePages from "./AdminSitePages";
 import AdminSubscribers from "./AdminSubscribers";
 import AdminFAQ from "./AdminFAQ";
+import AdminCertificates from "./AdminCertificates";
 
 interface NavItem {
   label: string;
