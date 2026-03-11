@@ -39,7 +39,7 @@ const SEOHead = ({
     "@type": "EducationalOrganization",
     "@id": `${SITE_URL}/#organization`,
     "name": SITE_NAME,
-    "alternateName": ["ইত্তেহাদ", "Ittehadul Madarisil Khususiyyah", "IMKB", "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ বাংলাদেশ"],
+    "alternateName": ["ইত্তেহাদ", "Ittehadul Madarisil Khususiyah", "IMKB", "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ বাংলাদেশ"],
     "description": "প্রাইভেট মাদরাসাগুলোর মধ্যে ভ্রাতৃত্ব ও সহযোগিতার বন্ধন দৃঢ় করা, দক্ষ শিক্ষক ও আদর্শ ছাত্র তৈরি এবং সামাজিক উন্নয়নে ঐক্যবদ্ধভাবে কাজ করার লক্ষ্যে প্রতিষ্ঠিত প্রাইভেট মাদরাসাগুলোর সমন্বিত সংগঠন।",
     "url": SITE_URL,
     "logo": {
