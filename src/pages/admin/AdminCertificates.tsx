@@ -88,7 +88,7 @@ const AdminCertificates = () => {
   );
 
   return (
-    <AdminPageWrapper title="সনদপত্র ব্যবস্থাপনা" icon={<Award size={20} />}>
+    <AdminPageWrapper title="সনদপত্র ব্যবস্থাপনা" icon={Award}>
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
