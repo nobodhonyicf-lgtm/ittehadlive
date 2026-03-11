@@ -73,6 +73,7 @@ const FAQPage = lazy(() => import("./pages/FAQPage"));
 const VerifyHub = lazy(() => import("./pages/VerifyHub"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 const DocumentCenter = lazy(() => import("./pages/DocumentCenter"));
+const CertificateDownload = lazy(() => import("./pages/CertificateDownload"));
 
 // Lazy Islamic pages
 const DuaPage = lazy(() => import("./pages/IslamicPages").then(m => ({ default: m.DuaPage })));
