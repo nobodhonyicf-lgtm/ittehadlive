@@ -742,6 +742,7 @@ const AdminDashboard = () => {
             <Route path="site-pages" element={<AdminSitePages />} />
             <Route path="subscribers" element={<AdminSubscribers />} />
             <Route path="faq" element={<AdminFAQ />} />
+            <Route path="certificates" element={<AdminCertificates />} />
           </Routes>
         </div>
       </main>
