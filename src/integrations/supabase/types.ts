@@ -349,6 +349,7 @@ export type Database = {
           total_students: number | null
           total_teachers: number | null
           user_id: string | null
+          verification_code: string | null
           website: string | null
         }
         Insert: {
@@ -377,6 +378,7 @@ export type Database = {
           total_students?: number | null
           total_teachers?: number | null
           user_id?: string | null
+          verification_code?: string | null
           website?: string | null
         }
         Update: {
@@ -405,6 +407,7 @@ export type Database = {
           total_students?: number | null
           total_teachers?: number | null
           user_id?: string | null
+          verification_code?: string | null
           website?: string | null
         }
         Relationships: []
@@ -437,6 +440,57 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      certificates: {
+        Row: {
+          certificate_number: string
+          created_at: string
+          exam_id: string
+          id: string
+          issue_date: string
+          status: string
+          student_id: string
+          updated_at: string
+          verification_code: string
+        }
+        Insert: {
+          certificate_number: string
+          created_at?: string
+          exam_id: string
+          id?: string
+          issue_date?: string
+          status?: string
+          student_id: string
+          updated_at?: string
+          verification_code: string
+        }
+        Update: {
+          certificate_number?: string
+          created_at?: string
+          exam_id?: string
+          id?: string
+          issue_date?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+          verification_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificates_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificates_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
             referencedColumns: ["id"]
           },
         ]
@@ -1629,6 +1683,7 @@ export type Database = {
           marks_obtained: number | null
           student_id: string
           subject_id: string
+          verification_code: string | null
         }
         Insert: {
           created_at?: string
@@ -1639,6 +1694,7 @@ export type Database = {
           marks_obtained?: number | null
           student_id: string
           subject_id: string
+          verification_code?: string | null
         }
         Update: {
           created_at?: string
@@ -1649,6 +1705,7 @@ export type Database = {
           marks_obtained?: number | null
           student_id?: string
           subject_id?: string
+          verification_code?: string | null
         }
         Relationships: [
           {
@@ -2007,6 +2064,7 @@ export type Database = {
           specialization: string | null
           subject: string
           updated_at: string
+          verification_code: string | null
         }
         Insert: {
           address?: string | null
@@ -2036,6 +2094,7 @@ export type Database = {
           specialization?: string | null
           subject: string
           updated_at?: string
+          verification_code?: string | null
         }
         Update: {
           address?: string | null
@@ -2065,6 +2124,7 @@ export type Database = {
           specialization?: string | null
           subject?: string
           updated_at?: string
+          verification_code?: string | null
         }
         Relationships: [
           {
