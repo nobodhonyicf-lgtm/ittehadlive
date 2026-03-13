@@ -2246,6 +2246,7 @@ export type Database = {
           roll_number: string
         }[]
       }
+      generate_missing_certificates: { Args: never; Returns: number }
       get_branches_public: {
         Args: never
         Returns: {
@@ -2265,6 +2266,24 @@ export type Database = {
           total_students: number
           total_teachers: number
           website: string
+        }[]
+      }
+      get_or_create_certificate_by_roll_reg: {
+        Args: { p_reg: string; p_roll: string }
+        Returns: {
+          branch_name: string
+          certificate_number: string
+          class_name: string
+          exam_name: string
+          exam_year: number
+          father_name: string
+          gpa: number
+          grade: string
+          issue_date: string
+          registration_number: string
+          roll_number: string
+          student_name: string
+          verification_code: string
         }[]
       }
       get_quiz_leaderboard: {
