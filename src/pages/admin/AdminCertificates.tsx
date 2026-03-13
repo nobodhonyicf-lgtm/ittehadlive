@@ -109,41 +109,53 @@ const AdminCertificates = () => {
           <Input placeholder="সনদ নম্বর, নাম বা কোড খুঁজুন..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
         {canEdit && (
-          <Dialog open={showDialog} onOpenChange={setShowDialog}>
-            <DialogTrigger asChild>
-              <Button className="gap-1.5"><Plus size={16} /> নতুন সনদ</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>নতুন সনদপত্র তৈরি</DialogTitle></DialogHeader>
-              <div className="space-y-4 pt-2">
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">শিক্ষার্থী</label>
-                  <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
-                    <SelectTrigger><SelectValue placeholder="শিক্ষার্থী নির্বাচন করুন" /></SelectTrigger>
-                    <SelectContent>
-                      {students?.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>{s.name} — রোল: {s.roll_number} ({s.class_name})</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="gap-1.5"
+              onClick={() => autoGenerateMutation.mutate()}
+              disabled={autoGenerateMutation.isPending}
+            >
+              {autoGenerateMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Award size={16} />}
+              অটো জেনারেট
+            </Button>
+
+            <Dialog open={showDialog} onOpenChange={setShowDialog}>
+              <DialogTrigger asChild>
+                <Button className="gap-1.5"><Plus size={16} /> নতুন সনদ</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle>নতুন সনদপত্র তৈরি</DialogTitle></DialogHeader>
+                <div className="space-y-4 pt-2">
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">শিক্ষার্থী</label>
+                    <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
+                      <SelectTrigger><SelectValue placeholder="শিক্ষার্থী নির্বাচন করুন" /></SelectTrigger>
+                      <SelectContent>
+                        {students?.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>{s.name} — রোল: {s.roll_number} ({s.class_name})</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">পরীক্ষা</label>
+                    <Select value={selectedExamId} onValueChange={setSelectedExamId}>
+                      <SelectTrigger><SelectValue placeholder="পরীক্ষা নির্বাচন করুন" /></SelectTrigger>
+                      <SelectContent>
+                        {exams?.map((e) => (
+                          <SelectItem key={e.id} value={e.id}>{e.name} ({e.year})</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={() => createMutation.mutate()} disabled={!selectedStudentId || !selectedExamId || createMutation.isPending} className="w-full">
+                    সনদ তৈরি করুন
+                  </Button>
                 </div>
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">পরীক্ষা</label>
-                  <Select value={selectedExamId} onValueChange={setSelectedExamId}>
-                    <SelectTrigger><SelectValue placeholder="পরীক্ষা নির্বাচন করুন" /></SelectTrigger>
-                    <SelectContent>
-                      {exams?.map((e) => (
-                        <SelectItem key={e.id} value={e.id}>{e.name} ({e.year})</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button onClick={() => createMutation.mutate()} disabled={!selectedStudentId || !selectedExamId || createMutation.isPending} className="w-full">
-                  সনদ তৈরি করুন
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         )}
       </div>
 
