@@ -92,8 +92,8 @@ const HeroSection = () => {
           </div>
         </div>
 
-        {/* Trust Stats Bar - Overlapping card */}
-        <div className="relative -mb-8 z-10">
+        {/* Trust Stats Bar */}
+        <div className="relative z-10 pb-6">
           <div className="bg-card rounded-2xl shadow-xl shadow-black/5 border border-border/50 p-5 md:p-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {stats.map((stat, i) => (
