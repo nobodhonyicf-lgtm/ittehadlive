@@ -39,7 +39,7 @@
 
 @layer base {
   :root {
-    --background: 200 10% 96%;
+    --background: 0 0% 98%;
     --foreground: 200 15% 10%;
     --card: 0 0% 100%;
     --card-foreground: 200 15% 10%;
@@ -47,18 +47,20 @@
     --popover-foreground: 200 15% 10%;
     --primary: 152 55% 22%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 200 12% 94%;
+    --secondary: 150 8% 95%;
     --secondary-foreground: 152 40% 18%;
-    --muted: 200 8% 93%;
+    --muted: 150 6% 94%;
     --muted-foreground: 200 8% 46%;
-    --accent: 38 80% 50%;
+    --accent: 38 70% 48%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
-    --border: 200 8% 90%;
-    --input: 200 8% 90%;
+    --border: 150 6% 90%;
+    --input: 150 6% 90%;
     --ring: 152 55% 22%;
-    --radius: 0.5rem;
+    --radius: 0.625rem;
+    --gold: 38 70% 48%;
+    --gold-foreground: 38 10% 15%;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 152 55% 22%;
@@ -70,25 +72,27 @@
   }
 
   .dark {
-    --background: 150 15% 7%;
+    --background: 150 12% 6%;
     --foreground: 0 0% 95%;
-    --card: 150 12% 11%;
+    --card: 150 10% 9%;
     --card-foreground: 0 0% 95%;
-    --popover: 150 12% 11%;
+    --popover: 150 10% 9%;
     --popover-foreground: 0 0% 95%;
     --primary: 152 50% 32%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 150 15% 15%;
+    --secondary: 150 12% 13%;
     --secondary-foreground: 150 25% 78%;
-    --muted: 150 10% 16%;
+    --muted: 150 8% 14%;
     --muted-foreground: 150 8% 60%;
-    --accent: 38 80% 50%;
+    --accent: 38 70% 48%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
-    --border: 150 10% 18%;
-    --input: 150 10% 18%;
+    --border: 150 8% 16%;
+    --input: 150 8% 16%;
     --ring: 152 50% 32%;
+    --gold: 38 65% 52%;
+    --gold-foreground: 38 10% 95%;
     --sidebar-background: 150 12% 8%;
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 152 50% 32%;
@@ -168,14 +172,17 @@
 /* Scrollbar styling for web mode */
 @media not all and (display-mode: standalone) {
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
   }
   ::-webkit-scrollbar-track {
-    background: hsl(var(--muted));
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.2);
     border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.4);
   }
 }
 
@@ -185,4 +192,15 @@
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Islamic geometric pattern utility */
+.islamic-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='currentColor' stroke-width='0.5' opacity='0.06'%3E%3Cpath d='M30 0L0 30l30 30 30-30z'/%3E%3Ccircle cx='30' cy='30' r='15'/%3E%3Ccircle cx='30' cy='30' r='8'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 60px 60px;
+}
+
+/* Gold gradient utility */
+.gold-gradient {
+  background: linear-gradient(135deg, hsl(var(--gold)), hsl(38 80% 58%));
 }
