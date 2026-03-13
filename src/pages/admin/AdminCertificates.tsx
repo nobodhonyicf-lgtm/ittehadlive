@@ -71,6 +71,19 @@ const AdminCertificates = () => {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const autoGenerateMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc("generate_missing_certificates");
+      if (error) throw error;
+      return Number(data || 0);
+    },
+    onSuccess: (count) => {
+      toast.success(`অটো জেনারেট সম্পন্ন: ${count}টি নতুন সনদ তৈরি হয়েছে`);
+      queryClient.invalidateQueries({ queryKey: ["admin_certificates"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("certificates").delete().eq("id", id);
