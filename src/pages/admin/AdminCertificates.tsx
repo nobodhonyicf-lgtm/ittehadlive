@@ -56,6 +56,8 @@ const AdminCertificates = () => {
         student_id: selectedStudentId,
         exam_id: selectedExamId,
         status: "active",
+        certificate_number: "",
+        verification_code: "",
       });
       if (error) throw error;
     },
