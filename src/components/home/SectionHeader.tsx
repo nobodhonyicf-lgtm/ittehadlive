@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
 
 interface SectionHeaderProps {
   title: string;
@@ -7,27 +6,24 @@ interface SectionHeaderProps {
   linkText?: string;
 }
 
-const SectionHeader = ({ title, linkUrl, linkText = "আরও" }: SectionHeaderProps) => {
-  return (
-    <div className="flex items-center justify-between mb-5 relative">
-      <div className="flex items-center gap-2.5">
-        <div className="w-1 h-6 rounded-full bg-primary" />
-        <h2 className="text-[15px] font-bold text-foreground">
-          {title}
-        </h2>
-      </div>
-      <div className="flex-1 mx-4 h-px bg-border" />
+const SectionHeader = ({ title, linkUrl, linkText = "আরও" }: SectionHeaderProps) => (
+  <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center gap-2.5">
+      <div className="w-1 h-6 rounded-full bg-gradient-to-b from-primary to-primary/40" />
+      <h2 className="text-[16px] font-bold text-foreground tracking-wide">{title}</h2>
+    </div>
+    <div className="flex items-center gap-3">
+      <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent hidden sm:block min-w-[40px]" />
       {linkUrl && (
         <Link
           to={linkUrl}
           className="flex items-center gap-0.5 text-[11px] font-semibold text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-full transition-colors border border-primary/10"
         >
-          {linkText}
-          <ChevronLeft size={12} className="rotate-180" />
+          {linkText} ›
         </Link>
       )}
     </div>
-  );
-};
+  </div>
+);
 
 export default SectionHeader;
