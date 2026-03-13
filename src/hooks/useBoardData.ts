@@ -104,18 +104,24 @@ export const useResults = (studentId?: string, examId?: string) =>
     enabled: !!(studentId || examId),
   });
 
+// Convert Bengali numerals to English for matching
+const toEnglishDigits = (str: string) =>
+  str.replace(/[০-৯]/g, d => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
+
 export const useResultByRoll = (rollNumber: string, examId: string, regNumber?: string) =>
   useQuery({
     queryKey: ["result_by_roll", rollNumber, examId, regNumber],
     queryFn: async () => {
-      // First try to find student with full details via admin-accessible query
-      // Use find_student_for_result RPC or get_students_public
+      const trimmedRoll = toEnglishDigits(rollNumber.trim());
+      const trimmedReg = regNumber ? toEnglishDigits(regNumber.trim()) : "";
+      
       const { data: students, error: sErr } = await supabase.rpc("get_students_public");
       if (sErr) throw sErr;
-      const student = students?.find((s: any) => 
-        s.roll_number === rollNumber && 
-        (!regNumber || s.registration_number === regNumber)
-      );
+      const student = students?.find((s: any) => {
+        const sRoll = toEnglishDigits((s.roll_number || "").trim());
+        const sReg = toEnglishDigits((s.registration_number || "").trim());
+        return sRoll === trimmedRoll && (!trimmedReg || sReg === trimmedReg);
+      });
       if (!student) return null;
 
       // Get additional details via secure RPC
