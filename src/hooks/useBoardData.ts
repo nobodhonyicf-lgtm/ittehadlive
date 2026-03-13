@@ -114,19 +114,15 @@ export const useResultByRoll = (rollNumber: string, examId: string, regNumber?: 
     queryFn: async () => {
       const trimmedRoll = toEnglishDigits(rollNumber.trim());
       const trimmedReg = regNumber ? toEnglishDigits(regNumber.trim()) : "";
-      
-      const { data: students, error: sErr } = await supabase.rpc("get_students_public");
-      if (sErr) throw sErr;
-      const student = students?.find((s: any) => {
-        const sRoll = toEnglishDigits((s.roll_number || "").trim());
-        const sReg = toEnglishDigits((s.registration_number || "").trim());
-        return sRoll === trimmedRoll && (!trimmedReg || sReg === trimmedReg);
-      });
-      if (!student) return null;
 
-      // Get additional details via secure RPC
-      const { data: details } = await supabase.rpc("get_student_details_for_result", { p_student_id: student.id });
-      const detail = details?.[0];
+      // Use server-side RPC for reliable matching
+      const { data: students, error: sErr } = await supabase.rpc("find_student_by_roll_reg", {
+        p_roll: trimmedRoll,
+        p_reg: trimmedReg,
+      });
+      if (sErr) throw sErr;
+      const student = students?.[0];
+      if (!student) return null;
 
       const { data: results, error: rErr } = await supabase
         .from("results")
@@ -134,15 +130,7 @@ export const useResultByRoll = (rollNumber: string, examId: string, regNumber?: 
         .eq("student_id", student.id)
         .eq("exam_id", examId);
       if (rErr) throw rErr;
-      return { 
-        student: { 
-          ...student, 
-          father_name: detail?.father_name || null,
-          mother_name: detail?.mother_name || null,
-          address: detail?.address || null,
-        }, 
-        results 
-      };
+      return { student, results };
     },
     enabled: !!rollNumber && !!examId,
   });
