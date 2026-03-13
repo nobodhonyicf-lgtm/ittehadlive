@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useMenuItems, useSiteSettings } from "@/hooks/useData";
-import { Menu, X, GraduationCap, Phone, BookOpen, LogIn, User, LayoutDashboard, Users, ChevronDown } from "lucide-react";
+import { Menu, X, GraduationCap, Phone, BookOpen, LogIn, User, LayoutDashboard, Users, ChevronDown, Search } from "lucide-react";
 import LocationPicker from "@/components/LocationPicker";
 import { useState, useEffect, useRef } from "react";
 import { toBengali } from "@/lib/bengali";
@@ -39,9 +39,9 @@ const DropdownMenu = ({ label, items, onNavigate }: { label: string; items: { la
     <li ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md"
+        className="flex items-center gap-1 px-3 py-2 hover:bg-primary-foreground/10 transition-colors text-[13px] font-medium rounded-md"
       >
-        {label} <ChevronDown size={12} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+        {label} <ChevronDown size={11} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
         <ul className="md:absolute md:top-full md:left-0 md:mt-1 md:bg-card/95 md:backdrop-blur-xl md:rounded-lg md:shadow-xl md:min-w-[140px] md:border md:border-border/50 md:z-50 md:py-1 md:text-foreground">
@@ -85,12 +85,54 @@ const Header = () => {
   }, []);
 
   return (
-    <header className={`w-full sticky top-0 z-50 transition-all duration-300 ${scrolled ? "shadow-lg shadow-primary/5" : ""}`}>
-      <div className="bg-card/90 backdrop-blur-xl border-b border-border/50">
-        <div className="max-w-[1200px] mx-auto px-4 py-3 flex items-center justify-between">
+    <header className={`w-full sticky top-0 z-50 transition-all duration-300 ${scrolled ? "shadow-lg shadow-black/5" : ""}`}>
+      {/* Top utility bar */}
+      <div className="bg-primary text-primary-foreground">
+        <div className="max-w-[1200px] mx-auto px-4 flex items-center justify-between h-8 text-[11px]">
+          <div className="flex items-center gap-4">
+            {settings?.contact_phone && (
+              <span className="hidden sm:flex items-center gap-1 opacity-80">
+                <Phone size={10} /> {toBengali(settings.contact_phone)}
+              </span>
+            )}
+            {settings?.contact_email && (
+              <span className="hidden md:flex items-center gap-1 opacity-80">
+                {settings.contact_email}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <LocationPicker />
+            {user ? (
+              <Link to="/profile" className="flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity">
+                <Avatar className="h-5 w-5">
+                  {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="Profile" /> : null}
+                  <AvatarFallback className="bg-white/20 text-[8px]">
+                    {profile?.full_name?.charAt(0) || <User size={8} />}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden sm:inline">{profile?.full_name || "প্রোফাইল"}</span>
+              </Link>
+            ) : (
+              <Link to="/login" className="flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity">
+                <LogIn size={11} /> লগইন
+              </Link>
+            )}
+            {user && hasAnyRole && (
+              <Link to="/admin" className="hidden md:flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity">
+                <LayoutDashboard size={11} /> ড্যাশবোর্ড
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Main header */}
+      <div className={`bg-card/95 backdrop-blur-xl border-b border-border/40 transition-all duration-300`}>
+        <div className="max-w-[1200px] mx-auto px-4 py-2.5 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 min-w-0">
             {settings?.logo_url && (
-              <img src={settings.logo_url} alt="Logo" className="h-10 md:h-12 object-contain shrink-0" />
+              <img src={settings.logo_url} alt="Logo" className="h-10 md:h-11 object-contain shrink-0" />
             )}
             <div className="min-w-0">
               <h1 className="text-base md:text-lg font-bold text-primary leading-tight truncate">
@@ -102,56 +144,35 @@ const Header = () => {
             </div>
           </Link>
 
-          <div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0">
-            {settings?.contact_phone && (
-              <span className="hidden lg:flex items-center gap-1">
-                <Phone size={11} /> {toBengali(settings.contact_phone)}
-              </span>
-            )}
-            <LocationPicker />
-            <Link to="/result" className="hidden md:flex items-center gap-1 hover:text-primary transition-colors">
-              <GraduationCap size={13} /> রেজাল্ট
-            </Link>
-            <Link to="/books" className="hidden md:flex items-center gap-1 hover:text-primary transition-colors">
-              <BookOpen size={13} /> প্রকাশনা
-            </Link>
-            <Link to="/teachers" className="hidden md:flex items-center gap-1 hover:text-primary transition-colors">
-              <Users size={13} /> খেদমত প্রয়োজন
-            </Link>
-            {user && hasAnyRole && (
-              <Link to="/admin" className="hidden md:flex items-center gap-1 hover:text-primary transition-colors">
-                <LayoutDashboard size={13} /> ড্যাশবোর্ড
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Quick links - desktop */}
+            <div className="hidden lg:flex items-center gap-1 text-xs text-muted-foreground">
+              <Link to="/result" className="flex items-center gap-1 hover:text-primary transition-colors px-2.5 py-1.5 rounded-md hover:bg-muted">
+                <GraduationCap size={13} /> রেজাল্ট
               </Link>
-            )}
-            {user ? (
-              <Link to="/profile" className="flex items-center gap-1 hover:text-primary transition-colors">
-                <Avatar className="h-6 w-6">
-                  {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="Profile" /> : null}
-                  <AvatarFallback className="bg-primary/10 text-primary text-[9px]">
-                    {profile?.full_name?.charAt(0) || <User size={10} />}
-                  </AvatarFallback>
-                </Avatar>
+              <Link to="/books" className="flex items-center gap-1 hover:text-primary transition-colors px-2.5 py-1.5 rounded-md hover:bg-muted">
+                <BookOpen size={13} /> প্রকাশনা
               </Link>
-            ) : (
-              <Link to="/login" className="flex items-center gap-1 hover:text-primary transition-colors">
-                <LogIn size={13} /> লগইন
+              <Link to="/teachers" className="flex items-center gap-1 hover:text-primary transition-colors px-2.5 py-1.5 rounded-md hover:bg-muted">
+                <Users size={13} /> শিক্ষক
               </Link>
-            )}
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-1.5 rounded-lg hover:bg-muted transition-colors" aria-label="Toggle menu">
+            </div>
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Toggle menu">
               {mobileOpen ? <X size={20} className="text-foreground" /> : <Menu size={20} className="text-foreground" />}
             </button>
           </div>
         </div>
       </div>
 
-      <nav className="bg-primary/95 backdrop-blur-xl text-primary-foreground">
+      {/* Navigation bar */}
+      <nav className="bg-primary text-primary-foreground">
         <div className="max-w-[1200px] mx-auto px-4">
           <ul className={`${mobileOpen ? "block py-2" : "hidden"} md:flex md:items-center md:justify-center`}>
             {menuItems?.map((item) => (
               <li key={item.id}>
                 <Link
                   to={item.url}
-                  className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md"
+                  className="block px-3 py-2 hover:bg-primary-foreground/10 transition-colors text-[13px] font-medium rounded-md"
                   onClick={() => setMobileOpen(false)}
                 >
                   {item.label}
@@ -162,18 +183,18 @@ const Header = () => {
             <DropdownMenu label="টুলস" items={toolsDropdown} onNavigate={() => setMobileOpen(false)} />
             {/* Mobile-only links */}
             <li className="md:hidden">
-              <Link to="/result" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+              <Link to="/result" className="block px-3 py-2 hover:bg-primary-foreground/10 transition-colors text-[13px] font-medium rounded-md" onClick={() => setMobileOpen(false)}>
                 রেজাল্ট
               </Link>
             </li>
             <li className="md:hidden">
-              <Link to="/books" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+              <Link to="/books" className="block px-3 py-2 hover:bg-primary-foreground/10 transition-colors text-[13px] font-medium rounded-md" onClick={() => setMobileOpen(false)}>
                 প্রকাশনা
               </Link>
             </li>
             <li className="md:hidden">
-              <Link to="/teachers" className="block px-3.5 py-2 hover:bg-primary-foreground/10 transition-colors text-sm font-medium rounded-md" onClick={() => setMobileOpen(false)}>
-                খেদমত প্রয়োজন
+              <Link to="/teachers" className="block px-3 py-2 hover:bg-primary-foreground/10 transition-colors text-[13px] font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+                শিক্ষক
               </Link>
             </li>
           </ul>

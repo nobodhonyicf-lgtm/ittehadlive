@@ -11,10 +11,9 @@ import WebPushPrompt from "@/components/WebPushPrompt";
 const Layout = ({ children, fullWidth }: { children: ReactNode; fullWidth?: boolean }) => {
   const isApp = useIsApp();
 
-  // App mode (PWA standalone / Capacitor): app-like layout with bottom nav
   if (isApp) {
     return (
-      <div className="min-h-screen flex flex-col bg-background pb-16">
+      <div className="min-h-screen flex flex-col bg-background pb-14">
         <AppHeader />
         <main className="flex-1 min-h-[60vh]">
           <div className="max-w-[1200px] mx-auto">
@@ -27,9 +26,8 @@ const Layout = ({ children, fullWidth }: { children: ReactNode; fullWidth?: bool
     );
   }
 
-  // Desktop: Fluent-style professional layout
   return (
-    <div className="min-h-screen flex flex-col bg-muted/30">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <HeaderAd />
       <main className="flex-1 min-h-[60vh]">

@@ -9,23 +9,21 @@ interface SectionHeaderProps {
 
 const SectionHeader = ({ title, linkUrl, linkText = "আরও" }: SectionHeaderProps) => {
   return (
-    <div className="flex items-center justify-between mb-4 relative">
-      {/* Left accent bar */}
-      <div className="flex items-center gap-2">
-        <div className="w-1 h-7 rounded-full bg-gradient-to-b from-primary to-primary/50" />
-        <h2 className="text-[16px] font-bold text-foreground tracking-wide">
+    <div className="flex items-center justify-between mb-5 relative">
+      <div className="flex items-center gap-2.5">
+        <div className="w-1 h-6 rounded-full bg-primary" />
+        <h2 className="text-[15px] font-bold text-foreground">
           {title}
         </h2>
       </div>
-      {/* Decorative line */}
-      <div className="flex-1 mx-3 h-px bg-gradient-to-r from-primary/30 via-border to-transparent" />
+      <div className="flex-1 mx-4 h-px bg-border" />
       {linkUrl && (
         <Link
           to={linkUrl}
-          className="flex items-center gap-0.5 text-[12px] font-semibold text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-full transition-colors border border-primary/15"
+          className="flex items-center gap-0.5 text-[11px] font-semibold text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-full transition-colors border border-primary/10"
         >
           {linkText}
-          <ChevronLeft size={13} className="rotate-180" />
+          <ChevronLeft size={12} className="rotate-180" />
         </Link>
       )}
     </div>
