@@ -35,62 +35,53 @@ const Footer = () => {
   return (
     <>
       <BackToTop />
-      <footer className="relative bg-primary text-primary-foreground mt-12 overflow-hidden">
-        {/* Islamic geometric pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.04]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23fff' stroke-width='1'%3E%3Cpath d='M0 0l40 40L0 80zM80 0L40 40l40 40z'/%3E%3Cpath d='M40 0L0 40l40 40 40-40z'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Ccircle cx='40' cy='40' r='10'/%3E%3C/g%3E%3C/svg%3E")`,
-          backgroundSize: '80px 80px'
-        }} />
+      <footer className="relative bg-primary text-primary-foreground mt-16 overflow-hidden">
+        {/* Subtle pattern */}
+        <div className="absolute inset-0 islamic-pattern opacity-20" />
 
-        {/* Top decorative border */}
-        <div className="h-1 bg-gradient-to-r from-transparent via-primary-foreground/30 to-transparent" />
+        {/* Gold accent top border */}
+        <div className="h-0.5 bg-gradient-to-r from-transparent via-[hsl(var(--gold))] to-transparent opacity-40" />
 
         <div className="relative max-w-[1200px] mx-auto px-4 pt-12 pb-6">
-          {/* Main content grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
             {/* About */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary-foreground/10 rounded-xl backdrop-blur-sm">
-                  <img src={logoImg} alt="Logo" className="h-14 object-contain" />
+                <div className="p-1.5 bg-white/10 rounded-xl">
+                  <img src={logoImg} alt="Logo" className="h-12 object-contain" />
                 </div>
               </div>
               <h3 className="text-lg font-bold leading-snug">
                 {settings?.site_name || "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ"}
               </h3>
-              <p className="text-sm opacity-70 leading-relaxed">
+              <p className="text-sm opacity-60 leading-relaxed">
                 {settings?.site_description || "প্রাইভেট মাদরাসাগুলোর একটি সমন্বিত সংগঠন"}
               </p>
-
-              {/* Social icons */}
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex items-center gap-2 pt-1">
                 <a
                   href={settings?.facebook_url || "https://www.facebook.com/ittehadbd"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2.5 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-all duration-300 hover:scale-110"
+                  className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-200"
                   aria-label="Facebook"
                 >
-                  <Facebook size={18} />
+                  <Facebook size={16} />
                 </a>
                 <a
                   href={settings?.youtube_url || "https://www.youtube.com/@ittehadbd"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2.5 rounded-xl bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-all duration-300 hover:scale-110"
+                  className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-200"
                   aria-label="YouTube"
                 >
-                  <Youtube size={18} />
+                  <Youtube size={16} />
                 </a>
               </div>
             </div>
 
             {/* Quick Links */}
             <div>
-              <h3 className="text-base font-bold mb-4 flex items-center gap-2">
-                <span className="w-8 h-0.5 bg-primary-foreground/40 rounded-full" />
-                গুরুত্বপূর্ণ লিংক
-              </h3>
+              <h3 className="text-sm font-bold mb-4 uppercase tracking-wider opacity-80">গুরুত্বপূর্ণ লিংক</h3>
               <ul className="text-sm space-y-2.5">
                 {[
                   { href: "/page/about", label: "আমাদের সম্পর্কে" },
@@ -104,9 +95,9 @@ const Footer = () => {
                   <li key={link.href}>
                     <Link
                       to={link.href}
-                      className="opacity-70 hover:opacity-100 transition-all duration-200 hover:translate-x-1 inline-flex items-center gap-1.5"
+                      className="opacity-60 hover:opacity-100 transition-opacity inline-flex items-center gap-1.5"
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground/40" />
+                      <span className="w-1 h-1 rounded-full bg-primary-foreground/40" />
                       {link.label}
                     </Link>
                   </li>
@@ -116,10 +107,7 @@ const Footer = () => {
 
             {/* Services + App */}
             <div>
-              <h3 className="text-base font-bold mb-4 flex items-center gap-2">
-                <span className="w-8 h-0.5 bg-primary-foreground/40 rounded-full" />
-                সেবা সমূহ
-              </h3>
+              <h3 className="text-sm font-bold mb-4 uppercase tracking-wider opacity-80">সেবা সমূহ</h3>
               <ul className="text-sm space-y-2.5">
                 {[
                   { href: "/students", label: "শিক্ষার্থী ডিরেক্টরি" },
@@ -133,61 +121,57 @@ const Footer = () => {
                   <li key={link.href}>
                     <Link
                       to={link.href}
-                      className="opacity-70 hover:opacity-100 transition-all duration-200 hover:translate-x-1 inline-flex items-center gap-1.5"
+                      className="opacity-60 hover:opacity-100 transition-opacity inline-flex items-center gap-1.5"
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground/40" />
+                      <span className="w-1 h-1 rounded-full bg-primary-foreground/40" />
                       {link.label}
                     </Link>
                   </li>
                 ))}
               </ul>
 
-              {/* App download */}
               <div className="mt-5 pt-4 border-t border-primary-foreground/10">
                 <Link
                   to="/install"
-                  className="inline-flex items-center gap-2.5 px-4 py-2.5 bg-primary-foreground/10 hover:bg-primary-foreground/20 rounded-xl transition-all duration-300 text-sm font-medium group"
+                  className="inline-flex items-center gap-2.5 px-4 py-2.5 bg-white/10 hover:bg-white/15 rounded-xl transition-all duration-200 text-sm font-medium group"
                 >
-                  <Smartphone size={18} className="group-hover:animate-pulse" />
+                  <Smartphone size={16} className="opacity-80" />
                   <div>
-                    <div className="text-xs opacity-60">মোবাইল অ্যাপ</div>
-                    <div className="font-semibold -mt-0.5">ডাউনলোড করুন</div>
+                    <div className="text-[10px] opacity-50">মোবাইল অ্যাপ</div>
+                    <div className="font-semibold text-xs -mt-0.5">ডাউনলোড করুন</div>
                   </div>
-                  <Download size={14} className="opacity-60 ml-1" />
+                  <Download size={12} className="opacity-50 ml-1" />
                 </Link>
               </div>
             </div>
 
             {/* Contact + Newsletter */}
             <div>
-              <h3 className="text-base font-bold mb-4 flex items-center gap-2">
-                <span className="w-8 h-0.5 bg-primary-foreground/40 rounded-full" />
-                যোগাযোগ
-              </h3>
+              <h3 className="text-sm font-bold mb-4 uppercase tracking-wider opacity-80">যোগাযোগ</h3>
               <ul className="text-sm space-y-3">
-                <li className="flex items-center gap-2.5 opacity-80">
-                  <div className="p-1.5 rounded-lg bg-primary-foreground/10 shrink-0">
-                    <Phone size={14} />
+                <li className="flex items-center gap-2.5 opacity-70">
+                  <div className="p-1.5 rounded-lg bg-white/10 shrink-0">
+                    <Phone size={12} />
                   </div>
                   {toBengali(settings?.contact_phone || "০১৯২৬-৪২৮৯৮৮")}
                 </li>
-                <li className="flex items-center gap-2.5 opacity-80">
-                  <div className="p-1.5 rounded-lg bg-primary-foreground/10 shrink-0">
-                    <Mail size={14} />
+                <li className="flex items-center gap-2.5 opacity-70">
+                  <div className="p-1.5 rounded-lg bg-white/10 shrink-0">
+                    <Mail size={12} />
                   </div>
                   {settings?.contact_email || "info@ittehad.bd"}
                 </li>
-                <li className="flex items-start gap-2.5 opacity-80">
-                  <div className="p-1.5 rounded-lg bg-primary-foreground/10 shrink-0 mt-0.5">
-                    <MapPin size={14} />
+                <li className="flex items-start gap-2.5 opacity-70">
+                  <div className="p-1.5 rounded-lg bg-white/10 shrink-0 mt-0.5">
+                    <MapPin size={12} />
                   </div>
-                  <span className="leading-relaxed">{settings?.contact_address || "মারকাযুস সুন্নাহ ক্যাডেট মাদরাসা, ওয়াবদারপুল তালতলা বাজার, ফতুল্লা, নারায়ণগঞ্জ"}</span>
+                  <span className="leading-relaxed text-[13px]">{settings?.contact_address || "মারকাযুস সুন্নাহ ক্যাডেট মাদরাসা, ফতুল্লা, নারায়ণগঞ্জ"}</span>
                 </li>
               </ul>
 
               {/* Newsletter */}
               <div className="mt-5 pt-4 border-t border-primary-foreground/10">
-                <h4 className="text-sm font-semibold mb-2.5">আপডেট পেতে সংযুক্ত থাকুন</h4>
+                <h4 className="text-xs font-semibold mb-2.5 opacity-80">আপডেট পেতে সংযুক্ত থাকুন</h4>
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault();
@@ -217,14 +201,14 @@ const Footer = () => {
                     type="email"
                     placeholder="ইমেইল দিন..."
                     required
-                    className="flex-1 px-3 py-2 rounded-lg bg-primary-foreground/10 border border-primary-foreground/10 text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:border-primary-foreground/30 transition-colors"
+                    className="flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-sm text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:border-white/25 transition-colors"
                   />
                   <button
                     type="submit"
-                    className="p-2 rounded-lg bg-primary-foreground/15 hover:bg-primary-foreground/25 transition-colors"
+                    className="p-2 rounded-lg bg-white/15 hover:bg-white/20 transition-colors"
                     aria-label="Subscribe"
                   >
-                    <Send size={16} />
+                    <Send size={14} />
                   </button>
                 </form>
               </div>
@@ -232,9 +216,9 @@ const Footer = () => {
           </div>
 
           {/* Bottom bar */}
-          <div className="border-t border-primary-foreground/10 mt-10 pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm opacity-50">
+          <div className="border-t border-primary-foreground/10 mt-10 pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs opacity-40">
             <p>{toBengali(settings?.copyright_text || "© ২০২৪ ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ। সর্বস্বত্ব সংরক্ষিত।")}</p>
-            <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-3">
               <Link to="/terms" className="hover:opacity-100 transition-opacity underline">শর্তাবলী</Link>
               <span>•</span>
               <Link to="/privacy" className="hover:opacity-100 transition-opacity underline">গোপনীয়তা নীতি</Link>
