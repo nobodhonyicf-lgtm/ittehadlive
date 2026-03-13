@@ -2219,6 +2219,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      find_student_by_roll_reg: {
+        Args: { p_reg: string; p_roll: string }
+        Returns: {
+          address: string
+          branch_id: string
+          class_name: string
+          father_name: string
+          id: string
+          mother_name: string
+          name: string
+          photo_url: string
+          registration_number: string
+          roll_number: string
+        }[]
+      }
       find_student_for_result: {
         Args: { p_class: string; p_roll: string }
         Returns: {
