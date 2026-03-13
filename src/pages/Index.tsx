@@ -35,36 +35,34 @@ const Index = () => {
       {isOn("section_hero") && <HeroSection />}
       {isOn("section_notice_ticker") && <NoticeTicker />}
       
-      <div className="max-w-[1200px] mx-auto px-4 py-8">
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Column */}
-          <div className="lg:col-span-2 space-y-10">
-            {/* Teacher Slider */}
-            {isOn("section_teacher_slider") && (
-              <div className="animate-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
-                <TeacherSlider />
-              </div>
-            )}
-            {/* Job Postings */}
-            {isOn("section_job_postings") && (
-              <div className="animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
-                <JobPostingsSlider />
-              </div>
-            )}
-            {/* About */}
+      <div className="max-w-[1200px] mx-auto px-4 pt-14 pb-8">
+        {/* Section 1: Services + Teacher + Jobs */}
+        <div className="space-y-8 mb-10">
+          {isOn("section_teacher_slider") && (
+            <div className="animate-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+              <TeacherSlider />
+            </div>
+          )}
+          {isOn("section_job_postings") && (
+            <div className="animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
+              <JobPostingsSlider />
+            </div>
+          )}
+        </div>
+
+        {/* Section 2: Main Content + Sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+          <div className="lg:col-span-2 space-y-8">
             {isOn("section_about") && (
               <div className="animate-fade-in" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
                 <AboutSection />
               </div>
             )}
-            {/* Islamic Nav */}
             {isOn("section_islamic_nav") && (
               <div className="animate-fade-in" style={{ animationDelay: "0.25s", animationFillMode: "both" }}>
                 <IslamicNav />
               </div>
             )}
-            {/* Islamic Content */}
             {isOn("section_islamic_content") && (
               <div className="animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
                 <IslamicContentWidget />
@@ -72,7 +70,6 @@ const Index = () => {
             )}
           </div>
 
-          {/* Sidebar */}
           {isOn("section_sidebar") && (
             <div className="lg:col-span-1 animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
               <Sidebar />
@@ -80,21 +77,18 @@ const Index = () => {
           )}
         </div>
 
-        {/* Full Width Sections */}
-        <div className="space-y-10 mt-10">
-          {/* Departments */}
+        {/* Section 3: Full Width - Departments, News, Videos */}
+        <div className="space-y-10">
           {isOn("section_departments") && (
             <div className="animate-fade-in" style={{ animationDelay: "0.35s", animationFillMode: "both" }}>
               <SectionCards />
             </div>
           )}
-          {/* Recent News */}
           {isOn("section_recent_news") && (
             <div className="animate-fade-in" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>
               <RecentNews />
             </div>
           )}
-          {/* Videos */}
           {isOn("section_videos") && (
             <div className="animate-fade-in" style={{ animationDelay: "0.45s", animationFillMode: "both" }}>
               <VideoSection />
