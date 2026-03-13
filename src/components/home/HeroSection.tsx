@@ -51,8 +51,8 @@ const HeroSection = () => {
       {/* Subtle geometric pattern */}
       <div className="absolute inset-0 islamic-pattern opacity-30" />
       {/* Gradient orbs */}
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/[0.03] rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-white/[0.03] rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl" />
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary-foreground/[0.03] rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary-foreground/[0.03] rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl" />
 
       <div className="relative max-w-[1200px] mx-auto px-4 py-10 md:py-14">
         {/* Main content */}
