@@ -37,84 +37,49 @@ const CertificateDownload = () => {
   const [certData, setCertData] = useState<CertificateData | null>(null);
   const certRef = useRef<HTMLDivElement>(null);
 
+  const toEnglishDigits = (str: string) => str.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
+
   const handleSearch = async () => {
-    if (!roll.trim() || !regNo.trim()) {
+    const normalizedRoll = toEnglishDigits(roll).trim();
+    const normalizedReg = toEnglishDigits(regNo).trim();
+
+    if (!normalizedRoll || !normalizedReg) {
       setError("রোল নম্বর এবং রেজিস্ট্রেশন নম্বর উভয়ই দিন।");
       return;
     }
+
     setLoading(true);
     setError("");
     setCertData(null);
 
     try {
-      // Find student
-      const { data: student } = await supabase
-        .from("students")
-        .select("id, name, father_name, roll_number, registration_number, class_name, branch_id")
-        .eq("roll_number", roll.trim())
-        .eq("registration_number", regNo.trim())
-        .eq("is_active", true)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("get_or_create_certificate_by_roll_reg", {
+        p_roll: normalizedRoll,
+        p_reg: normalizedReg,
+      });
 
-      if (!student) {
+      if (error) throw error;
+
+      const row = (data as any[])?.[0];
+      if (!row) {
         setError("এই রোল ও রেজিস্ট্রেশন নম্বরে কোনো শিক্ষার্থী পাওয়া যায়নি।");
-        setLoading(false);
         return;
-      }
-
-      // Find certificate
-      const { data: cert } = await supabase
-        .from("certificates")
-        .select("id, certificate_number, verification_code, issue_date, status, exam_id, exams(name, year)")
-        .eq("student_id", student.id)
-        .eq("status", "active")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (!cert) {
-        setError("এই শিক্ষার্থীর জন্য কোনো সনদপত্র প্রস্তুত নেই। অফিসে যোগাযোগ করুন।");
-        setLoading(false);
-        return;
-      }
-
-      // Get results for GPA
-      const { data: results } = await supabase
-        .from("results")
-        .select("marks_obtained, gpa, grade, subjects(full_marks, pass_marks)")
-        .eq("student_id", student.id)
-        .eq("exam_id", cert.exam_id);
-
-      const totalGpa = results && results.length > 0
-        ? Number((results.reduce((sum, r) => sum + (Number(r.gpa) || 0), 0) / results.length).toFixed(2))
-        : 0;
-      const overallGrade = totalGpa >= 5 ? "A+" : totalGpa >= 4 ? "A" : totalGpa >= 3.5 ? "A-" : totalGpa >= 3 ? "B" : totalGpa >= 2 ? "C" : totalGpa >= 1 ? "D" : "F";
-
-      // Get branch name
-      let branchName = "—";
-      if (student.branch_id) {
-        const { data: branch } = await supabase
-          .from("branches")
-          .select("name")
-          .eq("id", student.branch_id)
-          .maybeSingle();
-        branchName = branch?.name || "—";
       }
 
       setCertData({
-        studentName: student.name,
-        fatherName: student.father_name || "—",
-        rollNumber: student.roll_number,
-        registrationNumber: student.registration_number || "—",
-        className: student.class_name,
-        examName: (cert as any).exams?.name || "—",
-        examYear: (cert as any).exams?.year || 0,
-        gpa: totalGpa,
-        grade: overallGrade,
-        branchName,
-        certificateNumber: cert.certificate_number,
-        issueDate: cert.issue_date,
-        verificationCode: cert.verification_code,
+        studentName: row.student_name,
+        fatherName: row.father_name || "—",
+        rollNumber: row.roll_number,
+        registrationNumber: row.registration_number || "—",
+        className: row.class_name,
+        examName: row.exam_name || "—",
+        examYear: row.exam_year || 0,
+        gpa: Number(row.gpa || 0),
+        grade: row.grade || "F",
+        branchName: row.branch_name || "—",
+        certificateNumber: row.certificate_number,
+        issueDate: row.issue_date,
+        verificationCode: row.verification_code,
       });
     } catch {
       setError("তথ্য লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
