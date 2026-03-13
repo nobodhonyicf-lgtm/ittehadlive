@@ -57,8 +57,8 @@ const HeroSection = () => {
       <div className="relative max-w-[1200px] mx-auto px-4 py-10 md:py-14">
         {/* Main content */}
         <div className="text-center max-w-2xl mx-auto mb-8">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 mb-4 text-xs font-medium">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 rounded-full px-4 py-1.5 mb-4 text-xs font-medium">
+            <span className="w-2 h-2 rounded-full bg-primary-foreground animate-pulse opacity-60" />
             সমন্বিত শিক্ষা প্ল্যাটফর্ম
           </div>
           <h2 className="text-xl md:text-2xl font-bold leading-tight mb-2">
