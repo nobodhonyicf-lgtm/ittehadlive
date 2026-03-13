@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useMenuItems, useSiteSettings } from "@/hooks/useData";
-import { Menu, X, GraduationCap, Phone, BookOpen, LogIn, User, LayoutDashboard, Users, ChevronDown, Search } from "lucide-react";
+import { Menu, X, GraduationCap, Phone, BookOpen, LogIn, User, LayoutDashboard, Users, ChevronDown, Search, Building2, Bell, Shield, FileText } from "lucide-react";
 import LocationPicker from "@/components/LocationPicker";
 import { useState, useEffect, useRef } from "react";
 import { toBengali } from "@/lib/bengali";
@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import logoImg from "@/assets/logo.png";
 
 const islamicDropdown = [
   { label: "কুরআন", path: "/quran" },
@@ -21,6 +22,13 @@ const toolsDropdown = [
   { label: "কিবলা", path: "/qibla" },
   { label: "যাকাত", path: "/zakat" },
   { label: "ম্যাপ", path: "/nearby-map" },
+];
+
+const servicesDropdown = [
+  { label: "শিক্ষক খুঁজুন", path: "/teachers" },
+  { label: "যাচাই কেন্দ্র", path: "/verify" },
+  { label: "সনদ ডাউনলোড", path: "/certificate" },
+  { label: "দলিলপত্র", path: "/documents" },
 ];
 
 const DropdownMenu = ({ label, items, onNavigate }: { label: string; items: { label: string; path: string }[]; onNavigate?: () => void }) => {
@@ -44,7 +52,7 @@ const DropdownMenu = ({ label, items, onNavigate }: { label: string; items: { la
         {label} <ChevronDown size={11} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <ul className="md:absolute md:top-full md:left-0 md:mt-1 md:bg-card/95 md:backdrop-blur-xl md:rounded-lg md:shadow-xl md:min-w-[140px] md:border md:border-border/50 md:z-50 md:py-1 md:text-foreground">
+        <ul className="md:absolute md:top-full md:left-0 md:mt-1 md:bg-card/95 md:backdrop-blur-xl md:rounded-lg md:shadow-xl md:min-w-[160px] md:border md:border-border/50 md:z-50 md:py-1 md:text-foreground">
           {items.map((item) => (
             <li key={item.path}>
               <Link
@@ -91,12 +99,12 @@ const Header = () => {
         <div className="max-w-[1200px] mx-auto px-4 flex items-center justify-between h-8 text-[11px]">
           <div className="flex items-center gap-4">
             {settings?.contact_phone && (
-              <span className="hidden sm:flex items-center gap-1 opacity-80">
+              <span className="hidden sm:flex items-center gap-1 opacity-70">
                 <Phone size={10} /> {toBengali(settings.contact_phone)}
               </span>
             )}
             {settings?.contact_email && (
-              <span className="hidden md:flex items-center gap-1 opacity-80">
+              <span className="hidden md:flex items-center gap-1 opacity-70">
                 {settings.contact_email}
               </span>
             )}
@@ -104,7 +112,7 @@ const Header = () => {
           <div className="flex items-center gap-3">
             <LocationPicker />
             {user ? (
-              <Link to="/profile" className="flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity">
+              <Link to="/profile" className="flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
                 <Avatar className="h-5 w-5">
                   {profile?.avatar_url ? <AvatarImage src={profile.avatar_url} alt="Profile" /> : null}
                   <AvatarFallback className="bg-white/20 text-[8px]">
@@ -114,12 +122,12 @@ const Header = () => {
                 <span className="hidden sm:inline">{profile?.full_name || "প্রোফাইল"}</span>
               </Link>
             ) : (
-              <Link to="/login" className="flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity">
+              <Link to="/login" className="flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
                 <LogIn size={11} /> লগইন
               </Link>
             )}
             {user && hasAnyRole && (
-              <Link to="/admin" className="hidden md:flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity">
+              <Link to="/admin" className="hidden md:flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity">
                 <LayoutDashboard size={11} /> ড্যাশবোর্ড
               </Link>
             )}
@@ -128,14 +136,14 @@ const Header = () => {
       </div>
 
       {/* Main header */}
-      <div className={`bg-card/95 backdrop-blur-xl border-b border-border/40 transition-all duration-300`}>
-        <div className="max-w-[1200px] mx-auto px-4 py-2.5 flex items-center justify-between">
+      <div className="bg-card/95 backdrop-blur-xl border-b border-border/40 transition-all duration-300">
+        <div className="max-w-[1200px] mx-auto px-4 py-2 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 min-w-0">
-            {settings?.logo_url && (
-              <img src={settings.logo_url} alt="Logo" className="h-10 md:h-11 object-contain shrink-0" />
-            )}
+            <div className="h-10 w-10 md:h-11 md:w-11 rounded-xl bg-primary/5 border border-primary/10 p-0.5 shrink-0">
+              <img src={settings?.logo_url || logoImg} alt="Logo" className="h-full w-full object-contain rounded-lg" />
+            </div>
             <div className="min-w-0">
-              <h1 className="text-base md:text-lg font-bold text-primary leading-tight truncate">
+              <h1 className="text-[15px] md:text-[17px] font-bold text-foreground leading-tight truncate">
                 {settings?.site_name || "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ"}
               </h1>
               <p className="text-[10px] text-muted-foreground hidden sm:block truncate">
@@ -146,15 +154,15 @@ const Header = () => {
 
           <div className="flex items-center gap-2 shrink-0">
             {/* Quick links - desktop */}
-            <div className="hidden lg:flex items-center gap-1 text-xs text-muted-foreground">
+            <div className="hidden lg:flex items-center gap-0.5 text-xs text-muted-foreground">
               <Link to="/result" className="flex items-center gap-1 hover:text-primary transition-colors px-2.5 py-1.5 rounded-md hover:bg-muted">
                 <GraduationCap size={13} /> রেজাল্ট
               </Link>
+              <Link to="/branches" className="flex items-center gap-1 hover:text-primary transition-colors px-2.5 py-1.5 rounded-md hover:bg-muted">
+                <Building2 size={13} /> শাখা
+              </Link>
               <Link to="/books" className="flex items-center gap-1 hover:text-primary transition-colors px-2.5 py-1.5 rounded-md hover:bg-muted">
                 <BookOpen size={13} /> প্রকাশনা
-              </Link>
-              <Link to="/teachers" className="flex items-center gap-1 hover:text-primary transition-colors px-2.5 py-1.5 rounded-md hover:bg-muted">
-                <Users size={13} /> শিক্ষক
               </Link>
             </div>
             <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors" aria-label="Toggle menu">
@@ -179,6 +187,7 @@ const Header = () => {
                 </Link>
               </li>
             ))}
+            <DropdownMenu label="সেবা" items={servicesDropdown} onNavigate={() => setMobileOpen(false)} />
             <DropdownMenu label="ইসলামী" items={islamicDropdown} onNavigate={() => setMobileOpen(false)} />
             <DropdownMenu label="টুলস" items={toolsDropdown} onNavigate={() => setMobileOpen(false)} />
             {/* Mobile-only links */}
@@ -188,13 +197,13 @@ const Header = () => {
               </Link>
             </li>
             <li className="md:hidden">
-              <Link to="/books" className="block px-3 py-2 hover:bg-primary-foreground/10 transition-colors text-[13px] font-medium rounded-md" onClick={() => setMobileOpen(false)}>
-                প্রকাশনা
+              <Link to="/branches" className="block px-3 py-2 hover:bg-primary-foreground/10 transition-colors text-[13px] font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+                শাখা সমূহ
               </Link>
             </li>
             <li className="md:hidden">
-              <Link to="/teachers" className="block px-3 py-2 hover:bg-primary-foreground/10 transition-colors text-[13px] font-medium rounded-md" onClick={() => setMobileOpen(false)}>
-                শিক্ষক
+              <Link to="/books" className="block px-3 py-2 hover:bg-primary-foreground/10 transition-colors text-[13px] font-medium rounded-md" onClick={() => setMobileOpen(false)}>
+                প্রকাশনা
               </Link>
             </li>
           </ul>

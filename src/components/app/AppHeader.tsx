@@ -1,11 +1,12 @@
 import { useSiteSettings } from "@/hooks/useData";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { Bell, LayoutDashboard, GraduationCap } from "lucide-react";
+import { Bell, LayoutDashboard, GraduationCap, Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { toBengali } from "@/lib/bengali";
+import logoImg from "@/assets/logo.png";
 
 const NotificationBell = () => {
   const { data: notifications } = useQuery({
@@ -66,21 +67,19 @@ const AppHeader = () => {
       <div className="flex items-center justify-between px-4 h-14">
         {/* Logo & Name */}
         <Link to="/" className="flex items-center gap-2.5 min-w-0">
-          {appLogoUrl && (
-            <div className="h-9 w-9 rounded-xl bg-white/95 p-0.5 shadow-sm">
-              <img
-                src={appLogoUrl}
-                alt="App Logo"
-                className="h-full w-full rounded-lg object-contain"
-              />
-            </div>
-          )}
+          <div className="h-9 w-9 rounded-xl bg-white/95 p-0.5 shadow-sm shrink-0">
+            <img
+              src={appLogoUrl || logoImg}
+              alt="App Logo"
+              className="h-full w-full rounded-lg object-contain"
+            />
+          </div>
           <div className="min-w-0">
             <h1 className="font-bold text-[13px] leading-tight truncate max-w-[180px]">
               {appName}
             </h1>
-            <p className="text-[9px] opacity-60 truncate max-w-[180px] leading-tight">
-              {settings?.site_description?.slice(0, 50) || "সমন্বিত শিক্ষা প্ল্যাটফর্ম"}
+            <p className="text-[9px] opacity-50 truncate max-w-[180px] leading-tight">
+              সমন্বিত শিক্ষা প্ল্যাটফর্ম
             </p>
           </div>
         </Link>
@@ -95,7 +94,6 @@ const AppHeader = () => {
             <GraduationCap size={18} />
           </Link>
           <NotificationBell />
-
           {user && hasAnyRole && (
             <Link
               to="/admin"
