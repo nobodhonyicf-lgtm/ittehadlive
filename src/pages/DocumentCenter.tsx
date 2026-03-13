@@ -48,7 +48,7 @@ const documents = [
 const DocumentCenter = () => {
   const isApp = useIsApp();
 
-  const PageContent = () => (
+  const pageContent = (
     <div className="container mx-auto px-4 py-8 md:py-12 max-w-3xl">
       <SEOHead
         title="দলিলপত্র ও নীতিমালা | ইত্তেহাদুল মাদারিস"
@@ -110,7 +110,7 @@ const DocumentCenter = () => {
     </div>
   );
 
-  return isApp ? <AppLayout><PageContent /></AppLayout> : <Layout><PageContent /></Layout>;
+  return isApp ? <AppLayout>{pageContent}</AppLayout> : <Layout>{pageContent}</Layout>;
 };
 
 export default DocumentCenter;

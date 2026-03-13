@@ -71,7 +71,7 @@ const helpSections = [
 const HelpCenter = () => {
   const isApp = useIsApp();
 
-  const PageContent = () => (
+  const pageContent = (
     <div className="container mx-auto px-4 py-8 md:py-12 max-w-3xl">
       <SEOHead
         title="সহায়তা কেন্দ্র | ইত্তেহাদুল মাদারিস"
@@ -126,7 +126,7 @@ const HelpCenter = () => {
     </div>
   );
 
-  return isApp ? <AppLayout><PageContent /></AppLayout> : <Layout><PageContent /></Layout>;
+  return isApp ? <AppLayout>{pageContent}</AppLayout> : <Layout>{pageContent}</Layout>;
 };
 
 export default HelpCenter;

@@ -134,7 +134,7 @@ const CertificateDownload = () => {
     pdf.save(`সনদপত্র-${certData?.certificateNumber || "certificate"}.pdf`);
   };
 
-  const PageContent = () => (
+  const pageContent = (
     <div className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
       <SEOHead title="সনদপত্র ডাউনলোড | ইত্তেহাদুল মাদারিস" description="আপনার সনদপত্র ডাউনলোড করুন।" />
 
@@ -275,7 +275,7 @@ const CertificateDownload = () => {
     </div>
   );
 
-  return isApp ? <AppLayout><PageContent /></AppLayout> : <Layout><PageContent /></Layout>;
+  return isApp ? <AppLayout>{pageContent}</AppLayout> : <Layout>{pageContent}</Layout>;
 };
 
 export default CertificateDownload;

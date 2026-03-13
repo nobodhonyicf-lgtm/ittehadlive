@@ -46,7 +46,7 @@ const FAQPage = () => {
     })) || []
   };
 
-  const PageContent = () => (
+  const pageContent = (
     <div className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
       <SEOHead 
         title="সাধারণ জিজ্ঞাসা (FAQ) | ইত্তেহাদুল মাদারিস"
@@ -59,7 +59,7 @@ const FAQPage = () => {
 
       <div className="text-center mb-10">
         <h1 className="text-3xl md:text-4xl font-bold text-primary mb-4">সাধারণ জিজ্ঞাসা (FAQ)</h1>
-        <p className="text-muted-foreground">আপনাদের সাধারণ প্রশ্নগুলোর উত্তর এখানে দেওয়া হলো</p>
+        <p className="text-muted-foreground">আপনাদের সাধারণ প্রশ্নগুলোর উত্তর এখানে দেওয়া হলো</p>
       </div>
 
       {categories.length > 1 && (
@@ -100,7 +100,7 @@ const FAQPage = () => {
           ))}
           {filteredFaqs?.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
-              কোনো প্রশ্ন পাওয়া যায়নি।
+              কোনো প্রশ্ন পাওয়া যায়নি।
             </div>
           )}
         </Accordion>
@@ -108,15 +108,7 @@ const FAQPage = () => {
     </div>
   );
 
-  return isApp ? (
-    <AppLayout>
-      <PageContent />
-    </AppLayout>
-  ) : (
-    <Layout>
-      <PageContent />
-    </Layout>
-  );
+  return isApp ? <AppLayout>{pageContent}</AppLayout> : <Layout>{pageContent}</Layout>;
 };
 
 export default FAQPage;
