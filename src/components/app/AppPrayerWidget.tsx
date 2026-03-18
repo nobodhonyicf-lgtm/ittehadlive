@@ -1,13 +1,14 @@
 import { usePrayerTimes } from "@/hooks/useData";
-import { Clock } from "lucide-react";
+import { useAladhanPrayerTimes } from "@/hooks/useAladhanPrayerTimes";
+import { Clock, MapPin } from "lucide-react";
 import { toBengali } from "@/lib/bengali";
-import { useState, useEffect } from "react";
+import { buildForbiddenPrayerTimes } from "@/lib/forbiddenPrayerTimes";
+import ForbiddenPrayerTimesList from "@/components/prayer/ForbiddenPrayerTimesList";
+import { useState, useEffect, useMemo } from "react";
 
 const bengaliToEnglish = (s: string) =>
   s.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
 
-// Convert 12-hour Bengali time like "৫:১৫" to minutes since midnight
-// Prayer times are implicitly: ফজর(AM), যোহর(PM), আসর(PM), মাগরিব(PM), এশা(PM)
 const normalizePrayerMinutes = (timeText: string, name: string): number | null => {
   const cleaned = bengaliToEnglish(timeText.trim());
   const match = cleaned.match(/(\d{1,2})[:\.](\d{2})/);
@@ -15,28 +16,33 @@ const normalizePrayerMinutes = (timeText: string, name: string): number | null =
   let hours = parseInt(match[1]);
   const minutes = parseInt(match[2]);
 
-  // Determine AM/PM based on prayer name
   const amPrayers = ["ফজর"];
   const isAM = amPrayers.some((p) => name.includes(p));
 
-  if (isAM) {
-    // Already correct for AM (e.g., 5:15 = 5:15 AM)
-  } else {
-    // PM prayers: if hours < 12, add 12
-    if (hours < 12) hours += 12;
-  }
+  if (!isAM && hours < 12) hours += 12;
 
   return hours * 60 + minutes;
 };
 
 const AppPrayerWidget = () => {
   const { data: prayerTimes } = usePrayerTimes();
+  const { data: aladhanTimes } = useAladhanPrayerTimes();
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const forbiddenTimes = useMemo(
+    () =>
+      buildForbiddenPrayerTimes({
+        sunriseRaw: aladhanTimes?.sunriseRaw,
+        dhuhrRaw: aladhanTimes?.dhuhrRaw,
+        sunsetRaw: aladhanTimes?.sunsetRaw,
+      }),
+    [aladhanTimes?.dhuhrRaw, aladhanTimes?.sunriseRaw, aladhanTimes?.sunsetRaw]
+  );
 
   if (!prayerTimes?.length) return null;
 
@@ -58,13 +64,20 @@ const AppPrayerWidget = () => {
   }
 
   return (
-    <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 dark:from-emerald-800 dark:to-emerald-700 rounded-2xl p-4 text-white shadow-sm animate-fade-in transition-colors duration-300" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-bold flex items-center gap-2">
-          <Clock size={15} /> নামাজের সময়সূচি
-        </h2>
+    <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 dark:from-emerald-800 dark:to-emerald-700 rounded-2xl p-4 text-white shadow-sm animate-fade-in transition-colors duration-300" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
+      <div className="flex items-center justify-between mb-3 gap-2">
+        <div>
+          <h2 className="text-sm font-bold flex items-center gap-2">
+            <Clock size={15} /> নামাজের সময়সূচি
+          </h2>
+          {aladhanTimes?.locationName && (
+            <p className="mt-1 text-[10px] text-white/75 flex items-center gap-1">
+              <MapPin size={11} /> {aladhanTimes.locationName}
+            </p>
+          )}
+        </div>
         {nextPrayer && (
-          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full animate-pulse">
+          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full animate-pulse text-right">
             {nextPrayer.name} — আরও {toBengali(remainingMinutes)} মি. {toBengali(remainingSeconds)} সে.
           </span>
         )}
@@ -85,6 +98,12 @@ const AppPrayerWidget = () => {
           </div>
         ))}
       </div>
+
+      {!!forbiddenTimes.length && (
+        <div className="mt-4 rounded-2xl bg-background/95 p-3 text-foreground">
+          <ForbiddenPrayerTimesList items={forbiddenTimes} compact title="আজকের নিষিদ্ধ সময়" />
+        </div>
+      )}
     </div>
   );
 };
