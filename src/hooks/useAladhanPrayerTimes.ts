@@ -41,19 +41,33 @@ const toBengaliTime = (time24: string): string => {
 export interface PrayerApiTimes {
   sehri: string;
   iftar: string;
+  sunrise: string;
+  dhuhr: string;
+  sunset: string;
   sehriRaw: string;
   iftarRaw: string;
+  sunriseRaw: string;
+  dhuhrRaw: string;
+  sunsetRaw: string;
   hijriDate: string;
   loading: boolean;
   error: boolean;
   locationName: string;
 }
 
+const cleanRawTime = (time: string) => time.replace(/\s*\(.*\)/, "").trim();
+
 const fetchPrayerTimes = async (lat: number, lng: number): Promise<{
   sehri: string;
   iftar: string;
+  sunrise: string;
+  dhuhr: string;
+  sunset: string;
   sehriRaw: string;
   iftarRaw: string;
+  sunriseRaw: string;
+  dhuhrRaw: string;
+  sunsetRaw: string;
   hijriDate: string;
 }> => {
   const today = new Date();
@@ -74,8 +88,14 @@ const fetchPrayerTimes = async (lat: number, lng: number): Promise<{
   return {
     sehri: toBengaliTime(timings.Fajr),
     iftar: toBengaliTime(timings.Maghrib),
-    sehriRaw: timings.Fajr.replace(/\s*\(.*\)/, "").trim(),
-    iftarRaw: timings.Maghrib.replace(/\s*\(.*\)/, "").trim(),
+    sunrise: toBengaliTime(timings.Sunrise),
+    dhuhr: toBengaliTime(timings.Dhuhr),
+    sunset: toBengaliTime(timings.Maghrib),
+    sehriRaw: cleanRawTime(timings.Fajr),
+    iftarRaw: cleanRawTime(timings.Maghrib),
+    sunriseRaw: cleanRawTime(timings.Sunrise),
+    dhuhrRaw: cleanRawTime(timings.Dhuhr),
+    sunsetRaw: cleanRawTime(timings.Maghrib),
     hijriDate: `${hijri.day} ${hijri.month.ar}, ${hijri.year}`,
   };
 };
