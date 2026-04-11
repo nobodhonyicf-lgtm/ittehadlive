@@ -134,32 +134,29 @@ const Install = () => {
 
             {/* Direct install button */}
             {deferredPrompt && !downloading && (
-              <Card className="border-primary/30 shadow-lg">
-                <CardContent className="py-5 text-center space-y-3">
-                  <div className="w-14 h-14 bg-primary/10 rounded-2xl mx-auto flex items-center justify-center">
-                    <Download className="text-primary" size={28} />
+              <Card className="border-primary/20 shadow-xl overflow-hidden">
+                <div className="bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-6 text-center text-primary-foreground">
+                  <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl mx-auto mb-4 flex items-center justify-center ring-4 ring-white/10 shadow-lg">
+                    <Download className="text-white" size={30} />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-lg">অ্যাপ ডাউনলোড করুন</h3>
-                    <p className="text-sm text-muted-foreground">মাত্র ~২ MB • ১ ক্লিকেই ইনস্টল</p>
-                  </div>
-                  <Button onClick={handleInstall} size="lg" className="w-full text-base gap-2 shadow-md h-12">
-                    <Download size={18} /> এখনই ডাউনলোড করুন
+                  <h3 className="font-bold text-xl mb-1">অ্যাপ ডাউনলোড করুন</h3>
+                  <p className="text-sm opacity-80">মাত্র ~২ MB • ১ ক্লিকেই ইনস্টল</p>
+                </div>
+                <CardContent className="py-5 px-6 space-y-3">
+                  <Button
+                    onClick={handleInstall}
+                    size="lg"
+                    className="w-full text-base gap-2.5 h-14 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] bg-gradient-to-r from-primary to-primary/85 font-semibold"
+                  >
+                    <Download size={20} className="animate-bounce" /> এখনই ডাউনলোড করুন
                   </Button>
+                  <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground pt-1">
+                    <span className="flex items-center gap-1"><Zap size={12} className="text-yellow-500" /> দ্রুত</span>
+                    <span className="flex items-center gap-1"><WifiOff size={12} className="text-blue-500" /> অফলাইন</span>
+                    <span className="flex items-center gap-1"><CheckCircle size={12} className="text-green-500" /> নিরাপদ</span>
+                  </div>
                 </CardContent>
               </Card>
-            )}
-
-            {/* Install button */}
-            {deferredPrompt && (
-              <Button
-                variant="outline"
-                className="w-full gap-2"
-                onClick={handleInstall}
-                disabled={downloading}
-              >
-                <Download size={14} /> ডাউনলোড করুন
-              </Button>
             )}
 
             {/* iOS instructions */}
