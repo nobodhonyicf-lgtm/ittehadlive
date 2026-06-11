@@ -1,10 +1,19 @@
 import { useSiteSettings } from "@/hooks/useData";
 import { Link } from "react-router-dom";
-import { GraduationCap, Users, Building2, Phone, Search, ArrowRight, Shield, BookOpen } from "lucide-react";
+import {
+  GraduationCap,
+  Users,
+  Building2,
+  Phone,
+  Search,
+  ArrowUpRight,
+  Shield,
+  BookOpen,
+  Sparkles,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toBengali } from "@/lib/bengali";
-import logoImg from "@/assets/logo.png";
 
 const HeroSection = () => {
   const { data: settings } = useSiteSettings();
@@ -38,75 +47,157 @@ const HeroSection = () => {
     },
   });
 
-  const primaryActions = [
-    { icon: GraduationCap, label: "রেজাল্ট দেখুন", desc: "পরীক্ষার ফলাফল চেক করুন", path: "/result" },
-    { icon: Search, label: "শিক্ষার্থী খুঁজুন", desc: "নাম বা রোল দিয়ে অনুসন্ধান", path: "/students" },
-    { icon: Building2, label: "শাখা সমূহ", desc: "অনুমোদিত শাখা খুঁজুন", path: "/branches" },
-    { icon: Phone, label: "যোগাযোগ করুন", desc: "সরাসরি যোগাযোগ", path: "/contact" },
-  ];
-
-  const stats = [
-    { value: branchCount || 0, label: "অনুমোদিত শাখা", icon: Building2 },
-    { value: studentCount || 0, label: "নিবন্ধিত শিক্ষার্থী", icon: Users },
-    { value: teacherCount || 0, label: "নিবন্ধিত শিক্ষক", icon: GraduationCap },
-    { value: noticeCount || 0, label: "সক্রিয় নোটিশ", icon: BookOpen },
-  ];
-
   return (
-    <section className="relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
-      <div className="absolute inset-0 islamic-pattern opacity-20" />
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-foreground/[0.02] rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary-foreground/[0.02] rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl" />
+    <section className="relative overflow-hidden bg-background">
+      <div className="absolute inset-0 islamic-pattern opacity-[0.04] text-primary" />
+      <div className="absolute -top-32 -right-32 w-[480px] h-[480px] bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute -bottom-32 -left-32 w-[420px] h-[420px] bg-[hsl(var(--gold))]/10 rounded-full blur-3xl" />
 
-      <div className="relative max-w-[1200px] mx-auto px-4">
-        {/* Hero Content */}
-        <div className="pt-12 pb-6 md:pt-16 md:pb-8 text-center text-primary-foreground">
-          <div className="inline-flex items-center gap-2 bg-primary-foreground/[0.08] backdrop-blur-sm border border-primary-foreground/10 rounded-full px-4 py-1.5 mb-5 text-xs">
-            <Shield size={12} className="opacity-70" />
-            <span className="opacity-80">বিশ্বস্ত শিক্ষা সমন্বয় প্ল্যাটফর্ম</span>
-          </div>
-          <h2 className="text-2xl md:text-3xl font-bold leading-snug mb-3 max-w-xl mx-auto">
-            {settings?.site_name || "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ"}
-          </h2>
-          <p className="text-sm md:text-base opacity-70 max-w-md mx-auto leading-relaxed mb-8">
-            {settings?.site_description || "প্রাইভেট মাদরাসাগুলোর একটি সমন্বিত সংগঠন"}
-          </p>
-
-          {/* 4 Primary Action Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto mb-10">
-            {primaryActions.map((action) => (
-              <Link
-                key={action.path}
-                to={action.path}
-                className="group bg-primary-foreground/[0.07] hover:bg-primary-foreground/[0.14] border border-primary-foreground/10 hover:border-primary-foreground/20 backdrop-blur-sm rounded-xl p-4 md:p-5 text-center transition-all duration-300 hover:-translate-y-0.5"
-              >
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-primary-foreground/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-primary-foreground/15 transition-colors">
-                  <action.icon size={22} className="opacity-90" />
-                </div>
-                <p className="font-bold text-sm mb-0.5">{action.label}</p>
-                <p className="text-[10px] opacity-50 hidden md:block">{action.desc}</p>
-              </Link>
-            ))}
+      <div className="relative max-w-[1200px] mx-auto px-4 pt-10 pb-8 md:pt-14">
+        {/* Brand strip */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="inline-flex items-center gap-2 bg-card border border-border rounded-full px-3.5 py-1.5 shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--gold))] opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[hsl(var(--gold))]" />
+            </span>
+            <Shield size={13} className="text-primary" />
+            <span className="text-[11px] font-semibold text-foreground tracking-wide">
+              বিশ্বস্ত শিক্ষা সমন্বয় প্ল্যাটফর্ম
+            </span>
           </div>
         </div>
 
-        {/* Trust Stats Bar */}
-        <div className="relative z-10 pb-6">
-          <div className="bg-card rounded-2xl shadow-xl shadow-black/5 border border-border/50 p-5 md:p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {stats.map((stat, i) => (
-                <div key={i} className="text-center group">
-                  <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center mx-auto mb-2">
-                    <stat.icon size={18} className="text-primary" />
-                  </div>
-                  <p className="text-2xl md:text-3xl font-bold text-foreground">{toBengali(stat.value)}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">{stat.label}</p>
-                </div>
-              ))}
+        {/* Headline */}
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <h1 className="font-display text-4xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.05] mb-4">
+            {settings?.site_name || "ইত্তেহাদুল মাদারিসিল খুসুসিয়্যাহ"}
+          </h1>
+          <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+            {settings?.site_description || "প্রাইভেট মাদরাসাগুলোর একটি সমন্বিত সংগঠন"}
+          </p>
+        </div>
+
+        {/* Bento grid */}
+        <div className="grid grid-cols-6 md:grid-cols-12 auto-rows-[110px] md:auto-rows-[130px] gap-3 md:gap-4">
+          {/* Featured result card */}
+          <Link
+            to="/result"
+            className="bento-card bento-gradient col-span-6 md:col-span-7 row-span-2 p-6 md:p-7 flex flex-col justify-between group"
+          >
+            <div className="flex items-start justify-between">
+              <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider rounded-full px-2.5 py-1">
+                <Sparkles size={11} />
+                ফিচার্ড
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ArrowUpRight size={18} />
+              </div>
+            </div>
+            <div>
+              <h3 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-1.5">
+                পরীক্ষার রেজাল্ট দেখুন
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                রোল বা নাম দিয়ে দ্রুত ফলাফল ও মার্কশিট ডাউনলোড করুন
+              </p>
+            </div>
+          </Link>
+
+          {/* Stat: students */}
+          <div className="bento-card col-span-3 md:col-span-3 p-4 md:p-5 flex flex-col justify-between">
+            <Users size={20} className="text-primary" />
+            <div>
+              <p className="font-display text-2xl md:text-3xl font-bold text-foreground leading-none">
+                {toBengali(studentCount || 0)}
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-1 font-medium">নিবন্ধিত শিক্ষার্থী</p>
             </div>
           </div>
+
+          {/* Stat: teachers */}
+          <div className="bento-card col-span-3 md:col-span-2 p-4 md:p-5 flex flex-col justify-between">
+            <GraduationCap size={20} className="text-[hsl(var(--gold))]" />
+            <div>
+              <p className="font-display text-2xl md:text-3xl font-bold text-foreground leading-none">
+                {toBengali(teacherCount || 0)}
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-1 font-medium">শিক্ষক</p>
+            </div>
+          </div>
+
+          {/* Search students */}
+          <Link
+            to="/students"
+            className="bento-card col-span-3 md:col-span-3 p-4 md:p-5 flex flex-col justify-between group hover:bg-primary hover:text-primary-foreground"
+          >
+            <Search size={20} className="text-primary group-hover:text-primary-foreground transition-colors" />
+            <div>
+              <p className="font-display text-base font-bold leading-tight">শিক্ষার্থী খুঁজুন</p>
+              <p className="text-[11px] opacity-70 mt-0.5">নাম বা রোল</p>
+            </div>
+          </Link>
+
+          {/* Stat: notices */}
+          <div className="bento-card col-span-3 md:col-span-2 p-4 md:p-5 flex flex-col justify-between">
+            <BookOpen size={20} className="text-primary" />
+            <div>
+              <p className="font-display text-2xl md:text-3xl font-bold text-foreground leading-none">
+                {toBengali(noticeCount || 0)}
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-1 font-medium">সক্রিয় নোটিশ</p>
+            </div>
+          </div>
+
+          {/* Branches feature */}
+          <Link
+            to="/branches"
+            className="bento-card col-span-6 md:col-span-5 row-span-2 p-5 md:p-6 flex flex-col justify-between group relative overflow-hidden"
+          >
+            <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-[hsl(var(--gold))]/10 rounded-full blur-2xl" />
+            <div className="relative flex items-start justify-between">
+              <div className="w-11 h-11 rounded-xl bg-[hsl(var(--gold))]/15 text-[hsl(var(--gold))] flex items-center justify-center">
+                <Building2 size={22} />
+              </div>
+              <span className="font-display text-2xl font-bold text-foreground">
+                {toBengali(branchCount || 0)}
+              </span>
+            </div>
+            <div className="relative">
+              <h3 className="font-display text-xl font-bold text-foreground mb-1">শাখা সমূহ</h3>
+              <p className="text-xs text-muted-foreground mb-3">অনুমোদিত শাখা ও তাদের বিস্তারিত তথ্য</p>
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:gap-2 transition-all">
+                দেখুন <ArrowUpRight size={12} />
+              </span>
+            </div>
+          </Link>
+
+          {/* Contact */}
+          <Link
+            to="/contact"
+            className="bento-card col-span-3 md:col-span-4 p-4 md:p-5 flex items-center gap-3 group bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary-foreground/15 flex items-center justify-center shrink-0">
+              <Phone size={18} />
+            </div>
+            <div className="min-w-0">
+              <p className="font-display text-sm font-bold">যোগাযোগ করুন</p>
+              <p className="text-[11px] opacity-75 truncate">সরাসরি কথা বলুন</p>
+            </div>
+            <ArrowUpRight size={16} className="ml-auto opacity-70 group-hover:opacity-100 group-hover:rotate-12 transition-all" />
+          </Link>
+
+          {/* Books / extra */}
+          <Link
+            to="/books"
+            className="bento-card col-span-3 md:col-span-3 p-4 md:p-5 flex flex-col justify-between group"
+          >
+            <BookOpen size={20} className="text-primary" />
+            <div>
+              <p className="font-display text-sm font-bold text-foreground">বুকশপ</p>
+              <p className="text-[11px] text-muted-foreground">পাঠ্যপুস্তক ও বই</p>
+            </div>
+          </Link>
         </div>
       </div>
     </section>
