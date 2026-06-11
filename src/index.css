@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -39,15 +40,15 @@
 
 @layer base {
   :root {
-    --background: 0 0% 97%;
-    --foreground: 200 20% 8%;
+    --background: 48 30% 98%;
+    --foreground: 155 35% 8%;
     --card: 0 0% 100%;
-    --card-foreground: 200 20% 8%;
+    --card-foreground: 155 35% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 200 20% 8%;
-    --primary: 155 60% 18%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 150 10% 94%;
+    --popover-foreground: 155 35% 8%;
+    --primary: 158 65% 16%;
+    --primary-foreground: 48 30% 98%;
+    --secondary: 150 18% 95%;
     --secondary-foreground: 155 45% 15%;
     --muted: 150 8% 93%;
     --muted-foreground: 200 10% 42%;
@@ -117,10 +118,26 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'SolaimanLipi', 'Noto Sans Bengali', sans-serif;
+    font-family: 'DM Sans', 'SolaimanLipi', 'Noto Sans Bengali', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: 'Space Grotesk', 'SolaimanLipi', 'Noto Sans Bengali', sans-serif;
+    letter-spacing: -0.015em;
+  }
+}
+
+/* Bento card hover lift */
+.bento-card {
+  @apply relative overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300;
+}
+.bento-card:hover {
+  @apply -translate-y-0.5 shadow-[0_12px_40px_-12px_hsl(var(--primary)/0.25)] border-primary/30;
+}
+.bento-gradient {
+  background: radial-gradient(120% 100% at 0% 0%, hsl(var(--primary)/0.08), transparent 55%),
+              radial-gradient(120% 100% at 100% 100%, hsl(var(--gold)/0.10), transparent 55%);
 }
 
 /* Notice ticker animation */
