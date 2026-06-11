@@ -118,10 +118,26 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'SolaimanLipi', 'Noto Sans Bengali', sans-serif;
+    font-family: 'DM Sans', 'SolaimanLipi', 'Noto Sans Bengali', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: 'Space Grotesk', 'SolaimanLipi', 'Noto Sans Bengali', sans-serif;
+    letter-spacing: -0.015em;
+  }
+}
+
+/* Bento card hover lift */
+.bento-card {
+  @apply relative overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-300;
+}
+.bento-card:hover {
+  @apply -translate-y-0.5 shadow-[0_12px_40px_-12px_hsl(var(--primary)/0.25)] border-primary/30;
+}
+.bento-gradient {
+  background: radial-gradient(120% 100% at 0% 0%, hsl(var(--primary)/0.08), transparent 55%),
+              radial-gradient(120% 100% at 100% 100%, hsl(var(--gold)/0.10), transparent 55%);
 }
 
 /* Notice ticker animation */
